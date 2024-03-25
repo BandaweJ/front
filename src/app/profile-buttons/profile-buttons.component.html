@@ -1,0 +1,8 @@
+<mat-icon *ngIf="!isLoggedIn" (click)="switchToSignin()">login</mat-icon>
+
+<mat-icon *ngIf="isLoggedIn" [matMenuTriggerFor]="menu">perm_identity</mat-icon>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item>Profile</button>
+  <button mat-menu-item (click)="onLogout()">Logout</button>
+</mat-menu>

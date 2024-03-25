@@ -1,0 +1,27 @@
+form {
+  padding: 1rem;
+}
+
+.top-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.filter {
+  flex: 1;
+}
+
+.top-panel {
+  padding: 1rem;
+  display: flex;
+  justify-content: stretch;
+}
+
+.enrol-container {
+  padding: 1rem;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

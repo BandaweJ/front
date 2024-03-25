@@ -1,0 +1,17 @@
+.input-elements {
+  margin: 0 20px 0;
+}
+
+.conatiner {
+  width: 95vw;
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+.top-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0.5rem auto;
+  width: 98vw;
+}

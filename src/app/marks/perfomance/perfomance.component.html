@@ -1,0 +1,55 @@
+<form [formGroup]="perfForm" (ngSubmit)="getPerfData()">
+  <div class="top-btns">
+    <mat-form-field>
+      <mat-label>Choose Term</mat-label>
+      <mat-select formControlName="term">
+        <mat-option *ngFor="let term of terms$ | async" [value]="term">
+          {{ term.num + " " + term.year }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Choose Class</mat-label>
+      <mat-select formControlName="clas">
+        <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+          {{ clas.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <button
+      mat-mini-fab
+      type="button"
+      type="submit"
+      [disabled]="perfForm.invalid"
+    >
+      graph
+    </button>
+  </div>
+</form>
+
+<form [formGroup]="subjectForm">
+  <mat-form-field>
+    <mat-label>Choose Subject</mat-label>
+    <mat-select formControlName="subj">
+      <mat-option
+        (onSelectionChange)="plotSubjectPerf()"
+        *ngFor="let subject of subjects"
+        [value]="subject"
+      >
+        {{ subject }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>
+
+<div style="display: block">
+  <canvas
+    id="mychart"
+    baseChart
+    [options]="chartOptions"
+    [type]="'line'"
+    [data]="lineChartData"
+    [legend]="lineChartLegend"
+  >
+  </canvas>
+</div>

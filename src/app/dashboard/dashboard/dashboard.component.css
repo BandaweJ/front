@@ -1,0 +1,165 @@
+.title {
+  display: flex;
+  justify-content: center;
+}
+
+.error {
+  display: block;
+  color: red;
+  margin: 1rem auto;
+}
+
+.container {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 100vw;
+
+  min-height: 100%;
+  /* padding: 1rem; */
+  margin: 0 auto;
+  background-color: #eee;
+}
+
+.totals-widgets {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+
+  justify-content: space-between;
+}
+
+.widget {
+  background-color: #fff;
+  flex: 1 1 0;
+  height: 120px;
+  margin: 1rem;
+
+  box-shadow: 3px 3px 5px #333;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+/* .widget h2 {
+  font-size: 80px;
+
+  margin: 0;
+  flex-basis: 65%;
+  text-align: center;
+}
+
+.widget p {
+  text-align: center;
+  flex-basis: 35%;
+  margin: 0;
+
+  color: #cf17a7;
+} */
+
+.widget:nth-child(1) {
+  background-color: #ff914c;
+  color: #fff;
+}
+
+.widget:nth-child(2) {
+  background-color: #93c25a;
+  color: #fff;
+}
+
+.widget:nth-child(3) {
+  background-color: #75d84a;
+  color: #fff;
+}
+
+.widget:nth-child(4) {
+  background-color: #007e41;
+  color: #fff;
+}
+
+.icon-title {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: space-around;
+  padding: 1rem;
+}
+
+.icon {
+  transform: scale(2);
+  justify-self: flex-start;
+  margin-bottom: 1rem;
+}
+
+.widget-title {
+  justify-self: flex-end;
+  font-size: 1.5rem;
+}
+
+.widget-total {
+  display: flex;
+  padding: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.widget-total h2 {
+  font-size: 3rem;
+}
+
+.widget-subtotals {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+/* End of widgets */
+
+/* enrolment summary */
+
+.attendance-summary {
+  height: 120px;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+  flex: 1 1 0;
+}
+
+.piechart-container {
+  height: 100%;
+
+  /* background-color: red; */
+}
+
+/* enrolment summary */
+
+.graphs-container {
+  display: flex;
+  flex-flow: row;
+}
+
+.enrolment-graph {
+  width: 850px;
+  margin: 1rem;
+  padding: 1rem;
+  background-color: #ddd;
+  height: 400px;
+}
+
+.accounts-graph {
+  width: 550px;
+  margin: 1rem;
+  padding: 1rem;
+  background-color: #ddd;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.totals-icons {
+  color: #fff;
+  font-size: 62px;
+}

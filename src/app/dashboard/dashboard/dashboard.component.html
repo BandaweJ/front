@@ -1,0 +1,81 @@
+<mat-toolbar class="title">
+  <!-- <span>{{ title$ }}</span> -->
+  <div *ngIf="!(authErrMsg$ | async)">{{ today.toDateString() }} Term 3, 2023</div>
+  <div class="error" *ngIf="authErrMsg$ | async">{{ authErrMsg$ | async }}</div>
+</mat-toolbar>
+<div class="container">
+  <div class="totals-widgets">
+    <div class="widget">
+      <div class="icon-title">
+        <mat-icon class="icon" aria-hidden="false" aria-label="Example home icon" fontIcon="school"></mat-icon>
+        <h3 class="widget-title">TEACHERS</h3>
+      </div>
+      <div class="widget-total">
+        <h2>{{ (teachers$ | async)?.length }}</h2>
+      </div>
+      <div class="widget-subtotals">
+        <div class="top-total">
+          <h4><span>Males: </span>{{ maleTeachers }}</h4>
+        </div>
+        <div class="bottom-total">
+          <h4><span>Females: </span>{{ femaleTeachers }}</h4>
+        </div>
+      </div>
+      <!-- <mat-icon class="green totals-icons">cast_for_education</mat-icon> -->
+    </div>
+    <div class="widget">
+      <div class="icon-title">
+        <mat-icon class="icon" aria-hidden="false" aria-label="Example home icon" fontIcon="group"></mat-icon>
+        <h3 class="widget-title">STUDENTS</h3>
+      </div>
+      <div class="widget-total">
+        <h2>{{ (students$ | async)?.length }}</h2>
+      </div>
+      <div class="widget-subtotals">
+        <div class="top-total">
+          <h4><span>Boarders: </span>{{ boarders }}</h4>
+        </div>
+        <div class="bottom-total">
+          <h4><span>Day: </span>{{ dayScholars }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="widget">
+      <div class="icon-title">
+        <mat-icon class="icon" aria-hidden="false" aria-label="Example home icon" fontIcon="groups"></mat-icon>
+        <h3 class="widget-title">CLASSES</h3>
+      </div>
+      <div class="widget-total">
+        <h2>{{ (classes$ | async)?.length }}</h2>
+      </div>
+    </div>
+    <div class="widget">
+      <div class="icon-title">
+        <mat-icon class="icon" aria-hidden="false" aria-label="Example home icon" fontIcon="topic"></mat-icon>
+        <h3 class="widget-title">SUBJECTS</h3>
+      </div>
+      <div class="widget-total">
+        <h2>{{ (subjects$ | async)?.length }}</h2>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="attendance-summary">
+    <mat-card
+      class="piechart-container mat-elevation-z10"
+      *ngFor="let clas of classes$ | async"
+    >
+      <app-class-attendance-summary
+        [clas]="clas"
+      ></app-class-attendance-summary>
+    </mat-card>
+  </div> -->
+  <div class="graphs-container">
+    <div class="enrolment-graph">
+      <app-enrolment-chart></app-enrolment-chart>
+    </div>
+    <div class="accounts-graph">
+      <app-accounts-chart></app-accounts-chart>
+    </div>
+  </div>
+  <div class="recent-activities"></div>
+</div>

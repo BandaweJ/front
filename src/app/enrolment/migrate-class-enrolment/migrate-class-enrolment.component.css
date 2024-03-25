@@ -1,0 +1,30 @@
+form {
+  width: 100%;
+}
+.container {
+  margin: 0 auto;
+  max-width: 780px;
+  display: flex;
+  gap: 15px;
+  /* width: 100vw; */
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.flex-item {
+  flex: 1 1 0;
+  flex-basis: 100px;
+  /* align-items: stretch; */
+}
+
+.mat-mdc-card-header {
+  justify-content: center;
+}
+
+.card-content {
+  display: flex;
+  flex-flow: row nowrap;
+  margin-top: 1rem;
+  gap: 1rem;
+  justify-content: space-between;
+}

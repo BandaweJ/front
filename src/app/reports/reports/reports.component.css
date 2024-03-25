@@ -1,0 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates&family=Tektur&display=swap");
+.select-reports-form {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+form {
+  display: flex;
+}
+
+.input-controls {
+  display: flex;
+  width: 30vw;
+  justify-content: space-between;
+}
+
+.btns {
+  /* align-self: flex-end; */
+  display: flex;
+  justify-content: space-around;
+  width: 35vw;
+}
+/* Report Cards */
+.report-container {
+  width: 25cm;
+  margin: auto;
+  /* padding: 1rem 0.5rem; */
+  background-color: #587586;
+
+  position: relative;
+}
+
+.report {
+  width: 21cm;
+  height: 29.7cm;
+  background-color: white;
+  margin: 2rem auto;
+  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+  background-image: url("../../../assets/report bg.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  -webkit-border-radius: 0.5rem;
+  -moz-border-radius: 0.5rem;
+  -ms-border-radius: 0.5rem;
+  -o-border-radius: 0.5rem;
+  position: relative;
+}
+
+.letter-head {
+  width: 100%;
+  margin-bottom: 1rem;
+  height: auto;
+  display: block;
+}

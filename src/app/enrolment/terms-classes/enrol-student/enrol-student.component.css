@@ -1,0 +1,25 @@
+.main-container {
+  display: flex;
+  flex-flow: column nowrap;
+  /* padding: 1rem; */
+}
+
+.selected-students-conatiner {
+  margin: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-flow: column wrap;
+}
+
+.bottom-btn {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.bottom-btn button {
+  margin: 0 1rem;
+}
+
+.table-conatiner {
+  margin: 1rem;
+}

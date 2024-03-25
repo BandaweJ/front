@@ -1,0 +1,7 @@
+.top-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0.5rem auto;
+  width: 98vw;
+}

@@ -1,0 +1,48 @@
+mat-card {
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+}
+
+mat-card-content {
+  display: grid;
+  grid-row-gap: 1em;
+}
+
+.form-group {
+  /* display: flex; */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 1em 1em;
+}
+
+.item {
+  width: 33%;
+}
+
+.form-group-qual {
+  display: flex;
+}
+
+.addbtn {
+  margin-right: 10px;
+}
+
+.button-group {
+  width: 100%;
+  display: flex;
+  margin-top: 10px;
+}
+
+.btn-grp-item {
+  flex-grow: 1;
+}
+
+.error {
+  font-size: large;
+  text-align: center;
+  color: red;
+}

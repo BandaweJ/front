@@ -1,0 +1,123 @@
+<mat-toolbar color="primary">
+  <mat-icon (click)="sidenav.toggle()" *ngIf="isLoggedIn$ | async">menu</mat-icon>
+
+  <span>
+    <h1>Junior High School</h1>
+  </span>
+
+  <app-profile-buttons [isLoggedIn]="isLoggedIn$ | async"></app-profile-buttons>
+</mat-toolbar>
+<mat-sidenav-container>
+  <mat-sidenav role="navigation" #sidenav>
+    <div class="sidenav-container">
+      <button mat-button>
+        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      </button>
+      <mat-accordion>
+        <!-- Registration -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <button mat-button>Registration</button>
+          </mat-expansion-panel-header>
+          <div class="sidenav-container">
+            <button mat-button>
+              <a routerLink="/teachers" routerLinkActive="active">Teachers</a>
+            </button>
+            <button mat-button>
+              <a routerLink="/students" routerLinkActive="active"> Students </a>
+            </button>
+            <button mat-button>
+              <a routerLink="/parents" routerLinkActive="active"> Parents </a>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Enrolment -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <button mat-button>Enrolment</button>
+          </mat-expansion-panel-header>
+          <div class="sidenav-container">
+            <button mat-button>
+              <a routerLink="/classes" routerLinkActive="active"> Classes </a>
+            </button>
+            <button mat-button>
+              <a routerLink="/terms" routerLinkActive="active"> Terms </a>
+            </button>
+            <button mat-button>
+              <a routerLink="/enrol" routerLinkActive="active"> Enrol </a>
+            </button>
+            <button mat-button>
+              <a routerLink="/migrate-class" routerLinkActive="active">
+                Migrate Class
+              </a>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Attendance -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <button mat-button>Attendance</button>
+          </mat-expansion-panel-header>
+          <div class="sidenav-container">
+            <button mat-button>
+              <a routerLink="/registers" routerLinkActive="active">
+                Registers
+              </a>
+            </button>
+          </div>
+          <div class="sidenav-container">
+            <button mat-button>
+              <a routerLink="/mark-register" routerLinkActive="active">
+                Mark Register
+              </a>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Marks -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <button mat-button>Marks</button>
+          </mat-expansion-panel-header>
+          <div class="sidenav-container">
+            <button mat-button>
+              <a routerLink="/subjects" routerLinkActive="active"> Subjects </a>
+            </button>
+          </div>
+          <div class="sidenav-container">
+            <button mat-button>
+              <a routerLink="/input" routerLinkActive="active"> Marks </a>
+            </button>
+
+            <button mat-button>
+              <a routerLink="/teachers-comments" routerLinkActive="active"> Teacher's Comments </a>
+            </button>
+
+            <button mat-button>
+              <a routerLink="/perfomance" routerLinkActive="active">
+                Perfomance
+              </a>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Progress Reports -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <button mat-button>Progress Reports</button>
+          </mat-expansion-panel-header>
+          <div class="sidenav-container">
+            <button mat-button>
+              <a routerLink="/reports" routerLinkActive="active"> Reports </a>
+            </button>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content role="main">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

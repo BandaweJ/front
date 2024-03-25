@@ -1,0 +1,70 @@
+<mat-toolbar class="title">
+  {{ title.getTitle() }}
+</mat-toolbar>
+<form [formGroup]="addTermForm" (submit)="addTerm()">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="card-title"> Add New Term </mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="content">
+      <mat-card class="row">
+        <mat-form-field>
+          <mat-label>Term Number</mat-label>
+          <input
+            matInput
+            placeholder="Eg. 1"
+            type="number"
+            formControlName="num"
+          />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Term Year</mat-label>
+          <input
+            matInput
+            placeholder="Eg. 2023"
+            type="number"
+            formControlName="year"
+          />
+        </mat-form-field>
+      </mat-card>
+      <mat-card class="row">
+        <mat-form-field>
+          <mat-label>Start Date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker1"
+            formControlName="startDate"
+          />
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="picker1"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="picker2" formControlName="endDate" />
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="picker2"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
+      </mat-card>
+    </mat-card-content>
+    <mat-card-footer>
+      <mat-card-actions class="actions">
+        <button
+          class="submit-btn"
+          type="submit"
+          color="primary"
+          mat-raised-button
+        >
+          Add Term
+        </button>
+      </mat-card-actions>
+    </mat-card-footer>
+  </mat-card>
+</form>

@@ -1,0 +1,94 @@
+<mat-card class="report" id="content" #content>
+  <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()">
+    <span class="material-icons">file_download</span>
+  </button>
+  <div class="letter-head-container">
+    <img src="../../../assets/sandon banner3.png" alt="School letter head" class="letter-head" />
+  </div>
+  <hr class="hr" />
+  <mat-card-title>
+    <h2>
+      {{ report.report.className }}, End of Term {{ report.report.termNumber }},
+      {{ report.report.termYear }} Progress Report
+    </h2>
+  </mat-card-title>
+  <hr class="accent hr" />
+  <mat-card-subtitle>
+    <div class="names">
+      <span><b>Student Number:</b> {{ report.studentNumber }}</span>
+      <span><b>Name:</b> {{ report.report.surname + " " + report.report.name }}</span>
+    </div>
+    <div class="names">
+      <span><b>Class:</b> {{ report.report.className }}</span><span><b>Position in Class:</b> {{
+        report.report.classPosition
+        }}</span><span><b>Position in Form:</b> {{ report.report.formPosition }}</span>
+    </div>
+  </mat-card-subtitle>
+  <hr class="hr" />
+  <mat-card-content>
+    <div class="table">
+      <table>
+        <tr>
+          <th class="small-column">#</th>
+          <th>Subject</th>
+          <th>Mark</th>
+          <th>Average</th>
+          <th>Position</th>
+          <th>Grade</th>
+          <th>Teacher's Comment</th>
+        </tr>
+        <tr *ngFor="let subjRow of report.report.subjectsTable; let i = index">
+          <td class="small-column">{{ i + 1 }}</td>
+          <td>{{ subjRow.subjectCode + " " + subjRow.subjectName }}</td>
+          <td>{{ subjRow.mark }}</td>
+          <td>{{ subjRow.averageMark.toFixed(1) }}</td>
+          <td>{{ subjRow.position }}</td>
+          <td>{{ subjRow.grade }}</td>
+          <td>{{ subjRow.comment }}</td>
+        </tr>
+        <tr class="average-mark">
+          <td colspan="2"><b>Average Mark</b></td>
+          <td>
+            {{
+            report.report.percentageAverge ? report.report.percentageAverge.toFixed(2) : ""
+            }}
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+  </mat-card-content>
+
+  <mat-card-footer class="footer">
+    <div class="teachers-comment">
+      <h3>Class Teacher's Comment</h3>
+
+    </div>
+    <div>
+      {{ report.report.classTrComment }}
+
+    </div>
+    <div class="head-comment">
+      <h3>Head's Comment</h3>
+
+    </div>
+
+    <div>
+      <form [formGroup]="commentForm">
+        <mat-form-field *ngIf="!report.report.headComment || editState">
+          <mat-label>Head's Comment</mat-label>
+          <textarea (change)="saveComment()" matInput cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
+            formControlName="comment" cols="50"
+            [value]="report.report.headComment ? report.report.headComment : '' "></textarea>
+        </mat-form-field>
+        <p *ngIf="report.report.headComment && !editState">{{ report.report.headComment }}
+          <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleEditState()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </p>
+      </form>
+    </div>
+  </mat-card-footer>
+</mat-card>
