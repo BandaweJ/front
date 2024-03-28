@@ -64,9 +64,9 @@ export class AddEditTermComponent implements OnInit {
     let term: TermsModel = this.addTermForm.value;
 
     if (this.data) {
-      const date = term.endDate;
-      term.endDate = new Date(date.toISOString());
-      console.log(term);
+      // const date = term.endDate;
+      // term.endDate = new Date(date.toISOString());
+      // console.log(term);
       this.store.dispatch(editTermAction({ term }));
     } else {
       this.store.dispatch(addTermAction({ term }));
