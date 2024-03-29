@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as reportsActions from './reports.actions';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { ReportsService } from '../services/reports.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable()
 export class ReportsEffects {
   constructor(
     private actions$: Actions,
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private snackBar: MatSnackBar
   ) {}
 
   generateReports$ = createEffect(() =>
@@ -19,6 +21,17 @@ export class ReportsEffects {
         this.reportsService
           .generateReports(data.name, data.num, data.year)
           .pipe(
+            tap((data) =>
+              this.snackBar.open(
+                `${data.length} Generated Successfully`,
+                'OK',
+                {
+                  duration: 3000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                }
+              )
+            ),
             map((reports) =>
               reportsActions.generateReportsSuccess({ reports })
             ),
