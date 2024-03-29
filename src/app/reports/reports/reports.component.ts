@@ -69,7 +69,7 @@ export class ReportsComponent implements OnInit {
     const num = term.num;
     const year = term.year;
 
-    // console.log('name', name, 'num', num, 'year', year);
+    console.log('name', name, 'num', num, 'year', year);
 
     this.store.dispatch(reportsActions.generateReports({ name, num, year }));
   }

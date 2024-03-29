@@ -12,7 +12,7 @@ import { environment } from 'src/environments/environment';
 export class ReportsService {
   constructor(private httpClient: HttpClient) {}
 
-  baseUrl = environment.apiUrl;
+  baseUrl = environment.apiUrl + 'reports/';
 
   generateReports(
     name: string,
