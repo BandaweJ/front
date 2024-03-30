@@ -65,6 +65,10 @@ h2 {
   height: 1cm;
 }
 
+.blue-text {
+  color: #2dc4ff;
+}
+
 .table {
   height: 14cm;
   /* background-color: red; */

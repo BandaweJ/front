@@ -16,4 +16,6 @@ export interface ReportModel {
   classTrComment: string;
   headComment: string;
   subjectsTable: SubjectInfoModel[];
+  classSize: number;
+  subjectsPassed: number;
 }

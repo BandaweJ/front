@@ -8,20 +8,23 @@
   <hr class="hr" />
   <mat-card-title>
     <h2>
-      {{ report.report.className }}, End of Term {{ report.report.termNumber }},
-      {{ report.report.termYear }} Progress Report
+      End of Term {{ report.report.termNumber }},
+      {{ report.report.termYear }} Report Card
     </h2>
   </mat-card-title>
   <hr class="accent hr" />
   <mat-card-subtitle>
     <div class="names">
-      <span><b>Student Number:</b> {{ report.studentNumber }}</span>
-      <span><b>Name:</b> {{ report.report.surname + " " + report.report.name }}</span>
+      <span><b>Student Number: </b> <span class="blue-text">{{ report.studentNumber }}</span></span>
+      <span><b>Name: </b> <span class="blue-text">{{ report.report.surname + " " + report.report.name }}</span></span>
+      <span><b>Class: </b><span class="blue-text">{{ report.report.className }}</span> </span>
     </div>
     <div class="names">
-      <span><b>Class:</b> {{ report.report.className }}</span><span><b>Position in Class:</b> {{
-        report.report.classPosition
-        }}</span><span><b>Position in Form:</b> {{ report.report.formPosition }}</span>
+      <span><b>Position in Class: </b> <span class="blue-text"> {{ report.report.classPosition }} / {{
+          report.report.classSize }} </span> </span>
+
+
+      <span><b>Subjects Passed: </b> <span class="blue-text"> {{ report.report.subjectsPassed }} </span> </span>
     </div>
   </mat-card-subtitle>
   <hr class="hr" />
