@@ -1,5 +1,5 @@
 <mat-card class="report" id="content" #content>
-  <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()">
+  <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()" *ngIf="mode === 'view'">
     <span class="material-icons">file_download</span>
   </button>
   <div class="letter-head-container">

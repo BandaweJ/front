@@ -31,6 +31,6 @@
   </div>
 
   <div class="report-container" *ngIf="reports$ | async">
-    <app-report *ngFor="let report of reports$ | async" [report]="report"></app-report>
+    <app-report *ngFor="let report of reports$ | async" [report]="report" [mode]="mode"></app-report>
   </div>
 </mat-card>

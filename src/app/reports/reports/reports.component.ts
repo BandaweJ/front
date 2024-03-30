@@ -30,6 +30,7 @@ export class ReportsComponent implements OnInit {
   reports$!: Observable<ReportsModel[]>;
   reports!: ReportsModel[];
   role = '';
+  mode!: 'generate' | 'view';
 
   constructor(private store: Store) {
     this.store.dispatch(fetchTerms());
@@ -63,6 +64,7 @@ export class ReportsComponent implements OnInit {
   }
 
   generate() {
+    this.mode = 'generate';
     const name = this.clas?.value;
 
     const term: TermsModel = this.term?.value;
@@ -89,6 +91,7 @@ export class ReportsComponent implements OnInit {
   }
 
   viewReports() {
+    this.mode = 'view';
     const reports = this.reports;
 
     const name = this.clas?.value;

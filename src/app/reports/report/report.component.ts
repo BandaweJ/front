@@ -23,6 +23,9 @@ export class ReportComponent implements OnInit {
   editState = false;
   role = '';
 
+  @Input()
+  mode!: 'generate' | 'view';
+
   constructor(private store: Store) {}
 
   commentForm!: FormGroup;
