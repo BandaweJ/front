@@ -43,7 +43,7 @@
         <tr *ngFor="let subjRow of report.report.subjectsTable; let i = index">
           <td class="small-column">{{ i + 1 }}</td>
           <td>{{ subjRow.subjectCode + " " + subjRow.subjectName }}</td>
-          <td>{{ subjRow.mark }}</td>
+          <td [ngClass]="subjRow.mark >= 60 ? 'blue-text' : 'red-text'">{{ subjRow.mark }}</td>
           <td>{{ subjRow.averageMark.toFixed(1) }}</td>
           <td>{{ subjRow.position }}</td>
           <td>{{ subjRow.grade }}</td>
