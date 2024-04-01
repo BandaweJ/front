@@ -26,11 +26,11 @@
         Generate
       </button>
       <!-- <button mat-flat-button color="accent" (click)="saveReports()">Save</button> -->
-      <button mat-flat-button color="primary" (click)="viewReports()">View</button>
+      <!-- <button mat-flat-button color="primary" (click)="viewReports()">View</button> -->
     </div>
   </div>
 
   <div class="report-container" *ngIf="reports$ | async">
-    <app-report *ngFor="let report of reports$ | async" [report]="report" [mode]="mode"></app-report>
+    <app-report *ngFor="let report of reports$ | async" [report]="report"></app-report>
   </div>
 </mat-card>

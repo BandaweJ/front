@@ -74,7 +74,7 @@ h2 {
 }
 
 .table {
-  height: 14cm;
+  /* height: 14cm; */
   /* background-color: red; */
 }
 
@@ -116,12 +116,24 @@ td {
   /* margin-bottom: 0.2rem; */
 }
 
+.underline {
+  text-decoration: underline;
+}
+
 .footer {
   /* height: 20cm; */
+  height: 3cm;
+
   display: grid;
-  grid-template-columns: 20% 80%;
+  grid-template-rows: 20% 80%;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  row-gap: 1rem;
+  column-gap: 3rem;
+  position: absolute;
+  bottom: 0;
+  padding-left: 1rem;
+  padding-bottom: 1rem;
+  padding-right: 0.5rem;
   /* background-color: red; */
 }
 
@@ -129,22 +141,6 @@ td {
 }
 
 .head-comment {
-}
-
-.next-term-begins {
-  /* background-color: blueviolet; */
-  height: 2.6cm;
-  bottom: 0;
-  padding: 0 4rem;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-
-.chidhindo {
-  border: 1px solid black;
-  width: 170px;
-  height: 100px;
 }
 
 .download-btn {

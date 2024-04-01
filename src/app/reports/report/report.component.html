@@ -1,5 +1,5 @@
 <mat-card class="report" id="content" #content>
-  <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()" *ngIf="mode === 'view'">
+  <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()" *ngIf="!print">
     <span class="material-icons">file_download</span>
   </button>
   <div class="letter-head-container">
@@ -63,23 +63,24 @@
           <td></td>
         </tr>
       </table>
+
+
     </div>
+
+
+
+
   </mat-card-content>
-
   <mat-card-footer class="footer">
-    <div class="teachers-comment">
-      <h3>Class Teacher's Comment</h3>
-
+    <div>
+      <h3 class="underline">Form Teacher's Comment</h3>
     </div>
     <div>
-      {{ report.report.classTrComment }}
-
+      <h3 class="underline">Head's Comment</h3>
     </div>
-    <div class="head-comment">
-      <h3>Head's Comment</h3>
-
+    <div>
+      <p>{{ report.report.classTrComment }}</p>
     </div>
-
     <div>
       <form [formGroup]="commentForm">
         <mat-form-field *ngIf="!report.report.headComment || editState">
@@ -89,11 +90,17 @@
             [value]="report.report.headComment ? report.report.headComment : '' "></textarea>
         </mat-form-field>
         <p *ngIf="report.report.headComment && !editState">{{ report.report.headComment }}
-          <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleEditState()">
+          <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleEditState()" *ngIf="!print">
             <mat-icon>edit</mat-icon>
           </button>
         </p>
       </form>
     </div>
+
+
+
+
   </mat-card-footer>
+
+
 </mat-card>
