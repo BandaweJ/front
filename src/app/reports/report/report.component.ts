@@ -7,10 +7,14 @@ import {
   downloadReportActions,
   saveHeadCommentActions,
 } from '../store/reports.actions';
-import jsPDF from 'jspdf';
-import html2PDF from 'jspdf-html2canvas';
+
 import { HeadCommentModel } from '../models/comment.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
+import * as jspdf from 'jspdf';
+import html2canvas from 'html2canvas';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+// pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
   selector: 'app-report',
@@ -70,6 +74,7 @@ export class ReportComponent implements OnInit {
   }
 
   download() {
+    // server side pdf generation using pdfkit
     const name = this.report.report.className;
     const num = this.report.report.termNumber;
     const year = this.report.report.termYear;
@@ -78,6 +83,29 @@ export class ReportComponent implements OnInit {
     this.store.dispatch(
       downloadReportActions.downloadReport({ name, num, year, studentNumber })
     );
+
+    //client side pdf generation using jspdf
+    // let data = document.getElementById('content');
+    // if (data)
+    //   html2canvas(data, { scale: 1.0 }).then((canvas) => {
+    //     const contentDataURL = canvas.toDataURL('image/png'); // 'image/jpeg' for lower quality output.
+    //     // let pdf = new jspdf('l', 'cm', 'a4'); //Generates PDF in landscape mode
+    //     let pdf = new jspdf.jsPDF('p', 'cm', 'a4'); //Generates PDF in portrait mode
+    //     pdf.addImage(contentDataURL, 'PNG', 0, 0, 29.7, 21.0, 'fit');
+    //     // pdf.save('Filename.pdf');
+    //     pdf.save(
+    //       `${this.report.studentNumber}-${this.report.report.surname} ${this.report.report.name}.pdf`
+    //     );
+    //   });
+
+    //client side pdf generation using pdfmake
+    let docDefinition = {
+      header: 'C#Corner PDF Header',
+      content:
+        'Sample PDF generated with Angular and PDFMake for C#Corner Blog',
+    };
+
+    pdfMake.createPdf(docDefinition).open();
   }
 
   //   async savePdf() {
