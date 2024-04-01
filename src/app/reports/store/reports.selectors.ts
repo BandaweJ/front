@@ -13,3 +13,8 @@ export const selectReportsErrorMsg = createSelector(
   reportsState,
   (state: fromReportsReducer.State) => state.errorMessage
 );
+
+export const selectIsLoading = createSelector(
+  reportsState,
+  (state: fromReportsReducer.State) => state.isLoading
+);

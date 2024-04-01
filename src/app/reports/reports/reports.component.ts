@@ -14,7 +14,7 @@ import {
 } from 'src/app/enrolment/store/enrolment.selectors';
 import * as reportsActions from '../store/reports.actions';
 import { ReportsModel } from '../models/reports.model';
-import { selectReports } from '../store/reports.selectors';
+import { selectIsLoading, selectReports } from '../store/reports.selectors';
 import { ReportModel } from '../models/report.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 
@@ -31,6 +31,7 @@ export class ReportsComponent implements OnInit {
   reports!: ReportsModel[];
   role = '';
   mode!: 'generate' | 'view';
+  isLoading$ = this.store.select(selectIsLoading);
 
   constructor(private store: Store) {
     this.store.dispatch(fetchTerms());

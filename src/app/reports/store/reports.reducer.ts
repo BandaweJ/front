@@ -99,6 +99,14 @@ export const reportsReducer = createReducer(
       isLoading: false,
       errorMessage: error.message,
     })
-  )
+  ),
+  on(reportsActions.generatePdfActions.generatePdf, (state) => ({
+    ...state,
+    isLoading: true,
+  })),
+  on(reportsActions.generatePdfActions.generatePdfSuccess, (state) => ({
+    ...state,
+    isLoading: false,
+  }))
   // on(reportsActions.saveHeadCommentActions.saveHeadCommentSuccess, (state))
 );

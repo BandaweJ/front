@@ -5,6 +5,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   downloadReportActions,
+  generatePdfActions,
   saveHeadCommentActions,
 } from '../store/reports.actions';
 
@@ -14,6 +15,7 @@ import * as jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { selectIsLoading } from '../store/reports.selectors';
 // pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -26,6 +28,7 @@ export class ReportComponent implements OnInit {
   report!: ReportsModel;
   editState = false;
   role = '';
+  isLoading$ = this.store.select(selectIsLoading);
 
   print = false;
 
@@ -84,6 +87,7 @@ export class ReportComponent implements OnInit {
     // );
 
     // client side pdf generation using jspdf
+    this.store.dispatch(generatePdfActions.generatePdf());
     this.print = true;
     let data = document.getElementById('content');
     if (data)
@@ -97,6 +101,7 @@ export class ReportComponent implements OnInit {
         pdf.save(
           `${this.report.studentNumber}-${this.report.report.surname} ${this.report.report.name}.pdf`
         );
+        this.store.dispatch(generatePdfActions.generatePdfSuccess());
       });
     this.print = false;
 

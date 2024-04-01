@@ -69,3 +69,11 @@ export const downloadReportActions = createActionGroup({
     downloadReportFail: props<{ error: HttpErrorResponse }>(),
   },
 });
+
+export const generatePdfActions = createActionGroup({
+  source: 'Report Component',
+  events: {
+    generatePdf: emptyProps(),
+    generatePdfSuccess: emptyProps(),
+  },
+});

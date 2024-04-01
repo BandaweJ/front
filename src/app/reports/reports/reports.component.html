@@ -21,6 +21,7 @@
       </div>
     </form>
 
+
     <div class="btns">
       <button mat-flat-button color="primary" [disabled]="reportsForm.invalid" (click)="generate()">
         Generate
@@ -29,6 +30,7 @@
       <!-- <button mat-flat-button color="primary" (click)="viewReports()">View</button> -->
     </div>
   </div>
+  <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
 
   <div class="report-container" *ngIf="reports$ | async">
     <app-report *ngFor="let report of reports$ | async" [report]="report"></app-report>
