@@ -1,4 +1,4 @@
-<mat-card class="report" id="content" #content>
+<mat-card class="report" id="{{ report.studentNumber }}" #content>
   <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()" *ngIf="!print">
     <span class="material-icons">file_download</span>
   </button>

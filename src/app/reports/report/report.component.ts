@@ -29,6 +29,7 @@ export class ReportComponent implements OnInit {
   editState = false;
   role = '';
   isLoading$ = this.store.select(selectIsLoading);
+  studentNumber = '';
 
   print = false;
 
@@ -42,6 +43,7 @@ export class ReportComponent implements OnInit {
         Validators.required,
       ]),
     });
+    this.studentNumber = this.report.report.studentNumber;
 
     this.store.select(selectUser).subscribe((user) => {
       if (user) {
@@ -77,7 +79,7 @@ export class ReportComponent implements OnInit {
 
   download() {
     // server side pdf generation using pdfkit
-    // const name = this.report.report.className;
+    const name = this.report.report.className;
     // const num = this.report.report.termNumber;
     // const year = this.report.report.termYear;
     // const studentNumber = this.report.studentNumber;
@@ -89,7 +91,7 @@ export class ReportComponent implements OnInit {
     // client side pdf generation using jspdf
     this.store.dispatch(generatePdfActions.generatePdf());
     this.print = true;
-    let data = document.getElementById('content');
+    let data = document.getElementById(`${this.studentNumber}`);
     if (data)
       html2canvas(data, { scale: 2.0 }).then((canvas) => {
         const contentDataURL = canvas.toDataURL('image/png'); // 'image/jpeg' for lower quality output.
