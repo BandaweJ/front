@@ -42,10 +42,11 @@ export class MarksService {
     name: string,
     num: number,
     year: number,
-    subjectCode: string
+    subjectCode: string,
+    examtype: string
   ): Observable<MarksModel[]> {
     return this.httpClient.get<MarksModel[]>(
-      `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}`
+      `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}/${examtype}`
     );
   }
 

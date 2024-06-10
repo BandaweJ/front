@@ -51,7 +51,13 @@ export const deleteSubjectFail = createAction(
 
 export const fetchSubjectMarksInClass = createAction(
   '[Enter Marks Component] fetch subject marks for the class',
-  props<{ name: string; num: number; year: number; subjectCode: string }>()
+  props<{
+    name: string;
+    num: number;
+    year: number;
+    subjectCode: string;
+    examtype: string;
+  }>()
 );
 
 export const fetchSubjectMarksInClassSuccess = createAction(

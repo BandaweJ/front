@@ -122,16 +122,18 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     const year = term.year;
     const subjectCode = subject.code;
 
+    const examtype = this.type?.value;
+
     // console.log(`Name: ${name}, Num: ${num}, Year: ${year}`);
     this.store.dispatch(
-      fetchSubjectMarksInClass({ name, num, year, subjectCode })
+      fetchSubjectMarksInClass({ name, num, year, subjectCode, examtype })
     );
   }
 
   saveMark(mark: MarksModel, mrk: string, cmmnt: string) {
     mark = {
       ...mark,
-      type: this.type?.value,
+      examtype: this.type?.value,
     };
 
     if (mrk && cmmnt) {
@@ -147,7 +149,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
       // console.log('Mark', mark);
     }
 
-    console.log(mark);
+    // console.log(mark);
   }
 
   deleteMark(mark: MarksModel) {
