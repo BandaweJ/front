@@ -1,7 +1,7 @@
 <mat-card>
   <div class="select-reports-form">
     <form [formGroup]="reportsForm">
-      <div class="input-controls">
+      <div class="top-btns">
         <mat-form-field>
           <mat-label>Choose Term</mat-label>
           <mat-select formControlName="term">
@@ -15,6 +15,15 @@
           <mat-select formControlName="clas">
             <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
               {{ clas.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Choose Exam Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let type of examtype" [value]="type">
+              {{ type }}
             </mat-option>
           </mat-select>
         </mat-form-field>

@@ -19,7 +19,7 @@ export class ReportsEffects {
       ofType(reportsActions.generateReports),
       switchMap((data) =>
         this.reportsService
-          .generateReports(data.name, data.num, data.year)
+          .generateReports(data.name, data.num, data.year, data.examtype)
           .pipe(
             tap((data) =>
               this.snackBar.open(

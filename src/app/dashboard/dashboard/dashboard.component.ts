@@ -5,13 +5,16 @@ import { Observable, filter, map, take, tap } from 'rxjs';
 import { fetchAccountStats } from 'src/app/auth/store/auth.actions';
 import { selectErrorMsg } from 'src/app/auth/store/auth.selectors';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
+import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
   fetchClasses,
+  fetchEnrols,
   fetchTerms,
 } from 'src/app/enrolment/store/enrolment.actions';
 import {
   selectClasses,
+  selectEnrols,
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { SubjectsModel } from 'src/app/marks/models/subjects.model';
@@ -41,7 +44,10 @@ export class DashboardComponent implements OnInit {
   students$!: Observable<StudentsModel[]>;
   classes$!: Observable<ClassesModel[]>;
   subjects$!: Observable<SubjectsModel[]>;
-  currentTerm$!: Observable<TermsModel>;
+  enrols$!: Observable<EnrolsModel[]>;
+
+  currentTermNum!: number;
+  currentTermYear!: number;
 
   maleTeachers!: number;
   femaleTeachers!: number;
@@ -57,9 +63,11 @@ export class DashboardComponent implements OnInit {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchSubjects());
     this.store.dispatch(fetchTerms());
+    this.store.dispatch(fetchEnrols());
   }
 
   ngOnInit(): void {
+    this.enrols$ = this.store.select(selectEnrols);
     this.teachers$ = this.store.select(selectTeachers).pipe(
       tap((arr) => {
         this.maleTeachers = arr.filter((tr) => tr.gender === 'Male').length;
@@ -76,15 +84,29 @@ export class DashboardComponent implements OnInit {
     this.subjects$ = this.store.select(selectSubjects);
     this.authErrMsg$ = this.store.select(selectErrorMsg);
 
-    this.currentTerm$ = this.store
+    // this.store.select(selectTerms).subscribe((terms) =>
+    //   terms.map((term) => {
+    //     console.log(terms);
+    //   })
+    // );
+
+    this.store
       .select(selectTerms)
       .pipe(
-        map(
-          (ter) =>
-            ter.filter(
-              (tr) => tr.startDate < this.today && tr.endDate > this.today
-            )[0]
+        tap((terms) =>
+          terms.map((term) => {
+            // console.log('Terms :', terms);
+            if (
+              new Date(term.startDate) < this.today &&
+              new Date(term.endDate) > this.today
+            ) {
+              this.currentTermNum = term.num;
+              this.currentTermYear = term.year;
+              // console.log('Found it : ', term);
+            }
+          })
         )
-      );
+      )
+      .subscribe();
   }
 }

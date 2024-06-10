@@ -163,7 +163,7 @@ export const marksReducer = createReducer(
   })),
   on(
     marksActions.perfomanceActions.fetchPerfomanceData,
-    (state, { num, year, name }) => ({
+    (state, { num, year, name, examtype }) => ({
       ...state,
       isLoading: true,
     })

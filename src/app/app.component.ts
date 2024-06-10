@@ -6,9 +6,7 @@ import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
 import { signinSuccess } from './auth/store/auth.actions';
 import { User } from './auth/models/user.model';
-import { fetchTeachers } from './registration/store/registration.actions';
-import { selectTeachers } from './registration/store/registration.selectors';
-import { ROLES } from './registration/models/roles.enum';
+import jwtDecode from 'jwt-decode';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +20,8 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     const token = localStorage.getItem('token');
+
+    // const decoded = jwtDecode(token);
 
     if (token) {
       const user: User = jwt_decode(token);
@@ -49,7 +49,7 @@ export class AppComponent implements OnInit {
     this.router.navigateByUrl('/signin');
   }
 
-  navigateToTeachers() {
-    this.router.navigateByUrl('/taechers');
-  }
+  // navigateToTeachers() {
+  //   this.router.navigateByUrl('/taechers');
+  // }
 }

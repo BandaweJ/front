@@ -28,6 +28,7 @@ import {
 } from '../store/marks.actions';
 import { selectMarks, selectSubjects } from '../store/marks.selectors';
 import { Title } from '@angular/platform-browser';
+import { ExamType } from '../models/examtype.enum';
 
 @Component({
   selector: 'app-enter-marks',
@@ -42,6 +43,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
   enrolForm!: FormGroup;
   public dataSource = new MatTableDataSource<MarksModel>();
   marksForm!: FormGroup;
+  examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -67,6 +69,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
       clas: new FormControl('', [Validators.required]),
       term: new FormControl('', [Validators.required]),
       subject: new FormControl('', Validators.required),
+      type: new FormControl('', Validators.required),
     });
   }
 
@@ -96,6 +99,10 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     return this.enrolForm.get('subject');
   }
 
+  get type() {
+    return this.enrolForm.get('type');
+  }
+
   displayedColumns = [
     'studentNumber',
     'surname',
@@ -122,6 +129,11 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
   }
 
   saveMark(mark: MarksModel, mrk: string, cmmnt: string) {
+    mark = {
+      ...mark,
+      type: this.type?.value,
+    };
+
     if (mrk && cmmnt) {
       mark = {
         ...mark,
@@ -134,6 +146,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
       this.store.dispatch(saveMarkAction({ mark }));
       // console.log('Mark', mark);
     }
+
+    console.log(mark);
   }
 
   deleteMark(mark: MarksModel) {

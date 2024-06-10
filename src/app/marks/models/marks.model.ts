@@ -1,5 +1,6 @@
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { SubjectsModel } from './subjects.model';
+import { ExamType } from './examtype.enum';
 
 export interface MarksModel {
   id?: number;
@@ -10,4 +11,5 @@ export interface MarksModel {
   comment: string;
   subject: SubjectsModel;
   student: StudentsModel;
+  type: ExamType;
 }

@@ -1,6 +1,6 @@
 <mat-toolbar class="title">
   <!-- <span>{{ title$ }}</span> -->
-  <div *ngIf="!(authErrMsg$ | async)">{{ today.toDateString() }} Term 3, 2023</div>
+  <div *ngIf="!(authErrMsg$ | async)">{{ today.toDateString() }}, Term {{ currentTermNum }}</div>
   <div class="error" *ngIf="authErrMsg$ | async">{{ authErrMsg$ | async }}</div>
 </mat-toolbar>
 <div class="container">
@@ -29,7 +29,7 @@
         <h3 class="widget-title">STUDENTS</h3>
       </div>
       <div class="widget-total">
-        <h2>{{ (students$ | async)?.length }}</h2>
+        <h2>{{ (enrols$ | async)?.length }}</h2>
       </div>
       <div class="widget-subtotals">
         <div class="top-total">

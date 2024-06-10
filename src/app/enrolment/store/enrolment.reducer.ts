@@ -144,7 +144,7 @@ export const enrolmentReducer = createReducer(
     errorMessage: '',
     terms: [
       ...state.terms.map((trm) =>
-        trm.num !== term.num && trm.year !== term.year ? trm : term
+        trm.num === term.num && trm.year === term.year ? term : trm
       ),
     ],
   })),

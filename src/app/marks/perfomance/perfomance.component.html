@@ -1,3 +1,5 @@
+<mat-toolbar class="title">{{ title.getTitle() }}</mat-toolbar>
+
 <form [formGroup]="perfForm" (ngSubmit)="getPerfData()">
   <div class="top-btns">
     <mat-form-field>
@@ -16,40 +18,24 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <button
-      mat-mini-fab
-      type="button"
-      type="submit"
-      [disabled]="perfForm.invalid"
-    >
+    <mat-form-field>
+      <mat-label>Exam Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option *ngFor="let type of examtype" [value]="type">
+          {{ type }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <button mat-mini-fab type="submit" [disabled]="perfForm.invalid">
       graph
     </button>
   </div>
 </form>
 
-<form [formGroup]="subjectForm">
-  <mat-form-field>
-    <mat-label>Choose Subject</mat-label>
-    <mat-select formControlName="subj">
-      <mat-option
-        (onSelectionChange)="plotSubjectPerf()"
-        *ngFor="let subject of subjects"
-        [value]="subject"
-      >
-        {{ subject }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-</form>
+
 
 <div style="display: block">
-  <canvas
-    id="mychart"
-    baseChart
-    [options]="chartOptions"
-    [type]="'line'"
-    [data]="lineChartData"
-    [legend]="lineChartLegend"
-  >
+  <canvas id="mychart" baseChart [options]="chartOptions" [type]="'line'" [data]="lineChartData"
+    [legend]="lineChartLegend">
   </canvas>
 </div>

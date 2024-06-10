@@ -18,6 +18,14 @@ form {
   justify-content: space-between;
 }
 
+.top-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0.5rem auto;
+  width: 65vw;
+}
+
 .btns {
   /* align-self: flex-end; */
   display: flex;

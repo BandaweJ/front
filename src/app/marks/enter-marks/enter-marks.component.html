@@ -10,6 +10,16 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Choose Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option *ngFor="let type of examtype" [value]="type">
+            {{ type }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <mat-form-field>
         <mat-label>Choose Class</mat-label>
         <mat-select formControlName="clas">
@@ -22,20 +32,15 @@
       <mat-form-field>
         <mat-label>Choose Subject</mat-label>
         <mat-select formControlName="subject">
-          <mat-option
-            *ngFor="let subject of subjects$ | async"
-            [value]="subject"
-          >
+          <mat-option *ngFor="let subject of subjects$ | async" [value]="subject">
             {{ subject.code + " " + subject.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
-      <button
-        mat-mini-fab
-        type="button"
-        type="submit"
-        [disabled]="enrolForm.invalid"
-      >
+
+
+
+      <button mat-mini-fab type="button" type="submit" [disabled]="enrolForm.invalid">
         list
       </button>
     </div>
@@ -45,12 +50,7 @@
     <div class="top-panel">
       <mat-form-field>
         <mat-label>Filter</mat-label>
-        <input
-          matInput
-          (keyup)="applyFilter($event)"
-          placeholder="Ex. Mia"
-          #input
-        />
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input />
       </mat-form-field>
     </div>
     <table mat-table [dataSource]="dataSource" matSort>
@@ -82,37 +82,20 @@
 
       <!-- Mark Column --&&  -- Comment Column -->
       <ng-container matColumnDef="mark">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          [attr.colspan]="2"
-        >
+        <th mat-header-cell *matHeaderCellDef mat-sort-header [attr.colspan]="2">
           Mark
         </th>
         <td mat-cell *matCellDef="let row" [attr.colspan]="2">
           <mat-form-field class="input-elements">
             <mat-label>Mark</mat-label>
-            <input
-              matInput
-              required
-              pattern="^[1-9][0-9]?$|^100$"
-              type="number"
-              [value]="row.mark"
-              #mrk
-              (change)="saveMark(row, mrk.value, cmmnt.value)"
-            />
+            <input matInput required pattern="^[1-9][0-9]?$|^100$" type="number" [value]="row.mark" #mrk
+              (change)="saveMark(row, mrk.value, cmmnt.value)" />
           </mat-form-field>
 
           <mat-form-field>
             <mat-label>Comment</mat-label>
-            <input
-              matInput
-              required
-              [value]="row.comment ? row.comment : ''"
-              #cmmnt
-              (change)="saveMark(row, mrk.value, cmmnt.value)"
-            />
+            <input matInput required [value]="row.comment ? row.comment : ''" #cmmnt
+              (change)="saveMark(row, mrk.value, cmmnt.value)" />
           </mat-form-field>
         </td>
       </ng-container>
@@ -121,12 +104,7 @@
       <ng-container matColumnDef="action">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>State</th>
         <td mat-cell *matCellDef="let row" class="btns">
-          <button
-            mat-icon-button
-            color="warn"
-            type="button"
-            (click)="deleteMark(row)"
-          >
+          <button mat-icon-button color="warn" type="button" (click)="deleteMark(row)">
             <mat-icon> delete_forever </mat-icon>
           </button>
         </td>
@@ -143,9 +121,6 @@
       </tr>
     </table>
 
-    <mat-paginator
-      [pageSizeOptions]="[10, 15, 50]"
-      aria-label="Select page of users"
-    ></mat-paginator>
+    <mat-paginator [pageSizeOptions]="[10, 15, 50]" aria-label="Select page of users"></mat-paginator>
   </div>
 </mat-card>

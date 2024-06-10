@@ -100,7 +100,12 @@ export const deleteMarkActions = createActionGroup({
 export const perfomanceActions = createActionGroup({
   source: 'Perfomance component',
   events: {
-    fetchPerfomanceData: props<{ num: number; year: number; name: string }>(),
+    fetchPerfomanceData: props<{
+      num: number;
+      year: number;
+      name: string;
+      examtype: string;
+    }>(),
     fetchPerfomanceDataSuccess: props<{
       data: {
         subjects: SubjectsModel[];
@@ -120,7 +125,12 @@ export const saveCommentActions = createActionGroup({
     saveComment: props<{ comment: StudentComment }>(),
     saveCommentFail: props<{ error: HttpErrorResponse }>(),
     saveCommentSuccess: props<{ comment: StudentComment }>(),
-    fetchClassComments: props<{ name: string; num: number; year: number }>(),
+    fetchClassComments: props<{
+      name: string;
+      num: number;
+      year: number;
+      examtype: string;
+    }>(),
     fetchClassCommentsSuccess: props<{ comments: StudentComment[] }>(),
     fetchClassCommentsFail: props<{ error: HttpErrorResponse }>(),
   },

@@ -17,6 +17,7 @@ import { ReportsModel } from '../models/reports.model';
 import { selectIsLoading, selectReports } from '../store/reports.selectors';
 import { ReportModel } from '../models/report.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
+import { ExamType } from 'src/app/marks/models/examtype.enum';
 
 @Component({
   selector: 'app-reports',
@@ -33,6 +34,8 @@ export class ReportsComponent implements OnInit {
   mode!: 'generate' | 'view';
   isLoading$ = this.store.select(selectIsLoading);
 
+  examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
+
   constructor(private store: Store) {
     this.store.dispatch(fetchTerms());
     this.store.dispatch(fetchClasses());
@@ -47,6 +50,7 @@ export class ReportsComponent implements OnInit {
     this.reportsForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
+      type: new FormControl('', Validators.required),
     });
 
     this.store.select(selectUser).subscribe((user) => {
@@ -64,6 +68,10 @@ export class ReportsComponent implements OnInit {
     return this.reportsForm.get('clas');
   }
 
+  get type() {
+    return this.reportsForm.get('type');
+  }
+
   generate() {
     this.mode = 'generate';
     const name = this.clas?.value;
@@ -71,10 +79,13 @@ export class ReportsComponent implements OnInit {
     const term: TermsModel = this.term?.value;
     const num = term.num;
     const year = term.year;
+    const examtype: string = this.type?.value;
 
-    console.log('name', name, 'num', num, 'year', year);
+    // console.log('name', name, 'num', num, 'year', year);
 
-    this.store.dispatch(reportsActions.generateReports({ name, num, year }));
+    this.store.dispatch(
+      reportsActions.generateReports({ name, num, year, examtype })
+    );
   }
 
   saveReports() {

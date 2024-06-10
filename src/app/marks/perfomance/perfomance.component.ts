@@ -24,6 +24,8 @@ import {
 import { BaseChartDirective } from 'ng2-charts';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
+import { Title } from '@angular/platform-browser';
+import { ExamType } from '../models/examtype.enum';
 // import { SubjectsModel } from 'src/app/marks/models/subjects.model';
 
 @Component({
@@ -43,8 +45,9 @@ export class PerfomanceComponent implements OnInit {
   subjects!: string[];
   @ViewChild(BaseChartDirective)
   public chart!: BaseChartDirective;
+  examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
-  constructor(private store: Store) {
+  constructor(private store: Store, public title: Title) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
   }
@@ -61,10 +64,7 @@ export class PerfomanceComponent implements OnInit {
     this.perfForm = new FormGroup({
       term: new FormControl(null, [Validators.required]),
       clas: new FormControl(null, [Validators.required]),
-    });
-
-    this.subjectForm = new FormGroup({
-      subj: new FormControl(''),
+      type: new FormControl('', Validators.required),
     });
   }
 
@@ -77,15 +77,13 @@ export class PerfomanceComponent implements OnInit {
     return newArray;
   }
 
-  plotSubjectPerf() {
-    console.log('subject info');
-    const sub = this.subj?.value;
-    console.log(sub);
-    const index = this.subjects.indexOf(this.subj?.value);
-    console.log(index);
-    // this.store.dispatch(perfomanceActions.plotSubjectPerf({ subject, index }));
-    // this.chart.update();
-  }
+  // plotSubjectPerf() {
+
+  //   const index = this.subjects.indexOf(this.subj?.value);
+  //   console.log(index);
+  //   // this.store.dispatch(perfomanceActions.plotSubjectPerf({ subject, index }));
+  //   // this.chart.update();
+  // }
 
   get term() {
     return this.perfForm.get('term');
@@ -95,20 +93,22 @@ export class PerfomanceComponent implements OnInit {
     return this.perfForm.get('clas');
   }
 
-  get subj() {
-    return this.subjectForm.get('subj');
+  get type() {
+    return this.perfForm.get('type');
   }
 
   getPerfData() {
     if (this.perfForm.valid) {
       const term: TermsModel = this.term?.value;
       const clas = this.clas?.value;
+      const examtype: string = this.type?.value;
 
       this.store.dispatch(
         perfomanceActions.fetchPerfomanceData({
           num: term.num,
           year: term.year,
           name: clas,
+          examtype: examtype,
         })
       );
     }
