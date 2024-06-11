@@ -17,13 +17,10 @@ export const initialState: State = {
 
 export const reportsReducer = createReducer(
   initialState,
-  on(
-    reportsActions.generateReports,
-    (state, { name, num, year, examtype }) => ({
-      ...state,
-      isLoading: true,
-    })
-  ),
+  on(reportsActions.generateReports, (state, { name, num, year }) => ({
+    ...state,
+    isLoading: true,
+  })),
   on(reportsActions.generateReportsSuccess, (state, { reports }) => ({
     ...state,
     reports,

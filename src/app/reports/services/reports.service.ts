@@ -17,12 +17,12 @@ export class ReportsService {
   generateReports(
     name: string,
     num: number,
-    year: number,
-    examtype: string
+    year: number
+    // examtype: string
   ): Observable<ReportsModel[]> {
     // console.log(`${this.baseUrl}generate/${name}/${num}/${year}/`);
     return this.httpClient.get<ReportsModel[]>(
-      `${this.baseUrl}generate/${name}/${num}/${year}/${examtype}`
+      `${this.baseUrl}generate/${name}/${num}/${year}`
     );
   }
 

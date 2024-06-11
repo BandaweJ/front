@@ -64,7 +64,7 @@ export class PerfomanceComponent implements OnInit {
     this.perfForm = new FormGroup({
       term: new FormControl(null, [Validators.required]),
       clas: new FormControl(null, [Validators.required]),
-      type: new FormControl('', Validators.required),
+      // type: new FormControl('', Validators.required),
     });
   }
 
@@ -93,22 +93,22 @@ export class PerfomanceComponent implements OnInit {
     return this.perfForm.get('clas');
   }
 
-  get type() {
-    return this.perfForm.get('type');
-  }
+  // get type() {
+  //   return this.perfForm.get('type');
+  // }
 
   getPerfData() {
     if (this.perfForm.valid) {
       const term: TermsModel = this.term?.value;
       const clas = this.clas?.value;
-      const examtype: string = this.type?.value;
+      // const examtype: string = this.type?.value;
 
       this.store.dispatch(
         perfomanceActions.fetchPerfomanceData({
           num: term.num,
           year: term.year,
           name: clas,
-          examtype: examtype,
+          // examtype: examtype,
         })
       );
     }

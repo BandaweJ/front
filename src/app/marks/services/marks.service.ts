@@ -42,11 +42,11 @@ export class MarksService {
     name: string,
     num: number,
     year: number,
-    subjectCode: string,
-    examtype: string
+    subjectCode: string
+    // examtype: string
   ): Observable<MarksModel[]> {
     return this.httpClient.get<MarksModel[]>(
-      `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}/${examtype}`
+      `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}`
     );
   }
 
@@ -72,19 +72,19 @@ export class MarksService {
   fetchClassComments(
     name: string,
     num: number,
-    year: number,
-    examtype: string
+    year: number
+    // examtype: string
   ): Observable<StudentComment[]> {
     return this.httpClient.get<StudentComment[]>(
-      `${this.baseUrl}comments/${name}/${num}/${year}/${examtype}`
+      `${this.baseUrl}comments/${name}/${num}/${year}`
     );
   }
 
   getPerfomanceData(
     num: number,
     year: number,
-    name: string,
-    examtype: string
+    name: string
+    // examtype: string
   ): Observable<{
     subjects: SubjectsModel[];
     subjectsMarks: Array<MarksModel[]>;
@@ -96,6 +96,6 @@ export class MarksService {
       subjectsMarks: Array<MarksModel[]>;
       marks: Array<number[]>;
       xAxes: number[];
-    }>(`${this.baseUrl}perf/${num}/${year}/${name}/${examtype}`);
+    }>(`${this.baseUrl}perf/${num}/${year}/${name}`);
   }
 }

@@ -11,7 +11,7 @@ import { HeadCommentModel } from '../models/comment.model';
 
 export const generateReports = createAction(
   '[Reports Component] generate reports',
-  props<{ name: string; num: number; year: number; examtype: string }>()
+  props<{ name: string; num: number; year: number }>()
 );
 
 export const generateReportsSuccess = createAction(

@@ -56,7 +56,7 @@ export const fetchSubjectMarksInClass = createAction(
     num: number;
     year: number;
     subjectCode: string;
-    examtype: string;
+    // examtype: string;
   }>()
 );
 
@@ -110,7 +110,7 @@ export const perfomanceActions = createActionGroup({
       num: number;
       year: number;
       name: string;
-      examtype: string;
+      // examtype: string;
     }>(),
     fetchPerfomanceDataSuccess: props<{
       data: {
@@ -135,7 +135,7 @@ export const saveCommentActions = createActionGroup({
       name: string;
       num: number;
       year: number;
-      examtype: string;
+      // examtype: string;
     }>(),
     fetchClassCommentsSuccess: props<{ comments: StudentComment[] }>(),
     fetchClassCommentsFail: props<{ error: HttpErrorResponse }>(),

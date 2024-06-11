@@ -50,7 +50,7 @@ export class ReportsComponent implements OnInit {
     this.reportsForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
-      type: new FormControl('', Validators.required),
+      // type: new FormControl('', Validators.required),
     });
 
     this.store.select(selectUser).subscribe((user) => {
@@ -68,9 +68,9 @@ export class ReportsComponent implements OnInit {
     return this.reportsForm.get('clas');
   }
 
-  get type() {
-    return this.reportsForm.get('type');
-  }
+  // get type() {
+  //   return this.reportsForm.get('type');
+  // }
 
   generate() {
     this.mode = 'generate';
@@ -79,13 +79,11 @@ export class ReportsComponent implements OnInit {
     const term: TermsModel = this.term?.value;
     const num = term.num;
     const year = term.year;
-    const examtype: string = this.type?.value;
+    // const examtype: string = this.type?.value;
 
     // console.log('name', name, 'num', num, 'year', year);
 
-    this.store.dispatch(
-      reportsActions.generateReports({ name, num, year, examtype })
-    );
+    this.store.dispatch(reportsActions.generateReports({ name, num, year }));
   }
 
   saveReports() {

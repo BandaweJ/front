@@ -91,8 +91,8 @@ export class MarksEffects {
             data.name,
             data.num,
             data.year,
-            data.subjectCode,
-            data.examtype
+            data.subjectCode
+            // data.examtype
           )
           .pipe(
             map((marks) =>
@@ -197,22 +197,20 @@ export class MarksEffects {
     this.actions$.pipe(
       ofType(marksActions.perfomanceActions.fetchPerfomanceData),
       switchMap((par) =>
-        this.marksService
-          .getPerfomanceData(par.num, par.year, par.name, par.examtype)
-          .pipe(
-            map((data) =>
-              marksActions.perfomanceActions.fetchPerfomanceDataSuccess({
-                data,
+        this.marksService.getPerfomanceData(par.num, par.year, par.name).pipe(
+          map((data) =>
+            marksActions.perfomanceActions.fetchPerfomanceDataSuccess({
+              data,
+            })
+          ),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              marksActions.perfomanceActions.fetchPerfomanceDataFail({
+                ...error,
               })
-            ),
-            catchError((error: HttpErrorResponse) =>
-              of(
-                marksActions.perfomanceActions.fetchPerfomanceDataFail({
-                  ...error,
-                })
-              )
             )
           )
+        )
       )
     )
   );
@@ -222,7 +220,7 @@ export class MarksEffects {
       ofType(marksActions.saveCommentActions.fetchClassComments),
       switchMap((data) =>
         this.marksService
-          .fetchClassComments(data.name, data.num, data.year, data.examtype)
+          .fetchClassComments(data.name, data.num, data.year)
           .pipe(
             map((comments) =>
               marksActions.saveCommentActions.fetchClassCommentsSuccess({

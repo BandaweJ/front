@@ -11,5 +11,5 @@ export interface MarksModel {
   comment: string;
   subject: SubjectsModel;
   student: StudentsModel;
-  examtype: ExamType;
+  // examtype: ExamType;
 }

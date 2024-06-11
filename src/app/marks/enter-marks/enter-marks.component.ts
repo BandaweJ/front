@@ -43,7 +43,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
   enrolForm!: FormGroup;
   public dataSource = new MatTableDataSource<MarksModel>();
   marksForm!: FormGroup;
-  examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
+  // examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -69,7 +69,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
       clas: new FormControl('', [Validators.required]),
       term: new FormControl('', [Validators.required]),
       subject: new FormControl('', Validators.required),
-      type: new FormControl('', Validators.required),
+      // type: new FormControl('', Validators.required),
     });
   }
 
@@ -99,9 +99,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     return this.enrolForm.get('subject');
   }
 
-  get type() {
-    return this.enrolForm.get('type');
-  }
+  // get type() {
+  //   return this.enrolForm.get('type');
+  // }
 
   displayedColumns = [
     'studentNumber',
@@ -122,18 +122,18 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     const year = term.year;
     const subjectCode = subject.code;
 
-    const examtype = this.type?.value;
+    // const examtype = this.type?.value;
 
     // console.log(`Name: ${name}, Num: ${num}, Year: ${year}`);
     this.store.dispatch(
-      fetchSubjectMarksInClass({ name, num, year, subjectCode, examtype })
+      fetchSubjectMarksInClass({ name, num, year, subjectCode })
     );
   }
 
   saveMark(mark: MarksModel, mrk: string, cmmnt: string) {
     mark = {
       ...mark,
-      examtype: this.type?.value,
+      // examtype: this.type?.value,
     };
 
     if (mrk && cmmnt) {

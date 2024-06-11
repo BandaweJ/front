@@ -84,7 +84,7 @@ export const marksReducer = createReducer(
   })),
   on(
     marksActions.fetchSubjectMarksInClass,
-    (state, { name, num, year, subjectCode, examtype }) => ({
+    (state, { name, num, year, subjectCode }) => ({
       ...state,
       isLoading: true,
     })
@@ -163,7 +163,7 @@ export const marksReducer = createReducer(
   })),
   on(
     marksActions.perfomanceActions.fetchPerfomanceData,
-    (state, { num, year, name, examtype }) => ({
+    (state, { num, year, name }) => ({
       ...state,
       isLoading: true,
     })
