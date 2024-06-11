@@ -151,7 +151,7 @@ export const enrolStudentsFail = createAction(
   props<{ error: HttpErrorResponse }>()
 );
 
-export const fetchEnrols = createAction(
+export const fetchTotalEnrols = createAction(
   '[Terms Classes Component] fetch enrolments',
   props<{ num: number; year: number }>()
 );

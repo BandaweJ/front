@@ -9,8 +9,8 @@ import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
   fetchClasses,
-  fetchEnrols,
   fetchTerms,
+  fetchTotalEnrols,
 } from 'src/app/enrolment/store/enrolment.actions';
 import {
   selectClasses,
@@ -105,7 +105,7 @@ export class DashboardComponent implements OnInit {
 
               const num = this.currentTermNum;
               const year = this.currentTermYear;
-              this.store.dispatch(fetchEnrols({ num, year }));
+              this.store.dispatch(fetchTotalEnrols({ num, year }));
 
               // console.log('Found it : ', term);
             }

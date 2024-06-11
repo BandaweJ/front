@@ -150,7 +150,7 @@ export const enrolmentReducer = createReducer(
       ),
     ],
   })),
-  on(enrolmentActions.fetchEnrols, (state) => ({
+  on(enrolmentActions.fetchTotalEnrols, (state) => ({
     ...state,
     isLoading: true,
   })),

@@ -216,7 +216,7 @@ export class EnrolmentEffects {
 
   fetchTotalEnrolment$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fromEnrolmentActions.fetchEnrols),
+      ofType(fromEnrolmentActions.fetchTotalEnrols),
       switchMap((data) =>
         this.enrolService.getTotalEnrolment(data.num, data.year).pipe(
           map((enrols) => fromEnrolmentActions.fetchEnrolsSuccess({ enrols })),

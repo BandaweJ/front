@@ -11,7 +11,6 @@ import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
   fetchClasses,
-  fetchEnrols,
   fetchTerms,
   getEnrolmentByClass,
 } from 'src/app/enrolment/store/enrolment.actions';
@@ -20,8 +19,6 @@ import {
   selectEnrols,
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
-import { StudentsModel } from 'src/app/registration/models/students.model';
-import { TeachersModel } from 'src/app/registration/models/teachers.model';
 import { StudentComment } from '../models/student-comment';
 import { saveCommentActions } from '../store/marks.actions';
 import { selectComments } from '../store/marks.selectors';

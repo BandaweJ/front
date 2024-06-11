@@ -12,7 +12,6 @@ import {
 import {
   UnenrolStudentActions,
   fetchClasses,
-  fetchEnrols,
   fetchTerms,
   getEnrolmentByClass,
 } from '../store/enrolment.actions';
