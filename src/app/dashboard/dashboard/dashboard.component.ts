@@ -105,7 +105,7 @@ export class DashboardComponent implements OnInit {
 
               const num = this.currentTermNum;
               const year = this.currentTermYear;
-              // this.store.dispatch(fetchTotalEnrols({ num, year }));
+              this.store.dispatch(fetchTotalEnrols({ num, year }));
 
               // console.log('Found it : ', term);
             }
