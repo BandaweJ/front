@@ -158,7 +158,7 @@ export const fetchTotalEnrols = createAction(
 
 export const fetchEnrolsSuccess = createAction(
   '[Terms Classes Component] fetch enrols success',
-  props<{ enrols: EnrolsModel[] }>()
+  props<{ total: number }>()
 );
 
 export const fetchEnrolsFailure = createAction(

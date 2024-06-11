@@ -45,7 +45,7 @@ export class DashboardComponent implements OnInit {
   students$!: Observable<StudentsModel[]>;
   classes$!: Observable<ClassesModel[]>;
   subjects$!: Observable<SubjectsModel[]>;
-  enrols$!: Observable<EnrolsModel[]>;
+  enrols$!: Observable<number>;
 
   currentTermNum!: number;
   currentTermYear!: number;
@@ -82,7 +82,7 @@ export class DashboardComponent implements OnInit {
     this.classes$ = this.store.select(selectClasses);
     this.subjects$ = this.store.select(selectSubjects);
     this.authErrMsg$ = this.store.select(selectErrorMsg);
-    this.enrols$ = this.store.select(selectEnrols);
+    this.enrols$ = this.store.select(selectTotalEnroment);
 
     // this.store.select(selectTerms).subscribe((terms) =>
     //   terms.map((term) => {

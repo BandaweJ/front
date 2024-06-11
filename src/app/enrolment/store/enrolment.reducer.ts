@@ -19,7 +19,7 @@ export interface State {
   // addSuccess: boolean | null;
   enrolStats: EnrolStats | null;
   migrateClassResult: boolean;
-  totalEnrolment: EnrolsModel[];
+  totalEnrolment: number;
 }
 
 export const initialState: State = {
@@ -33,7 +33,7 @@ export const initialState: State = {
   // addSuccess: null,
   enrolStats: null,
   migrateClassResult: false,
-  totalEnrolment: [],
+  totalEnrolment: 0,
 };
 
 export const enrolmentReducer = createReducer(
@@ -154,10 +154,10 @@ export const enrolmentReducer = createReducer(
     ...state,
     isLoading: true,
   })),
-  on(enrolmentActions.fetchEnrolsSuccess, (state, { enrols }) => ({
+  on(enrolmentActions.fetchEnrolsSuccess, (state, { total }) => ({
     ...state,
     isLoading: false,
-    totalEnrolment: enrols,
+    totalEnrolment: total,
   })),
   on(enrolmentActions.fetchEnrolsFailure, (state, { error }) => ({
     ...state,

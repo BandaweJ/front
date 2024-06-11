@@ -33,8 +33,8 @@ export class EnrolService {
     return this.httpClient.get<EnrolStats>(this.baseURL);
   }
 
-  getTotalEnrolment(num: number, year: number): Observable<EnrolsModel[]> {
-    return this.httpClient.get<EnrolsModel[]>(`${this.baseURL}${num}/${year}`);
+  getTotalEnrolment(num: number, year: number): Observable<number> {
+    return this.httpClient.get<number>(`${this.baseURL}${num}/${year}`);
   }
 
   unenrolStudent(enrol: EnrolsModel): Observable<EnrolsModel> {
