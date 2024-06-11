@@ -43,6 +43,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
   enrolForm!: FormGroup;
   public dataSource = new MatTableDataSource<MarksModel>();
   marksForm!: FormGroup;
+  value = 0;
+  maxValue = 0;
   // examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -62,6 +64,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
 
     this.store.select(selectMarks).subscribe((marks) => {
       this.dataSource.data = marks;
+      console.log(marks);
       // console.log(marks[0]);
     });
 
