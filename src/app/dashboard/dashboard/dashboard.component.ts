@@ -16,6 +16,7 @@ import {
   selectClasses,
   selectEnrols,
   selectTerms,
+  selectTotalEnroment,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { SubjectsModel } from 'src/app/marks/models/subjects.model';
 import { fetchSubjects } from 'src/app/marks/store/marks.actions';
@@ -63,11 +64,9 @@ export class DashboardComponent implements OnInit {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchSubjects());
     this.store.dispatch(fetchTerms());
-    this.store.dispatch(fetchEnrols());
   }
 
   ngOnInit(): void {
-    this.enrols$ = this.store.select(selectEnrols);
     this.teachers$ = this.store.select(selectTeachers).pipe(
       tap((arr) => {
         this.maleTeachers = arr.filter((tr) => tr.gender === 'Male').length;
@@ -83,6 +82,7 @@ export class DashboardComponent implements OnInit {
     this.classes$ = this.store.select(selectClasses);
     this.subjects$ = this.store.select(selectSubjects);
     this.authErrMsg$ = this.store.select(selectErrorMsg);
+    this.enrols$ = this.store.select(selectTotalEnroment);
 
     // this.store.select(selectTerms).subscribe((terms) =>
     //   terms.map((term) => {
@@ -102,6 +102,11 @@ export class DashboardComponent implements OnInit {
             ) {
               this.currentTermNum = term.num;
               this.currentTermYear = term.year;
+
+              const num = this.currentTermNum;
+              const year = this.currentTermYear;
+              this.store.dispatch(fetchEnrols({ num, year }));
+
               // console.log('Found it : ', term);
             }
           })

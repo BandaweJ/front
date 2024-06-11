@@ -3,10 +3,10 @@ import { ClassesModel } from '../models/classes.model';
 import { EnrolsModel } from '../models/enrols.model';
 import { TermsModel } from '../models/terms.model';
 import * as enrolmentActions from './enrolment.actions';
-import { editClassFail } from './enrolment.actions';
+// import { editClassFail } from './enrolment.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolStats } from '../models/enrol-stats.model';
-import { RegisterModel } from '../../attendance/models/register.model';
+// import { RegisterModel } from '../../attendance/models/register.model';
 
 export interface State {
   terms: TermsModel[];
@@ -19,6 +19,7 @@ export interface State {
   // addSuccess: boolean | null;
   enrolStats: EnrolStats | null;
   migrateClassResult: boolean;
+  totalEnrolment: EnrolsModel[];
 }
 
 export const initialState: State = {
@@ -32,6 +33,7 @@ export const initialState: State = {
   // addSuccess: null,
   enrolStats: null,
   migrateClassResult: false,
+  totalEnrolment: [],
 };
 
 export const enrolmentReducer = createReducer(
@@ -151,6 +153,16 @@ export const enrolmentReducer = createReducer(
   on(enrolmentActions.fetchEnrols, (state) => ({
     ...state,
     isLoading: true,
+  })),
+  on(enrolmentActions.fetchEnrolsSuccess, (state, { enrols }) => ({
+    ...state,
+    isLoading: false,
+    totalEnrolment: enrols,
+  })),
+  on(enrolmentActions.fetchEnrolsFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
   })),
   on(enrolmentActions.getEnrolmentByClass, (state, { name, num, year }) => ({
     ...state,

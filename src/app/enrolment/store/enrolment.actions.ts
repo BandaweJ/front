@@ -152,7 +152,8 @@ export const enrolStudentsFail = createAction(
 );
 
 export const fetchEnrols = createAction(
-  '[Terms Classes Component] fetch enrolments'
+  '[Terms Classes Component] fetch enrolments',
+  props<{ num: number; year: number }>()
 );
 
 export const fetchEnrolsSuccess = createAction(

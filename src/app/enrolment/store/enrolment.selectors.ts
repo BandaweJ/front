@@ -14,6 +14,11 @@ export const selectEnrolErrorMsg = createSelector(
   (state: fromEnrolmentReducer.State) => state.errorMessage
 );
 
+export const selectTotalEnroment = createSelector(
+  enrolmentState,
+  (state: fromEnrolmentReducer.State) => state.totalEnrolment
+);
+
 // export const selectDeleteSuccess = createSelector(
 //   enrolmentState,
 //   (state: fromEnrolmentReducer.State) => state.deleteSuccess

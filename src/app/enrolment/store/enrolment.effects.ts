@@ -214,6 +214,20 @@ export class EnrolmentEffects {
     )
   );
 
+  fetchTotalEnrolment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromEnrolmentActions.fetchEnrols),
+      switchMap((data) =>
+        this.enrolService.getTotalEnrolment(data.num, data.year).pipe(
+          map((enrols) => fromEnrolmentActions.fetchEnrolsSuccess({ enrols })),
+          catchError((error: HttpErrorResponse) =>
+            of(fromEnrolmentActions.fetchEnrolsFailure({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
   fetchEnrolsStats$ = createEffect(() =>
     this.actions$.pipe(
       ofType(fromEnrolmentActions.fetchEnrolsStats),
