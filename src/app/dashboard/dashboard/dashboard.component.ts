@@ -82,7 +82,7 @@ export class DashboardComponent implements OnInit {
     this.classes$ = this.store.select(selectClasses);
     this.subjects$ = this.store.select(selectSubjects);
     this.authErrMsg$ = this.store.select(selectErrorMsg);
-    this.enrols$ = this.store.select(selectTotalEnroment);
+    this.enrols$ = this.store.select(selectEnrols);
 
     // this.store.select(selectTerms).subscribe((terms) =>
     //   terms.map((term) => {
