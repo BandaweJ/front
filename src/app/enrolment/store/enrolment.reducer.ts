@@ -159,11 +159,11 @@ export const enrolmentReducer = createReducer(
     isLoading: false,
     totalEnrolment: total,
   })),
-  // on(enrolmentActions.fetchTotalEnrolsFailure, (state, { error }) => ({
-  //   ...state,
-  //   isLoading: false,
-  //   errorMessage: error.message,
-  // })),
+  on(enrolmentActions.fetchTotalEnrolsFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: 'Failed to get total',
+  })),
   on(enrolmentActions.getEnrolmentByClass, (state, { name, num, year }) => ({
     ...state,
     isLoading: true,
