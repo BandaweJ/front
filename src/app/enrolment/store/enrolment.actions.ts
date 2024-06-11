@@ -156,12 +156,12 @@ export const fetchTotalEnrols = createAction(
   props<{ num: number; year: number }>()
 );
 
-export const fetchEnrolsSuccess = createAction(
+export const fetchTotalEnrolsSuccess = createAction(
   '[Terms Classes Component] fetch enrols success',
   props<{ total: number }>()
 );
 
-export const fetchEnrolsFailure = createAction(
+export const fetchTotalEnrolsFailure = createAction(
   '[Terms Classes Component] fetch enrols success',
   props<{ error: HttpErrorResponse }>()
 );

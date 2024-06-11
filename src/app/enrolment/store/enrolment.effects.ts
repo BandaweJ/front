@@ -219,9 +219,11 @@ export class EnrolmentEffects {
       ofType(fromEnrolmentActions.fetchTotalEnrols),
       switchMap((data) =>
         this.enrolService.getTotalEnrolment(data.num, data.year).pipe(
-          map((total) => fromEnrolmentActions.fetchEnrolsSuccess({ total })),
+          map((total) =>
+            fromEnrolmentActions.fetchTotalEnrolsSuccess({ total })
+          ),
           catchError((error: HttpErrorResponse) =>
-            of(fromEnrolmentActions.fetchEnrolsFailure({ ...error }))
+            of(fromEnrolmentActions.fetchTotalEnrolsFailure({ ...error }))
           )
         )
       )
