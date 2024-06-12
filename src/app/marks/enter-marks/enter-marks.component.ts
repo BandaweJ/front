@@ -67,7 +67,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
       marks.forEach((mark) => {
         this.maxValue = marks.length;
         if (mark.comment && mark.mark) {
-          this.value++;
+          this.value = this.value + 1;
         }
       });
       // console.log(marks);
