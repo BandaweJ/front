@@ -65,6 +65,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     this.store.select(selectMarks).subscribe((marks) => {
       this.dataSource.data = marks;
       this.value = 0;
+      this.maxValue = marks.length;
       marks.forEach((mark) => {
         if (mark.comment && mark.mark) {
           this.value++;
