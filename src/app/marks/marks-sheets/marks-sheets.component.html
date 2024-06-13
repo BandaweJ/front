@@ -42,7 +42,7 @@
     <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
 
     <!-- Start Mark Sheet Table -->
-    <table style="width:100%">
+    <table style="width:100%" *ngIf="reports">
         <caption>
             <h2>
                 Mid Term {{ reports[0].num }}, {{ reports[0].year }} {{ reports[0].name }} Marksheet

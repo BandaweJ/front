@@ -76,6 +76,8 @@ export class MarksSheetsComponent implements OnInit {
       });
 
       reps.sort((a, b) => a.report.classPosition - b.report.classPosition);
+
+      this.reports = reps;
     });
 
     this.markSheetForm = new FormGroup({
