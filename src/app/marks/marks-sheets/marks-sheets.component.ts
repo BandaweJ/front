@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -15,6 +15,10 @@ import {
 import { markSheetActions } from './store/actions';
 import { selectIsLoading, selectMarkSheet } from './store/selectors';
 import { ReportsModel } from 'src/app/reports/models/reports.model';
+import { MatDialog } from '@angular/material/dialog';
+import { Title } from '@angular/platform-browser';
+import { SubjectsModel } from '../models/subjects.model';
+import { SubjectInfoModel } from 'src/app/reports/models/subject-info.model';
 
 @Component({
   selector: 'app-marks-sheets',
@@ -28,8 +32,13 @@ export class MarksSheetsComponent implements OnInit {
   isLoading$!: Observable<boolean>;
   markSheet$!: Observable<ReportsModel[]>;
   reports!: ReportsModel[];
+  subjects: SubjectsModel[] = [];
 
-  constructor(private store: Store) {
+  constructor(
+    private store: Store,
+    private dialog: MatDialog,
+    public title: Title
+  ) {
     this.store.dispatch(fetchTerms());
     this.store.dispatch(fetchClasses());
   }
@@ -41,7 +50,32 @@ export class MarksSheetsComponent implements OnInit {
 
     // this.markSheet$ = this.store.select(selectMarkSheet);
     this.store.select(selectMarkSheet).subscribe((reps) => {
-      console.log(reps);
+      //create set to add all subjects done in class
+      const subjectsSet = new Set<SubjectsModel>();
+      //loop throu all reports adding all subjs on rep.report to the set
+      reps.forEach((rep) => {
+        rep.report.subjectsTable.forEach((subj) => {
+          const code = subj.subjectCode;
+          const name = subj.subjectName;
+          subjectsSet.add({ code, name });
+        });
+      });
+      //craete array from subjects and sort the array
+      this.subjects = Array.from(subjectsSet);
+      this.subjects.sort((a, b) => +a.code - +b.code);
+
+      reps.map((rep) => {
+        const newSubjectsTable = Array<SubjectInfoModel>(this.subjects.length);
+        rep.report.subjectsTable.map((subjInfo) => {
+          const code = subjInfo.subjectCode;
+          const name = subjInfo.subjectName;
+          const subjPosInSubjsArr = this.subjects.indexOf({ code, name });
+          newSubjectsTable[subjPosInSubjsArr] = subjInfo;
+        });
+        rep.report.subjectsTable = [...newSubjectsTable];
+      });
+
+      reps.sort((a, b) => a.report.classPosition - b.report.classPosition);
     });
 
     this.markSheetForm = new FormGroup({
@@ -67,4 +101,6 @@ export class MarksSheetsComponent implements OnInit {
 
     this.store.dispatch(markSheetActions.fetchMarkSheet({ name, num, year }));
   }
+
+  // Mark Sheet Table Data
 }
