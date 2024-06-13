@@ -18,5 +18,5 @@ export interface ReportModel {
   subjectsTable: SubjectInfoModel[];
   classSize: number;
   subjectsPassed: number;
-  symbols: { [key: string]: number };
+  symbols: number[];
 }

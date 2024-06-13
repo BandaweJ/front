@@ -17,6 +17,7 @@ import { ReportsComponent } from './reports/reports/reports.component';
 import { MarkRegisterComponent } from './attendance/mark-register/mark-register.component';
 import { MigrateClassEnrolmentComponent } from './enrolment/migrate-class-enrolment/migrate-class-enrolment.component';
 import { TeachersCommentsComponent } from './marks/teachers-comments/teachers-comments.component';
+import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -74,6 +75,12 @@ const routes: Routes = [
     component: EnterMarksComponent,
     canActivate: [AuthGuardService],
     title: 'Enter Marks',
+  },
+  {
+    path: 'mark-sheets',
+    component: MarksSheetsComponent,
+    canActivate: [AuthGuardService],
+    title: 'Mark Sheets',
   },
   {
     path: 'perfomance',

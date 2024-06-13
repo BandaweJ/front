@@ -13,6 +13,8 @@ import {
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { markSheetActions } from './store/actions';
+import { selectIsLoading, selectMarkSheet } from './store/selectors';
+import { ReportsModel } from 'src/app/reports/models/reports.model';
 
 @Component({
   selector: 'app-marks-sheets',
@@ -20,9 +22,12 @@ import { markSheetActions } from './store/actions';
   styleUrls: ['./marks-sheets.component.css'],
 })
 export class MarksSheetsComponent implements OnInit {
-  reportsForm!: FormGroup;
+  markSheetForm!: FormGroup;
   terms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
+  isLoading$!: Observable<boolean>;
+  markSheet$!: Observable<ReportsModel[]>;
+  reports!: ReportsModel[];
 
   constructor(private store: Store) {
     this.store.dispatch(fetchTerms());
@@ -32,19 +37,25 @@ export class MarksSheetsComponent implements OnInit {
   ngOnInit(): void {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
+    this.isLoading$ = this.store.select(selectIsLoading);
 
-    this.reportsForm = new FormGroup({
+    // this.markSheet$ = this.store.select(selectMarkSheet);
+    this.store.select(selectMarkSheet).subscribe((reps) => {
+      console.log(reps);
+    });
+
+    this.markSheetForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
     });
   }
 
   get term() {
-    return this.reportsForm.get('term');
+    return this.markSheetForm.get('term');
   }
 
   get clas() {
-    return this.reportsForm.get('clas');
+    return this.markSheetForm.get('clas');
   }
 
   fetchMarkSheet() {

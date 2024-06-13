@@ -13,6 +13,8 @@ import { PerfomanceComponent } from './perfomance/perfomance.component';
 import { NgChartsModule } from 'ng2-charts';
 import { TeachersCommentsComponent } from './teachers-comments/teachers-comments.component';
 import { MarksSheetsComponent } from './marks-sheets/marks-sheets.component';
+import { markSheetsReducer } from './marks-sheets/store/reducer';
+import { MarkSheetEffects } from './marks-sheets/store/effects';
 
 @NgModule({
   declarations: [
@@ -30,7 +32,9 @@ import { MarksSheetsComponent } from './marks-sheets/marks-sheets.component';
     FormsModule,
     NgChartsModule,
     StoreModule.forFeature('marks', marksReducer),
+    StoreModule.forFeature('markSheet', markSheetsReducer),
     EffectsModule.forFeature(MarksEffects),
+    EffectsModule.forFeature(MarkSheetEffects),
   ],
 })
 export class MarksModule {}
