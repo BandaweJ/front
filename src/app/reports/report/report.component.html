@@ -84,14 +84,14 @@
       <p>{{ report.report.classTrComment }}</p>
     </div>
     <div>
-      <form [formGroup]="commentForm">
+      <form [formGroup]="commentForm" class="head-comment">
         <mat-form-field *ngIf="!report.report.headComment || editState">
           <mat-label>Head's Comment</mat-label>
           <textarea (change)="saveComment()" matInput cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
             formControlName="comment" cols="50"
             [value]="report.report.headComment ? report.report.headComment : '' "></textarea>
         </mat-form-field>
-        <p *ngIf="report.report.headComment && !editState">{{ report.report.headComment }}
+        <p *ngIf="report.report.headComment && !editState" class="edit-button">{{ report.report.headComment }}
           <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleEditState()">
             <mat-icon>edit</mat-icon>
           </button>
