@@ -150,11 +150,3 @@ td {
   left: 50%;
   box-shadow: 0 0 0 3px #2dc4ff;
 }
-
-.head-comment {
-  display: flex;
-}
-.edit-button {
-  flex-basis: 4px;
-  align-self: flex-end;
-}
