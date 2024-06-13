@@ -12,6 +12,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PerfomanceComponent } from './perfomance/perfomance.component';
 import { NgChartsModule } from 'ng2-charts';
 import { TeachersCommentsComponent } from './teachers-comments/teachers-comments.component';
+import { MarksSheetsComponent } from './marks-sheets/marks-sheets.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { TeachersCommentsComponent } from './teachers-comments/teachers-comments
     AddEditSubjectComponent,
     PerfomanceComponent,
     TeachersCommentsComponent,
+    MarksSheetsComponent,
   ],
   imports: [
     CommonModule,

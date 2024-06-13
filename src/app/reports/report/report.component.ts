@@ -31,7 +31,7 @@ export class ReportComponent implements OnInit {
   isLoading$ = this.store.select(selectIsLoading);
   studentNumber = '';
 
-  print = false;
+  // print = false;
 
   constructor(private store: Store) {}
 
@@ -90,7 +90,7 @@ export class ReportComponent implements OnInit {
 
     // client side pdf generation using jspdf
     this.store.dispatch(generatePdfActions.generatePdf());
-    this.print = true;
+    // this.print = true;
     let data = document.getElementById(`${this.studentNumber}`);
     if (data)
       html2canvas(data, { scale: 2.0 }).then((canvas) => {
@@ -105,7 +105,7 @@ export class ReportComponent implements OnInit {
         );
         this.store.dispatch(generatePdfActions.generatePdfSuccess());
       });
-    this.print = false;
+    // this.print = false;
 
     //client side pdf generation using pdfmake
     // let docDefinition = {
