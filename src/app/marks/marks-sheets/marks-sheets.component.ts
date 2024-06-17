@@ -19,6 +19,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { SubjectsModel } from '../models/subjects.model';
 import { SubjectInfoModel } from 'src/app/reports/models/subject-info.model';
+import { ReportModel } from 'src/app/reports/models/report.model';
+import * as jspdf from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-marks-sheets',
@@ -50,34 +53,52 @@ export class MarksSheetsComponent implements OnInit {
 
     // this.markSheet$ = this.store.select(selectMarkSheet);
     this.store.select(selectMarkSheet).subscribe((reps) => {
+      // create an array to store modified reports
+      const modifiedReports: ReportsModel[] = [];
       //create set to add all subjects done in class
-      const subjectsSet = new Set<SubjectsModel>();
+      const subjectsArr: SubjectsModel[] = [];
       //loop throu all reports adding all subjs on rep.report to the set
       reps.forEach((rep) => {
         rep.report.subjectsTable.forEach((subj) => {
           const code = subj.subjectCode;
           const name = subj.subjectName;
-          subjectsSet.add({ code, name });
+          const newSubj = { code, name };
+          const found = subjectsArr.find((sbj) => sbj.code === newSubj.code);
+          if (!found) {
+            subjectsArr.push(newSubj);
+          }
         });
       });
       //craete array from subjects and sort the array
-      this.subjects = Array.from(subjectsSet);
-      this.subjects.sort((a, b) => +a.code - +b.code);
+      subjectsArr.sort((a, b) => +a.code - +b.code);
+      this.subjects = [...subjectsArr];
 
       reps.map((rep) => {
         const newSubjectsTable = Array<SubjectInfoModel>(this.subjects.length);
         rep.report.subjectsTable.map((subjInfo) => {
           const code = subjInfo.subjectCode;
           const name = subjInfo.subjectName;
-          const subjPosInSubjsArr = this.subjects.indexOf({ code, name });
+          const subjPosInSubjsArr = this.subjects.findIndex(
+            (sbj) => sbj.code === code && sbj.name === name
+          );
           newSubjectsTable[subjPosInSubjsArr] = subjInfo;
         });
-        rep.report.subjectsTable = [...newSubjectsTable];
+        const newReport: ReportsModel = {
+          ...rep,
+          report: {
+            ...rep.report,
+            subjectsTable: newSubjectsTable,
+          },
+        };
+        // newReport.report.subjectsTable = newSubjectsTable;
+        modifiedReports.push(newReport);
       });
 
-      reps.sort((a, b) => a.report.classPosition - b.report.classPosition);
+      // reps.sort((a, b) => a.report.classPosition - b.report.classPosition);
 
-      this.reports = reps;
+      this.reports = [...modifiedReports];
+
+      // console.log(modifiedReports);
     });
 
     this.markSheetForm = new FormGroup({
@@ -105,4 +126,21 @@ export class MarksSheetsComponent implements OnInit {
   }
 
   // Mark Sheet Table Data
+
+  download() {
+    let data = document.getElementById('marksheet');
+    if (data)
+      html2canvas(data, { scale: 4 }).then((canvas) => {
+        const contentDataURL = canvas.toDataURL('image/png'); // 'image/jpeg' for lower quality output.
+        // let pdf = new jspdf('l', 'cm', 'a4'); //Generates PDF in landscape mode
+        let pdf = new jspdf.jsPDF('l', 'cm', 'a4'); //Generates PDF in portrait mode
+
+        pdf.addImage(contentDataURL, 'PNG', 0, 0, 29.7, 21, 'fit');
+        // pdf.save('Filename.pdf');
+        pdf.save(
+          `Term ${this.reports[0].num} ${this.reports[0].year}, ${this.reports[0].name} Marksheet.pdf`
+        );
+        // this.store.dispatch(generatePdfActions.generatePdfSuccess());
+      });
+  }
 }

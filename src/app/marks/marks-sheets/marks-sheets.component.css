@@ -69,20 +69,42 @@ form {
   display: block;
 }
 
-/* Mark Sheet Table */
-table {
-  width: 100%;
+.marksheet {
 }
 
-.mat-mdc-form-field {
-  font-size: 14px;
-  width: 100%;
+/* Mark Sheet Table */
+table {
+  /* width: 29.7cm; */
+  margin: auto;
+  /* background-color: #eaeef1; */
+}
+
+table,
+td,
+th {
+  border: 1px solid #96d4d4;
+  border-collapse: collapse;
+  /* border-radius: 10px; */
 }
 
 td,
 th {
-  width: 25%;
+  padding: 2px 5px;
+  text-align: center;
 }
+
+tr:nth-child(even) {
+  background-color: #d6eeee;
+}
+
+.st-name {
+  width: 3cm;
+}
+
+/* .mat-mdc-form-field {
+  font-size: 14px;
+  width: 100%;
+} */
 
 /* Mark Sheet container */
 .marksheet-container {
@@ -90,4 +112,12 @@ th {
   height: 21cm;
   margin: 2rem auto;
   padding: 1rem;
+}
+
+.red-text {
+  color: red;
+}
+
+.blue-text {
+  color: blue;
 }
