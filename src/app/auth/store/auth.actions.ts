@@ -1,9 +1,12 @@
-import { createAction, props } from '@ngrx/store';
+import { createAction, createActionGroup, props } from '@ngrx/store';
 import { SigninInterface } from '../models/signin.model';
 import { SignupInterface } from '../models/signup.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { User } from '../models/user.model';
 import { AccountStats } from '../models/account-stats.model';
+import { TeachersModel } from 'src/app/registration/models/teachers.model';
+import { StudentsModel } from 'src/app/registration/models/students.model';
+import { ParentsModel } from 'src/app/registration/models/parents.model';
 
 export const signin = createAction(
   '[Signin] signin',
@@ -54,3 +57,12 @@ export const fetchAccountStatsFail = createAction(
   '[Dashboard Component] fetch account stats failure',
   props<{ error: HttpErrorResponse }>()
 );
+
+export const fetchUserActions = createActionGroup({
+  source: 'Profile Component',
+  events: {
+    fetchUser: props<{ id: string }>(),
+    fetchUserSuccess: props<{ user: TeachersModel | StudentsModel | ParentsModel }>(),
+    fetchUserFail: props<{ error: HttpErrorResponse }>()
+  }
+})

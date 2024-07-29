@@ -21,6 +21,10 @@ export class ProfileButtonsComponent {
     this.router.navigateByUrl('/signin');
   }
 
+  onProfile() {
+    this.router.navigateByUrl('/profile');
+  }
+
   switchToSignin() {
     this.router.navigateByUrl('/signin');
   }

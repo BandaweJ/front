@@ -45,7 +45,11 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
   marksForm!: FormGroup;
   value = 0;
   maxValue = 0;
-  // examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
+  examtype: ExamType[] = [
+    // ExamType.choose,
+    ExamType.midterm,
+    ExamType.endofterm,
+  ];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -80,7 +84,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
       clas: new FormControl('', [Validators.required]),
       term: new FormControl('', [Validators.required]),
       subject: new FormControl('', Validators.required),
-      // type: new FormControl('', Validators.required),
+      examType: new FormControl(''),
     });
   }
 
@@ -110,9 +114,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     return this.enrolForm.get('subject');
   }
 
-  // get type() {
-  //   return this.enrolForm.get('type');
-  // }
+  get examType() {
+    return this.enrolForm.get('examType');
+  }
 
   displayedColumns = [
     'studentNumber',
@@ -133,18 +137,18 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     const year = term.year;
     const subjectCode = subject.code;
 
-    // const examtype = this.type?.value;
+    const examType = this.examType?.value;
 
     // console.log(`Name: ${name}, Num: ${num}, Year: ${year}`);
     this.store.dispatch(
-      fetchSubjectMarksInClass({ name, num, year, subjectCode })
+      fetchSubjectMarksInClass({ name, num, year, subjectCode, examType })
     );
   }
 
   saveMark(mark: MarksModel, mrk: string, cmmnt: string) {
     mark = {
       ...mark,
-      // examtype: this.type?.value,
+      examType: this.examType?.value,
     };
 
     if (mrk && cmmnt) {

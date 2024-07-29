@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MarksModel } from '../models/marks.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { StudentComment } from '../models/student-comment';
+import { ExamType } from '../models/examtype.enum';
 
 export const fetchSubjects = createAction(
   '[Subjects Component] fetch all subjects'
@@ -56,7 +57,7 @@ export const fetchSubjectMarksInClass = createAction(
     num: number;
     year: number;
     subjectCode: string;
-    // examtype: string;
+    examType: ExamType;
   }>()
 );
 

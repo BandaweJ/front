@@ -18,10 +18,17 @@ import { MarkRegisterComponent } from './attendance/mark-register/mark-register.
 import { MigrateClassEnrolmentComponent } from './enrolment/migrate-class-enrolment/migrate-class-enrolment.component';
 import { TeachersCommentsComponent } from './marks/teachers-comments/teachers-comments.component';
 import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.component';
+import { ProfileComponent } from './auth/profile/profile.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
   { path: 'signup', component: SignupComponent, title: 'Sign Up' },
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    canActivate: [AuthGuardService],
+    title: 'Profile',
+  },
   {
     path: 'dashboard',
     component: DashboardComponent,

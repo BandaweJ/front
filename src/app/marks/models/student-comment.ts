@@ -8,7 +8,7 @@ export interface StudentComment {
   name: string;
   num: number;
   year: number;
-  // examtype: ExamType;
+  examType?: ExamType;
   student: StudentsModel;
   teacher?: TeachersModel;
 }

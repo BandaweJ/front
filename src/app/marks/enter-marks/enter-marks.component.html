@@ -11,14 +11,14 @@
         </mat-select>
       </mat-form-field>
 
-      <!-- <mat-form-field>
-        <mat-label>Choose Type</mat-label>
-        <mat-select formControlName="type">
-          <mat-option *ngFor="let type of examtype" [value]="type">
-            {{ type }}
+      <mat-form-field>
+        <mat-label>Exam Type</mat-label>
+        <mat-select formControlName="examType">
+          <mat-option *ngFor="let ty of examtype" [value]="ty">
+            {{ ty ? ty : 'Choose Type' }}
           </mat-option>
         </mat-select>
-      </mat-form-field> -->
+      </mat-form-field>
 
       <mat-form-field>
         <mat-label>Choose Class</mat-label>
@@ -41,10 +41,11 @@
 
 
       <button mat-mini-fab type="button" type="submit" [disabled]="enrolForm.invalid">
-        list
+        <mat-icon>list</mat-icon>
       </button>
     </div>
   </form>
+
 
   <div class="mat-elevation-z10">
     <mat-progress-bar matTooltip="{{ value }} out of {{ maxValue }}" color="primary" [value]="(value/maxValue * 100)"

@@ -5,6 +5,7 @@ import { SubjectsModel } from '../models/subjects.model';
 import { MarksModel } from '../models/marks.model';
 import { StudentComment } from '../models/student-comment';
 import { environment } from 'src/environments/environment';
+import { ExamType } from '../models/examtype.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -42,11 +43,11 @@ export class MarksService {
     name: string,
     num: number,
     year: number,
-    subjectCode: string
-    // examtype: string
+    subjectCode: string,
+    examType: ExamType
   ): Observable<MarksModel[]> {
     return this.httpClient.get<MarksModel[]>(
-      `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}`
+      `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}/${examType}`
     );
   }
 
