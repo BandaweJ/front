@@ -1,14 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import {
-  Chart,
-  ChartConfiguration,
-  ChartData,
-  ChartOptions,
-  ChartType,
-} from 'chart.js';
-import { Observable } from 'rxjs';
-import { SubjectsModel } from '../models/subjects.model';
-import { MarksModel } from '../models/marks.model';
+import { ChartConfiguration, ChartOptions } from 'chart.js';
+
 import { Store } from '@ngrx/store';
 import { selectLineChartData, selectPerfData } from '../store/marks.selectors';
 import { perfomanceActions } from '../store/marks.actions';
@@ -23,7 +15,6 @@ import {
 } from 'src/app/enrolment/store/enrolment.actions';
 import { BaseChartDirective } from 'ng2-charts';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
-import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { Title } from '@angular/platform-browser';
 import { ExamType } from '../models/examtype.enum';
 // import { SubjectsModel } from 'src/app/marks/models/subjects.model';
@@ -64,7 +55,7 @@ export class PerfomanceComponent implements OnInit {
     this.perfForm = new FormGroup({
       term: new FormControl(null, [Validators.required]),
       clas: new FormControl(null, [Validators.required]),
-      // type: new FormControl('', Validators.required),
+      examType: new FormControl('', Validators.required),
     });
   }
 
@@ -93,22 +84,22 @@ export class PerfomanceComponent implements OnInit {
     return this.perfForm.get('clas');
   }
 
-  // get type() {
-  //   return this.perfForm.get('type');
-  // }
+  get examType() {
+    return this.perfForm.get('examType');
+  }
 
   getPerfData() {
     if (this.perfForm.valid) {
       const term: TermsModel = this.term?.value;
       const clas = this.clas?.value;
-      // const examtype: string = this.type?.value;
+      const examType = this.examType?.value;
 
       this.store.dispatch(
         perfomanceActions.fetchPerfomanceData({
           num: term.num,
           year: term.year,
           name: clas,
-          // examtype: examtype,
+          examType: examType,
         })
       );
     }

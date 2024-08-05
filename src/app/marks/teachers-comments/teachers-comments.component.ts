@@ -57,7 +57,7 @@ export class TeachersCommentsComponent implements OnInit, AfterViewInit {
       // comment: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
       term: new FormControl('', Validators.required),
-      // type: new FormControl('', Validators.required),
+      examType: new FormControl('', Validators.required),
     });
 
     this.comments$.subscribe((comments) => {
@@ -87,9 +87,9 @@ export class TeachersCommentsComponent implements OnInit, AfterViewInit {
     return this.commentsForm.get('term');
   }
 
-  // get type() {
-  //   return this.commentsForm.get('type');
-  // }
+  get examType() {
+    return this.commentsForm.get('examType');
+  }
 
   fetchClassList() {
     const name = this.clas?.value;
@@ -97,11 +97,11 @@ export class TeachersCommentsComponent implements OnInit, AfterViewInit {
 
     const num = term.num;
     const year = term.year;
-    // const examtype = this.type?.value;
+    const examType = this.examType?.value;
 
     // console.log(`Name: ${name}, Num: ${num}, Year: ${year}`);
     this.store.dispatch(
-      saveCommentActions.fetchClassComments({ name, num, year })
+      saveCommentActions.fetchClassComments({ name, num, year, examType })
     );
   }
 
@@ -112,7 +112,7 @@ export class TeachersCommentsComponent implements OnInit, AfterViewInit {
     // const name = clas.name;
     const num = +term.num;
     const year = +term.year;
-    // const examtype = this.type?.value;
+    const examType = this.examType?.value;
 
     // const comment: StudentComment = {
     //   student,
@@ -127,7 +127,7 @@ export class TeachersCommentsComponent implements OnInit, AfterViewInit {
       comment: cmmnt,
       num: +term.num,
       year: +term.year,
-      // examtype: examtype,
+      examType: examType,
     };
 
     this.store.dispatch(saveCommentActions.saveComment({ comment }));

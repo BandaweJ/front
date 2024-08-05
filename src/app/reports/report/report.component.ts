@@ -79,32 +79,33 @@ export class ReportComponent implements OnInit {
 
   download() {
     // server side pdf generation using pdfkit
-    // const name = this.report.report.className;
-    // const num = this.report.report.termNumber;
-    // const year = this.report.report.termYear;
-    // const studentNumber = this.report.studentNumber;
 
-    // this.store.dispatch(
-    //   downloadReportActions.downloadReport({ name, num, year, studentNumber })
-    // );
+    const name = this.report.report.className;
+    const num = this.report.report.termNumber;
+    const year = this.report.report.termYear;
+    const studentNumber = this.report.studentNumber;
+
+    this.store.dispatch(
+      downloadReportActions.downloadReport({ name, num, year, studentNumber })
+    );
 
     // client side pdf generation using jspdf
-    this.store.dispatch(generatePdfActions.generatePdf());
-    // this.print = true;
-    let data = document.getElementById(`${this.studentNumber}`);
-    if (data)
-      html2canvas(data, { scale: 2.0 }).then((canvas) => {
-        const contentDataURL = canvas.toDataURL('image/png'); // 'image/jpeg' for lower quality output.
-        // let pdf = new jspdf('l', 'cm', 'a4'); //Generates PDF in landscape mode
-        let pdf = new jspdf.jsPDF('p', 'cm', 'a4'); //Generates PDF in portrait mode
+    // this.store.dispatch(generatePdfActions.generatePdf());
+    // // this.print = true;
+    // let data = document.getElementById(`${this.studentNumber}`);
+    // if (data)
+    //   html2canvas(data, { scale: 2.0 }).then((canvas) => {
+    //     const contentDataURL = canvas.toDataURL('image/png'); // 'image/jpeg' for lower quality output.
+    //     // let pdf = new jspdf('l', 'cm', 'a4'); //Generates PDF in landscape mode
+    //     let pdf = new jspdf.jsPDF('p', 'cm', 'a4'); //Generates PDF in portrait mode
 
-        pdf.addImage(contentDataURL, 'PNG', 0, 0, 21, 29.7, 'fit');
-        // pdf.save('Filename.pdf');
-        pdf.save(
-          `${this.report.studentNumber}-${this.report.report.surname} ${this.report.report.name}.pdf`
-        );
-        this.store.dispatch(generatePdfActions.generatePdfSuccess());
-      });
+    //     pdf.addImage(contentDataURL, 'PNG', 0, 0, 21, 29.7, 'fit');
+    //     // pdf.save('Filename.pdf');
+    //     pdf.save(
+    //       `${this.report.studentNumber}-${this.report.report.surname} ${this.report.report.name}.pdf`
+    //     );
+    //     this.store.dispatch(generatePdfActions.generatePdfSuccess());
+    //   });
     // this.print = false;
 
     //client side pdf generation using pdfmake

@@ -15,7 +15,7 @@
         <mat-label>Exam Type</mat-label>
         <mat-select formControlName="examType">
           <mat-option *ngFor="let ty of examtype" [value]="ty">
-            {{ ty ? ty : 'Choose Type' }}
+            {{ ty }}
           </mat-option>
         </mat-select>
       </mat-form-field>
