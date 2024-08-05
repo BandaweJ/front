@@ -12,11 +12,9 @@ import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
   fetchClasses,
   fetchTerms,
-  getEnrolmentByClass,
 } from 'src/app/enrolment/store/enrolment.actions';
 import {
   selectClasses,
-  selectEnrols,
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { StudentComment } from '../models/student-comment';
