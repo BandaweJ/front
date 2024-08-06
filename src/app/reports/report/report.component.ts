@@ -1,20 +1,15 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ReportsModel } from '../models/reports.model';
-import { ReportModel } from '../models/report.model';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   downloadReportActions,
-  generatePdfActions,
   saveHeadCommentActions,
 } from '../store/reports.actions';
 
 import { HeadCommentModel } from '../models/comment.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
-import * as jspdf from 'jspdf';
-import html2canvas from 'html2canvas';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+
 import { selectIsLoading } from '../store/reports.selectors';
 // pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -86,7 +81,7 @@ export class ReportComponent implements OnInit {
     const studentNumber = this.report.studentNumber;
 
     this.store.dispatch(
-      downloadReportActions.downloadReport({ name, num, year, studentNumber })
+      downloadReportActions.downloadReport({ reportsModel: this.report })
     );
 
     // client side pdf generation using jspdf

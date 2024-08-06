@@ -61,10 +61,7 @@ export const downloadReportActions = createActionGroup({
   source: 'Reports Component',
   events: {
     downloadReport: props<{
-      name: string;
-      num: number;
-      year: number;
-      studentNumber: string;
+      reportsModel: ReportsModel;
     }>(),
     downloadReportSuccess: emptyProps(),
     downloadReportFail: props<{ error: HttpErrorResponse }>(),

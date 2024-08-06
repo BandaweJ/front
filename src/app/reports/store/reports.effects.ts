@@ -82,7 +82,7 @@ export class ReportsEffects {
       ofType(reportsActions.downloadReportActions.downloadReport),
       switchMap((data) =>
         this.reportsService
-          .downloadReport(data.name, data.num, data.year, data.studentNumber)
+          .downloadReport(data.reportsModel)
           // .unsubscribe()
           .pipe(
             map((result) =>
