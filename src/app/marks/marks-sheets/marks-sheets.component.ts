@@ -22,6 +22,7 @@ import { SubjectInfoModel } from 'src/app/reports/models/subject-info.model';
 import { ReportModel } from 'src/app/reports/models/report.model';
 import * as jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
+import { ExamType } from '../models/examtype.enum';
 
 @Component({
   selector: 'app-marks-sheets',
@@ -36,6 +37,7 @@ export class MarksSheetsComponent implements OnInit {
   markSheet$!: Observable<ReportsModel[]>;
   reports!: ReportsModel[];
   subjects: SubjectsModel[] = [];
+  examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
   constructor(
     private store: Store,
@@ -104,6 +106,7 @@ export class MarksSheetsComponent implements OnInit {
     this.markSheetForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
+      examType: new FormControl('', [Validators.required]),
     });
   }
 
@@ -115,6 +118,10 @@ export class MarksSheetsComponent implements OnInit {
     return this.markSheetForm.get('clas');
   }
 
+  get examType() {
+    return this.markSheetForm.get('examType');
+  }
+
   fetchMarkSheet() {
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
@@ -122,7 +129,11 @@ export class MarksSheetsComponent implements OnInit {
     const num = term.num;
     const year = term.year;
 
-    this.store.dispatch(markSheetActions.fetchMarkSheet({ name, num, year }));
+    const examType = this.examType?.value;
+
+    this.store.dispatch(
+      markSheetActions.fetchMarkSheet({ name, num, year, examType })
+    );
   }
 
   // Mark Sheet Table Data

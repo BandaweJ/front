@@ -5,6 +5,7 @@ import { ReportsModel } from '../models/reports.model';
 import { ReportModel } from '../models/report.model';
 import { HeadCommentModel } from '../models/comment.model';
 import { environment } from 'src/environments/environment';
+import { ExamType } from 'src/app/marks/models/examtype.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -17,12 +18,12 @@ export class ReportsService {
   generateReports(
     name: string,
     num: number,
-    year: number
-    // examtype: string
+    year: number,
+    examType: ExamType
   ): Observable<ReportsModel[]> {
     // console.log(`${this.baseUrl}generate/${name}/${num}/${year}/`);
     return this.httpClient.get<ReportsModel[]>(
-      `${this.baseUrl}generate/${name}/${num}/${year}`
+      `${this.baseUrl}generate/${name}/${num}/${year}/${examType}`
     );
   }
 

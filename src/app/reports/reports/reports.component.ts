@@ -15,7 +15,6 @@ import {
 import * as reportsActions from '../store/reports.actions';
 import { ReportsModel } from '../models/reports.model';
 import { selectIsLoading, selectReports } from '../store/reports.selectors';
-import { ReportModel } from '../models/report.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 
@@ -50,7 +49,7 @@ export class ReportsComponent implements OnInit {
     this.reportsForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
-      // type: new FormControl('', Validators.required),
+      examType: new FormControl('', Validators.required),
     });
 
     this.store.select(selectUser).subscribe((user) => {
@@ -68,9 +67,9 @@ export class ReportsComponent implements OnInit {
     return this.reportsForm.get('clas');
   }
 
-  // get type() {
-  //   return this.reportsForm.get('type');
-  // }
+  get examType() {
+    return this.reportsForm.get('examType');
+  }
 
   generate() {
     this.mode = 'generate';
@@ -79,11 +78,13 @@ export class ReportsComponent implements OnInit {
     const term: TermsModel = this.term?.value;
     const num = term.num;
     const year = term.year;
-    // const examtype: string = this.type?.value;
+    const examType = this.examType?.value;
 
     // console.log('name', name, 'num', num, 'year', year);
 
-    this.store.dispatch(reportsActions.generateReports({ name, num, year }));
+    this.store.dispatch(
+      reportsActions.generateReports({ name, num, year, examType })
+    );
   }
 
   saveReports() {

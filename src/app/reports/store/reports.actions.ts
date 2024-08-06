@@ -8,10 +8,11 @@ import { ReportsModel } from '../models/reports.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ReportModel } from '../models/report.model';
 import { HeadCommentModel } from '../models/comment.model';
+import { ExamType } from 'src/app/marks/models/examtype.enum';
 
 export const generateReports = createAction(
   '[Reports Component] generate reports',
-  props<{ name: string; num: number; year: number }>()
+  props<{ name: string; num: number; year: number; examType: ExamType }>()
 );
 
 export const generateReportsSuccess = createAction(
