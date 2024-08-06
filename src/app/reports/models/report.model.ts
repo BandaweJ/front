@@ -1,3 +1,4 @@
+import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { SubjectInfoModel } from './subject-info.model';
 
 export interface ReportModel {
@@ -19,4 +20,5 @@ export interface ReportModel {
   classSize: number;
   subjectsPassed: number;
   symbols: number[];
+  examType?: ExamType;
 }

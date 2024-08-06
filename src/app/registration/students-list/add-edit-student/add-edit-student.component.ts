@@ -134,13 +134,6 @@ export class AddEditStudentComponent {
     let student: StudentsModel = this.addStudentForm.value;
 
     //Capitalise name and surname
-    student.name =
-      student.name.charAt(0).toUpperCase() +
-      student.name.substring(1).toLowerCase();
-
-    student.surname =
-      student.surname.charAt(0).toUpperCase() +
-      student.surname.substring(1).toLowerCase();
 
     if (!student.dob) {
       student.dob = new Date();
