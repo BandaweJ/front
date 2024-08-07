@@ -54,7 +54,7 @@ export class ReportsService {
   }
 
   downloadReport(reportsModel: ReportsModel) {
-    const result = this.httpClient.get(`${this.baseUrl}pdf/${reportsModel}`, {
+    const result = this.httpClient.post(`${this.baseUrl}pdf/`, reportsModel, {
       observe: 'response',
       responseType: 'blob',
     });
