@@ -11,6 +11,7 @@ import { HeadCommentModel } from '../models/comment.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 import { selectIsLoading } from '../store/reports.selectors';
+import { ExamType } from 'src/app/marks/models/examtype.enum';
 // pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -78,11 +79,24 @@ export class ReportComponent implements OnInit {
     const name = this.report.report.className;
     const num = this.report.report.termNumber;
     const year = this.report.report.termYear;
+    // const examType = this.report.report.examType;
     const studentNumber = this.report.studentNumber;
 
-    this.store.dispatch(
-      downloadReportActions.downloadReport({ reportsModel: this.report })
-    );
+    let examType: ExamType;
+
+    if (this.report.report.examType) {
+      const examType = this.report.report.examType;
+
+      this.store.dispatch(
+        downloadReportActions.downloadReport({
+          name,
+          num,
+          year,
+          examType,
+          studentNumber,
+        })
+      );
+    }
 
     // client side pdf generation using jspdf
     // this.store.dispatch(generatePdfActions.generatePdf());

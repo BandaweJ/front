@@ -53,11 +53,20 @@ export class ReportsService {
     );
   }
 
-  downloadReport(reportsModel: ReportsModel) {
-    const result = this.httpClient.post(`${this.baseUrl}pdf/`, reportsModel, {
-      observe: 'response',
-      responseType: 'blob',
-    });
+  downloadReport(
+    name: string,
+    num: number,
+    year: number,
+    examType: string,
+    studentNumber: string
+  ) {
+    const result = this.httpClient.get(
+      `${this.baseUrl}pdf/${name}/${num}/${year}/${examType}/${studentNumber}`,
+      {
+        observe: 'response',
+        responseType: 'blob',
+      }
+    );
 
     result.subscribe((response: HttpResponse<Blob>) => {
       this.handlePdfResponse(response);
