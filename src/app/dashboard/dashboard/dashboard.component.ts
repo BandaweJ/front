@@ -21,6 +21,7 @@ import {
 import { SubjectsModel } from 'src/app/marks/models/subjects.model';
 import { fetchSubjects } from 'src/app/marks/store/marks.actions';
 import { selectSubjects } from 'src/app/marks/store/marks.selectors';
+import { Residence } from 'src/app/registration/models/residence.enum';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { TeachersModel } from 'src/app/registration/models/teachers.model';
 import {
@@ -75,8 +76,12 @@ export class DashboardComponent implements OnInit {
     );
     this.students$ = this.store.select(selectStudents).pipe(
       tap((arr) => {
-        this.dayScholars = arr.filter((st) => st.residence === 'Day').length;
-        this.boarders = arr.filter((st) => st.residence === 'Boarder').length;
+        this.dayScholars = arr.filter(
+          (st) => st.residence === Residence.Day
+        ).length;
+        this.boarders = arr.filter(
+          (st) => st.residence === Residence.Boarder
+        ).length;
       })
     );
     this.classes$ = this.store.select(selectClasses);

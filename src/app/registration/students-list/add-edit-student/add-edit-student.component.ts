@@ -16,6 +16,8 @@ import {
 } from '../../store/registration.actions';
 import * as moment from 'moment';
 import { resetErrorMessage } from 'src/app/auth/store/auth.actions';
+import { ROLES } from '../../models/roles.enum';
+import { Residence } from '../../models/residence.enum';
 
 @Component({
   selector: 'app-add-edit-student',
@@ -23,6 +25,7 @@ import { resetErrorMessage } from 'src/app/auth/store/auth.actions';
   styleUrls: ['./add-edit-student.component.css'],
 })
 export class AddEditStudentComponent {
+  residences = [Residence.Boarder, Residence.Day];
   genders = ['Male', 'Female'];
   addStudentForm!: FormGroup;
   errorMsg$!: Observable<string>;
@@ -58,6 +61,7 @@ export class AddEditStudentComponent {
       address: new FormControl(''),
       prevSchool: new FormControl(''),
       studentNumber: new FormControl(''),
+      residence: new FormControl(),
       role: new FormControl('student'),
     });
 
@@ -143,7 +147,7 @@ export class AddEditStudentComponent {
       student.dateOfJoining = new Date();
     }
 
-    student.role = 'student';
+    student.role = ROLES.student;
 
     if (this.data) {
       this.store.dispatch(editStudentAction({ student }));

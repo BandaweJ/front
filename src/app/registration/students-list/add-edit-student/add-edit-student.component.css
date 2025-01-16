@@ -1,5 +1,34 @@
 mat-card {
-  padding: 20px;
+  padding: 0.5rem;
+}
+
+.page-container {
+  /* height: 70vh; */
+  width: 70vw;
+}
+
+.personal-deatils-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem;
+}
+
+.personal {
+  width: 48%;
+}
+
+.avatar {
+  width: 30%;
+}
+
+.academic {
+  width: 48%;
+}
+
+.contact {
+  display: flex;
+  justify-content: space-between;
+  /* width: 90%; */
 }
 
 h2 {
