@@ -26,7 +26,9 @@ export class AuthEffects {
         this.authService.signin(credentials.signinData).pipe(
           map((resp) => {
             const user: User = jwt_decode(resp.accessToken);
+
             localStorage.setItem('token', resp.accessToken);
+            // localStorage.setItem('user', JSON.stringify(user));
 
             const payload = {
               ...resp,
