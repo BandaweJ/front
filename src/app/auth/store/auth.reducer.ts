@@ -2,6 +2,9 @@ import { createReducer, on } from '@ngrx/store';
 import * as authActions from './auth.actions';
 import { User } from '../models/user.model';
 import { AccountStats } from '../models/account-stats.model';
+import { StudentsModel } from 'src/app/registration/models/students.model';
+import { TeachersModel } from 'src/app/registration/models/teachers.model';
+import { fetchUserDetailsActions } from './auth.actions';
 
 export interface State {
   accessToken: string;
@@ -10,6 +13,7 @@ export interface State {
   user: User | null;
   accStats: AccountStats | null;
   isLoading: boolean;
+  userDetails: StudentsModel | TeachersModel | null;
 }
 
 export const initialState: State = {
@@ -19,6 +23,7 @@ export const initialState: State = {
   user: null,
   accStats: null,
   isLoading: false,
+  userDetails: null,
 };
 
 export const authReducer = createReducer(
@@ -49,7 +54,7 @@ export const authReducer = createReducer(
     accStats: null,
     isLoading: false,
   })),
-  on(authActions.signin, (state) => ({
+  on(authActions.signup, (state) => ({
     ...state,
     errorMessage: '',
     isLoggedin: false,
@@ -99,5 +104,22 @@ export const authReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.message,
+  })),
+  on(fetchUserDetailsActions.fetchUser, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(fetchUserDetailsActions.fetchUserSuccess, (state, { user }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    userDetails: user,
+  })),
+  on(fetchUserDetailsActions.fetchUserFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+    userDetails: null,
   }))
 );

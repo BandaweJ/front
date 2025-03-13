@@ -88,10 +88,18 @@ export class ReportsService {
 
       // Option 2: Open the PDF in a new browser tab/window
       const link = document.createElement('a');
-      if (blob) link.href = window.URL.createObjectURL(blob);
-      link.target = '_blank';
-      link.download = filename || 'report.pdf'; // Set default filename if not provided
-      link.click();
+      if (blob) {
+        link.href = window.URL.createObjectURL(blob);
+        link.target = '_blank';
+        if (filename) {
+          link.download = filename; // Only set download if filename is available
+        }
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(link.href); // release the blob object
+      }
+
+      // link.download = filename || 'report.pdf'; // Set default filename if not provided
     } else {
       console.error('Error downloading PDF:', response.statusText);
       // Handle potential errors

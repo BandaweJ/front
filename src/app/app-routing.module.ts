@@ -19,6 +19,7 @@ import { MigrateClassEnrolmentComponent } from './enrolment/migrate-class-enrolm
 import { TeachersCommentsComponent } from './marks/teachers-comments/teachers-comments.component';
 import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.component';
 import { ProfileComponent } from './auth/profile/profile.component';
+import { TeachersSummaryListComponent } from './registration/teachers-list/teachers-summary-list/teachers-summary-list.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -40,6 +41,12 @@ const routes: Routes = [
     component: TeachersListComponent,
     canActivate: [AuthGuardService],
     title: 'Manage Teachers',
+  },
+  {
+    path: 'teachers-summary',
+    component: TeachersSummaryListComponent,
+    canActivate: [AuthGuardService],
+    title: 'Teachers Summary',
   },
   {
     path: 'students',

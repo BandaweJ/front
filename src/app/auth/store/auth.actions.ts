@@ -58,11 +58,13 @@ export const fetchAccountStatsFail = createAction(
   props<{ error: HttpErrorResponse }>()
 );
 
-export const fetchUserActions = createActionGroup({
+export const fetchUserDetailsActions = createActionGroup({
   source: 'Profile Component',
   events: {
     fetchUser: props<{ id: string }>(),
-    fetchUserSuccess: props<{ user: TeachersModel | StudentsModel | ParentsModel }>(),
-    fetchUserFail: props<{ error: HttpErrorResponse }>()
-  }
-})
+    fetchUserSuccess: props<{
+      user: TeachersModel | StudentsModel | null;
+    }>(),
+    fetchUserFail: props<{ error: HttpErrorResponse }>(),
+  },
+});

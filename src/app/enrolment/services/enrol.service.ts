@@ -5,6 +5,7 @@ import { EnrolsModel } from '../models/enrols.model';
 import { EnrolStats } from '../models/enrol-stats.model';
 import { RegisterModel } from '../../attendance/models/register.model';
 import { environment } from 'src/environments/environment';
+import { StudentsSummary } from '../models/students-summary.model';
 
 @Injectable({
   providedIn: 'root',
@@ -33,8 +34,10 @@ export class EnrolService {
     return this.httpClient.get<EnrolStats>(this.baseURL);
   }
 
-  getTotalEnrolment(num: number, year: number): Observable<number> {
-    return this.httpClient.get<number>(`${this.baseURL}${num}/${year}`);
+  getTotalEnrolment(num: number, year: number): Observable<StudentsSummary> {
+    return this.httpClient.get<StudentsSummary>(
+      `${this.baseURL}${num}/${year}`
+    );
   }
 
   unenrolStudent(enrol: EnrolsModel): Observable<EnrolsModel> {

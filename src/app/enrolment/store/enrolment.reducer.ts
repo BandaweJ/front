@@ -6,6 +6,7 @@ import * as enrolmentActions from './enrolment.actions';
 // import { editClassFail } from './enrolment.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolStats } from '../models/enrol-stats.model';
+import { StudentsSummary } from '../models/students-summary.model';
 // import { RegisterModel } from '../../attendance/models/register.model';
 
 export interface State {
@@ -19,7 +20,7 @@ export interface State {
   // addSuccess: boolean | null;
   enrolStats: EnrolStats | null;
   migrateClassResult: boolean;
-  totalEnrolment: number;
+  totalEnrolment: StudentsSummary | null;
 }
 
 export const initialState: State = {
@@ -33,7 +34,7 @@ export const initialState: State = {
   // addSuccess: null,
   enrolStats: null,
   migrateClassResult: false,
-  totalEnrolment: 0,
+  totalEnrolment: null,
 };
 
 export const enrolmentReducer = createReducer(
@@ -154,10 +155,10 @@ export const enrolmentReducer = createReducer(
     ...state,
     isLoading: true,
   })),
-  on(enrolmentActions.fetchTotalEnrolsSuccess, (state, { total }) => ({
+  on(enrolmentActions.fetchTotalEnrolsSuccess, (state, { summary }) => ({
     ...state,
     isLoading: false,
-    totalEnrolment: total,
+    totalEnrolment: summary,
   })),
   on(enrolmentActions.fetchTotalEnrolsFailure, (state, { error }) => ({
     ...state,

@@ -6,6 +6,7 @@ import { EnrolsModel } from '../models/enrols.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolStats } from '../models/enrol-stats.model';
 import { RegisterModel } from '../../attendance/models/register.model';
+import { StudentsSummary } from '../models/students-summary.model';
 
 export const fetchClasses = createAction('[Enrolment] fetch classes list');
 
@@ -158,7 +159,7 @@ export const fetchTotalEnrols = createAction(
 
 export const fetchTotalEnrolsSuccess = createAction(
   '[Terms Classes Component] fetch enrols success',
-  props<{ total: number }>()
+  props<{ summary: StudentsSummary }>()
 );
 
 export const fetchTotalEnrolsFailure = createAction(

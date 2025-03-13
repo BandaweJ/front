@@ -27,6 +27,8 @@ export class AddEditTeacherComponent implements OnInit {
   titles = ['Prof', 'Dr', 'Mr', 'Mrs', 'Miss', 'Ms'];
   addTeacherForm!: FormGroup;
   errorMsg$!: Observable<string>;
+  activeValues = [true, false];
+  roles = Object.values(ROLES);
 
   constructor(
     private store: Store,
@@ -57,9 +59,11 @@ export class AddEditTeacherComponent implements OnInit {
       email: new FormControl('', [Validators.required, Validators.email]),
       address: new FormControl(''),
       role: new FormControl(''),
+      active: new FormControl(''),
     });
 
     this.addTeacherForm.patchValue(this.data);
+    // console.log(this.data.active);
     this.data.qualifications.map((item) => {
       const qual = new FormControl(item);
       this.qualifications.push(qual);
@@ -129,6 +133,10 @@ export class AddEditTeacherComponent implements OnInit {
 
   get dateOfLeaving() {
     return this.addTeacherForm.get('dateOfLeaving');
+  }
+
+  get active() {
+    return this.addTeacherForm.get('active');
   }
 
   addTeacher() {

@@ -3,63 +3,105 @@
   <div *ngIf="!(authErrMsg$ | async)">{{ today.toDateString() }}, Term {{ currentTermNum }}</div>
   <div class="error" *ngIf="authErrMsg$ | async">{{ authErrMsg$ | async }}</div>
 </mat-toolbar>
+<!--  -->
+<div class="summaries-row">
+  <mat-card class="summaries-container">
+
+    <mat-icon class="icon summary-icon">school</mat-icon>
+
+    <div class="total">
+
+      <span class="big-total"> {{ (teachers$ |
+        async)?.length }}</span>
+    </div>
+    <div class="breakdown">
+      <mat-chip color="accent" (click)="navigateToTeachersSummary()">Male <mat-icon>male</mat-icon> : {{ maleTeachers
+        }}</mat-chip>
+      <mat-chip color="warn">Female <mat-icon>female</mat-icon> : {{ femaleTeachers }}</mat-chip>
+    </div>
+    <div class="heading">
+      TEACHERS
+    </div>
+  </mat-card>
+  <mat-card class="summaries-container">
+
+    <mat-icon class="icon summary-icon">group</mat-icon>
+
+    <div class="total">
+
+      <span class="big-total"> {{ (enrolsSummary$ |
+        async)?.total }}</span>
+    </div>
+    <div class="breakdown">
+      <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ (enrolsSummary$ | async)?.boys }}</mat-chip>
+      <mat-chip color="warn">Female <mat-icon>female</mat-icon> : {{ (enrolsSummary$ | async)?.girls }}</mat-chip>
+      <mat-chip color="warn">Day <mat-icon>home</mat-icon> : {{ (enrolsSummary$ | async)?.dayScholars }}</mat-chip>
+      <mat-chip color="warn">Boarders <mat-icon>hotel</mat-icon> : {{ (enrolsSummary$ | async)?.boarders }}</mat-chip>
+
+
+    </div>
+    <div class="heading">
+      STUDENTS
+    </div>
+  </mat-card>
+  <mat-card class="summaries-container">
+
+    <mat-icon class="icon summary-icon">groups</mat-icon>
+
+    <div class="total">
+
+      <span class="big-total"> {{ (classes$ |
+        async)?.length }}</span>
+    </div>
+    <div class="breakdown">
+      <!-- <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ (enrolsSummary$ | async)?.boys }}</mat-chip> -->
+
+
+    </div>
+    <div class="heading">
+      CLASSES
+    </div>
+  </mat-card>
+  <mat-card class="summaries-container">
+
+    <mat-icon class="icon summary-icon">library_books</mat-icon>
+
+    <div class="total">
+
+      <span class="big-total"> {{ (subjects$ |
+        async)?.length }}</span>
+    </div>
+    <div class="breakdown">
+      <!-- <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ (enrolsSummary$ | async)?.boys }}</mat-chip> -->
+
+
+    </div>
+    <div class="heading">
+      SUBJECTS
+    </div>
+  </mat-card>
+</div>
+
+<!--  -->
+
+
+<!--  -->
 <div class="container">
-  <div class="totals-widgets">
-    <div class="widget">
-      <div class="icon-title">
-        <mat-icon class="icon" aria-hidden="false" aria-label="Example home icon" fontIcon="school"></mat-icon>
-        <h3 class="widget-title">TEACHERS</h3>
-      </div>
-      <div class="widget-total">
-        <h2>{{ (teachers$ | async)?.length }}</h2>
-      </div>
-      <div class="widget-subtotals">
-        <div class="top-total">
-          <h4><span>M : </span>{{ maleTeachers }}</h4>
-        </div>
-        <div class="bottom-total">
-          <h4><span>F : </span>{{ femaleTeachers }}</h4>
-        </div>
-      </div>
-      <!-- <mat-icon class="green totals-icons">cast_for_education</mat-icon> -->
+
+
+
+  <div class="graphs-container">
+    <div class="enrolment-graph">
+      <app-enrolment-chart></app-enrolment-chart>
     </div>
-    <div class="widget">
-      <div class="icon-title">
-        <mat-icon class="icon" aria-hidden="false" aria-label="Example home icon" fontIcon="group"></mat-icon>
-        <h3 class="widget-title">STUDENTS</h3>
-      </div>
-      <div class="widget-total">
-        <h2>{{ (enrols$ | async) }}</h2>
-      </div>
-      <div class="widget-subtotals">
-        <div class="top-total">
-          <h4><span>B: </span>{{ boarders }}</h4>
-        </div>
-        <div class="bottom-total">
-          <h4><span>D: </span>{{ dayScholars }}</h4>
-        </div>
-      </div>
-    </div>
-    <div class="widget">
-      <div class="icon-title">
-        <mat-icon class="icon" aria-hidden="false" aria-label="Example home icon" fontIcon="groups"></mat-icon>
-        <h3 class="widget-title">CLASSES</h3>
-      </div>
-      <div class="widget-total">
-        <h2>{{ (classes$ | async)?.length }}</h2>
-      </div>
-    </div>
-    <div class="widget">
-      <div class="icon-title">
-        <mat-icon class="icon" aria-hidden="false" aria-label="Example home icon" fontIcon="topic"></mat-icon>
-        <h3 class="widget-title">SUBJECTS</h3>
-      </div>
-      <div class="widget-total">
-        <h2>{{ (subjects$ | async)?.length }}</h2>
-      </div>
+    <div class="accounts-graph">
+      <app-accounts-chart></app-accounts-chart>
     </div>
   </div>
-  <!-- <div class="attendance-summary">
+</div>
+<div class="recent-activities"></div>
+
+<!-- <div class="attendance-summary">
     <mat-card
       class="piechart-container mat-elevation-z10"
       *ngFor="let clas of classes$ | async"
@@ -69,13 +111,3 @@
       ></app-class-attendance-summary>
     </mat-card>
   </div> -->
-  <div class="graphs-container">
-    <div class="enrolment-graph">
-      <app-enrolment-chart></app-enrolment-chart>
-    </div>
-    <div class="accounts-graph">
-      <app-accounts-chart></app-accounts-chart>
-    </div>
-  </div>
-  <div class="recent-activities"></div>
-</div>

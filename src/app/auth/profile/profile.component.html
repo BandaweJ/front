@@ -1,12 +1,66 @@
 <div class="profile-container">
-  <div class="profile-menu">
-    <a routerLinkActive="active" routerLink="/personal">Personal</a>
-    <a routerLinkActive="active" routerLink="/contact">Contact</a>
-    <a routerLinkActive="active" routerLink="/academic">Academic</a>
-    <a routerLinkActive="active" routerLink="/security">Account</a>
 
-  </div>
   <div class="profile-content">
-    <router-outlet></router-outlet>
+    <h1>User Profile</h1>
+    <div class="isactive">
+      <!-- <h3 [ngClass]="(userDetails$ | async)?.active ? 'active' : 'inactive">ACTIVE</h3> -->
+    </div>
+
+    <div class="profile-section">
+      <h2>Personal Details</h2>
+      <div class="profile-field">
+        <label>Title:</label>
+        <span>Mr</span>
+      </div>
+      <div class="profile-field">
+        <label>I. D:</label>
+        <span>02-086980F12</span>
+      </div>
+      <div class="profile-field">
+        <label>Full Name:</label>
+        <span>John Doe</span>
+      </div>
+      <div class="profile-field">
+        <label>Date of Birth:</label>
+        <span>1990-01-15</span>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h2>Contact Details</h2>
+      <div class="profile-field">
+        <label>Email:</label>
+        <span>john.doe@example.com</span>
+      </div>
+      <div class="profile-field">
+        <label>Phone Number:</label>
+        <span>+1-555-123-4567</span>
+      </div>
+      <div class="profile-field">
+        <label>Address:</label>
+        <span>House No 2821 Povo, Chesvingo</span>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h2>Academic Details</h2>
+      <div class="profile-field">
+        <label>Qualifications:</label>
+        <span>Bachelor of Science</span>
+      </div>
+
+    </div>
+
+    <div class="profile-section">
+      <h2>Account Information</h2>
+      <div class="profile-field">
+        <label>Username:</label>
+        <span>johndoe123</span>
+      </div>
+      <div class="change-password-link">
+        <a href="#">Change Password</a>
+      </div>
+    </div>
+
   </div>
 </div>

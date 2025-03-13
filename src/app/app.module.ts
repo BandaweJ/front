@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -21,6 +21,7 @@ import { MarksModule } from './marks/marks.module';
 import { ReportsModule } from './reports/reports.module';
 import { NgChartsModule } from 'ng2-charts';
 import { AttendanceModule } from './attendance/attendance.module';
+import { AuthService } from './auth/auth.service';
 
 @NgModule({
   declarations: [AppComponent, ProfileButtonsComponent],
@@ -52,6 +53,14 @@ import { AttendanceModule } from './attendance/attendance.module';
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    AuthService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (authService: AuthService) => () =>
+        authService.checkTokenAndNavigate(),
+      deps: [AuthService],
+      multi: true,
+    },
   ],
   bootstrap: [AppComponent],
 })

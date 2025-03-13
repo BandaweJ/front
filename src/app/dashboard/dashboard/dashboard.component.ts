@@ -1,12 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, filter, map, take, tap } from 'rxjs';
-import { fetchAccountStats } from 'src/app/auth/store/auth.actions';
+import { Observable, tap } from 'rxjs';
 import { selectErrorMsg } from 'src/app/auth/store/auth.selectors';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
-import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
-import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
   fetchClasses,
   fetchTerms,
@@ -14,7 +12,6 @@ import {
 } from 'src/app/enrolment/store/enrolment.actions';
 import {
   selectClasses,
-  selectEnrols,
   selectTerms,
   selectTotalEnroment,
 } from 'src/app/enrolment/store/enrolment.selectors';
@@ -39,14 +36,14 @@ import {
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-  authErrMsg$!: Observable<string>;
+  authErrMsg$ = this.store.select(selectErrorMsg);
 
-  teachers$!: Observable<TeachersModel[]>;
+  teachers$ = this.store.select(selectTeachers);
 
-  students$!: Observable<StudentsModel[]>;
-  classes$!: Observable<ClassesModel[]>;
-  subjects$!: Observable<SubjectsModel[]>;
-  enrols$!: Observable<number>;
+  students$ = this.store.select(selectStudents);
+  classes$ = this.store.select(selectClasses);
+  subjects$ = this.store.select(selectSubjects);
+  enrolsSummary$ = this.store.select(selectTotalEnroment);
 
   currentTermNum!: number;
   currentTermYear!: number;
@@ -59,7 +56,11 @@ export class DashboardComponent implements OnInit {
 
   today = new Date();
 
-  constructor(private store: Store, private title: Title) {
+  constructor(
+    private store: Store,
+    private title: Title,
+    private router: Router
+  ) {
     this.store.dispatch(fetchTeachers());
     this.store.dispatch(fetchStudents());
     this.store.dispatch(fetchClasses());
@@ -68,26 +69,32 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.teachers$ = this.store.select(selectTeachers).pipe(
-      tap((arr) => {
-        this.maleTeachers = arr.filter((tr) => tr.gender === 'Male').length;
-        this.femaleTeachers = arr.filter((tr) => tr.gender === 'Female').length;
-      })
-    );
-    this.students$ = this.store.select(selectStudents).pipe(
-      tap((arr) => {
-        this.dayScholars = arr.filter(
-          (st) => st.residence === Residence.Day
-        ).length;
-        this.boarders = arr.filter(
-          (st) => st.residence === Residence.Boarder
-        ).length;
-      })
-    );
-    this.classes$ = this.store.select(selectClasses);
-    this.subjects$ = this.store.select(selectSubjects);
-    this.authErrMsg$ = this.store.select(selectErrorMsg);
-    this.enrols$ = this.store.select(selectTotalEnroment);
+    this.teachers$
+      .pipe(
+        tap((arr) => {
+          this.maleTeachers = arr.filter((tr) => tr.gender === 'Male').length;
+          this.femaleTeachers = arr.filter(
+            (tr) => tr.gender === 'Female'
+          ).length;
+        })
+      )
+      .subscribe();
+    // this.enrolsSummary$.subscribe((summary) => console.log(summary));
+    // this.enrols$
+    //   .pipe(
+    //     tap((arr) => {
+    //       this.dayScholars = arr.filter(
+    //         (st) => st.residence === Residence.Day
+    //       ).length;
+    //       this.boarders = arr.filter(
+    //         (st) => st.residence === Residence.Boarder
+    //       ).length;
+    //       this.girls = arr.filter((st) => st.gender === 'Female').length;
+    //       this.boys = arr.filter((st) => st.gender === 'Male').length;
+    //     })
+    //   )
+    //   .subscribe();
+    // console.log('boarder: ', this.boarders, 'day scholars: ', this.dayScholars);
 
     // this.store.select(selectTerms).subscribe((terms) =>
     //   terms.map((term) => {
@@ -118,5 +125,9 @@ export class DashboardComponent implements OnInit {
         )
       )
       .subscribe();
+  }
+
+  navigateToTeachersSummary() {
+    this.router.navigate(['/teachers-summary']);
   }
 }

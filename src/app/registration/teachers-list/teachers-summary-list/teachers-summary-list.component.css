@@ -1,0 +1,51 @@
+.top-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  width: 90vw;
+  margin: auto;
+}
+
+.errormsg {
+  color: red;
+  margin: 0.2rem auto;
+  text-align: center;
+}
+
+table {
+  width: 100%;
+}
+
+.mat-mdc-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+td,
+th {
+  /* width: 10%; */
+}
+button {
+  /* margin: 0 5px; */
+}
+.btns {
+  /* display: grid;
+  grid-template-columns: 1fr 1fr; */
+}
+
+.btns button {
+  /* width: 5px; */
+}
+
+.mat-column-gender {
+  max-width: fit-content;
+}
+
+.mdc-data-table__cell,
+.mdc-data-table__header-cell {
+  padding: 2px;
+}
+
+.container {
+  padding: 1rem;
+}
