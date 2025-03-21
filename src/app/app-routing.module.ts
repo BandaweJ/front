@@ -21,6 +21,7 @@ import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.componen
 import { ProfileComponent } from './auth/profile/profile.component';
 import { TeachersSummaryListComponent } from './registration/teachers-list/teachers-summary-list/teachers-summary-list.component';
 import { TeacherViewComponent } from './registration/teachers-list/teacher-view/teacher-view.component';
+import { StudentViewComponent } from './registration/students-list/student-view/student-view.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -54,6 +55,12 @@ const routes: Routes = [
     component: StudentsListComponent,
     canActivate: [AuthGuardService],
     title: 'Manage Students',
+  },
+  {
+    path: 'student-view/:studentNumber',
+    component: StudentViewComponent,
+    canActivate: [AuthGuardService],
+    title: 'Student Details',
   },
   {
     path: 'classes',

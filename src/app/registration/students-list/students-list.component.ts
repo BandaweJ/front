@@ -21,6 +21,7 @@ import {
   resetAddSuccess,
 } from '../store/registration.actions';
 import { Title } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-students-list',
@@ -33,7 +34,8 @@ export class StudentsListComponent implements OnInit, AfterViewInit {
     private dialog: MatDialog,
     // private dialogRef: MatDialogRef<AddEditStudentComponent>,
     private snackBar: MatSnackBar,
-    public title: Title
+    public title: Title,
+    private router: Router
   ) {
     this.store.dispatch(fetchStudents());
   }
@@ -44,16 +46,13 @@ export class StudentsListComponent implements OnInit, AfterViewInit {
 
   displayedColumns: string[] = [
     'studentNumber',
-    'idnumber',
+
     'surname',
     'name',
     'gender',
-    'dob',
-    'dateOfJoining',
+    'residence',
     'cell',
-    'email',
-    'address',
-    'prevSchool',
+
     'action',
   ];
 
@@ -68,24 +67,6 @@ export class StudentsListComponent implements OnInit, AfterViewInit {
     this.students$.subscribe((students) => {
       this.dataSource.data = students;
     });
-
-    // this.store.select(selectDeleteSuccess).subscribe((result) => {
-    //   if (result === true) {
-    //     this.snackBar.open('Student Deleted Successfully', '', {
-    //       duration: 3500,
-    //       verticalPosition: 'top',
-    //     });
-    //   } else if (result === false) {
-    //     this.snackBar.open('Faied to delete Student. Check errors shown', '', {
-    //       duration: 3500,
-    //       verticalPosition: 'top',
-    //     });
-    //   }
-    // });
-
-    // this.dialog.afterAllClosed.subscribe(() => {
-    //   this.store.dispatch(resetAddSuccess());
-    // });
   }
 
   ngAfterViewInit(): void {
@@ -115,15 +96,7 @@ export class StudentsListComponent implements OnInit, AfterViewInit {
     this.dialog.open(AddEditStudentComponent, { data });
   }
 
-  // calculateAge = (dateOfBirth: Date) => {
-  //   const today = new Date();
-  //   if (dateOfBirth) {
-  //     // const years = Math.floor((today - dateOfBirth) / (365 * 24 * 60 * 60));
-
-  //     const years = today - dateOfBirth;
-  //     return years;
-  //   }
-  //   else
-  //     return null
-  // };
+  openEditStudentView(student: StudentsModel) {
+    this.router.navigate(['student-view', student.studentNumber]);
+  }
 }

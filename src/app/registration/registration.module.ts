@@ -16,6 +16,8 @@ import { AddEditStudentComponent } from './students-list/add-edit-student/add-ed
 import { StudentsService } from './services/students.service';
 import { TeachersSummaryListComponent } from './teachers-list/teachers-summary-list/teachers-summary-list.component';
 import { TeacherViewComponent } from './teachers-list/teacher-view/teacher-view.component';
+import { StudentViewComponent } from './students-list/student-view/student-view.component';
+import { SharedService } from '../shared.service';
 
 @NgModule({
   declarations: [
@@ -27,6 +29,7 @@ import { TeacherViewComponent } from './teachers-list/teacher-view/teacher-view.
     AddEditStudentComponent,
     TeachersSummaryListComponent,
     TeacherViewComponent,
+    StudentViewComponent,
   ],
   imports: [
     CommonModule,
@@ -36,6 +39,6 @@ import { TeacherViewComponent } from './teachers-list/teacher-view/teacher-view.
     StoreModule.forFeature('reg', registrationReducer),
     EffectsModule.forFeature([RegistrationEffects]),
   ],
-  providers: [TeachersService, StudentsService],
+  providers: [TeachersService, StudentsService, SharedService],
 })
 export class RegistrationModule {}

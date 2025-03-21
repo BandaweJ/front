@@ -130,4 +130,8 @@ export class DashboardComponent implements OnInit {
   navigateToTeachersSummary() {
     this.router.navigate(['/teachers']);
   }
+
+  navigateToStudentsSummary() {
+    this.router.navigate(['/students']);
+  }
 }

@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { selectTeachers } from '../../store/registration.selectors';
 import { TeachersModel } from '../../models/teachers.model';
 import { Title } from '@angular/platform-browser';
+import { SharedService } from 'src/app/shared.service';
 
 @Component({
   selector: 'app-teacher-view',
@@ -17,7 +18,8 @@ export class TeacherViewComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private store: Store,
-    public title: Title
+    public title: Title,
+    public sharedService: SharedService
   ) {
     this.teacherId = this.route.snapshot.params['id'];
   }
@@ -26,31 +28,5 @@ export class TeacherViewComponent implements OnInit {
     this.store.select(selectTeachers).subscribe((teachers) => {
       this.teacher = teachers.find((tr) => tr.id === this.teacherId);
     });
-  }
-
-  calculateAge(dateOfBirth: string | undefined): number | undefined {
-    if (!dateOfBirth) {
-      return undefined; // Handle cases where date of birth is not provided
-    }
-
-    const birthDate =
-      typeof dateOfBirth === 'string' ? new Date(dateOfBirth) : dateOfBirth;
-
-    if (isNaN(birthDate.getTime())) {
-      return undefined; // Handle invalid date strings
-    }
-
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDifference = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDifference < 0 ||
-      (monthDifference === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
   }
 }
