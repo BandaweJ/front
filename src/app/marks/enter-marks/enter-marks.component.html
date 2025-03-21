@@ -46,10 +46,16 @@
     </div>
   </form>
 
+  <div class="sticky-progress-bar">
+    <div class="mat-elevation-z10 progress-bar-container">
+      <mat-progress-bar matTooltip="{{ value }} out of {{ maxValue }}" color="primary" [value]="(value/maxValue * 100)"
+        mode="determinate">
 
-  <div class="mat-elevation-z10">
-    <mat-progress-bar matTooltip="{{ value }} out of {{ maxValue }}" color="primary" [value]="(value/maxValue * 100)"
-      mode="determinate"></mat-progress-bar>
+      </mat-progress-bar>
+      <span class="progress-value">
+        {{ value }} / {{ maxValue }}
+      </span>
+    </div>
   </div>
 
   <div class="mat-elevation-z2">

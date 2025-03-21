@@ -22,6 +22,7 @@ import { ProfileComponent } from './auth/profile/profile.component';
 import { TeachersSummaryListComponent } from './registration/teachers-list/teachers-summary-list/teachers-summary-list.component';
 import { TeacherViewComponent } from './registration/teachers-list/teacher-view/teacher-view.component';
 import { StudentViewComponent } from './registration/students-list/student-view/student-view.component';
+import { ClassListsComponent } from './enrolment/terms-classes/class-lists/class-lists.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -79,6 +80,12 @@ const routes: Routes = [
     component: TermsClassesComponent,
     canActivate: [AuthGuardService],
     title: 'Enrol Students',
+  },
+  {
+    path: 'class-lists',
+    component: ClassListsComponent,
+    canActivate: [AuthGuardService],
+    title: 'Class Lists',
   },
   {
     path: 'migrate-class',

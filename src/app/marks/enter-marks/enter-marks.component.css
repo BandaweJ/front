@@ -15,3 +15,29 @@
   margin: 0.5rem auto;
   width: 98vw;
 }
+
+.sticky-progress-bar {
+  position: sticky;
+  top: 10px;
+  z-index: 1000; /* Ensure it's above other elements */
+  width: 100%; /* Make it span the full width */
+}
+
+/* Optional: Add background color to the sticky bar */
+.sticky-progress-bar .mat-elevation-z10 {
+  background-color: rgb(227, 219, 219); /* or any color you want */
+}
+
+.progress-value {
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust for centering */
+  color: white; /* Or any color you prefer */
+  font-size: 14px; /* Adjust font size as needed */
+  font-weight: bold;
+  pointer-events: none; /* Allows clicks to pass through the text */
+}
+mat-progress-bar {
+  --mdc-linear-progress-track-height: 20px; /* Or any desired height */
+}

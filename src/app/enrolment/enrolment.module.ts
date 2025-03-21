@@ -14,9 +14,10 @@ import { AddEditClassComponent } from './terms-classes/classes/add-edit-class/ad
 import { AddEditTermComponent } from './terms-classes/terms/add-edit-term/add-edit-term.component';
 import { EnrolStudentComponent } from './terms-classes/enrol-student/enrol-student.component';
 import { MigrateClassEnrolmentComponent } from './migrate-class-enrolment/migrate-class-enrolment.component';
+import { ClassListsComponent } from './terms-classes/class-lists/class-lists.component';
 
 @NgModule({
-  declarations: [TermsClassesComponent, TermsComponent, ClassesComponent, AddEditClassComponent, AddEditTermComponent, EnrolStudentComponent, MigrateClassEnrolmentComponent],
+  declarations: [TermsClassesComponent, TermsComponent, ClassesComponent, AddEditClassComponent, AddEditTermComponent, EnrolStudentComponent, MigrateClassEnrolmentComponent, ClassListsComponent],
   imports: [
     CommonModule,
     MaterialModule,

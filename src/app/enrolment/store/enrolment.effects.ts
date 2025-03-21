@@ -23,9 +23,27 @@ export class EnrolmentEffects {
       ofType(fromEnrolmentActions.fetchClasses),
       switchMap(() =>
         this.classesService.getAllClasses().pipe(
-          map((classes) =>
-            fromEnrolmentActions.fetchClassesSuccess({ classes })
-          ),
+          // map((classes) =>
+          //   fromEnrolmentActions.fetchClassesSuccess({ classes })
+          // ),
+          map((classes) => {
+            // Sort the classes array here
+            const sortedClasses = [...classes].sort((a, b) => {
+              // Replace 'name' with the property you want to sort by
+              // and adjust the sorting logic as needed.
+              if (a.name < b.name) {
+                return -1;
+              }
+              if (a.name > b.name) {
+                return 1;
+              }
+              return 0; // Equal
+            });
+
+            return fromEnrolmentActions.fetchClassesSuccess({
+              classes: sortedClasses,
+            });
+          }),
           catchError((error: HttpErrorResponse) =>
             of(fromEnrolmentActions.fetchClassesFailure({ ...error }))
           )
@@ -115,7 +133,25 @@ export class EnrolmentEffects {
       ofType(fromEnrolmentActions.fetchTerms),
       switchMap(() =>
         this.termsService.getAllTerms().pipe(
-          map((terms) => fromEnrolmentActions.fetchTermsSuccess({ terms })),
+          // map((terms) => fromEnrolmentActions.fetchTermsSuccess({ terms })),
+          map((terms) => {
+            // Sort the terms array here
+            const sortedTerms = [...terms].sort((a, b) => {
+              // Replace 'startDate' with the property you want to sort by
+              // and adjust the sorting logic as needed.
+              if (b.startDate < a.startDate) {
+                return -1;
+              }
+              if (a.startDate > b.startDate) {
+                return 1;
+              }
+              return 0; // Equal
+            });
+
+            return fromEnrolmentActions.fetchTermsSuccess({
+              terms: sortedTerms,
+            });
+          }),
           catchError((error: HttpErrorResponse) =>
             of(fromEnrolmentActions.fetchTermsFailure({ ...error }))
           )
