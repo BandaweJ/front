@@ -128,6 +128,6 @@ export class DashboardComponent implements OnInit {
   }
 
   navigateToTeachersSummary() {
-    this.router.navigate(['/teachers-summary']);
+    this.router.navigate(['/teachers']);
   }
 }

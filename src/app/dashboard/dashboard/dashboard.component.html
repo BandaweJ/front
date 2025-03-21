@@ -5,7 +5,7 @@
 </mat-toolbar>
 <!--  -->
 <div class="summaries-row">
-  <mat-card class="summaries-container">
+  <mat-card class="summaries-container" (click)="navigateToTeachersSummary()">
 
     <mat-icon class="icon summary-icon">school</mat-icon>
 
@@ -15,7 +15,7 @@
         async)?.length }}</span>
     </div>
     <div class="breakdown">
-      <mat-chip color="accent" (click)="navigateToTeachersSummary()">Male <mat-icon>male</mat-icon> : {{ maleTeachers
+      <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ maleTeachers
         }}</mat-chip>
       <mat-chip color="warn">Female <mat-icon>female</mat-icon> : {{ femaleTeachers }}</mat-chip>
     </div>

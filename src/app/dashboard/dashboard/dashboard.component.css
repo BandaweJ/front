@@ -4,6 +4,7 @@
   gap: 0.5rem;
   flex-flow: row nowrap;
   color: white;
+  cursor: pointer;
 }
 
 .summaries-row mat-card:nth-child(1) {

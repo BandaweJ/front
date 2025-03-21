@@ -15,6 +15,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AddEditStudentComponent } from './students-list/add-edit-student/add-edit-student.component';
 import { StudentsService } from './services/students.service';
 import { TeachersSummaryListComponent } from './teachers-list/teachers-summary-list/teachers-summary-list.component';
+import { TeacherViewComponent } from './teachers-list/teacher-view/teacher-view.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { TeachersSummaryListComponent } from './teachers-list/teachers-summary-l
     AddEditStudentComponent,
     AddEditStudentComponent,
     TeachersSummaryListComponent,
+    TeacherViewComponent,
   ],
   imports: [
     CommonModule,

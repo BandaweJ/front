@@ -1,9 +1,15 @@
 .top-panel {
   display: flex;
   flex-direction: row;
-  align-items: baseline;
-  width: 90vw;
+  align-items: center;
+  width: 95vw;
   margin: auto;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
 }
 
 .errormsg {
@@ -13,7 +19,9 @@
 }
 
 table {
-  width: 100%;
+  width: 95vw;
+  margin: auto;
+  padding: 1rem;
 }
 
 .mat-mdc-form-field {
@@ -44,4 +52,19 @@ button {
 .mdc-data-table__cell,
 .mdc-data-table__header-cell {
   padding: 2px;
+}
+
+.inactive {
+  background-color: #d7263d;
+  color: white;
+}
+
+.inactive:hover {
+  background-color: #e48491;
+
+  box-shadow: 10px 10px 5px lightblue;
+}
+
+.active {
+  background-color: #fff;
 }

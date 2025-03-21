@@ -16,6 +16,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { ROLES } from '../../models/roles.enum';
+import { act } from '@ngrx/effects';
 
 @Component({
   selector: 'app-add-edit-teacher',
@@ -63,7 +64,10 @@ export class AddEditTeacherComponent implements OnInit {
     });
 
     this.addTeacherForm.patchValue(this.data);
-    // console.log(this.data.active);
+
+    console.log(typeof this.data.active);
+    console.log(this.data.active);
+
     this.data.qualifications.map((item) => {
       const qual = new FormControl(item);
       this.qualifications.push(qual);
@@ -144,12 +148,12 @@ export class AddEditTeacherComponent implements OnInit {
 
     // teacher.role = ROLES.teacher;
     //capitalise name and surname
-    teacher.name =
-      teacher.name.charAt(0).toUpperCase() +
-      teacher.name.substring(1).toLowerCase();
-    teacher.surname =
-      teacher.surname.charAt(0).toUpperCase() +
-      teacher.surname.substring(1).toLowerCase();
+    // teacher.name =
+    //   teacher.name.charAt(0).toUpperCase() +
+    //   teacher.name.substring(1).toLowerCase();
+    // teacher.surname =
+    //   teacher.surname.charAt(0).toUpperCase() +
+    //   teacher.surname.substring(1).toLowerCase();
 
     if (!teacher.dob) {
       teacher.dob = new Date().toISOString();
@@ -165,6 +169,7 @@ export class AddEditTeacherComponent implements OnInit {
 
     if (this.data) {
       this.store.dispatch(editTeacherAction({ teacher }));
+      // console.log('called editTeacherAction with teacher: ', teacher);
     }
     // console.log(teacher);
     else {

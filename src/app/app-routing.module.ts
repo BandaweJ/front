@@ -20,6 +20,7 @@ import { TeachersCommentsComponent } from './marks/teachers-comments/teachers-co
 import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.component';
 import { ProfileComponent } from './auth/profile/profile.component';
 import { TeachersSummaryListComponent } from './registration/teachers-list/teachers-summary-list/teachers-summary-list.component';
+import { TeacherViewComponent } from './registration/teachers-list/teacher-view/teacher-view.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -43,10 +44,10 @@ const routes: Routes = [
     title: 'Manage Teachers',
   },
   {
-    path: 'teachers-summary',
-    component: TeachersSummaryListComponent,
+    path: 'teacher-view/:id',
+    component: TeacherViewComponent,
     canActivate: [AuthGuardService],
-    title: 'Teachers Summary',
+    title: 'Teacher Details',
   },
   {
     path: 'students',
