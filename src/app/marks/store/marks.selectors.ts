@@ -33,3 +33,13 @@ export const selectComments = createSelector(
   marksState,
   (state: fromMarksReducer.State) => state.comments
 );
+
+export const selectMarksProgress = createSelector(
+  marksState,
+  (state: fromMarksReducer.State) => state.marksProgress
+);
+
+export const isLoading = createSelector(
+  marksState,
+  (state: fromMarksReducer.State) => state.isLoading
+);

@@ -13,7 +13,7 @@ export class AccountsChartComponent implements OnInit {
   public doughnutChartData!: ChartConfiguration<'doughnut'>['data'];
 
   constructor(private store: Store) {
-    this.store.dispatch(fetchAccountStats());
+    // this.store.dispatch(fetchAccountStats());
   }
 
   ngOnInit(): void {

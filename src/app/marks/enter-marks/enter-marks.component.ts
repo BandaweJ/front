@@ -75,9 +75,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
           this.value++;
         }
       });
-
-      // console.log(marks);
-      // console.log(marks[0]);
     });
 
     this.enrolForm = new FormGroup({

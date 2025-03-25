@@ -5,6 +5,7 @@ import { MarksModel } from '../models/marks.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { StudentComment } from '../models/student-comment';
 import { ExamType } from '../models/examtype.enum';
+import { MarksProgressModel } from '../models/marks-progress.model';
 
 export const fetchSubjects = createAction(
   '[Subjects Component] fetch all subjects'
@@ -140,5 +141,20 @@ export const saveCommentActions = createActionGroup({
     }>(),
     fetchClassCommentsSuccess: props<{ comments: StudentComment[] }>(),
     fetchClassCommentsFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+
+export const fetchMarksProgressActions = createActionGroup({
+  source: 'Marks Progress component',
+  events: {
+    fetchMarksProgress: props<{
+      num: number;
+      year: number;
+      clas: string;
+      // fom: number;
+      examType: ExamType;
+    }>(),
+    fetchMarksProgressFail: props<{ error: HttpErrorResponse }>(),
+    fetchMarksProgressSuccess: props<{ marksProgress: MarksProgressModel[] }>(),
   },
 });

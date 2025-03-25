@@ -1,0 +1,37 @@
+.input-elements {
+  margin: 0 20px 0;
+}
+
+.conatiner {
+  width: 95vw;
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+.top-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0.5rem auto;
+  width: 98vw;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell,
+td.mat-cell {
+  padding: 8px;
+  text-align: left;
+}
+
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type {
+  padding-right: 0;
+}
+
+th.mat-header-cell:first-of-type,
+td.mat-cell:first-of-type {
+  padding-left: 0;
+}

@@ -24,7 +24,7 @@ export class SignupComponent implements OnInit {
     this.signupForm = new FormGroup({
       id: new FormControl('', [
         Validators.required,
-        Validators.minLength(10),
+        // Validators.minLength(10),
         Validators.maxLength(12),
       ]),
       role: new FormControl('', Validators.required),

@@ -15,6 +15,7 @@ import { TeachersCommentsComponent } from './teachers-comments/teachers-comments
 import { MarksSheetsComponent } from './marks-sheets/marks-sheets.component';
 import { markSheetsReducer } from './marks-sheets/store/reducer';
 import { MarkSheetEffects } from './marks-sheets/store/effects';
+import { MarksProgressComponent } from './marks-progress/marks-progress.component';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { MarkSheetEffects } from './marks-sheets/store/effects';
     PerfomanceComponent,
     TeachersCommentsComponent,
     MarksSheetsComponent,
+    MarksProgressComponent,
   ],
   imports: [
     CommonModule,

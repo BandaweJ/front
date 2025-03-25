@@ -23,6 +23,7 @@ import { TeachersSummaryListComponent } from './registration/teachers-list/teach
 import { TeacherViewComponent } from './registration/teachers-list/teacher-view/teacher-view.component';
 import { StudentViewComponent } from './registration/students-list/student-view/student-view.component';
 import { ClassListsComponent } from './enrolment/terms-classes/class-lists/class-lists.component';
+import { MarksProgressComponent } from './marks/marks-progress/marks-progress.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -104,6 +105,12 @@ const routes: Routes = [
     component: EnterMarksComponent,
     canActivate: [AuthGuardService],
     title: 'Enter Marks',
+  },
+  {
+    path: 'marks-progress',
+    component: MarksProgressComponent,
+    canActivate: [AuthGuardService],
+    title: 'Marks Capture Progress',
   },
   {
     path: 'mark-sheets',

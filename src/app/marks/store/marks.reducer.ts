@@ -4,6 +4,7 @@ import * as marksActions from './marks.actions';
 import { MarksModel } from '../models/marks.model';
 import { ChartConfiguration } from 'chart.js';
 import { StudentComment } from '../models/student-comment';
+import { MarksProgressModel } from '../models/marks-progress.model';
 
 export interface State {
   subjects: SubjectsModel[];
@@ -18,6 +19,7 @@ export interface State {
     xAxes: number[];
   };
   lineChartData: ChartConfiguration<'line'>['data'];
+  marksProgress: MarksProgressModel[];
 }
 
 export const initialState: State = {
@@ -36,6 +38,7 @@ export const initialState: State = {
     labels: [],
     datasets: [],
   },
+  marksProgress: [],
 };
 
 export const marksReducer = createReducer(
@@ -253,5 +256,25 @@ export const marksReducer = createReducer(
     ...state,
     isLoading: false,
     error: error.message,
-  }))
+  })),
+  on(marksActions.fetchMarksProgressActions.fetchMarksProgress, (state) => ({
+    ...state,
+    isLoading: true,
+  })),
+  on(
+    marksActions.fetchMarksProgressActions.fetchMarksProgressSuccess,
+    (state, { marksProgress }) => ({
+      ...state,
+      isLoading: false,
+      marksProgress,
+    })
+  ),
+  on(
+    marksActions.fetchMarksProgressActions.fetchMarksProgressFail,
+    (state, { error }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: error.message,
+    })
+  )
 );

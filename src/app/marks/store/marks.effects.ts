@@ -270,4 +270,28 @@ export class MarksEffects {
       )
     )
   );
+
+  fetchMarksProgress$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(marksActions.fetchMarksProgressActions.fetchMarksProgress),
+      switchMap((data) =>
+        this.marksService
+          .getMarksProgress(data.num, data.year, data.clas, data.examType)
+          .pipe(
+            map((marksProgress) =>
+              marksActions.fetchMarksProgressActions.fetchMarksProgressSuccess({
+                marksProgress,
+              })
+            ),
+            catchError((error: HttpErrorResponse) =>
+              of(
+                marksActions.fetchMarksProgressActions.fetchMarksProgressFail({
+                  ...error,
+                })
+              )
+            )
+          )
+      )
+    )
+  );
 }

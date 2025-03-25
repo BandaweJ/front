@@ -31,7 +31,7 @@ export const initialState: State = {
   isLoading: false,
   errorMessage: '',
   deleteSuccess: null,
-  // addSuccess: null,
+
   enrolStats: null,
   migrateClassResult: false,
   totalEnrolment: null,

@@ -6,6 +6,7 @@ import { MarksModel } from '../models/marks.model';
 import { StudentComment } from '../models/student-comment';
 import { environment } from 'src/environments/environment';
 import { ExamType } from '../models/examtype.enum';
+import { MarksProgressModel } from '../models/marks-progress.model';
 
 @Injectable({
   providedIn: 'root',
@@ -48,6 +49,18 @@ export class MarksService {
   ): Observable<MarksModel[]> {
     return this.httpClient.get<MarksModel[]>(
       `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}/${examType}`
+    );
+  }
+
+  getMarksProgress(
+    num: number,
+    year: number,
+    clas: string,
+    // fom: number,
+    examType: ExamType
+  ): Observable<MarksProgressModel[]> {
+    return this.httpClient.get<MarksProgressModel[]>(
+      `${this.baseUrl}progress/${num}/${year}/${clas}/${examType}`
     );
   }
 
