@@ -30,7 +30,7 @@ export class FeesComponent implements OnInit {
 
   ngOnInit(): void {
     this.fees$.subscribe((fees) => {
-      console.log('Fees data from store:', fees); // Add this line
+      // console.log('Fees data from store:', fees); // Add this line
       this.dataSource.data = fees;
     });
   }
@@ -65,6 +65,7 @@ export class FeesComponent implements OnInit {
   }
 
   deleteFees(fee: FeesModel) {
+    // console.log(fee);
     if (fee.id) this.store.dispatch(feesActions.deleteFee({ id: fee.id }));
   }
 }

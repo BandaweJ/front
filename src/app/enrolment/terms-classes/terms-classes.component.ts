@@ -56,8 +56,22 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
     this.terms$ = this.store.select(selectTerms);
     this.enrols$ = this.store.select(selectEnrols);
     this.enrols$.subscribe((enrols) => {
+      this.dataSource.filterPredicate = (data: EnrolsModel, filter: string) => {
+        const surname = data.student?.surname.toString(); // Access nested property
+        const name = data.student?.name.toString();
+        const studentNumber = data.student?.studentNumber.toString();
+
+        return (
+          surname.indexOf(filter) !== -1 ||
+          name.indexOf(filter) !== -1 ||
+          studentNumber.indexOf(filter) !== -1
+        );
+      };
+
       this.dataSource.data = enrols;
     });
+
+    // Customize the filterPredicate
 
     this.enrolForm = new FormGroup({
       clas: new FormControl('', [Validators.required]),
