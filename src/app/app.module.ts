@@ -22,6 +22,7 @@ import { ReportsModule } from './reports/reports.module';
 import { NgChartsModule } from 'ng2-charts';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AuthService } from './auth/auth.service';
+import { FinanceModule } from './finance/finance.module';
 
 @NgModule({
   declarations: [AppComponent, ProfileButtonsComponent],
@@ -36,6 +37,7 @@ import { AuthService } from './auth/auth.service';
     MarksModule,
     ReportsModule,
     AttendanceModule,
+    FinanceModule,
     MaterialModule,
     BrowserModule,
     AppRoutingModule,

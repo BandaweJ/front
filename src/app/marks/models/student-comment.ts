@@ -1,6 +1,7 @@
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { TeachersModel } from 'src/app/registration/models/teachers.model';
 import { ExamType } from './examtype.enum';
+import { Residence } from 'src/app/enrolment/models/residence.enum';
 
 export interface StudentComment {
   id?: number;
@@ -11,4 +12,5 @@ export interface StudentComment {
   examType?: ExamType;
   student: StudentsModel;
   teacher?: TeachersModel;
+  residence: Residence;
 }

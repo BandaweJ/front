@@ -24,6 +24,7 @@ import { TeacherViewComponent } from './registration/teachers-list/teacher-view/
 import { StudentViewComponent } from './registration/students-list/student-view/student-view.component';
 import { ClassListsComponent } from './enrolment/terms-classes/class-lists/class-lists.component';
 import { MarksProgressComponent } from './marks/marks-progress/marks-progress.component';
+import { FeesComponent } from './finance/fees/fees.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -141,6 +142,12 @@ const routes: Routes = [
     component: TeachersCommentsComponent,
     canActivate: [AuthGuardService],
     title: 'Teacher Comments',
+  },
+  {
+    path: 'fees',
+    component: FeesComponent,
+    canActivate: [AuthGuardService],
+    title: 'Manage Fees',
   },
   {
     path: '',

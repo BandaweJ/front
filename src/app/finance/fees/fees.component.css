@@ -1,0 +1,31 @@
+.top-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+table {
+  width: 100%;
+}
+
+.mat-mdc-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+th {
+  /* width: 20%; */
+  text-align: center;
+}
+
+td {
+}
+
+button {
+  margin: 0 5px;
+}
+
+.add-btn {
+  display: flex;
+  justify-content: center;
+}

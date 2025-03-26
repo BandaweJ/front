@@ -17,6 +17,7 @@ import { MatSort } from '@angular/material/sort';
 import { enrolStudents } from '../../store/enrolment.actions';
 import { Observable } from 'rxjs';
 import { selectEnrols } from '../../store/enrolment.selectors';
+import { Residence } from '../../models/residence.enum';
 
 @Component({
   selector: 'app-enrol-student',
@@ -108,6 +109,7 @@ export class EnrolStudentComponent implements OnInit, AfterViewInit {
           name: this.data.name,
           num: this.data.num,
           year: this.data.year,
+          residence: Residence.Boarder,
           // id: '',
         };
         enrols.push(enrol);
