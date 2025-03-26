@@ -8,6 +8,8 @@ import { Residence } from 'src/app/enrolment/models/residence.enum';
 import { feesActions } from '../../store/finance.actions';
 import { Title } from '@angular/platform-browser';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
+import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-add-edit-fees',
@@ -34,7 +36,25 @@ export class AddEditFeesComponent implements OnInit {
       description: new FormControl(''),
     });
 
-    this.feesForm.patchValue(this.data);
+    if (this.data) {
+      this.terms$
+        .pipe(
+          map((terms) =>
+            terms.find(
+              (term) =>
+                term.num === this.data?.num && term.year === this.data?.year
+            )
+          )
+        )
+        .subscribe((term) => {
+          this.feesForm.patchValue({
+            amount: this.data?.amount,
+            term: term,
+            residence: this.data?.residence,
+            description: this.data?.description,
+          });
+        });
+    }
   }
 
   get amount() {
@@ -70,7 +90,8 @@ export class AddEditFeesComponent implements OnInit {
     };
 
     if (this.data) {
-      this.store.dispatch(feesActions.editFee({ fee }));
+      const id = this.data.id;
+      if (id) this.store.dispatch(feesActions.editFee({ id, fee }));
     } else {
       this.store.dispatch(feesActions.addFee({ fee }));
     }

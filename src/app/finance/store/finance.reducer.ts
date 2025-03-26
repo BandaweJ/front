@@ -49,5 +49,38 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.message,
+  })),
+  on(feesActions.editFee, (state, { fee }) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(feesActions.editFeeSuccess, (state, { fee }) => ({
+    ...state,
+    fees: [...state.fees.map((f) => (f.id == fee.id ? (f = fee) : (f = f)))],
+    isLoading: false,
+    errorMessage: '',
+  })),
+  on(feesActions.editFeeFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
+
+  on(feesActions.deleteFee, (state, { id }) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(feesActions.deleteFeeSuccess, (state, { fee }) => ({
+    ...state,
+    fees: [...state.fees.filter((f) => f.id != fee.id)],
+    isLoading: false,
+    errorMessage: '',
+  })),
+  on(feesActions.deleteFeeFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
   }))
 );

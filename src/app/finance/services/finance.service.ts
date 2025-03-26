@@ -17,4 +17,12 @@ export class FinanceService {
   createFee(fee: FeesModel): Observable<FeesModel> {
     return this.httpClient.post<FeesModel>(`${this.baseURL}fees/`, fee);
   }
+
+  editFees(id: number, fee: FeesModel): Observable<FeesModel> {
+    return this.httpClient.patch<FeesModel>(`${this.baseURL}fees/${id}`, fee);
+  }
+
+  deleteFees(id: number): Observable<FeesModel> {
+    return this.httpClient.delete<FeesModel>(`${this.baseURL}fees/${id}`);
+  }
 }

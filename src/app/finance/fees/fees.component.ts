@@ -58,9 +58,13 @@ export class FeesComponent implements OnInit {
     this.dialog.open(AddEditFeesComponent);
   }
 
-  deleteFees(fee: FeesModel) {}
+  // deleteFees(fee: FeesModel) {}
 
   openEditFeesDialog(fee: FeesModel) {
     this.dialog.open(AddEditFeesComponent, { data: fee });
+  }
+
+  deleteFees(fee: FeesModel) {
+    if (fee.id) this.store.dispatch(feesActions.deleteFee({ id: fee.id }));
   }
 }

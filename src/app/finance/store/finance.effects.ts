@@ -67,4 +67,56 @@ export class FinanceEffects {
       )
     )
   );
+
+  editFees$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromFinanceActions.feesActions.editFee),
+      switchMap((data) =>
+        this.financeService.editFees(data.id, data.fee).pipe(
+          tap((data) =>
+            this.snackBar.open('Fees Edited Successfully', 'OK', {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            })
+          ),
+          map((fee) => {
+            // console.log(teacher);
+            return fromFinanceActions.feesActions.editFeeSuccess({
+              fee,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(fromFinanceActions.feesActions.editFeeFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
+  deleteFees$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromFinanceActions.feesActions.deleteFee),
+      switchMap((data) =>
+        this.financeService.deleteFees(data.id).pipe(
+          tap((fee) =>
+            this.snackBar.open('Fees Deleted Successfully', 'OK', {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            })
+          ),
+          map((fee) => {
+            // console.log(teacher);
+            return fromFinanceActions.feesActions.deleteFeeSuccess({
+              fee,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(fromFinanceActions.feesActions.deleteFeeFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
 }
