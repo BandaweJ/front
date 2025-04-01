@@ -7,3 +7,13 @@ export const selectFees = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.fees
 );
+
+export const selectIsLoading = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.isLoading
+);
+
+export const selectErrorMsg = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.errorMessage
+);

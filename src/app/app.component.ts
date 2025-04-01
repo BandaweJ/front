@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
-import { selectIsLoggedIn } from './auth/store/auth.selectors';
+import { selectIsLoggedIn, selectUser } from './auth/store/auth.selectors';
 
 @Component({
   selector: 'app-root',
@@ -15,9 +15,15 @@ export class AppComponent implements OnInit {
   role = '';
   isLoggedIn$!: Observable<boolean>;
   showProfile = false;
+  user$ = this.store.select(selectUser);
 
   ngOnInit(): void {
     this.isLoggedIn$ = this.store.select(selectIsLoggedIn);
+    this.user$.subscribe((user) => {
+      if (user?.role) {
+        this.role = user.role;
+      }
+    });
   }
 
   // this.isLoggedIn$ = this.store.select(selectIsLoggedIn);

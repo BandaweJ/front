@@ -24,7 +24,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 @NgModule({
   declarations: [],
   imports: [
@@ -53,6 +53,7 @@ import { MatBadgeModule } from '@angular/material/badge';
     MatProgressBarModule,
     MatTooltipModule,
     MatBadgeModule,
+    MatButtonToggleModule,
   ],
   exports: [
     MatCardModule,
@@ -79,6 +80,7 @@ import { MatBadgeModule } from '@angular/material/badge';
     MatProgressBarModule,
     MatTooltipModule,
     MatBadgeModule,
+    MatButtonToggleModule,
   ],
 })
 export class MaterialModule {}

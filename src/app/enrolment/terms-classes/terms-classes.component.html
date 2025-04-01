@@ -62,29 +62,51 @@
         <td mat-cell *matCellDef="let row">{{ row.student.gender }}</td>
       </ng-container>
 
-      <!-- Age Column -->
-      <ng-container matColumnDef="age">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Joined</th>
-        <td mat-cell *matCellDef="let row">{{ row.student.dob | date }}</td>
+      <!-- Residence Column -->
+      <ng-container matColumnDef="residence">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Residence</th>
+        <td mat-cell *matCellDef="let row">
+          <span>{{ row.residence }}</span>
+          <!-- <mat-form-field>
+            <mat-label>Residence</mat-label>
+            <mat-select [(ngModel)]="selectedResidence[row.student.studentNumber]"
+              (selectionChange)="updateResidence(row)">
+              <mat-option *ngFor="let residence of residences" [value]="residence">
+                {{ sharedService.residenceToString(residence) }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field> -->
+          <!-- <mat-button-toggle-group [(ngModel)]="selectedResidence[row.student.studentNumber]"
+            (change)="updateResidence(row)">
+            <mat-button-toggle *ngFor="let residence of residences" [value]="residence">
+              {{ sharedService.residenceToString(residence) }}
+            </mat-button-toggle>
+          </mat-button-toggle-group> -->
+          <!-- <mat-radio-group [(ngModel)]="selectedResidence[row.student.studentNumber]" (change)="updateResidence(row)">
+            <mat-radio-button *ngFor="let residence of residences" [value]="residence">
+              {{ sharedService.residenceToString(residence) }}
+            </mat-radio-button>
+          </mat-radio-group> -->
+        </td>
       </ng-container>
 
       <!-- Cell Column -->
-      <ng-container matColumnDef="cell">
+      <!-- <ng-container matColumnDef="cell">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Cell</th>
         <td mat-cell *matCellDef="let row">{{ row.student.cell }}</td>
-      </ng-container>
+      </ng-container> -->
 
       <!-- Address Column -->
-      <ng-container matColumnDef="address">
+      <!-- <ng-container matColumnDef="address">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
         <td mat-cell *matCellDef="let row">{{ row.student.address }}</td>
-      </ng-container>
+      </ng-container> -->
 
       <!-- Previous School Column -->
-      <ng-container matColumnDef="prevSchool">
+      <!-- <ng-container matColumnDef="prevSchool">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Prev School</th>
         <td mat-cell *matCellDef="let row">{{ row.student.prevSchool }}</td>
-      </ng-container>
+      </ng-container> -->
 
       <!-- Actions Column -->
       <ng-container matColumnDef="action">

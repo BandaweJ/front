@@ -23,9 +23,10 @@ import { NgChartsModule } from 'ng2-charts';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AuthService } from './auth/auth.service';
 import { FinanceModule } from './finance/finance.module';
+import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog/confirm-delete-dialog.component';
 
 @NgModule({
-  declarations: [AppComponent, ProfileButtonsComponent],
+  declarations: [AppComponent, ProfileButtonsComponent, ConfirmDeleteDialogComponent],
   imports: [
     HttpClientModule,
     FormsModule,

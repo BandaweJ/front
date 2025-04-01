@@ -10,6 +10,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { AddEditFeesComponent } from './add-edit-fees/add-edit-fees.component';
+import { ConfirmDeleteDialogComponent } from 'src/app/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-fees',
@@ -30,7 +31,7 @@ export class FeesComponent implements OnInit {
 
   ngOnInit(): void {
     this.fees$.subscribe((fees) => {
-      // console.log('Fees data from store:', fees); // Add this line
+      // console.log('Fees data from store:', fees);
       this.dataSource.data = fees;
     });
   }
@@ -64,8 +65,24 @@ export class FeesComponent implements OnInit {
     this.dialog.open(AddEditFeesComponent, { data: fee });
   }
 
-  deleteFees(fee: FeesModel) {
-    // console.log(fee);
-    if (fee.id) this.store.dispatch(feesActions.deleteFee({ id: fee.id }));
-  }
+  // deleteFees(id: number) {
+  //   const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+  //     width: '250px',
+  //     data: { message: 'Are you sure you want to delete this Fees?' },
+  //   });
+
+  //   dialogRef.afterClosed().subscribe((result) => {
+  //     if (result) {
+  //       // User confirmed, perform the delete operation
+  //       console.log('Fees deleted:', id);
+  //       // your delete logic here.
+  //       if (id) this.store.dispatch(feesActions.deleteFee({ id }));
+  //     } else {
+  //       // User canceled
+  //       dialogRef.close();
+  //     }
+  //   });
+
+  //   // console.log(fee);
+  // }
 }

@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, tap } from 'rxjs';
-import { selectErrorMsg } from 'src/app/auth/store/auth.selectors';
+import { selectErrorMsg, selectUser } from 'src/app/auth/store/auth.selectors';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import {
   fetchClasses,
@@ -19,6 +19,7 @@ import { SubjectsModel } from 'src/app/marks/models/subjects.model';
 import { fetchSubjects } from 'src/app/marks/store/marks.actions';
 import { selectSubjects } from 'src/app/marks/store/marks.selectors';
 import { Residence } from 'src/app/registration/models/residence.enum';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { TeachersModel } from 'src/app/registration/models/teachers.model';
 import {
@@ -44,6 +45,7 @@ export class DashboardComponent implements OnInit {
   classes$ = this.store.select(selectClasses);
   subjects$ = this.store.select(selectSubjects);
   enrolsSummary$ = this.store.select(selectTotalEnroment);
+  user$ = this.store.select(selectUser);
 
   currentTermNum!: number;
   currentTermYear!: number;
@@ -61,11 +63,20 @@ export class DashboardComponent implements OnInit {
     private title: Title,
     private router: Router
   ) {
-    this.store.dispatch(fetchTeachers());
-    this.store.dispatch(fetchStudents());
-    this.store.dispatch(fetchClasses());
-    this.store.dispatch(fetchSubjects());
-    this.store.dispatch(fetchTerms());
+    this.user$.subscribe((user) => {
+      switch (user?.role) {
+        case ROLES.admin:
+        case ROLES.hod:
+        case ROLES.reception:
+        case ROLES.teacher: {
+          this.store.dispatch(fetchTeachers());
+          this.store.dispatch(fetchStudents());
+          this.store.dispatch(fetchClasses());
+          this.store.dispatch(fetchSubjects());
+          this.store.dispatch(fetchTerms());
+        }
+      }
+    });
   }
 
   ngOnInit(): void {

@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Residence } from './enrolment/models/residence.enum';
+import { FeesNames } from './finance/models/fees-names.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -30,5 +32,49 @@ export class SharedService {
     }
 
     return age;
+  }
+
+  residenceToString(residence: Residence) {
+    switch (residence) {
+      case Residence.Boarder:
+        return 'Boarder';
+      case Residence.Day:
+        return 'Day';
+      case Residence.DayFood:
+        return 'Day With Food';
+      case Residence.DayTransport:
+        return 'Day With Transport';
+      case Residence.DayFoodTransport:
+        return 'Day With Food and Transport';
+    }
+  }
+
+  feesNamesToString(feesName: FeesNames) {
+    switch (feesName) {
+      case FeesNames.aLevelApplicationFee:
+        return 'A Level Application Fee';
+      case FeesNames.aLevelTuitionBoarder:
+        return 'A Level Boarder Tuition';
+      case FeesNames.aLevelTuitionDay:
+        return 'A Level Day Tuition';
+      case FeesNames.alevelScienceFee:
+        return 'A Level Science Fee';
+      case FeesNames.deskFee:
+        return 'Desk Fee';
+      case FeesNames.developmentFee:
+        return 'Development Fee';
+      case FeesNames.foodFee:
+        return 'Food Fee';
+      case FeesNames.oLevelApplicationFee:
+        return 'O Level Application Fee';
+      case FeesNames.oLevelScienceFee:
+        return 'O Level Science Fee';
+      case FeesNames.oLevelTuitionBoarder:
+        return 'O Level Boarder Tuition';
+      case FeesNames.oLevelTuitionDay:
+        return 'O Level Day Tuition';
+      case FeesNames.transportFee:
+        return 'Transport Fee';
+    }
   }
 }

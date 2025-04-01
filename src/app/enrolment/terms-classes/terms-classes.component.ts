@@ -23,6 +23,8 @@ import { MatSort } from '@angular/material/sort';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { EnrolStudentComponent } from './enrol-student/enrol-student.component';
 import { Title } from '@angular/platform-browser';
+import { Residence } from '../models/residence.enum';
+import { SharedService } from 'src/app/shared.service';
 
 @Component({
   selector: 'app-terms-classes',
@@ -36,6 +38,9 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
   private errorMsg$!: Observable<string>;
   public dataSource = new MatTableDataSource<EnrolsModel>();
   enrolForm!: FormGroup;
+  residences = [...Object.values(Residence)];
+  // selectedResidence: Residence = Residence.Boarder;
+  // selectedResidence: { [studentNumber: string]: Residence } = {};
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -44,7 +49,8 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
     private store: Store,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    public title: Title
+    public title: Title,
+    public sharedService: SharedService
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
@@ -69,6 +75,11 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
       };
 
       this.dataSource.data = enrols;
+
+      //init selected residence values.
+      // enrols.forEach((enrol) => {
+      //   this.selectedResidence[enrol.student.studentNumber] = enrol.residence;
+      // });
     });
 
     // Customize the filterPredicate
@@ -92,10 +103,10 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
     'surname',
     'name',
     'gender',
-    'age',
-    'cell',
-    'address',
-    'prevSchool',
+    'residence',
+    // 'cell',
+    // 'address',
+    // 'prevSchool',
     'action',
   ];
 
@@ -148,4 +159,27 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
   unenrolStudent(enrol: EnrolsModel) {
     this.store.dispatch(UnenrolStudentActions.unenrolStudent({ enrol }));
   }
+
+  // updateResidence(resi: string, enrol: EnrolsModel) {
+  //   const residence = resi as Residence;
+  //   const updatedEnrol = { ...enrol, residence };
+  //   console.log(updatedEnrol);
+  //   // this.store.dispatch(updateEnrol({ enrol }));
+  // }
+
+  // updateResidence(row: EnrolsModel): void {
+  //   // Create a new EnrolsModel object with the updated residence
+  //   const updatedRow: EnrolsModel = {
+  //     ...row,
+  //     residence: this.selectedResidence[row.student.studentNumber],
+  //   };
+
+  //   // Update the dataSource.data array
+  //   // this.dataSource.data = this.dataSource.data.map((item) =>
+  //   //   item === row ? updatedRow : item
+  //   // );
+
+  //   // Perform any other necessary logic (e.g., dispatch an action to update the backend)
+  //   console.log('Residence updated:', updatedRow);
+  // }
 }

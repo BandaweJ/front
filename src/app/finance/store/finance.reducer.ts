@@ -24,12 +24,13 @@ export const financeReducer = createReducer(
   })),
   on(feesActions.fetchFeesSuccess, (state, { fees }) => ({
     ...state,
-    fees: fees,
+    fees: [...fees],
     isLoading: false,
     errorMessage: '',
   })),
   on(feesActions.fetchFeesFail, (state, { error }) => ({
     ...state,
+    fees: [],
     isLoading: false,
     errorMessage: error.message,
   })),
@@ -57,7 +58,8 @@ export const financeReducer = createReducer(
   })),
   on(feesActions.editFeeSuccess, (state, { fee }) => ({
     ...state,
-    fees: [...state.fees.map((f) => (f.id == fee.id ? (f = fee) : (f = f)))],
+    // fees: [...state.fees.map((f) => (f.id == fee.id ? (f = fee) : (f = f)))],
+    fees: [...state.fees.map((f) => (f.id === fee.id ? { ...fee } : f))],
     isLoading: false,
     errorMessage: '',
   })),
@@ -65,22 +67,22 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.message,
-  })),
-
-  on(feesActions.deleteFee, (state, { id }) => ({
-    ...state,
-    isLoading: true,
-    errorMessage: '',
-  })),
-  on(feesActions.deleteFeeSuccess, (state, { fee }) => ({
-    ...state,
-    fees: [...state.fees.filter((f) => f.id != fee.id)],
-    isLoading: false,
-    errorMessage: '',
-  })),
-  on(feesActions.deleteFeeFail, (state, { error }) => ({
-    ...state,
-    isLoading: false,
-    errorMessage: error.message,
   }))
+
+  // on(feesActions.deleteFee, (state, { id }) => ({
+  //   ...state,
+  //   isLoading: true,
+  //   errorMessage: '',
+  // })),
+  // on(feesActions.deleteFeeSuccess, (state, { id }) => ({
+  //   ...state,
+  //   fees: [...state.fees.filter((f) => f.id != id)],
+  //   isLoading: false,
+  //   errorMessage: '',
+  // })),
+  // on(feesActions.deleteFeeFail, (state, { error }) => ({
+  //   ...state,
+  //   isLoading: false,
+  //   errorMessage: error.message,
+  // }))
 );

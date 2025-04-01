@@ -110,6 +110,7 @@ export class EnrolStudentComponent implements OnInit, AfterViewInit {
           num: this.data.num,
           year: this.data.year,
           residence: Residence.Boarder,
+
           // id: '',
         };
         enrols.push(enrol);

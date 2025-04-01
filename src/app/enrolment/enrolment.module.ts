@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../material/material.module';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { enrolmentReducer } from './store/enrolment.reducer';
@@ -17,8 +17,18 @@ import { MigrateClassEnrolmentComponent } from './migrate-class-enrolment/migrat
 import { ClassListsComponent } from './terms-classes/class-lists/class-lists.component';
 
 @NgModule({
-  declarations: [TermsClassesComponent, TermsComponent, ClassesComponent, AddEditClassComponent, AddEditTermComponent, EnrolStudentComponent, MigrateClassEnrolmentComponent, ClassListsComponent],
+  declarations: [
+    TermsClassesComponent,
+    TermsComponent,
+    ClassesComponent,
+    AddEditClassComponent,
+    AddEditTermComponent,
+    EnrolStudentComponent,
+    MigrateClassEnrolmentComponent,
+    ClassListsComponent,
+  ],
   imports: [
+    FormsModule,
     CommonModule,
     MaterialModule,
     RouterModule,

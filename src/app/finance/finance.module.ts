@@ -9,9 +9,10 @@ import { EffectsModule } from '@ngrx/effects';
 import { financeReducer } from './store/finance.reducer';
 import { FinanceEffects } from './store/finance.effects';
 import { AddEditFeesComponent } from './fees/add-edit-fees/add-edit-fees.component';
+import { PaymentsComponent } from './payments/payments.component';
 
 @NgModule({
-  declarations: [FeesComponent, AddEditFeesComponent],
+  declarations: [FeesComponent, AddEditFeesComponent, PaymentsComponent],
   imports: [
     CommonModule,
     MaterialModule,

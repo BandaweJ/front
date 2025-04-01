@@ -4,25 +4,15 @@
 <form [formGroup]="feesForm" (submit)="addFees()">
   <mat-card>
     <mat-card-header>
-      <mat-card-title class="card-title"> Add New Fees </mat-card-title>
+      <mat-card-title class="card-title"> {{ data ? 'Edit Fees' : 'Add New Fees' }} </mat-card-title>
     </mat-card-header>
     <mat-card-content>
 
-      <mat-form-field class="term">
-        <mat-label>Term</mat-label>
-        <mat-select formControlName="term">
-          <mat-option *ngFor="let term of terms$ | async" [value]="term">
-            {{ term.num + " " + term.year }}
-          </mat-option>
-
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field class="resi">
-        <mat-label>Residence</mat-label>
-        <mat-select formControlName="residence">
-          <mat-option *ngFor="let residence of residences" [value]="residence">
-            {{ residenceToString(residence) }}
+      <mat-form-field class="name">
+        <mat-label>Fees Name</mat-label>
+        <mat-select formControlName="name">
+          <mat-option *ngFor="let name of feesNames" [value]="name">
+            {{ sharedService.feesNamesToString(name) }}
           </mat-option>
 
         </mat-select>

@@ -31,7 +31,7 @@
     </div>
     <div class="grid-cell age">
       <span class="detail-label">Age:</span>
-      <span class="detail-value" id="teacher-dob">{{ sharedService.calculateAge }}</span>
+      <span class="detail-value" id="teacher-dob">{{ sharedService.calculateAge(teacher?.dob) }}</span>
     </div>
 
     <div class="grid-cell gender">
@@ -54,7 +54,7 @@
     </div>
     <div class="grid-cell qual">
       <span class="detail-label">Qualifications:</span>
-      <ul class="detail-value" id="teacher-qualifications">{{ teacher?.qualifications?.toString() }}</ul>
+      <ul class="detail-value" id="teacher-qualifications">{{ teacher?.qualifications?.toString()?.trim() }}</ul>
     </div>
 
 
@@ -72,7 +72,7 @@
 
 
 
-    <div class="grid-cell dol">
+    <div class="grid-cell dol" *ngIf="teacher?.dateOfLeaving">
       <span class="detail-label">Date of Leaving:</span>
       <span class="detail-value" id="teacher-dol">{{ teacher?.active ? '' : teacher?.dateOfLeaving}}</span>
     </div>

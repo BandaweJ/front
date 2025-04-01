@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { FinanceService } from '../services/finance.service';
-import * as fromFinanceActions from './finance.actions';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { feesActions } from './finance.actions';
 @Injectable()
 export class FinanceEffects {
   constructor(
@@ -15,29 +15,29 @@ export class FinanceEffects {
 
   fetchFees$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fromFinanceActions.feesActions.fetchFees),
+      ofType(feesActions.fetchFees),
       switchMap(() =>
         this.financeService.getAllFees().pipe(
           map((fees) => {
-            // Sort the classes array here
+            // Sort the fees array here
             const sortedFees = [...fees].sort((a, b) => {
               // Replace 'name' with the property you want to sort by
               // and adjust the sorting logic as needed.
-              if (a.year < b.year) {
+              if (a.name < b.name) {
                 return -1;
               }
-              if (a.year > b.year) {
+              if (a.name > b.name) {
                 return 1;
               }
               return 0; // Equal
             });
 
-            return fromFinanceActions.feesActions.fetchFeesSuccess({
+            return feesActions.fetchFeesSuccess({
               fees: sortedFees,
             });
           }),
           catchError((error: HttpErrorResponse) =>
-            of(fromFinanceActions.feesActions.fetchFeesFail({ ...error }))
+            of(feesActions.fetchFeesFail({ ...error }))
           )
         )
       )
@@ -46,7 +46,7 @@ export class FinanceEffects {
 
   addFees$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fromFinanceActions.feesActions.addFee),
+      ofType(feesActions.addFee),
       switchMap((data) =>
         this.financeService.createFee(data.fee).pipe(
           tap(() =>
@@ -57,11 +57,18 @@ export class FinanceEffects {
             })
           ),
           map((fee) => {
-            // console.log(teacher);
-            return fromFinanceActions.feesActions.addFeeSuccess({ fee });
+            return feesActions.addFeeSuccess({ fee });
           }),
           catchError((error: HttpErrorResponse) =>
-            of(fromFinanceActions.feesActions.addFeeFail({ ...error }))
+            of(feesActions.addFeeFail({ ...error })).pipe(
+              tap(() =>
+                this.snackBar.open(error.message, 'OK', {
+                  duration: 3000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                })
+              )
+            )
           )
         )
       )
@@ -70,7 +77,7 @@ export class FinanceEffects {
 
   editFees$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fromFinanceActions.feesActions.editFee),
+      ofType(feesActions.editFee),
       switchMap((data) =>
         this.financeService.editFees(data.id, data.fee).pipe(
           tap((data) =>
@@ -82,41 +89,57 @@ export class FinanceEffects {
           ),
           map((fee) => {
             // console.log(teacher);
-            return fromFinanceActions.feesActions.editFeeSuccess({
+            return feesActions.editFeeSuccess({
               fee,
             });
           }),
           catchError((error: HttpErrorResponse) =>
-            of(fromFinanceActions.feesActions.editFeeFail({ ...error }))
+            of(feesActions.editFeeFail({ ...error })).pipe(
+              tap(() =>
+                this.snackBar.open(error.message, 'OK', {
+                  duration: 3000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                })
+              )
+            )
           )
         )
       )
     )
   );
 
-  deleteFees$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(fromFinanceActions.feesActions.deleteFee),
-      switchMap((data) =>
-        this.financeService.deleteFees(data.id).pipe(
-          tap((fee) =>
-            this.snackBar.open('Fees Deleted Successfully', 'OK', {
-              duration: 3000,
-              verticalPosition: 'top',
-              horizontalPosition: 'center',
-            })
-          ),
-          map((fee) => {
-            // console.log(teacher);
-            return fromFinanceActions.feesActions.deleteFeeSuccess({
-              fee,
-            });
-          }),
-          catchError((error: HttpErrorResponse) =>
-            of(fromFinanceActions.feesActions.deleteFeeFail({ ...error }))
-          )
-        )
-      )
-    )
-  );
+  // deleteFees$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(fromFinanceActions.feesActions.deleteFee),
+  //     switchMap((data) =>
+  //       this.financeService.deleteFees(data.id).pipe(
+  //         tap(() =>
+  //           this.snackBar.open('Fees Deleted Successfully', 'OK', {
+  //             duration: 3000,
+  //             verticalPosition: 'top',
+  //             horizontalPosition: 'center',
+  //           })
+  //         ),
+  //         map((id) => {
+  //           // console.log(teacher);
+  //           return fromFinanceActions.feesActions.deleteFeeSuccess({
+  //             id,
+  //           });
+  //         }),
+  //         catchError((error: HttpErrorResponse) =>
+  //           of(fromFinanceActions.feesActions.deleteFeeFail({ ...error })).pipe(
+  //             tap(() =>
+  //               this.snackBar.open(error.message, 'OK', {
+  //                 duration: 3000,
+  //                 verticalPosition: 'top',
+  //                 horizontalPosition: 'center',
+  //               })
+  //             )
+  //           )
+  //         )
+  //       )
+  //     )
+  //   )
+  // );
 }

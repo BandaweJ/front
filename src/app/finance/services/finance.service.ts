@@ -22,7 +22,8 @@ export class FinanceService {
     return this.httpClient.patch<FeesModel>(`${this.baseURL}fees/${id}`, fee);
   }
 
-  deleteFees(id: number): Observable<FeesModel> {
-    return this.httpClient.delete<FeesModel>(`${this.baseURL}fees/${id}`);
+  deleteFees(id: number): Observable<number> {
+    // console.log(id);
+    return this.httpClient.delete<number>(`${this.baseURL}fees/${id}`);
   }
 }

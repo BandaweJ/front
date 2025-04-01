@@ -14,8 +14,8 @@ export const feesActions = createActionGroup({
     editFee: props<{ id: number; fee: FeesModel }>(),
     editFeeSuccess: props<{ fee: FeesModel }>(),
     editFeeFail: props<{ error: HttpErrorResponse }>(),
-    deleteFee: props<{ id: number }>(),
-    deleteFeeSuccess: props<{ fee: FeesModel }>(),
-    deleteFeeFail: props<{ error: HttpErrorResponse }>(),
+    // deleteFee: props<{ id: number }>(),
+    // deleteFeeSuccess: props<{ id: number }>(),
+    // deleteFeeFail: props<{ error: HttpErrorResponse }>(),
   },
 });
