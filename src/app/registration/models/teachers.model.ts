@@ -1,3 +1,5 @@
+import { ROLES } from './roles.enum';
+
 export interface TeachersModel {
   id: string;
   name: string;
@@ -12,5 +14,5 @@ export interface TeachersModel {
   email: string;
   address: string;
   dateOfLeaving: string;
-  role: string;
+  role: ROLES;
 }

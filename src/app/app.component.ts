@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { selectIsLoggedIn, selectUser } from './auth/store/auth.selectors';
+import { ROLES } from './registration/models/roles.enum';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +13,7 @@ import { selectIsLoggedIn, selectUser } from './auth/store/auth.selectors';
 export class AppComponent implements OnInit {
   constructor(private store: Store, private router: Router) {}
 
-  role = '';
+  role!: ROLES;
   isLoggedIn$!: Observable<boolean>;
   showProfile = false;
   user$ = this.store.select(selectUser);

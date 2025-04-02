@@ -4,7 +4,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { FinanceService } from '../services/finance.service';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { feesActions } from './finance.actions';
+import { billingActions, feesActions } from './finance.actions';
 @Injectable()
 export class FinanceEffects {
   constructor(
@@ -105,6 +105,26 @@ export class FinanceEffects {
             )
           )
         )
+      )
+    )
+  );
+
+  fetchStudentsToBill$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(billingActions.fetchStudentsToBill),
+      switchMap((data) =>
+        this.financeService
+          .getStudentsNotYetBilledForTerm(data.num, data.year)
+          .pipe(
+            map((studentsToBill) => {
+              return billingActions.fetchStudentsToBillSuccess({
+                studentsToBill,
+              });
+            }),
+            catchError((error: HttpErrorResponse) =>
+              of(billingActions.fetchStudentsToBillFail({ ...error }))
+            )
+          )
       )
     )
   );

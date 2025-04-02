@@ -20,3 +20,8 @@ mat-card-header {
 .des {
   grid-area: des;
 }
+
+.actions {
+  display: flex;
+  justify-content: center;
+}

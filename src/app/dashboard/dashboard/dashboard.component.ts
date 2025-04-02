@@ -46,7 +46,7 @@ export class DashboardComponent implements OnInit {
   subjects$ = this.store.select(selectSubjects);
   enrolsSummary$ = this.store.select(selectTotalEnroment);
   user$ = this.store.select(selectUser);
-
+  role!: ROLES;
   currentTermNum!: number;
   currentTermYear!: number;
 
@@ -73,10 +73,10 @@ export class DashboardComponent implements OnInit {
           this.store.dispatch(fetchStudents());
           this.store.dispatch(fetchClasses());
           this.store.dispatch(fetchSubjects());
-          this.store.dispatch(fetchTerms());
         }
       }
     });
+    this.store.dispatch(fetchTerms());
   }
 
   ngOnInit(): void {
@@ -90,28 +90,6 @@ export class DashboardComponent implements OnInit {
         })
       )
       .subscribe();
-    // this.enrolsSummary$.subscribe((summary) => console.log(summary));
-    // this.enrols$
-    //   .pipe(
-    //     tap((arr) => {
-    //       this.dayScholars = arr.filter(
-    //         (st) => st.residence === Residence.Day
-    //       ).length;
-    //       this.boarders = arr.filter(
-    //         (st) => st.residence === Residence.Boarder
-    //       ).length;
-    //       this.girls = arr.filter((st) => st.gender === 'Female').length;
-    //       this.boys = arr.filter((st) => st.gender === 'Male').length;
-    //     })
-    //   )
-    //   .subscribe();
-    // console.log('boarder: ', this.boarders, 'day scholars: ', this.dayScholars);
-
-    // this.store.select(selectTerms).subscribe((terms) =>
-    //   terms.map((term) => {
-    //     console.log(terms);
-    //   })
-    // );
 
     this.store
       .select(selectTerms)
@@ -136,17 +114,44 @@ export class DashboardComponent implements OnInit {
         )
       )
       .subscribe();
+    this.user$.subscribe((usr) => {
+      if (usr?.role) {
+        this.role = usr.role;
+        console.log('User is a : ', this.role);
+      }
+    });
   }
 
   navigateToTeachersSummary() {
-    this.router.navigate(['/teachers']);
+    switch (this.role) {
+      case ROLES.admin:
+      case ROLES.hod:
+      case ROLES.reception:
+      case ROLES.teacher: {
+        this.router.navigate(['/teachers']);
+      }
+    }
   }
 
   navigateToStudentsSummary() {
-    this.router.navigate(['/students']);
+    switch (this.role) {
+      case ROLES.admin:
+      case ROLES.hod:
+      case ROLES.reception:
+      case ROLES.teacher: {
+        this.router.navigate(['/students']);
+      }
+    }
   }
 
   navigateToClassLists() {
-    this.router.navigate(['/class-lists']);
+    switch (this.role) {
+      case ROLES.admin:
+      case ROLES.hod:
+      case ROLES.reception:
+      case ROLES.teacher: {
+        this.router.navigate(['/class-lists']);
+      }
+    }
   }
 }

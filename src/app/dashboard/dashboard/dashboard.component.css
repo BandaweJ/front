@@ -96,7 +96,7 @@ mat-chip mat-icon {
 }
 .graphs-container {
   display: grid;
-  grid-template-columns: 80% 20%;
+  /* grid-template-columns: 80% 20%; */
   grid-template-rows: auto;
   margin: 1rem;
   align-items: center;

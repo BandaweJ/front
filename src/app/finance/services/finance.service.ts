@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { FeesModel } from '../models/fees.model';
+import { StudentsModel } from 'src/app/registration/models/students.model';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
@@ -25,5 +26,14 @@ export class FinanceService {
   deleteFees(id: number): Observable<number> {
     // console.log(id);
     return this.httpClient.delete<number>(`${this.baseURL}fees/${id}`);
+  }
+
+  getStudentsNotYetBilledForTerm(
+    num: number,
+    year: number
+  ): Observable<StudentsModel[]> {
+    return this.httpClient.get<StudentsModel[]>(
+      `${this.baseURL}billing/tobill/${num}/${year}`
+    );
   }
 }

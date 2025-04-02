@@ -15,7 +15,7 @@
       </button>
       <mat-accordion>
         <!-- Registration -->
-        <mat-expansion-panel>
+        <mat-expansion-panel *ngIf="role === 'admin' || role === 'reception' || 'teacher'">
           <mat-expansion-panel-header>
             <button mat-button>Registration</button>
           </mat-expansion-panel-header>
@@ -33,24 +33,24 @@
         </mat-expansion-panel>
 
         <!-- Enrolment -->
-        <mat-expansion-panel>
+        <mat-expansion-panel *ngIf="role !== 'student'">
           <mat-expansion-panel-header>
             <button mat-button>Enrolment</button>
           </mat-expansion-panel-header>
           <div class="sidenav-container">
-            <button mat-button>
+            <button mat-button *ngIf="role === 'admin'">
               <a routerLink="/classes" routerLinkActive="active"> Classes </a>
             </button>
-            <button mat-button>
+            <button mat-button *ngIf="role === 'admin' || role === 'reception'">
               <a routerLink="/terms" routerLinkActive="active"> Terms </a>
             </button>
-            <button mat-button>
+            <button mat-button *ngIf="role === 'admin'">
               <a routerLink="/enrol" routerLinkActive="active"> Enrol </a>
             </button>
-            <button mat-button>
+            <button mat-button *ngIf="role === 'admin' || role === 'reception' || role === 'teacher' || role === 'hod'">
               <a routerLink="/class-lists" routerLinkActive="active"> Class Lists </a>
             </button>
-            <button mat-button>
+            <button mat-button *ngIf="role === 'admin'">
               <a routerLink="/migrate-class" routerLinkActive="active">
                 Migrate Class
               </a>
@@ -59,7 +59,7 @@
         </mat-expansion-panel>
 
         <!-- Attendance -->
-        <mat-expansion-panel>
+        <mat-expansion-panel *ngIf="role !== 'student' && role !== 'parent'">
           <mat-expansion-panel-header>
             <button mat-button>Attendance</button>
           </mat-expansion-panel-header>
@@ -71,7 +71,7 @@
             </button>
           </div>
           <div class="sidenav-container">
-            <button mat-button>
+            <button mat-button *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
               <a routerLink="/mark-register" routerLinkActive="active">
                 Mark Register
               </a>
@@ -80,12 +80,12 @@
         </mat-expansion-panel>
 
         <!-- Marks -->
-        <mat-expansion-panel>
+        <mat-expansion-panel *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
           <mat-expansion-panel-header>
             <button mat-button>Marks</button>
           </mat-expansion-panel-header>
           <div class="sidenav-container">
-            <button mat-button>
+            <button mat-button *ngIf="role === 'admin'">
               <a routerLink="/subjects" routerLinkActive="active"> Subjects </a>
             </button>
           </div>
@@ -106,11 +106,11 @@
               <a routerLink="/mark-sheets" routerLinkActive="active"> Mark Sheets </a>
             </button>
 
-            <button mat-button>
+            <!-- <button mat-button>
               <a routerLink="/perfomance" routerLinkActive="active">
                 Perfomance
               </a>
-            </button>
+            </button> -->
           </div>
         </mat-expansion-panel>
 
@@ -136,9 +136,14 @@
               <a routerLink="/fees" routerLinkActive="active"> Fees </a>
             </button>
           </div>
-          <div class="sidenav-container">
+          <div class="sidenav-container" *ngIf="role === 'reception'">
             <button mat-button>
               <a routerLink="/payments" routerLinkActive="active"> Payments </a>
+            </button>
+          </div>
+          <div class="sidenav-container">
+            <button mat-button>
+              <a routerLink="/student-finance" routerLinkActive="active"> Student Finance </a>
             </button>
           </div>
         </mat-expansion-panel>

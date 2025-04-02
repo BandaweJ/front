@@ -1,6 +1,7 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { FeesModel } from '../models/fees.model';
 import { HttpErrorResponse } from '@angular/common/http';
+import { StudentsModel } from 'src/app/registration/models/students.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -17,5 +18,13 @@ export const feesActions = createActionGroup({
     // deleteFee: props<{ id: number }>(),
     // deleteFeeSuccess: props<{ id: number }>(),
     // deleteFeeFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+export const billingActions = createActionGroup({
+  source: 'Student Finance Component',
+  events: {
+    fetchStudentsToBill: props<{ num: number; year: number }>(),
+    fetchStudentsToBillSuccess: props<{ studentsToBill: StudentsModel[] }>(),
+    fetchStudentsToBillFail: props<{ error: HttpErrorResponse }>(),
   },
 });

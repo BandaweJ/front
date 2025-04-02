@@ -1,3 +1,4 @@
+import { ROLES } from './../../registration/models/roles.enum';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
@@ -11,6 +12,8 @@ import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { AddEditFeesComponent } from './add-edit-fees/add-edit-fees.component';
 import { ConfirmDeleteDialogComponent } from 'src/app/confirm-delete-dialog/confirm-delete-dialog.component';
+import { SharedService } from 'src/app/shared.service';
+import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 @Component({
   selector: 'app-fees',
@@ -19,12 +22,15 @@ import { ConfirmDeleteDialogComponent } from 'src/app/confirm-delete-dialog/conf
 })
 export class FeesComponent implements OnInit {
   fees$ = this.store.select(selectFees);
+  user$ = this.store.select(selectUser);
+  role!: ROLES;
   public dataSource = new MatTableDataSource<FeesModel>();
 
   constructor(
     public title: Title,
     private store: Store,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public sharedService: SharedService
   ) {
     this.store.dispatch(feesActions.fetchFees());
   }
@@ -34,12 +40,16 @@ export class FeesComponent implements OnInit {
       // console.log('Fees data from store:', fees);
       this.dataSource.data = fees;
     });
+
+    this.user$.subscribe((usr) => {
+      if (usr?.role) this.role = usr.role;
+    });
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns: string[] = ['num', 'year', 'residence', 'amount', 'action'];
+  displayedColumns: string[] = ['amount', 'name', 'description', 'action'];
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
@@ -64,25 +74,4 @@ export class FeesComponent implements OnInit {
   openEditFeesDialog(fee: FeesModel) {
     this.dialog.open(AddEditFeesComponent, { data: fee });
   }
-
-  // deleteFees(id: number) {
-  //   const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-  //     width: '250px',
-  //     data: { message: 'Are you sure you want to delete this Fees?' },
-  //   });
-
-  //   dialogRef.afterClosed().subscribe((result) => {
-  //     if (result) {
-  //       // User confirmed, perform the delete operation
-  //       console.log('Fees deleted:', id);
-  //       // your delete logic here.
-  //       if (id) this.store.dispatch(feesActions.deleteFee({ id }));
-  //     } else {
-  //       // User canceled
-  //       dialogRef.close();
-  //     }
-  //   });
-
-  //   // console.log(fee);
-  // }
 }

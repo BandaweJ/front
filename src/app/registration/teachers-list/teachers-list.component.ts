@@ -66,7 +66,7 @@ export class TeachersListComponent implements OnInit, AfterViewInit {
     'role',
     'cell',
     'email',
-    'address',
+    // 'address',
 
     // 'active',
 

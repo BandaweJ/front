@@ -6,6 +6,7 @@ import { SignupInterface } from '../models/signup.model';
 import { resetErrorMessage, signup } from '../store/auth.actions';
 import { Observable } from 'rxjs';
 import { isLoading, selectErrorMsg } from '../store/auth.selectors';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 
 @Component({
   selector: 'app-signup',
@@ -41,7 +42,7 @@ export class SignupComponent implements OnInit {
 
   signupForm!: FormGroup;
   hide = true;
-  roles = ['teacher', 'parent', 'student'];
+  roles = [...Object.values(ROLES)];
   errorMsg$!: Observable<string>;
   isLoading$!: Observable<boolean>;
 

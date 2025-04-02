@@ -64,7 +64,7 @@ export class AuthService {
   checkTokenAndNavigate(): void {
     // console.log('here lies one whose name was writ in water');
     if (this.isTokenExpired()) {
-      console.log('water');
+      // console.log('water');
       this.router.navigate(['/signin']);
     } else {
       // console.log('fire');

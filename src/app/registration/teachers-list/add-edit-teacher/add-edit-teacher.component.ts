@@ -65,28 +65,10 @@ export class AddEditTeacherComponent implements OnInit {
 
     this.addTeacherForm.patchValue(this.data);
 
-    console.log(typeof this.data.active);
-    console.log(this.data.active);
-
     this.data.qualifications.map((item) => {
       const qual = new FormControl(item);
       this.qualifications.push(qual);
     });
-
-    // this.store.select(selectAddSuccess).subscribe((result) => {
-    //   if (result === true) {
-    //     this.snackBar.open('Teacher Added Successfully', '', {
-    //       duration: 3500,
-    //       verticalPosition: 'top',
-    //     });
-    //     this.dialogRef.close();
-    //   } else if (result === false) {
-    //     this.snackBar.open('Faied to add Teacher. Check errors shown', '', {
-    //       duration: 3500,
-    //       verticalPosition: 'top',
-    //     });
-    //   }
-    // });
 
     this.errorMsg$ = this.store.select(selectRegErrorMsg);
   }
@@ -146,15 +128,6 @@ export class AddEditTeacherComponent implements OnInit {
   addTeacher() {
     let teacher: TeachersModel = this.addTeacherForm.value;
 
-    // teacher.role = ROLES.teacher;
-    //capitalise name and surname
-    // teacher.name =
-    //   teacher.name.charAt(0).toUpperCase() +
-    //   teacher.name.substring(1).toLowerCase();
-    // teacher.surname =
-    //   teacher.surname.charAt(0).toUpperCase() +
-    //   teacher.surname.substring(1).toLowerCase();
-
     if (!teacher.dob) {
       teacher.dob = new Date().toISOString();
     }
@@ -169,7 +142,8 @@ export class AddEditTeacherComponent implements OnInit {
 
     if (this.data) {
       this.store.dispatch(editTeacherAction({ teacher }));
-      // console.log('called editTeacherAction with teacher: ', teacher);
+      console.log('current role is : ', this.data.role);
+      console.log('called editTeacherAction with teacher: ', teacher.role);
     }
     // console.log(teacher);
     else {

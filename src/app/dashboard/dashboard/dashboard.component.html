@@ -4,7 +4,7 @@
   <div class="error" *ngIf="authErrMsg$ | async">{{ authErrMsg$ | async }}</div>
 </mat-toolbar>
 <!--  -->
-<div class="summaries-row">
+<div class="summaries-row" *ngIf="role !== 'student'">
   <mat-card class="summaries-container" (click)="navigateToTeachersSummary()">
 
     <mat-icon class="icon summary-icon">school</mat-icon>
@@ -90,24 +90,13 @@
 
 
 
-  <div class="graphs-container">
+  <div class="graphs-container" *ngIf="role !== 'student'">
     <div class="enrolment-graph">
       <app-enrolment-chart></app-enrolment-chart>
     </div>
-    <div class="accounts-graph">
+    <!-- <div class="accounts-graph">
       <app-accounts-chart></app-accounts-chart>
-    </div>
+    </div> -->
   </div>
 </div>
 <div class="recent-activities"></div>
-
-<!-- <div class="attendance-summary">
-    <mat-card
-      class="piechart-container mat-elevation-z10"
-      *ngFor="let clas of classes$ | async"
-    >
-      <app-class-attendance-summary
-        [clas]="clas"
-      ></app-class-attendance-summary>
-    </mat-card>
-  </div> -->

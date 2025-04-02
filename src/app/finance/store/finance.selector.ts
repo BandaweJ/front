@@ -17,3 +17,8 @@ export const selectErrorMsg = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.errorMessage
 );
+
+export const selectStudentsToBill = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.studentsToBill
+);

@@ -1,16 +1,19 @@
 import { FeesModel } from '../models/fees.model';
 import { isLoading } from '../../auth/store/auth.selectors';
 import { createReducer, on } from '@ngrx/store';
-import { feesActions } from './finance.actions';
+import { billingActions, feesActions } from './finance.actions';
+import { StudentsModel } from 'src/app/registration/models/students.model';
 
 export interface State {
   fees: FeesModel[];
+  studentsToBill: StudentsModel[];
   isLoading: boolean;
   errorMessage: string;
 }
 
 export const initialState: State = {
   fees: [],
+  studentsToBill: [],
   isLoading: false,
   errorMessage: '',
 };
@@ -67,6 +70,27 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.message,
+  })),
+  on(billingActions.fetchStudentsToBill, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+    studentsToBill: [],
+  })),
+  on(
+    billingActions.fetchStudentsToBillSuccess,
+    (state, { studentsToBill }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: '',
+      studentsToBill,
+    })
+  ),
+  on(billingActions.fetchStudentsToBillFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+    studentsToBill: [],
   }))
 
   // on(feesActions.deleteFee, (state, { id }) => ({
