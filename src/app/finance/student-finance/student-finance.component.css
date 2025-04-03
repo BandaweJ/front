@@ -1,0 +1,14 @@
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.enrolment-invoice {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.billing-payment-container {
+  display: flex;
+  flex-flow: column nowrap;
+}

@@ -3,10 +3,11 @@ import { isLoading } from '../../auth/store/auth.selectors';
 import { createReducer, on } from '@ngrx/store';
 import { billingActions, feesActions } from './finance.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 
 export interface State {
   fees: FeesModel[];
-  studentsToBill: StudentsModel[];
+  studentsToBill: EnrolsModel[];
   isLoading: boolean;
   errorMessage: string;
 }

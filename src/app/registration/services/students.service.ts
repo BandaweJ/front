@@ -22,6 +22,7 @@ export class StudentsService {
   }
 
   deleteStudent(studentNumber: string): Observable<{ studentNumber: string }> {
+    console.log('Deleting student : ', studentNumber);
     return this.httpClient.delete<{ studentNumber: string }>(
       this.baseUrl + studentNumber
     );

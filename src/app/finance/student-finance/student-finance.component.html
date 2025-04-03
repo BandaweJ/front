@@ -1,3 +1,37 @@
-<app-students-to-bill [currentTerm]="currentTerm">
+<div class="container">
+  <mat-card class="students-to-bill-container">
+    <app-students-to-bill [currentTerm]="currentTerm" *ngIf="currentTerm"
+      (selectedEnrolChange)="selectedEnrolChanged($event)">
 
-</app-students-to-bill>
+    </app-students-to-bill>
+  </mat-card>
+  <mat-card class="student-details-container">
+    <app-student-enrolment-details *ngIf="selectedStudentEnrol" [studentEnrol]="selectedStudentEnrol">
+
+    </app-student-enrolment-details>
+  </mat-card>
+  <div class="enrolment-invoice">
+    <mat-card class="current-enrolment">
+      <app-current-enrolment>
+
+      </app-current-enrolment>
+    </mat-card>
+    <mat-card class="invoice-container">
+      <app-invoice>
+
+      </app-invoice>
+    </mat-card>
+  </div>
+  <div class="billing-payment-container">
+    <mat-card class="billing">
+      <app-billing>
+
+      </app-billing>
+    </mat-card>
+    <mat-card class="payment">
+      <app-payments>
+
+      </app-payments>
+    </mat-card>
+  </div>
+</div>

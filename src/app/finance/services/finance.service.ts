@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { FeesModel } from '../models/fees.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
@@ -31,8 +32,8 @@ export class FinanceService {
   getStudentsNotYetBilledForTerm(
     num: number,
     year: number
-  ): Observable<StudentsModel[]> {
-    return this.httpClient.get<StudentsModel[]>(
+  ): Observable<EnrolsModel[]> {
+    return this.httpClient.get<EnrolsModel[]>(
       `${this.baseURL}billing/tobill/${num}/${year}`
     );
   }

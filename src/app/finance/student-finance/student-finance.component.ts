@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tap } from 'rxjs';
+import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
 import { StudentsModel } from 'src/app/registration/models/students.model';
@@ -11,7 +12,7 @@ import { StudentsModel } from 'src/app/registration/models/students.model';
   styleUrls: ['./student-finance.component.css'],
 })
 export class StudentFinanceComponent implements OnInit {
-  selectedStudent!: StudentsModel;
+  selectedStudentEnrol: EnrolsModel | null = null;
   currentTerm!: TermsModel;
   today = new Date();
   constructor(private store: Store) {}
@@ -35,5 +36,10 @@ export class StudentFinanceComponent implements OnInit {
         )
       )
       .subscribe();
+  }
+
+  selectedEnrolChanged(enrol: EnrolsModel) {
+    this.selectedStudentEnrol = enrol;
+    // console.log(this.selectedStudentEnrol);
   }
 }

@@ -103,7 +103,7 @@ export class RegistrationEffects {
       ofType(fromRegistrationActions.deleteStudentAction),
       switchMap((data) =>
         this.studentsService.deleteStudent(data.studentNumber).pipe(
-          tap((student) =>
+          tap(() =>
             this.snackBar.open('Student Deleted Successfully', 'OK', {
               duration: 3000,
               verticalPosition: 'top',

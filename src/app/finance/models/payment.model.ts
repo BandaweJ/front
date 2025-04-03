@@ -1,4 +1,5 @@
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import { PaymentMethods } from './payment-methods.enum';
 
 export interface PaymentModel {
   receiptNumber?: number;
@@ -7,4 +8,5 @@ export interface PaymentModel {
   amount: number;
   description: string;
   paymentDate?: Date;
+  method: PaymentMethods;
 }
