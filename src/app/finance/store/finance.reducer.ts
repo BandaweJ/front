@@ -1,15 +1,17 @@
 import { FeesModel } from '../models/fees.model';
 import { isLoading } from '../../auth/store/auth.selectors';
 import { createReducer, on } from '@ngrx/store';
-import { billingActions, feesActions } from './finance.actions';
+import { billingActions, feesActions, invoiceActions } from './finance.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
+import { InvoiceModel } from '../models/invoice.model';
 
 export interface State {
   fees: FeesModel[];
   studentsToBill: EnrolsModel[];
   isLoading: boolean;
   errorMessage: string;
+  selectedStudentInvoice: InvoiceModel | null;
 }
 
 export const initialState: State = {
@@ -17,6 +19,7 @@ export const initialState: State = {
   studentsToBill: [],
   isLoading: false,
   errorMessage: '',
+  selectedStudentInvoice: null,
 };
 
 export const financeReducer = createReducer(
@@ -92,22 +95,23 @@ export const financeReducer = createReducer(
     isLoading: false,
     errorMessage: error.message,
     studentsToBill: [],
+  })),
+  on(invoiceActions.fetchInvoice, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+    selectedStudentInvoice: null,
+  })),
+  on(invoiceActions.fetchInvoiceSuccess, (state, { invoice }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    selectedStudentInvoice: invoice,
+  })),
+  on(invoiceActions.fetchInvoiceFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+    selectedStudentInvoice: null,
   }))
-
-  // on(feesActions.deleteFee, (state, { id }) => ({
-  //   ...state,
-  //   isLoading: true,
-  //   errorMessage: '',
-  // })),
-  // on(feesActions.deleteFeeSuccess, (state, { id }) => ({
-  //   ...state,
-  //   fees: [...state.fees.filter((f) => f.id != id)],
-  //   isLoading: false,
-  //   errorMessage: '',
-  // })),
-  // on(feesActions.deleteFeeFail, (state, { error }) => ({
-  //   ...state,
-  //   isLoading: false,
-  //   errorMessage: error.message,
-  // }))
 );

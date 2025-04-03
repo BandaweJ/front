@@ -10,14 +10,14 @@
 
     </app-student-enrolment-details>
   </mat-card>
-  <div class="enrolment-invoice">
+  <div class="enrolment-invoice" *ngIf="selectedStudentEnrol">
     <mat-card class="current-enrolment">
       <app-current-enrolment>
 
       </app-current-enrolment>
     </mat-card>
     <mat-card class="invoice-container">
-      <app-invoice>
+      <app-invoice [studentNumber]="selectedStudentEnrol.student.studentNumber">
 
       </app-invoice>
     </mat-card>

@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { FeesModel } from '../models/fees.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
+import { InvoiceModel } from '../models/invoice.model';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {

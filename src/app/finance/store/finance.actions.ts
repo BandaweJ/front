@@ -3,6 +3,7 @@ import { FeesModel } from '../models/fees.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
+import { InvoiceModel } from '../models/invoice.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -27,5 +28,13 @@ export const billingActions = createActionGroup({
     fetchStudentsToBill: props<{ num: number; year: number }>(),
     fetchStudentsToBillSuccess: props<{ studentsToBill: EnrolsModel[] }>(),
     fetchStudentsToBillFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+export const invoiceActions = createActionGroup({
+  source: 'Student Finance Component',
+  events: {
+    fetchInvoice: props<{ studentNumber: string }>(),
+    fetchInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
+    fetchInvoiceFail: props<{ error: HttpErrorResponse }>(),
   },
 });

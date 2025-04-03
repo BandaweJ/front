@@ -4,12 +4,14 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { FinanceService } from '../services/finance.service';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { billingActions, feesActions } from './finance.actions';
+import { billingActions, feesActions, invoiceActions } from './finance.actions';
+import { PaymentsService } from '../services/payments.service';
 @Injectable()
 export class FinanceEffects {
   constructor(
     private actions$: Actions,
     private financeService: FinanceService,
+    private paymentsService: PaymentsService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -129,37 +131,21 @@ export class FinanceEffects {
     )
   );
 
-  // deleteFees$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(fromFinanceActions.feesActions.deleteFee),
-  //     switchMap((data) =>
-  //       this.financeService.deleteFees(data.id).pipe(
-  //         tap(() =>
-  //           this.snackBar.open('Fees Deleted Successfully', 'OK', {
-  //             duration: 3000,
-  //             verticalPosition: 'top',
-  //             horizontalPosition: 'center',
-  //           })
-  //         ),
-  //         map((id) => {
-  //           // console.log(teacher);
-  //           return fromFinanceActions.feesActions.deleteFeeSuccess({
-  //             id,
-  //           });
-  //         }),
-  //         catchError((error: HttpErrorResponse) =>
-  //           of(fromFinanceActions.feesActions.deleteFeeFail({ ...error })).pipe(
-  //             tap(() =>
-  //               this.snackBar.open(error.message, 'OK', {
-  //                 duration: 3000,
-  //                 verticalPosition: 'top',
-  //                 horizontalPosition: 'center',
-  //               })
-  //             )
-  //           )
-  //         )
-  //       )
-  //     )
-  //   )
-  // );
+  fetchInvoice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.fetchInvoice),
+      switchMap((data) =>
+        this.paymentsService.getInvoice(data.studentNumber).pipe(
+          map((invoice) => {
+            return invoiceActions.fetchInvoiceSuccess({
+              invoice,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(invoiceActions.fetchInvoiceFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
 }
