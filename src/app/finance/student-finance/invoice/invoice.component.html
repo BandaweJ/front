@@ -1,5 +1,6 @@
+<!-- Bills Table -->
 <div class="bills-container" *ngIf="invoice$ | async">
-  <table mat-table [dataSource]="billsDataSource" class="mat-elevation-z8">
+  <table mat-table [dataSource]="billsDataSource" class="mat-elevation-z8" *ngIf="(invoice$ | async)?.bills?.length">
 
     <!--- Note that these columns can be defined in any order.
           The actual rendered columns are set as a property on the row definition" -->
@@ -8,6 +9,7 @@
     <ng-container matColumnDef="class">
       <th mat-header-cell *matHeaderCellDef> Class </th>
       <td mat-cell *matCellDef="let element"> {{element.enrolment?.name}} </td>
+      <td mat-footer-cell *matFooterCellDef> Total </td>
     </ng-container>
 
     <!-- Term Column -->
@@ -26,11 +28,64 @@
     <ng-container matColumnDef="amount">
       <th mat-header-cell *matHeaderCellDef> Amount </th>
       <td mat-cell *matCellDef="let element"> {{element?.fees?.amount}} </td>
+      <td mat-footer-cell *matFooterCellDef> {{getTotalBill() | currency}} </td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <tr mat-header-row *matHeaderRowDef="billsDisplayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: billsDisplayedColumns;"></tr>
+    <tr mat-footer-row *matFooterRowDef="billsDisplayedColumns"></tr>
   </table>
+
+  <div *ngIf="!(invoice$ | async)?.bills?.length">
+    <p>No Bills for selected student</p>
+  </div>
+</div>
+<div *ngIf="!(invoice$ | async)">
+  <p>No Student Selected Yet</p>
+</div>
+
+<!-- Payments Table -->
+<div class="payments-container" *ngIf="invoice$ | async">
+  <table mat-table [dataSource]="paymentsDataSource" class="mat-elevation-z8"
+    *ngIf="(invoice$ | async)?.payments?.length">
+
+    <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+
+    <!-- Date Column -->
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef> Date </th>
+      <td mat-cell *matCellDef="let element"> {{element.paymentDate | date}} </td>
+      <td mat-footer-cell *matFooterCellDef> Total </td>
+    </ng-container>
+
+    <!-- Receipt Number Column -->
+    <ng-container matColumnDef="receiptno">
+      <th mat-header-cell *matHeaderCellDef> Receipt No </th>
+      <td mat-cell *matCellDef="let element"> {{element.receiptNumber}} </td>
+    </ng-container>
+
+    <!-- Method Column -->
+    <ng-container matColumnDef="method">
+      <th mat-header-cell *matHeaderCellDef> Method </th>
+      <td mat-cell *matCellDef="let element"> {{ element?.method }} </td>
+    </ng-container>
+
+    <!-- Amount Column -->
+    <ng-container matColumnDef="amount">
+      <th mat-header-cell *matHeaderCellDef> Amount </th>
+      <td mat-cell *matCellDef="let element"> {{element?.amount}} </td>
+      <td mat-footer-cell *matFooterCellDef> {{getTotalPayments() | currency}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="paymentsDisplayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: paymentsDisplayedColumns;"></tr>
+    <tr mat-footer-row *matFooterRowDef="paymentsDisplayedColumns"></tr>
+  </table>
+
+  <div *ngIf="!(invoice$ | async)?.payments?.length">
+    <p>No Payments for selected student</p>
+  </div>
 </div>
 <div *ngIf="!(invoice$ | async)">
   <p>No Student Selected Yet</p>
