@@ -127,7 +127,7 @@
         </mat-expansion-panel>
 
         <!-- Finance -->
-        <mat-expansion-panel>
+        <mat-expansion-panel *ngIf="role === 'reception'">
           <mat-expansion-panel-header>
             <button mat-button>Finance</button>
           </mat-expansion-panel-header>
