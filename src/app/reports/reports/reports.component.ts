@@ -23,6 +23,8 @@ import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { viewReportsActions } from '../store/reports.actions';
+import { invoiceActions } from 'src/app/finance/store/finance.actions';
+import { selectedStudentInvoice } from 'src/app/finance/store/finance.selector';
 
 @Component({
   selector: 'app-reports',
@@ -41,6 +43,7 @@ export class ReportsComponent implements OnInit {
   id!: string;
   mode!: 'generate' | 'view';
   isLoading$ = this.store.select(selectIsLoading);
+  invoice$ = this.store.select(selectedStudentInvoice);
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
@@ -72,6 +75,8 @@ export class ReportsComponent implements OnInit {
       this.store.dispatch(
         viewReportsActions.fetchStudentReports({ studentNumber: this.id })
       );
+      const studentNumber = this.id;
+      this.store.dispatch(invoiceActions.fetchInvoice({ studentNumber }));
     }
   }
 

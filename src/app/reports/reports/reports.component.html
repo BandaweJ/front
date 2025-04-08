@@ -48,8 +48,8 @@
 
 <div class="student-reports-view" *ngIf="role === 'student'">
   <div class="side-panel">
-    <div class="balance">
-      Balance
+    <div class="balance" *ngIf="invoice$ | async as invoice">
+      <h3>{{ 'Balance : $' + invoice.balanceBfwd.amount }}</h3>
     </div>
     <app-current-enrolment>
 

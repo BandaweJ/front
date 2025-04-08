@@ -56,6 +56,59 @@ export class ReportsService {
     );
   }
 
+  // downloadReport(
+  //   name: string,
+  //   num: number,
+  //   year: number,
+  //   examType: string,
+  //   studentNumber: string
+  // ) {
+  //   const result = this.httpClient.get(
+  //     `${this.baseUrl}pdf/${name}/${num}/${year}/${examType}/${studentNumber}`,
+  //     {
+  //       observe: 'response',
+  //       responseType: 'blob',
+  //     }
+  //   );
+
+  //   result.subscribe((response: HttpResponse<Blob>) => {
+  //     this.handlePdfResponse(response);
+  //   });
+
+  //   return result;
+  // }
+
+  // handlePdfResponse(response: HttpResponse<Blob>) {
+  //   // Check for successful response
+  //   if (response.status === 200) {
+  //     const filename = response.headers
+  //       .get('Content-Disposition')
+  //       ?.split('filename=')[1];
+  //     const blob = response.body;
+
+  //     // Option 1: Save the PDF to disk (requires additional libraries)
+  //     // Use a library like FileSaver.js to save the blob to the user's device.
+
+  //     // Option 2: Open the PDF in a new browser tab/window
+  //     const link = document.createElement('a');
+  //     if (blob) {
+  //       link.href = window.URL.createObjectURL(blob);
+  //       link.target = '_blank';
+  //       if (filename) {
+  //         link.download = filename; // Only set download if filename is available
+  //       }
+  //       link.click();
+  //       link.remove();
+  //       window.URL.revokeObjectURL(link.href); // release the blob object
+  //     }
+
+  //     // link.download = filename || 'report.pdf'; // Set default filename if not provided
+  //   } else {
+  //     console.error('Error downloading PDF:', response.statusText);
+  //     // Handle potential errors
+  //   }
+  // }
+
   downloadReport(
     name: string,
     num: number,
@@ -81,28 +134,29 @@ export class ReportsService {
   handlePdfResponse(response: HttpResponse<Blob>) {
     // Check for successful response
     if (response.status === 200) {
-      const filename = response.headers
-        .get('Content-Disposition')
-        ?.split('filename=')[1];
+      let filename = 'report.pdf'; // Default filename
+      const contentDisposition = response.headers.get('Content-Disposition');
+
+      if (contentDisposition && contentDisposition.includes('filename=')) {
+        filename = contentDisposition
+          .split('filename=')[1]
+          .split(';')[0]
+          .trim()
+          .replace(/"/g, '');
+      }
+
       const blob = response.body;
 
-      // Option 1: Save the PDF to disk (requires additional libraries)
-      // Use a library like FileSaver.js to save the blob to the user's device.
-
-      // Option 2: Open the PDF in a new browser tab/window
+      // Option 2: Open the PDF in a new browser tab/window and enable saving with a default filename
       const link = document.createElement('a');
       if (blob) {
         link.href = window.URL.createObjectURL(blob);
         link.target = '_blank';
-        if (filename) {
-          link.download = filename; // Only set download if filename is available
-        }
+        link.download = filename; // Always set a filename for saving
         link.click();
         link.remove();
         window.URL.revokeObjectURL(link.href); // release the blob object
       }
-
-      // link.download = filename || 'report.pdf'; // Set default filename if not provided
     } else {
       console.error('Error downloading PDF:', response.statusText);
       // Handle potential errors

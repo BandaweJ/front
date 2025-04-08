@@ -75,3 +75,12 @@ form {
 .side-panel {
   width: 300px;
 }
+
+.balance {
+  padding: 2rem;
+  color: white;
+  background-color: teal;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
