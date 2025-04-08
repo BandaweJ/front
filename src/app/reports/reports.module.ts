@@ -9,6 +9,8 @@ import { ReportsComponent } from './reports/reports.component';
 import { reportsReducer } from './store/reports.reducer';
 import { ReportsEffects } from './store/reports.effects';
 import { ReportComponent } from './report/report.component';
+import { FinanceModule } from '../finance/finance.module';
+// import { PaymentModule } from '../';
 
 @NgModule({
   declarations: [ReportsComponent, ReportComponent],
@@ -17,6 +19,7 @@ import { ReportComponent } from './report/report.component';
     MaterialModule,
     RouterModule,
     ReactiveFormsModule,
+    FinanceModule,
     StoreModule.forFeature('reports', reportsReducer),
     EffectsModule.forFeature([ReportsEffects]),
   ],

@@ -93,7 +93,8 @@
             [value]="report.report.headComment ? report.report.headComment : '' "></textarea>
         </mat-form-field>
         <p *ngIf="report.report.headComment && !editState" class="edit-button">{{ report.report.headComment }}
-          <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleEditState()">
+          <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleEditState()"
+            *ngIf="role !== 'student'">
             <mat-icon>edit</mat-icon>
           </button>
         </p>

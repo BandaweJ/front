@@ -6,6 +6,7 @@ import { FeesModel } from '../models/fees.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
+import { BalancesModel } from '../models/balances.model';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
@@ -36,6 +37,13 @@ export class FinanceService {
   ): Observable<EnrolsModel[]> {
     return this.httpClient.get<EnrolsModel[]>(
       `${this.baseURL}billing/tobill/${num}/${year}`
+    );
+  }
+
+  createFeesBalance(balance: BalancesModel): Observable<BalancesModel> {
+    return this.httpClient.post<BalancesModel>(
+      `${this.baseURL}fees/balance/`,
+      balance
     );
   }
 }

@@ -31,10 +31,12 @@ export class ReportsService {
     name: string,
     num: number,
     year: number,
+    examType: ExamType,
     reports: ReportsModel[]
   ): Observable<ReportsModel[]> {
+    // console.log(name, num, year, examType, reports.length);
     return this.httpClient.post<ReportsModel[]>(
-      `${this.baseUrl}save/${name}/${num}/${year}/`,
+      `${this.baseUrl}save/${name}/${num}/${year}/${examType}`,
       reports
     );
   }
@@ -46,10 +48,11 @@ export class ReportsService {
   viewReports(
     name: string,
     num: number,
-    year: number
+    year: number,
+    examType: ExamType
   ): Observable<ReportsModel[]> {
     return this.httpClient.get<ReportsModel[]>(
-      `${this.baseUrl}view/${name}/${num}/${year}/`
+      `${this.baseUrl}view/${name}/${num}/${year}/${examType}`
     );
   }
 
@@ -104,5 +107,11 @@ export class ReportsService {
       console.error('Error downloading PDF:', response.statusText);
       // Handle potential errors
     }
+  }
+
+  getStudentReports(studentNumber: string): Observable<ReportsModel[]> {
+    return this.httpClient.get<ReportsModel[]>(
+      `${this.baseUrl}view/${studentNumber}`
+    );
   }
 }

@@ -4,7 +4,12 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { FinanceService } from '../services/finance.service';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { billingActions, feesActions, invoiceActions } from './finance.actions';
+import {
+  balancesActions,
+  billingActions,
+  feesActions,
+  invoiceActions,
+} from './finance.actions';
 import { PaymentsService } from '../services/payments.service';
 @Injectable()
 export class FinanceEffects {
@@ -143,6 +148,37 @@ export class FinanceEffects {
           }),
           catchError((error: HttpErrorResponse) =>
             of(invoiceActions.fetchInvoiceFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
+  addBalance$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(balancesActions.saveBalance),
+      switchMap((data) =>
+        this.financeService.createFeesBalance(data.balance).pipe(
+          tap(() =>
+            this.snackBar.open('Balance Added Successfully', 'OK', {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            })
+          ),
+          map((balance) => {
+            return balancesActions.saveBalanceSuccess({ balance });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(balancesActions.saveBalanceFail({ ...error })).pipe(
+              tap(() =>
+                this.snackBar.open(error.error.message, 'OK', {
+                  duration: 3000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                })
+              )
+            )
           )
         )
       )

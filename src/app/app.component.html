@@ -15,7 +15,7 @@
       </button>
       <mat-accordion>
         <!-- Registration -->
-        <mat-expansion-panel *ngIf="role === 'admin' || role === 'reception' || 'teacher'">
+        <mat-expansion-panel *ngIf="role === 'admin' || role === 'reception'">
           <mat-expansion-panel-header>
             <button mat-button>Registration</button>
           </mat-expansion-panel-header>
@@ -127,7 +127,7 @@
         </mat-expansion-panel>
 
         <!-- Finance -->
-        <mat-expansion-panel *ngIf="role === 'reception'">
+        <mat-expansion-panel>
           <mat-expansion-panel-header>
             <button mat-button>Finance</button>
           </mat-expansion-panel-header>
@@ -136,14 +136,24 @@
               <a routerLink="/fees" routerLinkActive="active"> Fees </a>
             </button>
           </div>
-          <div class="sidenav-container" *ngIf="role === 'reception' || 'reception'">
+          <div class="sidenav-container" *ngIf="role === 'reception' || 'admin'">
             <button mat-button>
               <a routerLink="/payments" routerLinkActive="active"> Payments </a>
             </button>
           </div>
-          <div class="sidenav-container">
+          <div class="sidenav-container" *ngIf="role === 'reception' || 'admin'">
             <button mat-button>
               <a routerLink="/student-finance" routerLinkActive="active"> Student Finance </a>
+            </button>
+          </div>
+          <div class="sidenav-container" *ngIf="role === 'student' || role === 'admin'">
+            <button mat-button>
+              <a routerLink="/invoice" routerLinkActive="active"> Invoice </a>
+            </button>
+          </div>
+          <div class="sidenav-container" *ngIf="role === 'reception' || role === 'admin'">
+            <button mat-button>
+              <a routerLink="/balances" routerLinkActive="active"> Student Balances </a>
             </button>
           </div>
         </mat-expansion-panel>

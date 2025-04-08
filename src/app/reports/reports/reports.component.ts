@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
@@ -14,9 +14,15 @@ import {
 } from 'src/app/enrolment/store/enrolment.selectors';
 import * as reportsActions from '../store/reports.actions';
 import { ReportsModel } from '../models/reports.model';
-import { selectIsLoading, selectReports } from '../store/reports.selectors';
+import {
+  selectIsLoading,
+  selectReports,
+  selectStudentReports,
+} from '../store/reports.selectors';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
+import { ROLES } from 'src/app/registration/models/roles.enum';
+import { viewReportsActions } from '../store/reports.actions';
 
 @Component({
   selector: 'app-reports',
@@ -27,9 +33,12 @@ export class ReportsComponent implements OnInit {
   reportsForm!: FormGroup;
   terms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
-  reports$!: Observable<ReportsModel[]>;
+  // reports$: Observable<ReportsModel[]> = this.store.select(selectReports);
+  reports$ = this.store.pipe(select(selectReports));
+  studentReports$ = this.store.select(selectStudentReports);
   reports!: ReportsModel[];
   role = '';
+  id!: string;
   mode!: 'generate' | 'view';
   isLoading$ = this.store.select(selectIsLoading);
 
@@ -55,8 +64,15 @@ export class ReportsComponent implements OnInit {
     this.store.select(selectUser).subscribe((user) => {
       if (user) {
         this.role = user.role;
+        this.id = user.id;
       }
     });
+
+    if (this.role === ROLES.student) {
+      this.store.dispatch(
+        viewReportsActions.fetchStudentReports({ studentNumber: this.id })
+      );
+    }
   }
 
   get term() {
@@ -95,24 +111,37 @@ export class ReportsComponent implements OnInit {
     const term: TermsModel = this.term?.value;
     const num = term.num;
     const year = term.year;
+    const examType = this.examType?.value;
 
     this.store.dispatch(
-      reportsActions.saveReportActions.saveReports({ name, num, year, reports })
+      reportsActions.saveReportActions.saveReports({
+        name,
+        num,
+        year,
+        reports,
+        examType,
+      })
     );
   }
 
   viewReports() {
-    this.mode = 'view';
-    const reports = this.reports;
+    // this.mode = 'view';
+    // const reports = this.reports;
 
     const name = this.clas?.value;
 
     const term: TermsModel = this.term?.value;
     const num = term.num;
     const year = term.year;
+    const examType = this.examType?.value;
 
     this.store.dispatch(
-      reportsActions.viewReportsActions.viewReports({ name, num, year })
+      reportsActions.viewReportsActions.viewReports({
+        name,
+        num,
+        year,
+        examType,
+      })
     );
   }
 }

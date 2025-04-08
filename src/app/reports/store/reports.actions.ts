@@ -33,6 +33,7 @@ export const saveReportActions = createActionGroup({
       num: number;
       year: number;
       reports: ReportsModel[];
+      examType: ExamType;
     }>(),
     saveReportsSuccess: props<{ reports: ReportsModel[] }>(),
     saveReportsFail: props<{ error: HttpErrorResponse }>(),
@@ -42,9 +43,17 @@ export const saveReportActions = createActionGroup({
 export const viewReportsActions = createActionGroup({
   source: 'Reports Component',
   events: {
-    viewReports: props<{ name: string; num: number; year: number }>(),
+    viewReports: props<{
+      name: string;
+      num: number;
+      year: number;
+      examType: ExamType;
+    }>(),
     viewReportsSuccess: props<{ reports: ReportsModel[] }>(),
     viewReportsFail: props<{ error: HttpErrorResponse }>(),
+    fetchStudentReports: props<{ studentNumber: string }>(),
+    fetchStudentReportsSuccess: props<{ reports: ReportsModel[] }>(),
+    fetchStudentReportsFail: props<{ error: HttpErrorResponse }>(),
   },
 });
 

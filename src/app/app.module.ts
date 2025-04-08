@@ -24,9 +24,14 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { AuthService } from './auth/auth.service';
 import { FinanceModule } from './finance/finance.module';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog/confirm-delete-dialog.component';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
-  declarations: [AppComponent, ProfileButtonsComponent, ConfirmDeleteDialogComponent],
+  declarations: [
+    AppComponent,
+    ProfileButtonsComponent,
+    ConfirmDeleteDialogComponent,
+  ],
   imports: [
     HttpClientModule,
     FormsModule,
@@ -44,6 +49,7 @@ import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog/confirm-de
     AppRoutingModule,
     BrowserAnimationsModule,
     NgChartsModule,
+    SharedModule,
     StoreModule.forRoot({}),
     StoreDevtoolsModule.instrument({
       maxAge: 25,

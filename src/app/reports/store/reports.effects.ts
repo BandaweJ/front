@@ -48,7 +48,13 @@ export class ReportsEffects {
       ofType(reportsActions.saveReportActions.saveReports),
       switchMap((data) =>
         this.reportsService
-          .saveReports(data.name, data.num, data.year, data.reports)
+          .saveReports(
+            data.name,
+            data.num,
+            data.year,
+            data.examType,
+            data.reports
+          )
           .pipe(
             map((reports) =>
               reportsActions.saveReportActions.saveReportsSuccess({ reports })
@@ -65,12 +71,36 @@ export class ReportsEffects {
     this.actions$.pipe(
       ofType(reportsActions.viewReportsActions.viewReports),
       switchMap((data) =>
-        this.reportsService.viewReports(data.name, data.num, data.year).pipe(
+        this.reportsService
+          .viewReports(data.name, data.num, data.year, data.examType)
+          .pipe(
+            map((reports) =>
+              reportsActions.viewReportsActions.viewReportsSuccess({ reports })
+            ),
+            catchError((error: HttpErrorResponse) =>
+              of(reportsActions.saveReportActions.saveReportsFail({ ...error }))
+            )
+          )
+      )
+    )
+  );
+
+  fetchStudentReports$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(reportsActions.viewReportsActions.fetchStudentReports),
+      switchMap((data) =>
+        this.reportsService.getStudentReports(data.studentNumber).pipe(
           map((reports) =>
-            reportsActions.viewReportsActions.viewReportsSuccess({ reports })
+            reportsActions.viewReportsActions.fetchStudentReportsSuccess({
+              reports,
+            })
           ),
           catchError((error: HttpErrorResponse) =>
-            of(reportsActions.saveReportActions.saveReportsFail({ ...error }))
+            of(
+              reportsActions.viewReportsActions.fetchStudentReportsFail({
+                ...error,
+              })
+            )
           )
         )
       )

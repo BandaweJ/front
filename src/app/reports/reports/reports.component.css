@@ -68,3 +68,10 @@ form {
   height: auto;
   display: block;
 }
+
+.student-reports-view {
+  display: flex;
+}
+.side-panel {
+  width: 300px;
+}

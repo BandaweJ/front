@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
+import { BalancesModel } from '../models/balances.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -36,5 +37,14 @@ export const invoiceActions = createActionGroup({
     fetchInvoice: props<{ studentNumber: string }>(),
     fetchInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     fetchInvoiceFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+
+export const balancesActions = createActionGroup({
+  source: 'Balances Component',
+  events: {
+    saveBalance: props<{ balance: BalancesModel }>(),
+    saveBalanceSuccess: props<{ balance: BalancesModel }>(),
+    saveBalanceFail: props<{ error: HttpErrorResponse }>(),
   },
 });

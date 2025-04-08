@@ -1,1 +1,21 @@
-<p>billing works!</p>
+<mat-card *ngIf="enrolment &&(fees$ | async) as fees">
+  <mat-card-title>
+    Select Fees to Bill Student
+  </mat-card-title>
+  <mat-card-content>
+    <mat-chip-listbox class="chip-list">
+      <mat-chip *ngFor="let fee of fees" [value]="fee" (click)="addToBill(fee)" selectable>
+        {{ fee.name + ' ' + fee.amount }}
+        <mat-icon *ngIf="isSelected(fee)">check</mat-icon>
+      </mat-chip>
+    </mat-chip-listbox>
+    <div *ngIf="!fees">
+      No Fees To Display
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-button color="primary">
+      Bill Student
+    </button>
+  </mat-card-actions>
+</mat-card>

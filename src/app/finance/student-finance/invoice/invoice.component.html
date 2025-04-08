@@ -1,6 +1,6 @@
 <!-- Bills Table -->
-<div class="bills-container" *ngIf="invoice$ | async">
-  <table mat-table [dataSource]="billsDataSource" class="mat-elevation-z8" *ngIf="(invoice$ | async)?.bills?.length">
+<div class="bills-container" *ngIf="invoice$ | async as invoice">
+  <table mat-table [dataSource]="billsDataSource" class="mat-elevation-z8" *ngIf="invoice?.bills?.length">
 
     <!--- Note that these columns can be defined in any order.
           The actual rendered columns are set as a property on the row definition" -->
@@ -36,7 +36,7 @@
     <tr mat-footer-row *matFooterRowDef="billsDisplayedColumns"></tr>
   </table>
 
-  <div *ngIf="!(invoice$ | async)?.bills?.length">
+  <div *ngIf="!invoice?.bills?.length">
     <p>No Bills for selected student</p>
   </div>
 </div>

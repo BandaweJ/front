@@ -7,6 +7,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { BillModel } from '../../models/bill.model';
 import { SharedService } from 'src/app/shared.service';
 import { PaymentModel } from '../../models/payment.model';
+import { BalancesModel } from '../../models/balances.model';
 
 @Component({
   selector: 'app-invoice',
@@ -18,6 +19,7 @@ export class InvoiceComponent implements OnInit {
   invoice$ = this.store.select(selectedStudentInvoice);
   totalBill: number = 0;
   totalPayments: number = 0;
+  balanceBfwd: BalancesModel | undefined = undefined;
 
   constructor(private store: Store, public sharedService: SharedService) {}
 
@@ -36,6 +38,7 @@ export class InvoiceComponent implements OnInit {
           return total;
         }, 0);
       }
+      this.balanceBfwd = invoice?.balanceBfwd;
     });
   }
 

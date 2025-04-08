@@ -5,19 +5,21 @@ import { ReportModel } from '../models/report.model';
 
 export interface State {
   reports: ReportsModel[];
+  studentReports: ReportsModel[];
   isLoading: boolean;
   errorMessage: string;
 }
 
 export const initialState: State = {
   reports: [],
+  studentReports: [],
   isLoading: false,
   errorMessage: '',
 };
 
 export const reportsReducer = createReducer(
   initialState,
-  on(reportsActions.generateReports, (state, { name, num, year }) => ({
+  on(reportsActions.generateReports, (state) => ({
     ...state,
     isLoading: true,
   })),
@@ -31,7 +33,7 @@ export const reportsReducer = createReducer(
     isLoading: false,
     errorMessage: error.message,
   })),
-  on(reportsActions.saveReportActions.saveReports, (state, { reports }) => ({
+  on(reportsActions.saveReportActions.saveReports, (state) => ({
     ...state,
     isLoading: true,
     reports: [],
@@ -49,14 +51,11 @@ export const reportsReducer = createReducer(
     isLoading: false,
     errorMessage: error.message,
   })),
-  on(
-    reportsActions.viewReportsActions.viewReports,
-    (state, { name, num, year }) => ({
-      ...state,
-      isLoading: true,
-      reports: [],
-    })
-  ),
+  on(reportsActions.viewReportsActions.viewReports, (state) => ({
+    ...state,
+    isLoading: true,
+    reports: [],
+  })),
   on(
     reportsActions.viewReportsActions.viewReportsSuccess,
     (state, { reports }) => ({
@@ -107,6 +106,32 @@ export const reportsReducer = createReducer(
   on(reportsActions.generatePdfActions.generatePdfSuccess, (state) => ({
     ...state,
     isLoading: false,
-  }))
+  })),
+  on(reportsActions.viewReportsActions.fetchStudentReports, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+    reports: [],
+  })),
+  on(
+    reportsActions.viewReportsActions.fetchStudentReportsSuccess,
+    (state, { reports }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: '',
+      reports: [],
+      studentReports: [...reports],
+    })
+  ),
+  on(
+    reportsActions.viewReportsActions.fetchStudentReportsFail,
+    (state, { error }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: error.message,
+      reports: [],
+      studentReports: [],
+    })
+  )
   // on(reportsActions.saveHeadCommentActions.saveHeadCommentSuccess, (state))
 );

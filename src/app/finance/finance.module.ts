@@ -16,6 +16,9 @@ import { StudentEnrolmentDetailsComponent } from './student-finance/student-enro
 import { CurrentEnrolmentComponent } from './student-finance/current-enrolment/current-enrolment.component';
 import { InvoiceComponent } from './student-finance/invoice/invoice.component';
 import { BillingComponent } from './student-finance/billing/billing.component';
+import { StudentBalancesComponent } from './student-balances/student-balances.component';
+import { SharedModule } from '../shared/shared.module';
+import { AddEditBalancesComponent } from './student-balances/add-edit-balances/add-edit-balances.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +31,8 @@ import { BillingComponent } from './student-finance/billing/billing.component';
     CurrentEnrolmentComponent,
     InvoiceComponent,
     BillingComponent,
+    StudentBalancesComponent,
+    AddEditBalancesComponent,
   ],
   imports: [
     CommonModule,
@@ -35,8 +40,10 @@ import { BillingComponent } from './student-finance/billing/billing.component';
     RouterModule,
     ReactiveFormsModule,
     FormsModule,
+    SharedModule,
     StoreModule.forFeature('finance', financeReducer),
     EffectsModule.forFeature([FinanceEffects]),
   ],
+  exports: [CurrentEnrolmentComponent, StudentEnrolmentDetailsComponent],
 })
 export class FinanceModule {}

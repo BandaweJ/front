@@ -1,10 +1,16 @@
 import { FeesModel } from '../models/fees.model';
 import { isLoading } from '../../auth/store/auth.selectors';
 import { createReducer, on } from '@ngrx/store';
-import { billingActions, feesActions, invoiceActions } from './finance.actions';
+import {
+  balancesActions,
+  billingActions,
+  feesActions,
+  invoiceActions,
+} from './finance.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
+import { BalancesModel } from '../models/balances.model';
 
 export interface State {
   fees: FeesModel[];
@@ -12,6 +18,7 @@ export interface State {
   isLoading: boolean;
   errorMessage: string;
   selectedStudentInvoice: InvoiceModel | null;
+  balance: BalancesModel | null;
 }
 
 export const initialState: State = {
@@ -20,6 +27,7 @@ export const initialState: State = {
   isLoading: false,
   errorMessage: '',
   selectedStudentInvoice: null,
+  balance: null,
 };
 
 export const financeReducer = createReducer(
@@ -113,5 +121,23 @@ export const financeReducer = createReducer(
     isLoading: false,
     errorMessage: error.message,
     selectedStudentInvoice: null,
+  })),
+  on(balancesActions.saveBalance, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+    balance: null,
+  })),
+  on(balancesActions.saveBalanceSuccess, (state, { balance }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    balance,
+  })),
+  on(balancesActions.saveBalanceFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+    balance: null,
   }))
 );
