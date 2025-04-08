@@ -56,7 +56,11 @@ export class ReportsComponent implements OnInit {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
     this.reports$ = this.store.select(selectReports);
-    this.reports$.subscribe((reps) => (this.reports = reps));
+    this.reports$.subscribe((reps) => {
+      this.reports = reps;
+      if (reps)
+        console.log('first head comment is : ', reps[0].report.headComment);
+    });
 
     this.reportsForm = new FormGroup({
       term: new FormControl('', [Validators.required]),

@@ -35,8 +35,8 @@
       <button mat-flat-button color="primary" [disabled]="reportsForm.invalid" (click)="generate()">
         Generate
       </button>
-      <button mat-flat-button color="accent" (click)="saveReports()" [disabled]="reportsForm.invalid">Save</button>
-      <button mat-flat-button color="primary" (click)="viewReports()" [disabled]="reportsForm.invalid">View</button>
+      <!-- <button mat-flat-button color="accent" (click)="saveReports()" [disabled]="reportsForm.invalid">Save</button>
+      <button mat-flat-button color="primary" (click)="viewReports()" [disabled]="reportsForm.invalid">View</button> -->
     </div>
   </div>
   <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
