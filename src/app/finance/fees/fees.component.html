@@ -10,7 +10,7 @@
   <div class="add">
     <div class="add-btn">
       <button type="button" mat-mini-fab color="primary" (click)="openAddFeesDialog()"
-        *ngIf="role === 'reception' || 'admin'">
+        *ngIf="role === 'reception' || role === 'admin'">
         <mat-icon>add</mat-icon>
       </button>
     </div>
@@ -38,7 +38,7 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Action</th>
         <td mat-cell *matCellDef="let row" class="btns">
           <button mat-icon-button color="primary" (click)="openEditFeesDialog(row)"
-            *ngIf="role === 'reception' || 'admin'">
+            *ngIf="role === 'reception' || role === 'admin'">
             <mat-icon>edit</mat-icon>
           </button>
           <!-- <button mat-icon-button color="warn" (click)="deleteFees(row.id)">

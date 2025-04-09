@@ -15,6 +15,9 @@ import {
   selectTerms,
   selectTotalEnroment,
 } from 'src/app/enrolment/store/enrolment.selectors';
+import { InvoiceModel } from 'src/app/finance/models/invoice.model';
+import { invoiceActions } from 'src/app/finance/store/finance.actions';
+import { selectedStudentInvoice } from 'src/app/finance/store/finance.selector';
 import { SubjectsModel } from 'src/app/marks/models/subjects.model';
 import { fetchSubjects } from 'src/app/marks/store/marks.actions';
 import { selectSubjects } from 'src/app/marks/store/marks.selectors';
@@ -30,6 +33,10 @@ import {
   selectStudents,
   selectTeachers,
 } from 'src/app/registration/store/registration.selectors';
+import { ReportModel } from 'src/app/reports/models/report.model';
+import { ReportsModel } from 'src/app/reports/models/reports.model';
+import { viewReportsActions } from 'src/app/reports/store/reports.actions';
+import { selectStudentReports } from 'src/app/reports/store/reports.selectors';
 
 @Component({
   selector: 'app-dashboard',
@@ -40,15 +47,21 @@ export class DashboardComponent implements OnInit {
   authErrMsg$ = this.store.select(selectErrorMsg);
 
   teachers$ = this.store.select(selectTeachers);
+  invoice$ = this.store.select(selectedStudentInvoice);
+
+  studentReports$ = this.store.select(selectStudentReports);
 
   students$ = this.store.select(selectStudents);
   classes$ = this.store.select(selectClasses);
   subjects$ = this.store.select(selectSubjects);
   enrolsSummary$ = this.store.select(selectTotalEnroment);
+  selectedReport: ReportsModel | null = null;
   user$ = this.store.select(selectUser);
   role!: ROLES;
+  id: string = '';
   currentTermNum!: number;
   currentTermYear!: number;
+  invoice!: InvoiceModel;
 
   maleTeachers!: number;
   femaleTeachers!: number;
@@ -91,6 +104,12 @@ export class DashboardComponent implements OnInit {
       )
       .subscribe();
 
+    this.invoice$.subscribe((inv) => {
+      if (inv) {
+        this.invoice = inv;
+      }
+    });
+
     this.store
       .select(selectTerms)
       .pipe(
@@ -114,12 +133,20 @@ export class DashboardComponent implements OnInit {
         )
       )
       .subscribe();
-    this.user$.subscribe((usr) => {
-      if (usr?.role) {
-        this.role = usr.role;
-        console.log('User is a : ', this.role);
+    this.user$.subscribe((user) => {
+      if (user) {
+        this.role = user.role;
+        this.id = user.id;
       }
     });
+
+    if (this.role === ROLES.student) {
+      this.store.dispatch(
+        viewReportsActions.fetchStudentReports({ studentNumber: this.id })
+      );
+      const studentNumber = this.id;
+      this.store.dispatch(invoiceActions.fetchInvoice({ studentNumber }));
+    }
   }
 
   navigateToTeachersSummary() {
@@ -133,6 +160,9 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  changeSelectedReport(report: ReportsModel) {
+    this.selectedReport = report;
+  }
   navigateToStudentsSummary() {
     switch (this.role) {
       case ROLES.admin:

@@ -105,3 +105,48 @@ mat-chip mat-icon {
 .enrolment-graph app-enrolment-chart {
   max-height: 60vh;
 }
+
+.student-widgets {
+  width: 100%;
+  display: flex;
+}
+
+.balance {
+  padding: 1rem;
+  background-color: teal;
+  color: white;
+}
+
+.widget {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1; /* Allow items to grow and take up available space */
+  flex-basis: 0; /* Initially, don't take up any fixed space */
+}
+
+.enrolment {
+  padding: 1rem;
+  background-color: #157145;
+  color: white;
+}
+
+.student-reports {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.reports-pills {
+  display: flex;
+}
+
+.pay-up {
+  padding: 1rem;
+  background-color: rgb(153, 51, 88);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+}

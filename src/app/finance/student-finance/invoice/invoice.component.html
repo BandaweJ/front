@@ -1,7 +1,18 @@
 <!-- Bills Table -->
+
 <div class="bills-container" *ngIf="invoice$ | async as invoice">
   <table mat-table [dataSource]="billsDataSource" class="mat-elevation-z8" *ngIf="invoice?.bills?.length">
 
+    <ng-container matColumnDef="balanceBroughtForward">
+      <th mat-header-cell *matHeaderCellDef colspan="billsDisplayedColumns.length">
+        Balance Brought Forward
+      </th>
+      <td mat-cell *matCellDef="let element" colspan="billsDisplayedColumns.length">
+        {{ invoice.balanceBfwd.amount | currency }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="['balanceBroughtForward']"></tr>
     <!--- Note that these columns can be defined in any order.
           The actual rendered columns are set as a property on the row definition" -->
 
@@ -28,7 +39,7 @@
     <ng-container matColumnDef="amount">
       <th mat-header-cell *matHeaderCellDef> Amount </th>
       <td mat-cell *matCellDef="let element"> {{element?.fees?.amount}} </td>
-      <td mat-footer-cell *matFooterCellDef> {{getTotalBill() | currency}} </td>
+      <td mat-footer-cell *matFooterCellDef> {{ totalBill | currency}} </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="billsDisplayedColumns"></tr>
@@ -38,6 +49,7 @@
 
   <div *ngIf="!invoice?.bills?.length">
     <p>No Bills for selected student</p>
+    <p>{{ 'Balance Brought Foward : ' + invoice.balanceBfwd.amount }}</p>
   </div>
 </div>
 <div *ngIf="!(invoice$ | async)">
@@ -75,7 +87,7 @@
     <ng-container matColumnDef="amount">
       <th mat-header-cell *matHeaderCellDef> Amount </th>
       <td mat-cell *matCellDef="let element"> {{element?.amount}} </td>
-      <td mat-footer-cell *matFooterCellDef> {{getTotalPayments() | currency}} </td>
+      <td mat-footer-cell *matFooterCellDef> {{ totalPayments | currency}} </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="paymentsDisplayedColumns"></tr>

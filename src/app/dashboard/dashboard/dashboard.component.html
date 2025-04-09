@@ -86,17 +86,40 @@
 
 
 <!--  -->
-<div class="container">
 
 
 
-  <div class="graphs-container" *ngIf="role !== 'student'">
-    <div class="enrolment-graph">
-      <app-enrolment-chart></app-enrolment-chart>
+
+<div *ngIf="role === 'student'">
+  <div class="student-widgets">
+    <div class="balance widget" *ngIf="invoice">
+      <h3>{{ 'Balance : $' + invoice.balanceBfwd.amount }}</h3>
     </div>
-    <!-- <div class="accounts-graph">
+    <app-current-enrolment class="widget enrolment">
+
+    </app-current-enrolment>
+  </div>
+  <div class="student-reports" *ngIf="studentReports$ | async as studentReports">
+    <div class="reports-pills">
+      <mat-chip-listbox [(ngModel)]="selectedReport" *ngIf="studentReports.length" class="chip-list">
+        <mat-chip *ngFor="let report of studentReports" [value]="report" (click)="changeSelectedReport(report)">
+          {{ report.examType + ' ' + report.num + ', ' + report.year }}
+          <mat-icon *ngIf="studentReports && selectedReport?.id === report.id">check</mat-icon>
+        </mat-chip>
+      </mat-chip-listbox>
+    </div>
+    <app-report [report]="selectedReport" *ngIf="selectedReport && !invoice.balance">
+
+    </app-report>
+    <div *ngIf="invoice?.balance" class="pay-up">
+      <h3>Pay up your balance of ${{ invoice.balance }} to view and download reports</h3>
+    </div>
+  </div>
+
+  <!-- <div class="enrolment-graph">
+      <app-enrolment-chart></app-enrolment-chart>
+    </div> -->
+  <!-- <div class="accounts-graph">
       <app-accounts-chart></app-accounts-chart>
     </div> -->
-  </div>
 </div>
-<div class="recent-activities"></div>

@@ -45,24 +45,3 @@
     <app-report *ngFor="let report of reports$ | async" [report]="report"></app-report>
   </div>
 </mat-card>
-
-<div class="student-reports-view" *ngIf="role === 'student'">
-  <div class="side-panel">
-    <div class="balance" *ngIf="invoice$ | async as invoice">
-      <h3>{{ 'Balance : $' + invoice.balanceBfwd.amount }}</h3>
-    </div>
-    <app-current-enrolment>
-
-    </app-current-enrolment>
-
-    <app-student-enrolment-details>
-
-    </app-student-enrolment-details>
-  </div>
-  <div class="report-container" *ngIf="studentReports$ | async">
-    <app-report *ngFor="let report of studentReports$ | async" [report]="report"></app-report>
-  </div>
-
-
-
-</div>

@@ -27,6 +27,7 @@ import { MarksProgressComponent } from './marks/marks-progress/marks-progress.co
 import { FeesComponent } from './finance/fees/fees.component';
 import { StudentFinanceComponent } from './finance/student-finance/student-finance.component';
 import { StudentBalancesComponent } from './finance/student-balances/student-balances.component';
+import { InvoiceComponent } from './finance/student-finance/invoice/invoice.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -156,6 +157,12 @@ const routes: Routes = [
     component: StudentBalancesComponent,
     canActivate: [AuthGuardService],
     title: 'Manage Balances',
+  },
+  {
+    path: 'invoice',
+    component: InvoiceComponent,
+    canActivate: [AuthGuardService],
+    title: 'Invoice',
   },
   {
     path: 'student-finance',

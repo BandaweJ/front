@@ -8,6 +8,7 @@ import { BillModel } from '../../models/bill.model';
 import { SharedService } from 'src/app/shared.service';
 import { PaymentModel } from '../../models/payment.model';
 import { BalancesModel } from '../../models/balances.model';
+import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 @Component({
   selector: 'app-invoice',
@@ -17,17 +18,16 @@ import { BalancesModel } from '../../models/balances.model';
 export class InvoiceComponent implements OnInit {
   @Input() studentNumber: string | null = null;
   invoice$ = this.store.select(selectedStudentInvoice);
+  user$ = this.store.select(selectUser);
+  id: string = '';
   totalBill: number = 0;
   totalPayments: number = 0;
-  balanceBfwd: BalancesModel | undefined = undefined;
+  // balanceBfwd: BalancesModel | undefined = undefined;
+  balanceBroughtForward: number = 0;
 
   constructor(private store: Store, public sharedService: SharedService) {}
 
   ngOnInit(): void {
-    if (this.studentNumber) {
-      const studentNumber = this.studentNumber;
-      this.store.dispatch(invoiceActions.fetchInvoice({ studentNumber }));
-    }
     this.invoice$.subscribe((invoice) => {
       if (invoice?.bills) {
         this.billsDataSource.data = invoice?.bills;
@@ -38,8 +38,32 @@ export class InvoiceComponent implements OnInit {
           return total;
         }, 0);
       }
-      this.balanceBfwd = invoice?.balanceBfwd;
+
+      if (invoice?.balanceBfwd) {
+        this.balanceBroughtForward = invoice.balanceBfwd.amount;
+      }
+      if (invoice?.payments) {
+        this.paymentsDataSource.data = invoice?.payments;
+        this.totalPayments = invoice.payments.reduce((total, payment) => {
+          if (payment.amount && typeof payment.amount === 'number') {
+            return total + payment.amount;
+          }
+          return total;
+        }, 0);
+      }
     });
+    this.user$.subscribe((user) => {
+      if (user) {
+        this.id = user.id;
+        if (user.role === 'student') {
+          this.studentNumber = user.id;
+        }
+      }
+    });
+    if (this.studentNumber) {
+      const studentNumber = this.studentNumber;
+      this.store.dispatch(invoiceActions.fetchInvoice({ studentNumber }));
+    }
   }
 
   billsDisplayedColumns: string[] = ['class', 'term', 'fees', 'amount'];
@@ -54,12 +78,4 @@ export class InvoiceComponent implements OnInit {
   ];
   paymentsDataSource: MatTableDataSource<PaymentModel> =
     new MatTableDataSource<PaymentModel>([]);
-
-  getTotalBill() {
-    return this.totalBill;
-  }
-
-  getTotalPayments() {
-    return this.totalPayments;
-  }
 }

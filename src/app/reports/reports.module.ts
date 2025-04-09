@@ -23,5 +23,6 @@ import { FinanceModule } from '../finance/finance.module';
     StoreModule.forFeature('reports', reportsReducer),
     EffectsModule.forFeature([ReportsEffects]),
   ],
+  exports: [ReportComponent],
 })
 export class ReportsModule {}

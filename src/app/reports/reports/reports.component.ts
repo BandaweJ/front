@@ -37,13 +37,11 @@ export class ReportsComponent implements OnInit {
   classes$!: Observable<ClassesModel[]>;
   // reports$: Observable<ReportsModel[]> = this.store.select(selectReports);
   reports$ = this.store.pipe(select(selectReports));
-  studentReports$ = this.store.select(selectStudentReports);
   reports!: ReportsModel[];
   role = '';
   id!: string;
   mode!: 'generate' | 'view';
   isLoading$ = this.store.select(selectIsLoading);
-  invoice$ = this.store.select(selectedStudentInvoice);
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
