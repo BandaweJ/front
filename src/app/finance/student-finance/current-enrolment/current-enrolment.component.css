@@ -1,0 +1,25 @@
+mat-card {
+  background-color: teal;
+  padding: 0.5rem;
+  margin: 0;
+}
+mat-card-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "name value"
+    "term term"
+    "resi resi";
+}
+.name {
+  grid-area: name;
+}
+.value {
+  grid-area: value;
+}
+.term {
+  grid-area: term;
+}
+.resi {
+  grid-area: resi;
+}

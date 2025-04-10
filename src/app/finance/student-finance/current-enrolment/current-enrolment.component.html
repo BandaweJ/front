@@ -1,1 +1,11 @@
-<p>current-enrolment works!</p>
+<mat-card *ngIf="currentEnrolment$ | async as currentEnrolment">
+  <mat-card-title>
+    Current Enrolment
+  </mat-card-title>
+  <mat-card-content>
+    <span class="name"><label>Class</label></span>
+    <span class="value">{{ currentEnrolment.name }}</span>
+    <span class="term"><label>Term : </label>{{ currentEnrolment.num + " " + currentEnrolment.year }}</span>
+    <span class="resi">{{ 'As a ' + currentEnrolment.residence + ' Scholar' }}</span>
+  </mat-card-content>
+</mat-card>

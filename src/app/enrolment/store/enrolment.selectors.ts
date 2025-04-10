@@ -48,3 +48,8 @@ export const selectMigrateClassResult = createSelector(
   enrolmentState,
   (state: fromEnrolmentReducer.State) => state.migrateClassResult
 );
+
+export const selectCurrentEnrolment = createSelector(
+  enrolmentState,
+  (state: fromEnrolmentReducer.State) => state.currentEnrolment
+);

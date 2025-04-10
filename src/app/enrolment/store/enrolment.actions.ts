@@ -205,3 +205,12 @@ export const migrateClassActions = createActionGroup({
     migrateClassEnrolmentFail: props<{ error: HttpErrorResponse }>(),
   },
 });
+
+export const currentEnrolementActions = createActionGroup({
+  source: 'Current Enrolment Component',
+  events: {
+    fetchCurrentEnrolment: props<{ studentNumber: string }>(),
+    fetchCurrentEnrolmentSuccess: props<{ enrols: EnrolsModel }>(),
+    fetchCurrentEnrolmentFail: props<{ error: HttpErrorResponse }>(),
+  },
+});

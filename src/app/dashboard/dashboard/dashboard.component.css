@@ -112,7 +112,7 @@ mat-chip mat-icon {
 }
 
 .balance {
-  padding: 1rem;
+  /* padding: 1rem; */
   background-color: teal;
   color: white;
 }
@@ -126,8 +126,8 @@ mat-chip mat-icon {
 }
 
 .enrolment {
-  padding: 1rem;
-  background-color: #157145;
+  /* padding: 1rem; */
+  background-color: teal;
   color: white;
 }
 

@@ -95,7 +95,7 @@
     <div class="balance widget" *ngIf="invoice">
       <h3>{{ 'Balance : $' + invoice.balanceBfwd.amount }}</h3>
     </div>
-    <app-current-enrolment class="widget enrolment">
+    <app-current-enrolment class="widget enrolment" [studentNumber]="id">
 
     </app-current-enrolment>
   </div>

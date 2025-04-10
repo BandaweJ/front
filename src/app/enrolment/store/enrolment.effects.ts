@@ -353,4 +353,32 @@ export class EnrolmentEffects {
       )
     )
   );
+
+  fetchCurrentEnrolment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(
+        fromEnrolmentActions.currentEnrolementActions.fetchCurrentEnrolment
+      ),
+      switchMap((data) =>
+        this.enrolService.getCurrentEnrolment(data.studentNumber).pipe(
+          map((enrols) => {
+            return fromEnrolmentActions.currentEnrolementActions.fetchCurrentEnrolmentSuccess(
+              {
+                enrols,
+              }
+            );
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              fromEnrolmentActions.currentEnrolementActions.fetchCurrentEnrolmentFail(
+                {
+                  ...error,
+                }
+              )
+            )
+          )
+        )
+      )
+    )
+  );
 }
