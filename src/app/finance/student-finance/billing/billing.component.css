@@ -1,0 +1,10 @@
+.billing {
+  padding: 1rem;
+}
+mat-chip {
+  font-size: 0.75rem;
+}
+.reminders {
+  color: red;
+  font-size: xx-small;
+}

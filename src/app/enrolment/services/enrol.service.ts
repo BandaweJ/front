@@ -26,11 +26,7 @@ export class EnrolService {
   }
 
   getCurrentEnrolment(studentNumber: string): Observable<EnrolsModel> {
-    const result = this.httpClient.get<EnrolsModel>(
-      `${this.baseURL}${studentNumber}`
-    );
-    console.log(result);
-    return result;
+    return this.httpClient.get<EnrolsModel>(`${this.baseURL}${studentNumber}`);
   }
 
   enrolStudents(enrols: EnrolsModel[]): Observable<EnrolsModel[]> {
@@ -62,6 +58,12 @@ export class EnrolService {
   ): Observable<boolean> {
     return this.httpClient.get<boolean>(
       `${this.baseURL}migrate/${fromName}/${fromNum}/${fromYear}/${toName}/${toNum}/${toYear}`
+    );
+  }
+
+  isNewComer(studentNumber: string): Observable<boolean> {
+    return this.httpClient.get<boolean>(
+      `${this.baseURL}newcomers/${studentNumber}`
     );
   }
 }

@@ -27,3 +27,8 @@ export const selectedStudentInvoice = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.selectedStudentInvoice
 );
+
+export const selectIsNewComer = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.isNewComer
+);

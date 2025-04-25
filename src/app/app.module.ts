@@ -7,7 +7,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './material/material.module';
 import { StoreModule } from '@ngrx/store';
 import { AuthModule } from './auth/auth.module';
-import * as authReducer from './auth/store/auth.reducer';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';

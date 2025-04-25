@@ -6,3 +6,16 @@
   padding: 1rem;
   margin: 0 auto;
 }
+h3 {
+  display: flex;
+  justify-content: center;
+}
+.row {
+  padding-bottom: 0.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.student-details {
+  padding: 0.5rem;
+}

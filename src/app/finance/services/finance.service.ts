@@ -7,6 +7,8 @@ import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
+import { EnrolService } from 'src/app/enrolment/services/enrol.service';
+import { BillModel } from '../models/bill.model';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
@@ -29,6 +31,10 @@ export class FinanceService {
   deleteFees(id: number): Observable<number> {
     // console.log(id);
     return this.httpClient.delete<number>(`${this.baseURL}fees/${id}`);
+  }
+
+  createBills(bills: BillModel[]): Observable<BillModel[]> {
+    return this.httpClient.post<BillModel[]>(`${this.baseURL}billing`, bills);
   }
 
   getStudentsNotYetBilledForTerm(

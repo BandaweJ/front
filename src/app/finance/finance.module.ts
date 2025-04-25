@@ -19,6 +19,7 @@ import { BillingComponent } from './student-finance/billing/billing.component';
 import { StudentBalancesComponent } from './student-balances/student-balances.component';
 import { SharedModule } from '../shared/shared.module';
 import { AddEditBalancesComponent } from './student-balances/add-edit-balances/add-edit-balances.component';
+import { EnrolmentModule } from '../enrolment/enrolment.module';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { AddEditBalancesComponent } from './student-balances/add-edit-balances/a
     ReactiveFormsModule,
     FormsModule,
     SharedModule,
+    EnrolmentModule,
     StoreModule.forFeature('finance', financeReducer),
     EffectsModule.forFeature([FinanceEffects]),
   ],

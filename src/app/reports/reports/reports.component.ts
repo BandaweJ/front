@@ -56,8 +56,8 @@ export class ReportsComponent implements OnInit {
     this.reports$ = this.store.select(selectReports);
     this.reports$.subscribe((reps) => {
       this.reports = reps;
-      if (reps)
-        console.log('first head comment is : ', reps[0].report.headComment);
+      // if (reps)
+      // console.log('first head comment is : ', reps[0].report.headComment);
     });
 
     this.reportsForm = new FormGroup({

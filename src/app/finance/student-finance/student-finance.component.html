@@ -1,7 +1,7 @@
+<app-student-search class="search" (studentSelected)="selectedStudentChanged($event)"></app-student-search>
 <div class="container">
   <mat-card class="students-to-bill-container">
-    <app-students-to-bill [currentTerm]="currentTerm" *ngIf="currentTerm"
-      (selectedEnrolChange)="selectedEnrolChanged($event)">
+    <app-students-to-bill (selectedEnrolChange)="selectedEnrolChanged($event)">
 
     </app-students-to-bill>
   </mat-card>
@@ -12,12 +12,12 @@
   </mat-card>
   <div class="enrolment-invoice" *ngIf="selectedStudentEnrol">
     <mat-card class="current-enrolment">
-      <app-current-enrolment>
+      <app-current-enrolment [studentNumber]="selectedStudentEnrol.student.studentNumber">
 
       </app-current-enrolment>
     </mat-card>
     <mat-card class="invoice-container">
-      <app-invoice [studentNumber]="selectedStudentEnrol.student.studentNumber">
+      <app-invoice *ngIf="selectedStudentEnrol" [studentNumber]="selectedStudentEnrol.student.studentNumber">
 
       </app-invoice>
     </mat-card>
@@ -28,10 +28,10 @@
 
       </app-billing>
     </mat-card>
-    <mat-card class="payment">
+    <!-- <mat-card class="payment">
       <app-payments>
 
       </app-payments>
-    </mat-card>
+    </mat-card> -->
   </div>
 </div>

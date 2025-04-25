@@ -1,11 +1,19 @@
-<mat-card *ngIf="enrolment &&(fees$ | async) as fees">
+<mat-card *ngIf="enrolment &&(fees$ | async) as fees" class="billing">
   <mat-card-title>
     Select Fees to Bill Student
   </mat-card-title>
   <mat-card-content>
+    <div class="reminders">
+      <span *ngIf="isNewComer$ | async">
+        New Student : Add Desk Fee and Application Fee
+      </span>
+      <span *ngIf="isScienceStudent">
+        Science Student : Add Science Levy
+      </span>
+    </div>
     <mat-chip-listbox class="chip-list">
       <mat-chip *ngFor="let fee of fees" [value]="fee" (click)="addToBill(fee)" selectable>
-        {{ fee.name + ' ' + fee.amount }}
+        {{ sharedService.feesNamesToString(fee.name) + ': $' + fee.amount.toFixed(2) }}
         <mat-icon *ngIf="isSelected(fee)">check</mat-icon>
       </mat-chip>
     </mat-chip-listbox>
@@ -14,7 +22,7 @@
     </div>
   </mat-card-content>
   <mat-card-actions>
-    <button mat-button color="primary">
+    <button mat-button color="primary" (click)="confirmBill()">
       Bill Student
     </button>
   </mat-card-actions>

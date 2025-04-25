@@ -7,16 +7,20 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   balancesActions,
   billingActions,
+  billStudentAction,
   feesActions,
   invoiceActions,
+  isNewComerActions,
 } from './finance.actions';
 import { PaymentsService } from '../services/payments.service';
+import { EnrolService } from 'src/app/enrolment/services/enrol.service';
 @Injectable()
 export class FinanceEffects {
   constructor(
     private actions$: Actions,
     private financeService: FinanceService,
     private paymentsService: PaymentsService,
+    private enrolService: EnrolService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -179,6 +183,47 @@ export class FinanceEffects {
                 })
               )
             )
+          )
+        )
+      )
+    )
+  );
+
+  isNewComer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(isNewComerActions.checkIsNewComer),
+      switchMap((data) =>
+        this.enrolService.isNewComer(data.studentNumber).pipe(
+          map((isNewComer) => {
+            return isNewComerActions.checkIsNewComerSuccess({
+              isNewComer,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(isNewComerActions.checkIsNewComerFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
+  createBills$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(billStudentAction.billStudent),
+      switchMap((data) =>
+        this.financeService.createBills(data.bills).pipe(
+          tap(() =>
+            this.snackBar.open('Bills Added Successfully', 'OK', {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            })
+          ),
+          map((bills) => {
+            return billStudentAction.billStudentSuccess({ bills });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(billStudentAction.billStudentFail({ ...error }))
           )
         )
       )

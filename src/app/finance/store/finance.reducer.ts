@@ -4,21 +4,24 @@ import { createReducer, on } from '@ngrx/store';
 import {
   balancesActions,
   billingActions,
+  billStudentAction,
   feesActions,
   invoiceActions,
+  isNewComerActions,
 } from './finance.actions';
-import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
+import { StudentsModel } from 'src/app/registration/models/students.model';
 
 export interface State {
   fees: FeesModel[];
   studentsToBill: EnrolsModel[];
   isLoading: boolean;
   errorMessage: string;
-  selectedStudentInvoice: InvoiceModel | null;
+  selectedStudentInvoice: InvoiceModel;
   balance: BalancesModel | null;
+  isNewComer: boolean;
 }
 
 export const initialState: State = {
@@ -26,8 +29,17 @@ export const initialState: State = {
   studentsToBill: [],
   isLoading: false,
   errorMessage: '',
-  selectedStudentInvoice: null,
+  selectedStudentInvoice: {
+    totalBill: 0, // Provide a default value (or calculate if possible at this stage)
+    totalPayments: 0, // Provide a default value
+    balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
+    student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
+    bills: [],
+    payments: [], // Initialize payments array
+    balance: 0, // Provide a default value
+  },
   balance: null,
+  isNewComer: false,
 };
 
 export const financeReducer = createReducer(
@@ -108,7 +120,15 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: true,
     errorMessage: '',
-    selectedStudentInvoice: null,
+    selectedStudentInvoice: {
+      totalBill: 0, // Provide a default value (or calculate if possible at this stage)
+      totalPayments: 0, // Provide a default value
+      balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
+      student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
+      bills: [],
+      payments: [], // Initialize payments array
+      balance: 0, // Provide a default value
+    },
   })),
   on(invoiceActions.fetchInvoiceSuccess, (state, { invoice }) => ({
     ...state,
@@ -120,7 +140,15 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.message,
-    selectedStudentInvoice: null,
+    selectedStudentInvoice: {
+      totalBill: 0, // Provide a default value (or calculate if possible at this stage)
+      totalPayments: 0, // Provide a default value
+      balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
+      student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
+      bills: [],
+      payments: [], // Initialize payments array
+      balance: 0, // Provide a default value
+    },
   })),
   on(balancesActions.saveBalance, (state) => ({
     ...state,
@@ -139,5 +167,50 @@ export const financeReducer = createReducer(
     isLoading: false,
     errorMessage: error.message,
     balance: null,
+  })),
+  on(isNewComerActions.checkIsNewComer, (state) => ({
+    ...state,
+    isNewComer: false,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(isNewComerActions.checkIsNewComerSuccess, (state, { isNewComer }) => ({
+    ...state,
+    isLoading: false,
+    isNewComer,
+    errorMessage: '',
+  })),
+  on(isNewComerActions.checkIsNewComerFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    isNewComer: false,
+    errorMessage: error.message,
+  })),
+  on(billStudentAction.billStudent, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+    selectedStudentInvoice: {
+      ...state.selectedStudentInvoice,
+      bills: [],
+    },
+  })),
+  on(billStudentAction.billStudentSuccess, (state, { bills }) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+    selectedStudentInvoice: {
+      ...state.selectedStudentInvoice,
+      bills,
+    },
+  })),
+  on(billStudentAction.billStudentFail, (state, { error }) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: error.message,
+    selectedStudentInvoice: {
+      ...state.selectedStudentInvoice,
+      bills: [],
+    },
   }))
 );

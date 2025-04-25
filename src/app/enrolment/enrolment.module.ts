@@ -15,6 +15,7 @@ import { AddEditTermComponent } from './terms-classes/terms/add-edit-term/add-ed
 import { EnrolStudentComponent } from './terms-classes/enrol-student/enrol-student.component';
 import { MigrateClassEnrolmentComponent } from './migrate-class-enrolment/migrate-class-enrolment.component';
 import { ClassListsComponent } from './terms-classes/class-lists/class-lists.component';
+import { EnrolService } from './services/enrol.service';
 
 @NgModule({
   declarations: [
@@ -36,5 +37,6 @@ import { ClassListsComponent } from './terms-classes/class-lists/class-lists.com
     StoreModule.forFeature('enrol', enrolmentReducer),
     EffectsModule.forFeature([EnrolmentEffects]),
   ],
+  // exports: [EnrolService]
 })
 export class EnrolmentModule {}

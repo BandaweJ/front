@@ -1,104 +1,45 @@
-<!-- Bills Table -->
-
-<div class="bills-container" *ngIf="invoice$ | async as invoice">
-  <table mat-table [dataSource]="billsDataSource" class="mat-elevation-z8" *ngIf="invoice?.bills?.length">
-
-    <ng-container matColumnDef="balanceBroughtForward">
-      <th mat-header-cell *matHeaderCellDef colspan="billsDisplayedColumns.length">
-        Balance Brought Forward
-      </th>
-      <td mat-cell *matCellDef="let element" colspan="billsDisplayedColumns.length">
-        {{ invoice.balanceBfwd.amount | currency }}
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="['balanceBroughtForward']"></tr>
-    <!--- Note that these columns can be defined in any order.
-          The actual rendered columns are set as a property on the row definition" -->
-
-    <!-- Class Column -->
-    <ng-container matColumnDef="class">
-      <th mat-header-cell *matHeaderCellDef> Class </th>
-      <td mat-cell *matCellDef="let element"> {{element.enrolment?.name}} </td>
-      <td mat-footer-cell *matFooterCellDef> Total </td>
-    </ng-container>
-
-    <!-- Term Column -->
-    <ng-container matColumnDef="term">
-      <th mat-header-cell *matHeaderCellDef> Term </th>
-      <td mat-cell *matCellDef="let element"> {{element?.enrolment.num + ' ' + element?.enrolment.year}} </td>
-    </ng-container>
-
-    <!-- Fees Column -->
-    <ng-container matColumnDef="fees">
-      <th mat-header-cell *matHeaderCellDef> Fees </th>
-      <td mat-cell *matCellDef="let element"> {{ element?.fees?.name }} </td>
-    </ng-container>
-
-    <!-- Amount Column -->
-    <ng-container matColumnDef="amount">
-      <th mat-header-cell *matHeaderCellDef> Amount </th>
-      <td mat-cell *matCellDef="let element"> {{element?.fees?.amount}} </td>
-      <td mat-footer-cell *matFooterCellDef> {{ totalBill | currency}} </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="billsDisplayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: billsDisplayedColumns;"></tr>
-    <tr mat-footer-row *matFooterRowDef="billsDisplayedColumns"></tr>
-  </table>
-
-  <div *ngIf="!invoice?.bills?.length">
-    <p>No Bills for selected student</p>
-    <p>{{ 'Balance Brought Foward : ' + invoice.balanceBfwd.amount }}</p>
+<div class="student-details" *ngIf="invoice$ | async as invoice">
+  <h3>SCHOOL FEES INVOICE</h3>
+  <div class="row">
+    <label>Date </label>
+    <span class="row-item">{{ today | date }}</span>
   </div>
-</div>
-<div *ngIf="!(invoice$ | async)">
-  <p>No Student Selected Yet</p>
-</div>
-
-<!-- Payments Table -->
-<div class="payments-container" *ngIf="invoice$ | async">
-  <table mat-table [dataSource]="paymentsDataSource" class="mat-elevation-z8"
-    *ngIf="(invoice$ | async)?.payments?.length">
-
-    <!--- Note that these columns can be defined in any order.
-          The actual rendered columns are set as a property on the row definition" -->
-
-    <!-- Date Column -->
-    <ng-container matColumnDef="date">
-      <th mat-header-cell *matHeaderCellDef> Date </th>
-      <td mat-cell *matCellDef="let element"> {{element.paymentDate | date}} </td>
-      <td mat-footer-cell *matFooterCellDef> Total </td>
-    </ng-container>
-
-    <!-- Receipt Number Column -->
-    <ng-container matColumnDef="receiptno">
-      <th mat-header-cell *matHeaderCellDef> Receipt No </th>
-      <td mat-cell *matCellDef="let element"> {{element.receiptNumber}} </td>
-    </ng-container>
-
-    <!-- Method Column -->
-    <ng-container matColumnDef="method">
-      <th mat-header-cell *matHeaderCellDef> Method </th>
-      <td mat-cell *matCellDef="let element"> {{ element?.method }} </td>
-    </ng-container>
-
-    <!-- Amount Column -->
-    <ng-container matColumnDef="amount">
-      <th mat-header-cell *matHeaderCellDef> Amount </th>
-      <td mat-cell *matCellDef="let element"> {{element?.amount}} </td>
-      <td mat-footer-cell *matFooterCellDef> {{ totalPayments | currency}} </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="paymentsDisplayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: paymentsDisplayedColumns;"></tr>
-    <tr mat-footer-row *matFooterRowDef="paymentsDisplayedColumns"></tr>
-  </table>
-
-  <div *ngIf="!(invoice$ | async)?.payments?.length">
-    <p>No Payments for selected student</p>
+  <div class="row">
+    <label>Student Number </label>
+    <span class="row-item">{{ invoice.student.studentNumber }}</span>
   </div>
+  <div class="row">
+    <label>Student Name </label>
+    <span class="row-item">{{ invoice.student.surname + ' ' + invoice.student.name }}</span>
+  </div>
+  <div class="row" *ngIf="currentEnrolment">
+    <label>Class </label>
+    <span class="row-item">{{ currentEnrolment.name }}</span>
+  </div>
+  <div class="row" *ngIf="currentEnrolment">
+    <label>Term </label>
+    <span class="row-item">{{ currentEnrolment.num + ' ' + currentEnrolment.year }}</span>
+  </div>
+
 </div>
-<div *ngIf="!(invoice$ | async)">
-  <p>No Student Selected Yet</p>
-</div>
+
+<table class="invoice-table" *ngIf="invoice$ | async as invoice">
+  <thead>
+    <tr>
+      <th>{{ (isNewComer$ | async) ? 'New Student' : 'Returning Student' }}</th>
+      <th>USD $</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>Balance as at {{ invoice.balanceBfwd.dateCreated | date }}</td>
+    <td>{{ invoice.balanceBfwd.amount | currency }}</td>
+  </tr>
+  <tr *ngFor="let bill of invoice.bills">
+    <td>{{ sharedService.feesNamesToString(bill.fees.name) }}</td>
+    <td>{{ bill.fees.amount | currency }}</td>
+  </tr>
+  <tr>
+    <td>Total</td>
+    <td>{{ invoice.balance| currency }}</td>
+  </tr>
+</table>

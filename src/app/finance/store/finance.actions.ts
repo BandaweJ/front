@@ -5,6 +5,7 @@ import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
+import { BillModel } from '../models/bill.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -46,5 +47,23 @@ export const balancesActions = createActionGroup({
     saveBalance: props<{ balance: BalancesModel }>(),
     saveBalanceSuccess: props<{ balance: BalancesModel }>(),
     saveBalanceFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+
+export const isNewComerActions = createActionGroup({
+  source: 'Invoice Component',
+  events: {
+    checkIsNewComer: props<{ studentNumber: string }>(),
+    checkIsNewComerSuccess: props<{ isNewComer: boolean }>(),
+    checkIsNewComerFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+
+export const billStudentAction = createActionGroup({
+  source: 'Bill Component',
+  events: {
+    billStudent: props<{ bills: BillModel[] }>(),
+    billStudentSuccess: props<{ bills: BillModel[] }>(),
+    billStudentFail: props<{ error: HttpErrorResponse }>(),
   },
 });

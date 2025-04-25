@@ -5,6 +5,8 @@ import { BalancesModel } from './balances.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 
 export interface InvoiceModel {
+  totalBill: number;
+  totalPayments: number;
   balanceBfwd: BalancesModel;
   student: StudentsModel;
   bills: BillModel[];
