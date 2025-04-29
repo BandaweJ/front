@@ -34,7 +34,15 @@ export class FinanceService {
   }
 
   createBills(bills: BillModel[]): Observable<BillModel[]> {
+    // console.log('adding these bills', bills);
     return this.httpClient.post<BillModel[]>(`${this.baseURL}billing`, bills);
+  }
+
+  removeBill(bill: BillModel): Observable<BillModel> {
+    // console.log('removing these bills ', bill);
+    return this.httpClient.delete<BillModel>(
+      `${this.baseURL}billing/${bill.id}`
+    );
   }
 
   getStudentsNotYetBilledForTerm(

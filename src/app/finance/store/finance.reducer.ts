@@ -1,10 +1,9 @@
 import { FeesModel } from '../models/fees.model';
-import { isLoading } from '../../auth/store/auth.selectors';
 import { createReducer, on } from '@ngrx/store';
 import {
   balancesActions,
   billingActions,
-  billStudentAction,
+  billStudentActions,
   feesActions,
   invoiceActions,
   isNewComerActions,
@@ -186,31 +185,97 @@ export const financeReducer = createReducer(
     isNewComer: false,
     errorMessage: error.message,
   })),
-  on(billStudentAction.billStudent, (state) => ({
+  on(billStudentActions.billStudent, (state) => ({
     ...state,
     isLoading: true,
     errorMessage: '',
-    selectedStudentInvoice: {
-      ...state.selectedStudentInvoice,
-      bills: [],
-    },
   })),
-  on(billStudentAction.billStudentSuccess, (state, { bills }) => ({
+  on(billStudentActions.billStudentSuccess, (state, { bills }) => {
+    // Calculate the new totalBill from the bills array
+    const newTotalBill = bills.reduce((sum, bill) => sum + bill.fees.amount, 0);
+
+    // Calculate the new balance
+    const currentBalanceBfwdAmount =
+      state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
+    const currentTotalPayments =
+      state.selectedStudentInvoice?.totalPayments || 0;
+
+    const newBalance =
+      state.selectedStudentInvoice?.balance +
+      Number(newTotalBill) +
+      Number(currentBalanceBfwdAmount) -
+      currentTotalPayments;
+
+    return {
+      ...state,
+      isLoading: false, // Corrected to false on success
+      errorMessage: '',
+      selectedStudentInvoice: {
+        ...state.selectedStudentInvoice,
+        bills: [...state.selectedStudentInvoice.bills, ...bills],
+        totalBill: newTotalBill, // Update totalBill with the calculated value
+        balance: newBalance, // Update balance with the calculated value
+      },
+    };
+  }),
+  on(billStudentActions.billStudentFail, (state, { error }) => ({
     ...state,
-    isLoading: true,
-    errorMessage: '',
-    selectedStudentInvoice: {
-      ...state.selectedStudentInvoice,
-      bills,
-    },
-  })),
-  on(billStudentAction.billStudentFail, (state, { error }) => ({
-    ...state,
-    isLoading: true,
+    isLoading: false,
     errorMessage: error.message,
     selectedStudentInvoice: {
       ...state.selectedStudentInvoice,
       bills: [],
     },
+  })),
+  on(billStudentActions.removeBill, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(billStudentActions.removeBillSuccess, (state, { bill }) => {
+    const updatedTotalBill =
+      state.selectedStudentInvoice.totalBill - bill.fees.amount;
+    const currentBalanceBfwdAmount = Number(
+      state.selectedStudentInvoice?.balanceBfwd?.amount || 0
+    );
+    const currentTotalPayments = Number(
+      state.selectedStudentInvoice?.totalPayments || 0
+    );
+    const updatedBalance =
+      updatedTotalBill + currentBalanceBfwdAmount - currentTotalPayments;
+
+    return {
+      ...state,
+      isLoading: false,
+      errorMessage: '',
+      selectedStudentInvoice: {
+        ...state.selectedStudentInvoice,
+        bills: state.selectedStudentInvoice.bills.filter(
+          (b) => b.id !== bill.id
+        ),
+        totalBill: updatedTotalBill, // Use the updated totalBill
+        balance: updatedBalance, // Use the recalculated balance
+      },
+    };
+  }),
+  on(billStudentActions.removeBillFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
+  on(invoiceActions.downloadInvoice, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(invoiceActions.downloadInvoiceSuccess, (state) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+  })),
+  on(invoiceActions.downloadInvoiceFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
   }))
 );

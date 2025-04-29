@@ -7,12 +7,16 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  billStudentAction,
+  billStudentActions,
   feesActions,
   isNewComerActions,
 } from '../../store/finance.actions';
 import { FeesModel } from '../../models/fees.model';
-import { selectFees, selectIsNewComer } from '../../store/finance.selector';
+import {
+  selectedStudentInvoice,
+  selectFees,
+  selectIsNewComer,
+} from '../../store/finance.selector';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { BillModel } from '../../models/bill.model';
 import { SharedService } from 'src/app/shared.service';
@@ -31,6 +35,7 @@ export class BillingComponent implements OnInit, OnChanges {
   @Input() enrolment: EnrolsModel | null = null;
   // selectedFees: FeesModel[] = [];
   selectedBills: BillModel[] = [];
+  toBill: BillModel[] = [];
 
   constructor(
     private store: Store,
@@ -57,7 +62,11 @@ export class BillingComponent implements OnInit, OnChanges {
     }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.store.select(selectedStudentInvoice).subscribe((invoice) => {
+      this.selectedBills = [...invoice.bills];
+    });
+  }
 
   addToBill(fee: FeesModel) {
     if (this.enrolment?.student) {
@@ -68,15 +77,17 @@ export class BillingComponent implements OnInit, OnChanges {
         const bill: BillModel = {
           student: this.enrolment?.student,
           fees: fee,
-          enrolment: this.enrolment,
+          enrol: this.enrolment,
         };
 
         this.selectedBills.push(bill);
+        this.toBill.push(bill);
       } else {
         // Remove the fee if it's already selected
-        this.selectedBills = this.selectedBills.filter(
-          (selectedBill) => selectedBill.fees.id !== fee.id
-        );
+        this.confirmBillRemoval(fee);
+        // this.selectedBills = this.selectedBills.filter(
+        //   (selectedBill) => selectedBill.fees.id !== fee.id
+        // );
       }
     }
   }
@@ -87,26 +98,60 @@ export class BillingComponent implements OnInit, OnChanges {
     );
   }
 
-  removeFromBill(fee: FeesModel) {
-    this.selectedBills = this.selectedBills.filter((f) => f.id !== fee.id);
-  }
+  // removeFromBill(fee: FeesModel) {
+  //   this.selectedBills = this.selectedBills.filter((f) => f.id !== fee.id);
+  // }
 
   billStudent() {
-    this.store.dispatch(
-      billStudentAction.billStudent({ bills: this.selectedBills })
+    this.store.dispatch(billStudentActions.billStudent({ bills: this.toBill }));
+    this.toBill = [];
+  }
+
+  removeBill(fee: FeesModel) {
+    const bill = this.selectedBills.find(
+      (selectedBill) => selectedBill.fees.id === fee.id
     );
+    if (bill) {
+      this.store.dispatch(billStudentActions.removeBill({ bill }));
+    }
   }
 
   confirmBill() {
-    this.openConfirmationDialog(
+    this.openBillConfirmationDialog(
       'Are you sure you want to bill student with selected fees?'
     );
   }
 
-  openConfirmationDialog(message: string): void {
+  confirmBillRemoval(fee: FeesModel) {
+    this.openBillRemovalConfirmationDialog(
+      'Are you sure you want to remove this fee from this student?',
+      fee
+    );
+  }
+
+  openBillRemovalConfirmationDialog(message: string, fee: FeesModel): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '300px', // Adjust width as needed
-      data: { message: message }, // Use the provided message
+      data: { message: message, title: 'Confirm Bill Removal' }, // Use the provided message
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      // this.submissionAttempted = true;
+      if (result) {
+        // this.submissionConfirmed = true;
+        this.removeBill(fee); // Call your form submission logic here
+      } else {
+        // this.submissionConfirmed = false;
+        // User clicked 'No' or closed the dialog
+        dialogRef.close();
+      }
+    });
+  }
+
+  openBillConfirmationDialog(message: string): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '300px', // Adjust width as needed
+      data: { message: message, title: 'Confirm Billing' }, // Use the provided message
     });
 
     dialogRef.afterClosed().subscribe((result) => {

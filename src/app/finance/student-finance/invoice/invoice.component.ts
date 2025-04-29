@@ -9,8 +9,7 @@ import {
 import { MatTableDataSource } from '@angular/material/table';
 import { BillModel } from '../../models/bill.model';
 import { SharedService } from 'src/app/shared.service';
-import { PaymentModel } from '../../models/payment.model';
-import { BalancesModel } from '../../models/balances.model';
+
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { selectCurrentEnrolment } from 'src/app/enrolment/store/enrolment.selectors';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
@@ -44,16 +43,34 @@ export class InvoiceComponent implements OnInit {
         }
       }
     });
-    if (this.studentNumber) {
-      const studentNumber = this.studentNumber;
-      this.store.dispatch(invoiceActions.fetchInvoice({ studentNumber }));
-    }
+
     this.store.select(selectCurrentEnrolment).subscribe((enrol) => {
       if (enrol) this.currentEnrolment = enrol;
+      if (this.studentNumber) {
+        const studentNumber = this.studentNumber;
+        const num = this.currentEnrolment.num;
+        const year = this.currentEnrolment.year;
+
+        this.store.dispatch(
+          invoiceActions.fetchInvoice({ studentNumber, num, year })
+        );
+      }
     });
   }
 
   billsDisplayedColumns: string[] = ['class', 'term', 'fees', 'amount'];
   billsDataSource: MatTableDataSource<BillModel> =
     new MatTableDataSource<BillModel>([]);
+
+  download() {
+    if (this.currentEnrolment) {
+      const studentNumber = this.currentEnrolment.student.studentNumber;
+      const num = this.currentEnrolment.num;
+      const year = this.currentEnrolment.year;
+
+      this.store.dispatch(
+        invoiceActions.downloadInvoice({ studentNumber, num, year })
+      );
+    }
+  }
 }

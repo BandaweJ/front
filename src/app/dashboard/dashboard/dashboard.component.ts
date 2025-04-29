@@ -145,7 +145,13 @@ export class DashboardComponent implements OnInit {
         viewReportsActions.fetchStudentReports({ studentNumber: this.id })
       );
       const studentNumber = this.id;
-      this.store.dispatch(invoiceActions.fetchInvoice({ studentNumber }));
+      this.store.dispatch(
+        invoiceActions.fetchInvoice({
+          studentNumber,
+          year: this.currentTermYear,
+          num: this.currentTermNum,
+        })
+      );
     }
   }
 

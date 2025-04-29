@@ -10,6 +10,7 @@ import {
 } from 'src/app/enrolment/store/enrolment.actions';
 import {
   selectClasses,
+  selectCurrentEnrolment,
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import * as reportsActions from '../store/reports.actions';
@@ -25,6 +26,7 @@ import { ROLES } from 'src/app/registration/models/roles.enum';
 import { viewReportsActions } from '../store/reports.actions';
 import { invoiceActions } from 'src/app/finance/store/finance.actions';
 import { selectedStudentInvoice } from 'src/app/finance/store/finance.selector';
+import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 
 @Component({
   selector: 'app-reports',
@@ -42,18 +44,23 @@ export class ReportsComponent implements OnInit {
   id!: string;
   mode!: 'generate' | 'view';
   isLoading$ = this.store.select(selectIsLoading);
+  currentEnrolment!: EnrolsModel;
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
   constructor(private store: Store) {
     this.store.dispatch(fetchTerms());
     this.store.dispatch(fetchClasses());
+    this.store.select(selectCurrentEnrolment).subscribe((enrolment) => {
+      if (enrolment) this.currentEnrolment = enrolment;
+    });
   }
 
   ngOnInit(): void {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
     this.reports$ = this.store.select(selectReports);
+
     this.reports$.subscribe((reps) => {
       this.reports = reps;
       // if (reps)
@@ -77,8 +84,13 @@ export class ReportsComponent implements OnInit {
       this.store.dispatch(
         viewReportsActions.fetchStudentReports({ studentNumber: this.id })
       );
+
       const studentNumber = this.id;
-      this.store.dispatch(invoiceActions.fetchInvoice({ studentNumber }));
+      const num = this.currentEnrolment.num;
+      const year = this.currentEnrolment.year;
+      this.store.dispatch(
+        invoiceActions.fetchInvoice({ studentNumber, num, year })
+      );
     }
   }
 

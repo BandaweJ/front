@@ -6,6 +6,6 @@ export interface BillModel {
   id?: number;
   student: StudentsModel;
   fees: FeesModel;
-  enrolment: EnrolsModel;
+  enrol: EnrolsModel;
   date?: Date;
 }

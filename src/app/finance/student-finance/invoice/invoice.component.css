@@ -19,3 +19,19 @@ h3 {
 .student-details {
   padding: 0.5rem;
 }
+
+.invoice-download {
+  display: flex;
+  justify-content: center;
+}
+
+.material-icons {
+  /* font-size: 0.8rem; */
+}
+
+.download-btn {
+  padding: 5px; /* Adjust this value as needed */
+  min-width: unset; /* Override default min-width for fab buttons */
+  height: auto; /* Ensure height adjusts with padding */
+  width: auto; /* Ensure width adjusts with padding */
+}

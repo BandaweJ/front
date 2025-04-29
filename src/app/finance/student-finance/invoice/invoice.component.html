@@ -1,3 +1,8 @@
+<div class="invoice-download">
+  <button type="button" mat-mini-fab color="primary" class="download-btn" (click)="download()">
+    <span class="material-icons">file_download</span>
+  </button>
+</div>
 <div class="student-details" *ngIf="invoice$ | async as invoice">
   <h3>SCHOOL FEES INVOICE</h3>
   <div class="row">
@@ -40,6 +45,6 @@
   </tr>
   <tr>
     <td>Total</td>
-    <td>{{ invoice.balance| currency }}</td>
+    <td>{{ invoice.balance | currency }}</td>
   </tr>
 </table>

@@ -35,9 +35,16 @@ export const billingActions = createActionGroup({
 export const invoiceActions = createActionGroup({
   source: 'Student Finance Component',
   events: {
-    fetchInvoice: props<{ studentNumber: string }>(),
+    fetchInvoice: props<{ studentNumber: string; num: number; year: number }>(),
     fetchInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     fetchInvoiceFail: props<{ error: HttpErrorResponse }>(),
+    downloadInvoice: props<{
+      studentNumber: string;
+      num: number;
+      year: number;
+    }>(),
+    downloadInvoiceSuccess: emptyProps(),
+    downloadInvoiceFail: props<{ error: HttpErrorResponse }>(),
   },
 });
 
@@ -59,11 +66,14 @@ export const isNewComerActions = createActionGroup({
   },
 });
 
-export const billStudentAction = createActionGroup({
+export const billStudentActions = createActionGroup({
   source: 'Bill Component',
   events: {
     billStudent: props<{ bills: BillModel[] }>(),
     billStudentSuccess: props<{ bills: BillModel[] }>(),
     billStudentFail: props<{ error: HttpErrorResponse }>(),
+    removeBill: props<{ bill: BillModel }>(),
+    removeBillSuccess: props<{ bill: BillModel }>(),
+    removeBillFail: props<{ error: HttpErrorResponse }>(),
   },
 });

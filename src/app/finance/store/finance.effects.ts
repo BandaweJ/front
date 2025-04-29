@@ -7,7 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   balancesActions,
   billingActions,
-  billStudentAction,
+  billStudentActions,
   feesActions,
   invoiceActions,
   isNewComerActions,
@@ -144,16 +144,18 @@ export class FinanceEffects {
     this.actions$.pipe(
       ofType(invoiceActions.fetchInvoice),
       switchMap((data) =>
-        this.paymentsService.getInvoice(data.studentNumber).pipe(
-          map((invoice) => {
-            return invoiceActions.fetchInvoiceSuccess({
-              invoice,
-            });
-          }),
-          catchError((error: HttpErrorResponse) =>
-            of(invoiceActions.fetchInvoiceFail({ ...error }))
+        this.paymentsService
+          .getInvoice(data.studentNumber, data.num, data.year)
+          .pipe(
+            map((invoice) => {
+              return invoiceActions.fetchInvoiceSuccess({
+                invoice,
+              });
+            }),
+            catchError((error: HttpErrorResponse) =>
+              of(invoiceActions.fetchInvoiceFail({ ...error }))
+            )
           )
-        )
       )
     )
   );
@@ -209,7 +211,7 @@ export class FinanceEffects {
 
   createBills$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(billStudentAction.billStudent),
+      ofType(billStudentActions.billStudent),
       switchMap((data) =>
         this.financeService.createBills(data.bills).pipe(
           tap(() =>
@@ -220,12 +222,67 @@ export class FinanceEffects {
             })
           ),
           map((bills) => {
-            return billStudentAction.billStudentSuccess({ bills });
+            return billStudentActions.billStudentSuccess({ bills });
           }),
           catchError((error: HttpErrorResponse) =>
-            of(billStudentAction.billStudentFail({ ...error }))
+            of(billStudentActions.billStudentFail({ ...error }))
           )
         )
+      )
+    )
+  );
+
+  removeBill$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(billStudentActions.removeBill),
+      switchMap((data) =>
+        this.financeService.removeBill(data.bill).pipe(
+          tap((data) => {
+            console.log(data),
+              this.snackBar.open('Bill removed successfully', 'OK', {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              });
+          }),
+          map((bill) => {
+            return billStudentActions.removeBillSuccess({
+              bill,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(billStudentActions.removeBillFail({ ...error })).pipe(
+              tap(() =>
+                this.snackBar.open(error.message, 'OK', {
+                  duration: 3000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                })
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  downloadReport$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.downloadInvoice),
+      switchMap((data) =>
+        this.paymentsService
+          .downloadInvoice(data.studentNumber, data.num, data.year)
+          // .unsubscribe()
+          .pipe(
+            map((result) => invoiceActions.downloadInvoiceSuccess()),
+            catchError((error: HttpErrorResponse) =>
+              of(
+                invoiceActions.downloadInvoiceFail({
+                  ...error,
+                })
+              )
+            )
+          )
       )
     )
   );
