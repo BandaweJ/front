@@ -136,12 +136,12 @@
               <a routerLink="/fees" routerLinkActive="active"> Fees </a>
             </button>
           </div>
-          <div class="sidenav-container" *ngIf="role === 'reception' || role === 'admin'">
+          <div class="sidenav-container" *ngIf="role === 'reception'">
             <button mat-button>
               <a routerLink="/payments" routerLinkActive="active"> Payments </a>
             </button>
           </div>
-          <div class="sidenav-container" *ngIf="role === 'reception' || role === 'admin'">
+          <div class="sidenav-container" *ngIf="role === 'reception'">
             <button mat-button>
               <a routerLink="/student-finance" routerLinkActive="active"> Billing </a>
             </button>
@@ -151,7 +151,7 @@
               <a routerLink="/invoice" routerLinkActive="active"> Invoice </a>
             </button>
           </div>
-          <div class="sidenav-container" *ngIf="role === 'reception' || role === 'admin'">
+          <div class="sidenav-container" *ngIf="role === 'reception'">
             <button mat-button>
               <a routerLink="/balances" routerLinkActive="active"> Student Balances </a>
             </button>
