@@ -1,19 +1,15 @@
 .search {
   display: flex;
   justify-content: center;
+  margin-bottom: 16px;
 }
 .container {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  align-items: stretch;
-}
-
-.enrolment-invoice {
-  display: flex;
-  flex-flow: column nowrap;
-}
-
-.billing-payment-container {
-  display: flex;
-  flex-flow: column nowrap;
+  width: 100%; /* Ensures the grid takes the full width of its parent */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(200px, 1fr)
+  ); /* Responsive columns with a minimum width */
+  gap: 16px; /* Add some spacing between grid items */
+  align-items: stretch; /* Makes grid items stretch vertically to the height of the tallest item in their row */
 }

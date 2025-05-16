@@ -1,37 +1,23 @@
 <app-student-search class="search" (studentSelected)="selectedStudentChanged($event)"></app-student-search>
 <div class="container">
-  <mat-card class="students-to-bill-container">
+  <mat-card class="student-container" *ngIf="selectedStudentEnrol">
+    <app-student-enrolment-details *ngIf="selectedStudentEnrol" [studentEnrol]="selectedStudentEnrol">
+
+    </app-student-enrolment-details>
     <app-students-to-bill (selectedEnrolChange)="selectedEnrolChanged($event)">
 
     </app-students-to-bill>
   </mat-card>
-  <mat-card class="student-details-container">
-    <app-student-enrolment-details *ngIf="selectedStudentEnrol" [studentEnrol]="selectedStudentEnrol">
 
-    </app-student-enrolment-details>
+  <mat-card class="invoice-container">
+    <app-invoice *ngIf="selectedStudentEnrol" [studentNumber]="selectedStudentEnrol.student.studentNumber">
+
+    </app-invoice>
   </mat-card>
-  <div class="enrolment-invoice" *ngIf="selectedStudentEnrol">
-    <mat-card class="current-enrolment">
-      <app-current-enrolment [studentNumber]="selectedStudentEnrol.student.studentNumber">
 
-      </app-current-enrolment>
-    </mat-card>
-    <mat-card class="invoice-container">
-      <app-invoice *ngIf="selectedStudentEnrol" [studentNumber]="selectedStudentEnrol.student.studentNumber">
+  <app-billing [enrolment]="selectedStudentEnrol" class="billing-container">
 
-      </app-invoice>
-    </mat-card>
-  </div>
-  <div class="billing-payment-container">
-    <mat-card class="billing">
-      <app-billing [enrolment]="selectedStudentEnrol">
+  </app-billing>
 
-      </app-billing>
-    </mat-card>
-    <!-- <mat-card class="payment">
-      <app-payments>
 
-      </app-payments>
-    </mat-card> -->
-  </div>
 </div>

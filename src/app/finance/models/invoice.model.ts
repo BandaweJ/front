@@ -12,4 +12,8 @@ export interface InvoiceModel {
   bills: BillModel[];
   payments: PaymentModel[];
   balance: number;
+  enrol?: EnrolsModel;
+  invoiceNumber?: string;
+  invoiceDate: Date;
+  invoiceDueDate: Date;
 }

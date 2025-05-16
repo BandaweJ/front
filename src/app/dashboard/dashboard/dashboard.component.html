@@ -81,7 +81,7 @@
     </div>
   </mat-card>
 </div>
-<div class="enrolment-graph">
+<div class="enrolment-graph" *ngIf="role !== 'student'">
   <app-enrolment-chart></app-enrolment-chart>
 </div>
 
@@ -116,7 +116,7 @@
     <app-report [report]="selectedReport" *ngIf="selectedReport && !invoice.balance">
 
     </app-report>
-    <div *ngIf="invoice?.balance" class="pay-up">
+    <div *ngIf="invoice?.balanceBfwd?.amount != 0" class="pay-up">
       <h3>Pay up your balance of ${{ invoice.balance }} to view and download reports</h3>
     </div>
   </div>

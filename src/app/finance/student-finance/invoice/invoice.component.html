@@ -1,50 +1,52 @@
-<div class="invoice-download">
-  <button type="button" mat-mini-fab color="primary" class="download-btn" (click)="download()">
-    <span class="material-icons">file_download</span>
-  </button>
-</div>
-<div class="student-details" *ngIf="invoice$ | async as invoice">
-  <h3>SCHOOL FEES INVOICE</h3>
-  <div class="row">
-    <label>Date </label>
-    <span class="row-item">{{ today | date }}</span>
+<div class="invoice-wrapper">
+  <div class="invoice-download">
+    <button type="button" mat-mini-fab color="primary" class="download-btn" (click)="downloadable? download() : save()">
+      <span class="material-icons">{{ downloadable? 'download' : 'save' }}</span>
+    </button>
   </div>
-  <div class="row">
-    <label>Student Number </label>
-    <span class="row-item">{{ invoice.student.studentNumber }}</span>
-  </div>
-  <div class="row">
-    <label>Student Name </label>
-    <span class="row-item">{{ invoice.student.surname + ' ' + invoice.student.name }}</span>
-  </div>
-  <div class="row" *ngIf="currentEnrolment">
-    <label>Class </label>
-    <span class="row-item">{{ currentEnrolment.name }}</span>
-  </div>
-  <div class="row" *ngIf="currentEnrolment">
-    <label>Term </label>
-    <span class="row-item">{{ currentEnrolment.num + ' ' + currentEnrolment.year }}</span>
+  <div class="student-details" *ngIf="invoice">
+    <h3>SCHOOL FEES INVOICE</h3>
+    <div class="row">
+      <label>Date </label>
+      <span class="row-item">{{ today | date }}</span>
+    </div>
+    <div class="row">
+      <label>Student Number </label>
+      <span class="row-item">{{ invoice.student.studentNumber }}</span>
+    </div>
+    <div class="row">
+      <label>Student Name </label>
+      <span class="row-item">{{ invoice.student.surname + ' ' + invoice.student.name }}</span>
+    </div>
+    <div class="row" *ngIf="currentEnrolment">
+      <label>Class </label>
+      <span class="row-item">{{ currentEnrolment.name }}</span>
+    </div>
+    <div class="row" *ngIf="currentEnrolment">
+      <label>Term </label>
+      <span class="row-item">{{ currentEnrolment.num + ' ' + currentEnrolment.year }}</span>
+    </div>
+
   </div>
 
-</div>
-
-<table class="invoice-table" *ngIf="invoice$ | async as invoice">
-  <thead>
+  <table class="invoice-table" *ngIf="invoice">
+    <thead>
+      <tr>
+        <th>{{ (isNewComer$ | async) ? 'New Student' : 'Returning Student' }}</th>
+        <th>USD $</th>
+      </tr>
+    </thead>
     <tr>
-      <th>{{ (isNewComer$ | async) ? 'New Student' : 'Returning Student' }}</th>
-      <th>USD $</th>
+      <td>Balance as at {{ invoice.balanceBfwd.dateCreated | date }}</td>
+      <td>{{ invoice.balanceBfwd.amount | currency }}</td>
     </tr>
-  </thead>
-  <tr>
-    <td>Balance as at {{ invoice.balanceBfwd.dateCreated | date }}</td>
-    <td>{{ invoice.balanceBfwd.amount | currency }}</td>
-  </tr>
-  <tr *ngFor="let bill of invoice.bills">
-    <td>{{ sharedService.feesNamesToString(bill.fees.name) }}</td>
-    <td>{{ bill.fees.amount | currency }}</td>
-  </tr>
-  <tr>
-    <td>Total</td>
-    <td>{{ invoice.balance | currency }}</td>
-  </tr>
-</table>
+    <tr *ngFor="let bill of invoice.bills">
+      <td>{{ sharedService.feesNamesToString(bill.fees.name) }}</td>
+      <td>{{ bill.fees.amount | currency }}</td>
+    </tr>
+    <tr>
+      <td class="total">Total</td>
+      <td class="total">{{ invoice.balance | currency }}</td>
+    </tr>
+  </table>
+</div>

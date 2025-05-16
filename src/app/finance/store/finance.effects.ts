@@ -238,12 +238,12 @@ export class FinanceEffects {
       switchMap((data) =>
         this.financeService.removeBill(data.bill).pipe(
           tap((data) => {
-            console.log(data),
-              this.snackBar.open('Bill removed successfully', 'OK', {
-                duration: 3000,
-                verticalPosition: 'top',
-                horizontalPosition: 'center',
-              });
+            // console.log(data),
+            this.snackBar.open('Bill removed successfully', 'OK', {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            });
           }),
           map((bill) => {
             return billStudentActions.removeBillSuccess({
@@ -266,7 +266,7 @@ export class FinanceEffects {
     )
   );
 
-  downloadReport$ = createEffect(() =>
+  downloadInvoice$ = createEffect(() =>
     this.actions$.pipe(
       ofType(invoiceActions.downloadInvoice),
       switchMap((data) =>
@@ -278,6 +278,40 @@ export class FinanceEffects {
             catchError((error: HttpErrorResponse) =>
               of(
                 invoiceActions.downloadInvoiceFail({
+                  ...error,
+                })
+              )
+            )
+          )
+      )
+    )
+  );
+
+  saveInvoice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.saveInvoice),
+      switchMap((data) =>
+        this.paymentsService
+          .saveInvoice(data.invoice)
+          // .unsubscribe()
+          .pipe(
+            tap((invoice) => {
+              this.snackBar.open(
+                invoice.student.name +
+                  invoice.student.surname +
+                  ' Invoice Saved',
+                'OK',
+                {
+                  duration: 3000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                }
+              );
+            }),
+            map(() => invoiceActions.saveInvoiceSuccess()),
+            catchError((error: HttpErrorResponse) =>
+              of(
+                invoiceActions.saveInvoiceFail({
                   ...error,
                 })
               )

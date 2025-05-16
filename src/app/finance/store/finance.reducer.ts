@@ -36,6 +36,8 @@ export const initialState: State = {
     bills: [],
     payments: [], // Initialize payments array
     balance: 0, // Provide a default value
+    invoiceDate: new Date(),
+    invoiceDueDate: new Date(),
   },
   balance: null,
   isNewComer: false,
@@ -127,6 +129,8 @@ export const financeReducer = createReducer(
       bills: [],
       payments: [], // Initialize payments array
       balance: 0, // Provide a default value
+      invoiceDate: new Date(),
+      invoiceDueDate: new Date(),
     },
   })),
   on(invoiceActions.fetchInvoiceSuccess, (state, { invoice }) => ({
@@ -147,6 +151,8 @@ export const financeReducer = createReducer(
       bills: [],
       payments: [], // Initialize payments array
       balance: 0, // Provide a default value
+      invoiceDate: new Date(),
+      invoiceDueDate: new Date(),
     },
   })),
   on(balancesActions.saveBalance, (state) => ({
@@ -274,6 +280,21 @@ export const financeReducer = createReducer(
     errorMessage: '',
   })),
   on(invoiceActions.downloadInvoiceFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
+  on(invoiceActions.saveInvoice, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(invoiceActions.saveInvoiceSuccess, (state) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+  })),
+  on(invoiceActions.saveInvoiceFail, (state, { error }) => ({
     ...state,
     isLoading: false,
     errorMessage: error.message,

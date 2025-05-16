@@ -19,6 +19,14 @@ export class PaymentsService {
     );
   }
 
+  saveInvoice(invoice: InvoiceModel): Observable<InvoiceModel> {
+    // console.log(invoice);
+    return this.httpClient.post<InvoiceModel>(
+      `${this.baseURL}invoice`,
+      invoice
+    );
+  }
+
   downloadInvoice(studentNumber: string, num: number, year: number) {
     const result = this.httpClient.get(
       `${this.baseURL}invoicepdf/${studentNumber}/${num}/${year}`,

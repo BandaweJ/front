@@ -21,18 +21,23 @@ import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 })
 export class InvoiceComponent implements OnInit {
   @Input() studentNumber: string | null = null;
-  invoice$ = this.store.select(selectedStudentInvoice);
   user$ = this.store.select(selectUser);
   isNewComer$ = this.store.select(selectIsNewComer);
   today = new Date();
   currentEnrolment!: EnrolsModel;
+  invoice!: InvoiceModel;
+  downloadable = true;
 
   id: string = '';
 
   // balanceBfwd: BalancesModel | undefined = undefined;
   balanceBroughtForward: number = 0;
 
-  constructor(private store: Store, public sharedService: SharedService) {}
+  constructor(private store: Store, public sharedService: SharedService) {
+    this.store.select(selectedStudentInvoice).subscribe((invoice) => {
+      this.invoice = invoice;
+    });
+  }
 
   ngOnInit(): void {
     this.user$.subscribe((user) => {
@@ -62,7 +67,20 @@ export class InvoiceComponent implements OnInit {
   billsDataSource: MatTableDataSource<BillModel> =
     new MatTableDataSource<BillModel>([]);
 
+  save() {
+    // console.log('called save');
+    if (this.currentEnrolment) {
+      const studentNumber = this.currentEnrolment.student.studentNumber;
+      const num = this.currentEnrolment.num;
+      const year = this.currentEnrolment.year;
+      const invoice = this.invoice;
+
+      this.store.dispatch(invoiceActions.saveInvoice({ invoice }));
+    }
+  }
+
   download() {
+    // console.log('called download');
     if (this.currentEnrolment) {
       const studentNumber = this.currentEnrolment.student.studentNumber;
       const num = this.currentEnrolment.num;
