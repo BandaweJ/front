@@ -29,6 +29,10 @@ export class EnrolService {
     return this.httpClient.get<EnrolsModel>(`${this.baseURL}${studentNumber}`);
   }
 
+  updateCurrentEnrolment(enrol: EnrolsModel): Observable<EnrolsModel> {
+    return this.httpClient.patch<EnrolsModel>(`${this.baseURL}`, enrol);
+  }
+
   enrolStudents(enrols: EnrolsModel[]): Observable<EnrolsModel[]> {
     // console.log(enrols);
     return this.httpClient.post<EnrolsModel[]>(this.baseURL, enrols);

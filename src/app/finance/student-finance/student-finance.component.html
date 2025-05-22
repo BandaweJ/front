@@ -1,13 +1,18 @@
-<app-student-search class="search" (studentSelected)="selectedStudentChanged($event)"></app-student-search>
+<div class="top-panel">
+  <app-student-search class="search" (studentSelected)="selectedStudentChanged($event)"></app-student-search>
+  <app-current-enrolment *ngIf="selectedStudentEnrol" class="enrolment"
+    [studentNumber]="selectedStudentEnrol.student.studentNumber"></app-current-enrolment>
+
+</div>
 <div class="container">
-  <mat-card class="student-container" *ngIf="selectedStudentEnrol">
+  <!-- <mat-card class="student-container" *ngIf="selectedStudentEnrol">
     <app-student-enrolment-details *ngIf="selectedStudentEnrol" [studentEnrol]="selectedStudentEnrol">
 
     </app-student-enrolment-details>
     <app-students-to-bill (selectedEnrolChange)="selectedEnrolChanged($event)">
 
     </app-students-to-bill>
-  </mat-card>
+  </mat-card> -->
 
   <mat-card class="invoice-container">
     <!-- <app-invoice *ngIf="selectedStudentEnrol" [enrolment]="selectedStudentEnrol" [downloadable]="false">
@@ -15,8 +20,8 @@
     </app-invoice> -->
     <app-invoice-item [invoice]="invoice" [downloadable]="false"></app-invoice-item>
   </mat-card>
-
   <app-billing [enrolment]="selectedStudentEnrol" class="billing-container">
+
 
   </app-billing>
 

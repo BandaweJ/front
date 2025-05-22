@@ -284,5 +284,28 @@ export const enrolmentReducer = createReducer(
       isLoading: false,
       errorMessage: error.message,
     })
+  ),
+  on(
+    enrolmentActions.currentEnrolementActions.updateCurrentEnrolment,
+    (state, { enrol }) => ({
+      ...state,
+      isLoading: true,
+    })
+  ),
+  on(
+    enrolmentActions.currentEnrolementActions.updateCurrentEnrolmentSuccess,
+    (state, { enrol }) => ({
+      ...state,
+      isLoading: false,
+      currentEnrolment: enrol,
+    })
+  ),
+  on(
+    enrolmentActions.currentEnrolementActions.updateCurrentEnrolmentFail,
+    (state, { error }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: error.message,
+    })
   )
 );

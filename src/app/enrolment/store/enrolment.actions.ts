@@ -212,5 +212,8 @@ export const currentEnrolementActions = createActionGroup({
     fetchCurrentEnrolment: props<{ studentNumber: string }>(),
     fetchCurrentEnrolmentSuccess: props<{ enrols: EnrolsModel }>(),
     fetchCurrentEnrolmentFail: props<{ error: HttpErrorResponse }>(),
+    updateCurrentEnrolment: props<{ enrol: EnrolsModel }>(),
+    updateCurrentEnrolmentSuccess: props<{ enrol: EnrolsModel }>(),
+    updateCurrentEnrolmentFail: props<{ error: HttpErrorResponse }>(),
   },
 });

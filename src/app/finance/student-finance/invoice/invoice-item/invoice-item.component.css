@@ -10,12 +10,35 @@
   box-sizing: border-box; /* Ensures padding and border are included in the width/height */
 
   /* Optional: Add some padding for inner content */
-  padding: 20mm; /* Using mm for consistent spacing on print */
+  padding: 15mm; /* Using mm for consistent spacing on print */
 
   /* Optional: Center the invoice item on the page if it's the main content */
-  margin: 20px auto; /* 20px top/bottom margin, auto for left/right to center */
+  margin: 0 auto; /* 20px top/bottom margin, auto for left/right to center */
   background-color: #fff; /* White background, typical for invoices */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* --- Media Queries for Responsiveness --- */
+
+/* For screens smaller than A4 width (e.g., typical tablet/phone landscape) */
+@media screen and (max-width: 820px) {
+  .invoice-item {
+    width: 95vw; /* Take up 95% of the viewport width */
+    height: auto; /* Allow height to adjust based on content */
+    margin: 20px auto; /* Add some vertical margin on smaller screens */
+    padding: 20px; /* Use px for screen-based padding */
+    box-shadow: none; /* Remove shadow on smaller screens for a cleaner look */
+    border: none; /* Remove border on smaller screens if desired */
+  }
+}
+
+/* For even smaller screens (e.g., typical phone portrait) */
+@media screen and (max-width: 500px) {
+  .invoice-item {
+    width: 98vw; /* Take up even more of the viewport width */
+    padding: 15px; /* Reduce padding further */
+    margin: 10px auto; /* Reduce vertical margin */
+  }
 }
 
 /* Media query for print styles */
@@ -121,9 +144,14 @@ h1 {
   font-weight: bold;
 }
 
+h3 {
+  margin: 0.5;
+}
+
 .banking-details {
   display: grid;
-  grid-template-columns: auto ifr;
+  gap: 5px;
+  grid-template-columns: auto 1fr;
 }
 
 .footer {
@@ -142,6 +170,40 @@ h1 {
 }
 
 .invoice-download {
-  display: flex;
-  justify-content: center;
+  position: absolute; /* Position relative to .invoice-item */
+  top: 10px; /* Adjust distance from the top as needed */
+  left: 50%; /* Move 50% from the left edge of the parent */
+  transform: translateX(
+    -50%
+  ); /* Adjust for the button's own width to truly center it */
+  z-index: 10; /* Ensure it stays on top of other content */
+}
+
+.invoice-table {
+  width: 100%;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-width: 0.2px;
+  border-style: solid;
+  border-collapse: collapse;
+  border-color: #96d4d4;
+}
+
+.invoice-table td {
+  border: 1px solid #96d4d4;
+  border-collapse: collapse;
+}
+
+.invoice-table th {
+  border-width: 0.2px;
+  border-style: solid;
+  border-collapse: collapse;
+  border-color: #96d4d4;
+  background-color: #96d4d4;
+}
+
+.invoice-table th,
+.invoice-table td {
+  padding: 5px;
+  text-align: left;
 }

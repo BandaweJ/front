@@ -381,4 +381,42 @@ export class EnrolmentEffects {
       )
     )
   );
+
+  editCurrentEnrolment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(
+        fromEnrolmentActions.currentEnrolementActions.updateCurrentEnrolment
+      ),
+      switchMap((data) =>
+        this.enrolService.updateCurrentEnrolment(data.enrol).pipe(
+          tap((enrol) =>
+            this.snackBar.open(
+              'Enrolment Updated to ' + enrol.residence,
+              'OK',
+              {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              }
+            )
+          ),
+          map((enrol) => {
+            // console.log(teacher);
+            return fromEnrolmentActions.currentEnrolementActions.updateCurrentEnrolmentSuccess(
+              {
+                enrol,
+              }
+            );
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              fromEnrolmentActions.currentEnrolementActions.updateCurrentEnrolmentFail(
+                { ...error }
+              )
+            )
+          )
+        )
+      )
+    )
+  );
 }

@@ -1,11 +1,31 @@
-<mat-card *ngIf="currentEnrolment$ | async as currentEnrolment">
+<mat-card *ngIf="currentEnrolment">
   <mat-card-title>
     Current Enrolment
   </mat-card-title>
   <mat-card-content>
-    <span class="name"><label>Class</label></span>
+    <label class="label">Class</label>
     <span class="value">{{ currentEnrolment.name }}</span>
-    <span class="term"><label>Term : </label>{{ currentEnrolment.num + " " + currentEnrolment.year }}</span>
-    <!-- <span class="resi">{{ 'As a ' + currentEnrolment.residence + ' Scholar' }}</span> -->
+    <label class="label">Term </label>
+    <span class="value">{{ currentEnrolment.num + " " + currentEnrolment.year }}</span>
+    <label class="label">Residence </label>
+    <span class="value">
+      <div *ngIf="editable">
+        {{ currentEnrolment.residence }}
+        <mat-icon aria-hidden="false" aria-label="Edit icon" fontIcon="edit" (click)="editable = !editable"
+          color="accent"></mat-icon>
+      </div>
+      <div *ngIf="!editable">
+        <mat-form-field>
+          <mat-label>Residence</mat-label>
+          <mat-select [value]="currentEnrolment.residence" (selectionChange)="updateResidence($event.value)">
+            <mat-option *ngFor="let residence of residences" [value]="residence">
+              {{ residence }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <!-- <mat-icon aria-hidden="false" aria-label="Save icon" fontIcon="save" -->
+      </div>
+    </span>
+
   </mat-card-content>
 </mat-card>

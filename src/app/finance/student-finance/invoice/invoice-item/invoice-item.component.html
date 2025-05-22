@@ -18,30 +18,30 @@
   </div>
 
   <div class="invoice-title">
-    <h1>INVOICE FOR TERM 2 2025</h1>
+    <h1>INVOICE FOR TERM {{ invoice.enrol?.num }} {{ invoice.enrol?.year }}</h1>
     <div class="invoice-number">
       <span class="invoice-label">Invoice #:</span>
-      <span class="invoice-value">INV-0001</span>
+      <span class="invoice-value">{{ invoice.invoiceNumber }}</span>
       <span class="invoice-label">Date:</span>
-      <span class="invoice-value">16/05/25</span>
+      <span class="invoice-value">{{ invoice.invoiceDate | date }}</span>
       <span class="invoice-label">Due Date:</span>
-      <span class="invoice-value">15/06/25</span>
+      <span class="invoice-value">{{ invoice.invoiceDueDate | date }}</span>
     </div>
   </div>
 
   <div class="bill-to">
-    <span class="bill-label">Bill Tospan</span>
-    <span class="bill-value">John Doe</span>
+    <span class="bill-label">Bill To</span>
+    <span class="bill-value">{{ invoice.student.surname }} {{ invoice.student.name }}</span>
     <span class="bill-label">Student No</span>
-    <span class="bill-value">S2401100</span>
+    <span class="bill-value">{{ invoice.student.studentNumber }}</span>
     <span class="bill-label">Class</span>
-    <span class="bill-value">2 Blue</span>
+    <span class="bill-value">{{ invoice.enrol?.name }}</span>
     <span class="bill-label">Residence</span>
-    <span class="bill-value">Boarder</span>
+    <span class="bill-value">{{ invoice.enrol?.residence }}</span>
     <span class="bill-label">Phone</span>
-    <span class="bill-value">0778261057</span>
+    <span class="bill-value">{{ invoice.student.cell || 'Student has no phone' }}</span>
     <span class="bill-label">Email</span>
-    <span class="bill-value">H3Bk6@example.com</span>
+    <span class="bill-value">{{ invoice.student.email || 'Student has no email' }}</span>
   </div>
 
   <table class="invoice-table" *ngIf="invoice">

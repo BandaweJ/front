@@ -1,25 +1,29 @@
 mat-card {
-  background-color: teal;
-  padding: 0.5rem;
+  /* background-color: #84d2f6; */
+  padding: 0.2rem;
   margin: 0;
 }
 mat-card-content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    "name value"
-    "term term"
-    "resi resi";
+  grid-template-columns: auto 1fr;
+  gap: 5px;
 }
-.name {
-  grid-area: name;
+
+mat-card-content:last-child {
+  padding-bottom: 0 !important; /* Or your desired value like 8px */
 }
+
 .value {
-  grid-area: value;
+  display: flex; /* 1. Make the span a flex container */
+  align-items: center; /* 2. Vertically align items in the middle */
+  gap: 5px; /* 3. Add a small gap between the text and icon */
+  /* Optional: Adjust font size for the text if needed */
+  /* font-size: 16px; */
 }
-.term {
-  grid-area: term;
-}
-.resi {
-  grid-area: resi;
+
+/* Optional: Adjust the icon size if it doesn't align perfectly */
+.value mat-icon {
+  font-size: 18px; /* Example: make icon slightly smaller or larger to match text height */
+  height: 18px; /* Match height to font-size for consistency */
+  width: 18px; /* Match width to font-size */
 }
