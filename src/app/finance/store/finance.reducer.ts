@@ -191,11 +191,44 @@ export const financeReducer = createReducer(
     isNewComer: false,
     errorMessage: error.message,
   })),
-  on(billStudentActions.billStudent, (state) => ({
-    ...state,
-    isLoading: true,
-    errorMessage: '',
-  })),
+  on(billStudentActions.billStudent, (state, { bills }) => {
+    // Combine the existing bills with the new bills
+    const updatedBills = [
+      ...(state.selectedStudentInvoice?.bills || []),
+      ...bills,
+    ];
+    // Calculate the new totalBill from the bills array
+    const newTotalBill = updatedBills.reduce(
+      (sum, bill) => sum + +bill.fees.amount,
+      0
+    );
+    // console.log(newTotalBill);
+
+    // Calculate the new balance
+    const currentBalanceBfwdAmount =
+      state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
+    const currentTotalPayments =
+      state.selectedStudentInvoice?.totalPayments || 0;
+
+    const newBalance =
+      Number(newTotalBill) +
+      Number(currentBalanceBfwdAmount) -
+      +currentTotalPayments;
+
+    console.log(newBalance);
+
+    return {
+      ...state,
+      isLoading: false, // Corrected to false on success
+      errorMessage: '',
+      selectedStudentInvoice: {
+        ...state.selectedStudentInvoice,
+        bills: [...updatedBills],
+        totalBill: newTotalBill, // Update totalBill with the calculated value
+        balance: newBalance, // Update balance with the calculated value
+      },
+    };
+  }),
   on(billStudentActions.billStudentSuccess, (state, { bills }) => {
     // Calculate the new totalBill from the bills array
     const newTotalBill = bills.reduce((sum, bill) => sum + bill.fees.amount, 0);
@@ -233,12 +266,12 @@ export const financeReducer = createReducer(
       bills: [],
     },
   })),
-  on(billStudentActions.removeBill, (state) => ({
+  on(billStudentActions.removeBillSuccess, (state) => ({
     ...state,
     isLoading: true,
     errorMessage: '',
   })),
-  on(billStudentActions.removeBillSuccess, (state, { bill }) => {
+  on(billStudentActions.removeBill, (state, { bill }) => {
     const updatedTotalBill =
       state.selectedStudentInvoice.totalBill - bill.fees.amount;
     const currentBalanceBfwdAmount = Number(
@@ -286,17 +319,19 @@ export const financeReducer = createReducer(
   })),
   on(invoiceActions.saveInvoice, (state) => ({
     ...state,
+
     isLoading: true,
     errorMessage: '',
   })),
-  on(invoiceActions.saveInvoiceSuccess, (state) => ({
+  on(invoiceActions.saveInvoiceSuccess, (state, { invoice }) => ({
     ...state,
+    selectedStudentInvoice: invoice,
     isLoading: false,
     errorMessage: '',
   })),
   on(invoiceActions.saveInvoiceFail, (state, { error }) => ({
     ...state,
     isLoading: false,
-    errorMessage: error.message,
+    errorMessage: error.error.message,
   }))
 );

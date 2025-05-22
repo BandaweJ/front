@@ -10,9 +10,10 @@
   </mat-card>
 
   <mat-card class="invoice-container">
-    <app-invoice *ngIf="selectedStudentEnrol" [studentNumber]="selectedStudentEnrol.student.studentNumber">
+    <!-- <app-invoice *ngIf="selectedStudentEnrol" [enrolment]="selectedStudentEnrol" [downloadable]="false">
 
-    </app-invoice>
+    </app-invoice> -->
+    <app-invoice-item [invoice]="invoice" [downloadable]="false"></app-invoice-item>
   </mat-card>
 
   <app-billing [enrolment]="selectedStudentEnrol" class="billing-container">

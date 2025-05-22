@@ -113,7 +113,7 @@
         </span>
       </mat-chip-listbox>
     </div>
-    <app-report [report]="selectedReport" *ngIf="selectedReport && !invoice.balance">
+    <app-report [report]="selectedReport" *ngIf="selectedReport && invoice.balance != 0">
 
     </app-report>
     <div *ngIf="invoice?.balanceBfwd?.amount != 0" class="pay-up">

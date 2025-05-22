@@ -1,10 +1,11 @@
+<app-invoice-item></app-invoice-item>
 <div class="invoice-wrapper">
-  <div class="invoice-download">
+  <div class="invoice-download" *ngIf="invoice">
     <button type="button" mat-mini-fab color="primary" class="download-btn" (click)="downloadable? download() : save()">
       <span class="material-icons">{{ downloadable? 'download' : 'save' }}</span>
     </button>
   </div>
-  <div class="student-details" *ngIf="invoice">
+  <div class="student-details" *ngIf="invoice && invoice.student">
     <h3>SCHOOL FEES INVOICE</h3>
     <div class="row">
       <label>Date </label>
@@ -18,13 +19,13 @@
       <label>Student Name </label>
       <span class="row-item">{{ invoice.student.surname + ' ' + invoice.student.name }}</span>
     </div>
-    <div class="row" *ngIf="currentEnrolment">
+    <div class="row" *ngIf="enrolment">
       <label>Class </label>
-      <span class="row-item">{{ currentEnrolment.name }}</span>
+      <span class="row-item">{{ enrolment.name }}</span>
     </div>
-    <div class="row" *ngIf="currentEnrolment">
+    <div class="row" *ngIf="enrolment">
       <label>Term </label>
-      <span class="row-item">{{ currentEnrolment.num + ' ' + currentEnrolment.year }}</span>
+      <span class="row-item">{{ enrolment.num + ' ' + enrolment.year }}</span>
     </div>
 
   </div>
@@ -37,7 +38,7 @@
       </tr>
     </thead>
     <tr>
-      <td>Balance as at {{ invoice.balanceBfwd.dateCreated | date }}</td>
+      <td>Balance as at {{ invoice.balanceBfwd.dateCreated| date }}</td>
       <td>{{ invoice.balanceBfwd.amount | currency }}</td>
     </tr>
     <tr *ngFor="let bill of invoice.bills">
@@ -46,7 +47,7 @@
     </tr>
     <tr>
       <td class="total">Total</td>
-      <td class="total">{{ invoice.balance | currency }}</td>
+      <td class="total">{{ invoice.totalBill| currency }}</td>
     </tr>
   </table>
 </div>

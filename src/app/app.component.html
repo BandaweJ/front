@@ -146,7 +146,7 @@
               <a routerLink="/student-finance" routerLinkActive="active"> Billing </a>
             </button>
           </div>
-          <div class="sidenav-container" *ngIf="role === 'student' || role === 'admin'">
+          <div class="sidenav-container" *ngIf="role === 'student' || role === 'admin' || role === 'reception'">
             <button mat-button>
               <a routerLink="/invoice" routerLinkActive="active"> Invoice </a>
             </button>

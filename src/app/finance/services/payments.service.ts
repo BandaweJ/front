@@ -28,6 +28,7 @@ export class PaymentsService {
   }
 
   downloadInvoice(studentNumber: string, num: number, year: number) {
+    console.log('called download');
     const result = this.httpClient.get(
       `${this.baseURL}invoicepdf/${studentNumber}/${num}/${year}`,
       {

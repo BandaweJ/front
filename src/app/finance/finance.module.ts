@@ -20,6 +20,7 @@ import { StudentBalancesComponent } from './student-balances/student-balances.co
 import { SharedModule } from '../shared/shared.module';
 import { AddEditBalancesComponent } from './student-balances/add-edit-balances/add-edit-balances.component';
 import { EnrolmentModule } from '../enrolment/enrolment.module';
+import { InvoiceItemComponent } from './student-finance/invoice/invoice-item/invoice-item.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { EnrolmentModule } from '../enrolment/enrolment.module';
     BillingComponent,
     StudentBalancesComponent,
     AddEditBalancesComponent,
+    InvoiceItemComponent,
   ],
   imports: [
     CommonModule,

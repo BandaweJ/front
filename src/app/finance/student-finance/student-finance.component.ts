@@ -9,6 +9,9 @@ import {
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import { invoiceActions } from '../store/finance.actions';
+import { InvoiceModel } from '../models/invoice.model';
+import { selectedStudentInvoice } from '../store/finance.selector';
 
 @Component({
   selector: 'app-student-finance',
@@ -17,21 +20,29 @@ import { StudentsModel } from 'src/app/registration/models/students.model';
 })
 export class StudentFinanceComponent implements OnInit {
   selectedStudentEnrol: EnrolsModel | null = null;
+  invoice!: InvoiceModel;
   // currentTerm!: TermsModel;
   currentEnrolment$ = this.store
     .select(selectCurrentEnrolment)
     .subscribe((enrolment) => {
       this.selectedStudentEnrol = enrolment;
-      // console.log('selectedStudentEnrol ', this.selectedStudentEnrol);
+      if (enrolment) {
+        this.store.dispatch(
+          invoiceActions.fetchInvoice({
+            studentNumber: enrolment.student.studentNumber,
+            num: enrolment.num,
+            year: enrolment.year,
+          })
+        );
+      }
     });
   // today = new Date();
   constructor(private store: Store) {}
 
   ngOnInit(): void {
-    // this.currentEnrolment$.subscribe((enrolment) => {
-    //   this.selectedStudentEnrol = enrolment;
-    //   // console.log('selectedStudentEnrol ', this.selectedStudentEnrol);
-    // });
+    this.store.select(selectedStudentInvoice).subscribe((invoice) => {
+      this.invoice = invoice;
+    });
   }
 
   selectedEnrolChanged(enrol: EnrolsModel) {

@@ -82,6 +82,7 @@ export class BillingComponent implements OnInit, OnChanges {
 
         this.selectedBills.push(bill);
         this.toBill.push(bill);
+        // console.log('bill added', bill, 'selectedBills', this.selectedBills);
       } else {
         // Remove the fee if it's already selected
         this.confirmBillRemoval(fee);

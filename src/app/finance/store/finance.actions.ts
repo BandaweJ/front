@@ -46,7 +46,7 @@ export const invoiceActions = createActionGroup({
     downloadInvoiceSuccess: emptyProps(),
     downloadInvoiceFail: props<{ error: HttpErrorResponse }>(),
     saveInvoice: props<{ invoice: InvoiceModel }>(),
-    saveInvoiceSuccess: emptyProps(),
+    saveInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     saveInvoiceFail: props<{ error: HttpErrorResponse }>(),
   },
 });
