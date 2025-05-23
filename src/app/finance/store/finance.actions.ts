@@ -6,6 +6,7 @@ import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
 import { BillModel } from '../models/bill.model';
+import { InvoiceStatsModel } from '../models/invoice-stats.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -48,6 +49,9 @@ export const invoiceActions = createActionGroup({
     saveInvoice: props<{ invoice: InvoiceModel }>(),
     saveInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     saveInvoiceFail: props<{ error: HttpErrorResponse }>(),
+    fetchInvoiceStats: props<{ num: number; year: number }>(),
+    fetchInvoiceStatsSuccess: props<{ invoiceStats: InvoiceStatsModel[] }>(),
+    fetchInvoiceStatsFail: props<{ error: HttpErrorResponse }>(),
   },
 });
 

@@ -160,6 +160,24 @@ export class FinanceEffects {
     )
   );
 
+  fetchInvoiceStats$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.fetchInvoiceStats),
+      switchMap((data) =>
+        this.paymentsService.getInvoiceStats(data.num, data.year).pipe(
+          map((invoiceStats) => {
+            return invoiceActions.fetchInvoiceStatsSuccess({
+              invoiceStats,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(invoiceActions.fetchInvoiceStatsFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
   addBalance$ = createEffect(() =>
     this.actions$.pipe(
       ofType(balancesActions.saveBalance),

@@ -12,6 +12,7 @@ import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import { InvoiceStatsModel } from '../models/invoice-stats.model';
 
 export interface State {
   fees: FeesModel[];
@@ -21,6 +22,7 @@ export interface State {
   selectedStudentInvoice: InvoiceModel;
   balance: BalancesModel | null;
   isNewComer: boolean;
+  invoiceStats: InvoiceStatsModel[];
 }
 
 export const initialState: State = {
@@ -41,6 +43,7 @@ export const initialState: State = {
   },
   balance: null,
   isNewComer: false,
+  invoiceStats: [],
 };
 
 export const financeReducer = createReducer(
@@ -333,5 +336,23 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.error.message,
+  })),
+  on(invoiceActions.fetchInvoiceStats, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+    invoiceStats: [],
+  })),
+  on(invoiceActions.fetchInvoiceStatsSuccess, (state, { invoiceStats }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    invoiceStats,
+  })),
+  on(invoiceActions.fetchInvoiceStatsFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+    invoiceStats: [],
   }))
 );

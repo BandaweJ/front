@@ -294,11 +294,15 @@ export const enrolmentReducer = createReducer(
   ),
   on(
     enrolmentActions.currentEnrolementActions.updateCurrentEnrolmentSuccess,
-    (state, { enrol }) => ({
-      ...state,
-      isLoading: false,
-      currentEnrolment: enrol,
-    })
+    (state, { enrol }) => {
+      return {
+        ...state,
+        isLoading: false,
+        currentEnrolment: {
+          ...enrol, // Ensure enrol is an object or safely spread
+        },
+      };
+    }
   ),
   on(
     enrolmentActions.currentEnrolementActions.updateCurrentEnrolmentFail,

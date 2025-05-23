@@ -1,53 +1,26 @@
-<app-invoice-item></app-invoice-item>
-<div class="invoice-wrapper">
-  <div class="invoice-download" *ngIf="invoice">
-    <button type="button" mat-mini-fab color="primary" class="download-btn" (click)="downloadable? download() : save()">
-      <span class="material-icons">{{ downloadable? 'download' : 'save' }}</span>
-    </button>
+<div class="admin" *ngIf="role === 'reception'">
+  <div class="term-select">
+    <!-- <mat-form-field>
+      <mat-label>Select Term</mat-label>
+      <mat-select *ngFor="let term of terms$ | async" [(ngModel)]="term" (selectionChange)="onTermChange($event.value)">
+      </mat-select>
+    </mat-form-field> -->
   </div>
-  <div class="student-details" *ngIf="invoice && invoice.student">
-    <h3>SCHOOL FEES INVOICE</h3>
-    <div class="row">
-      <label>Date </label>
-      <span class="row-item">{{ today | date }}</span>
-    </div>
-    <div class="row">
-      <label>Student Number </label>
-      <span class="row-item">{{ invoice.student.studentNumber }}</span>
-    </div>
-    <div class="row">
-      <label>Student Name </label>
-      <span class="row-item">{{ invoice.student.surname + ' ' + invoice.student.name }}</span>
-    </div>
-    <div class="row" *ngIf="enrolment">
-      <label>Class </label>
-      <span class="row-item">{{ enrolment.name }}</span>
-    </div>
-    <div class="row" *ngIf="enrolment">
-      <label>Term </label>
-      <span class="row-item">{{ enrolment.num + ' ' + enrolment.year }}</span>
-    </div>
-
+  <div class="breakdown" *ngIf="invoiceStats$ | async as invoiceStats">
+    <mat-card class="total-widget" *ngFor="let stat of invoiceStats">
+      <mat-card-title>
+        {{ stat.title }}
+      </mat-card-title>
+      <mat-card-content>
+        <span class="total-value">${{ stat.total }}</span>
+        <div class="breakdown">
+          <label>O Level</label>
+          <span class="breakdown-value">${{ stat.oLevel }}</span>
+          <label>A Level</label>
+          <span class="breakdown-value">${{ stat.aLevel }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
-  <table class="invoice-table" *ngIf="invoice">
-    <thead>
-      <tr>
-        <th>{{ (isNewComer$ | async) ? 'New Student' : 'Returning Student' }}</th>
-        <th>USD $</th>
-      </tr>
-    </thead>
-    <tr>
-      <td>Balance as at {{ invoice.balanceBfwd.dateCreated| date }}</td>
-      <td>{{ invoice.balanceBfwd.amount | currency }}</td>
-    </tr>
-    <tr *ngFor="let bill of invoice.bills">
-      <td>{{ sharedService.feesNamesToString(bill.fees.name) }}</td>
-      <td>{{ bill.fees.amount | currency }}</td>
-    </tr>
-    <tr>
-      <td class="total">Total</td>
-      <td class="total">{{ invoice.totalBill| currency }}</td>
-    </tr>
-  </table>
 </div>

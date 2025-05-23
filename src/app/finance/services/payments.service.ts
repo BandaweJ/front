@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InvoiceModel } from '../models/invoice.model';
 import { environment } from 'src/environments/environment';
+import { InvoiceStatsModel } from '../models/invoice-stats.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsService {
@@ -16,6 +17,12 @@ export class PaymentsService {
   ): Observable<InvoiceModel> {
     return this.httpClient.get<InvoiceModel>(
       `${this.baseURL}invoice/${studentNumber}/${num}/${year}`
+    );
+  }
+
+  getInvoiceStats(num: number, year: number): Observable<InvoiceStatsModel[]> {
+    return this.httpClient.get<InvoiceStatsModel[]>(
+      `${this.baseURL}invoice/${num}/${year}`
     );
   }
 
