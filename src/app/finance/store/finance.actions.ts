@@ -52,6 +52,9 @@ export const invoiceActions = createActionGroup({
     fetchInvoiceStats: props<{ num: number; year: number }>(),
     fetchInvoiceStatsSuccess: props<{ invoiceStats: InvoiceStatsModel[] }>(),
     fetchInvoiceStatsFail: props<{ error: HttpErrorResponse }>(),
+    fetchInvoices: props<{ num: number; year: number }>(),
+    fetchInvoicesSuccess: props<{ invoices: InvoiceModel[] }>(),
+    fetchInvoicesFail: props<{ error: HttpErrorResponse }>(),
   },
 });
 

@@ -26,6 +26,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatListModule } from '@angular/material/list';
 @NgModule({
   declarations: [],
   imports: [
@@ -56,6 +57,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatBadgeModule,
     MatButtonToggleModule,
     MatAutocompleteModule,
+    MatListModule,
   ],
   exports: [
     MatCardModule,
@@ -84,6 +86,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatBadgeModule,
     MatButtonToggleModule,
     MatAutocompleteModule,
+    MatListModule,
   ],
 })
 export class MaterialModule {}

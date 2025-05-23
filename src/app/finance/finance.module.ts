@@ -21,6 +21,8 @@ import { SharedModule } from '../shared/shared.module';
 import { AddEditBalancesComponent } from './student-balances/add-edit-balances/add-edit-balances.component';
 import { EnrolmentModule } from '../enrolment/enrolment.module';
 import { InvoiceItemComponent } from './student-finance/invoice/invoice-item/invoice-item.component';
+import { SearchInvoiceComponent } from './student-finance/invoice/search-invoice/search-invoice.component';
+import { InvoiceListComponent } from './student-finance/invoice/invoice-list/invoice-list.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,8 @@ import { InvoiceItemComponent } from './student-finance/invoice/invoice-item/inv
     StudentBalancesComponent,
     AddEditBalancesComponent,
     InvoiceItemComponent,
+    SearchInvoiceComponent,
+    InvoiceListComponent,
   ],
   imports: [
     CommonModule,

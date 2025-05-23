@@ -1,5 +1,5 @@
 <div class="invoice-item">
-  <div class="invoice-download" *ngIf="invoice">
+  <div class="invoice-download">
     <button type="button" mat-mini-fab color="primary" class="download-btn" (click)="downloadable? download() : save()">
       <span class="material-icons">{{ downloadable? 'download' : 'save' }}</span>
     </button>

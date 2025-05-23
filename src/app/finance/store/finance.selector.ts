@@ -37,3 +37,8 @@ export const selectInVoiceStats = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.invoiceStats
 );
+
+export const selectInVoices = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.invoices
+);

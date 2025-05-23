@@ -1,26 +1,38 @@
 <div class="admin" *ngIf="role === 'reception'">
   <div class="term-select">
-    <!-- <mat-form-field>
+    <mat-form-field>
       <mat-label>Select Term</mat-label>
-      <mat-select *ngFor="let term of terms$ | async" [(ngModel)]="term" (selectionChange)="onTermChange($event.value)">
+      <mat-select [(ngModel)]="term" (selectionChange)="onTermChange($event.value)">
+        <mat-option *ngFor="let t of terms$ | async" [value]="t">{{ t.num + ' ' + t.year }}</mat-option>
       </mat-select>
-    </mat-form-field> -->
+    </mat-form-field>
   </div>
-  <div class="breakdown" *ngIf="invoiceStats$ | async as invoiceStats">
+  <div class="breakdown-container" *ngIf="invoiceStats$ | async as invoiceStats">
     <mat-card class="total-widget" *ngFor="let stat of invoiceStats">
       <mat-card-title>
-        {{ stat.title }}
+        {{ namesToString(stat.title) }}
       </mat-card-title>
       <mat-card-content>
         <span class="total-value">${{ stat.total }}</span>
         <div class="breakdown">
           <label>O Level</label>
-          <span class="breakdown-value">${{ stat.oLevel }}</span>
+          <span class="breakdown-value money">${{ stat.oLevel }}</span>
           <label>A Level</label>
-          <span class="breakdown-value">${{ stat.aLevel }}</span>
+          <span class="breakdown-value money">${{ stat.aLevel }}</span>
         </div>
       </mat-card-content>
     </mat-card>
+  </div>
+
+  <div class="invoices-container">
+    <div class="invoice-selection" *ngIf="invoices$ | async as invoices">
+      <app-search-invoice class="search-invoice" (invoiceSelected)="onInvoiceSelected($event)"></app-search-invoice>
+      <app-invoice-list (invoiceSelected)="onInvoiceSelected($event)"></app-invoice-list>
+    </div>
+    <div class="invoice-container">
+      <app-invoice-item *ngIf="invoice" [downloadable]="true" [invoice]="invoice"></app-invoice-item>
+
+    </div>
   </div>
 
 </div>

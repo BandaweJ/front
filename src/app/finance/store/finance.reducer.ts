@@ -23,6 +23,7 @@ export interface State {
   balance: BalancesModel | null;
   isNewComer: boolean;
   invoiceStats: InvoiceStatsModel[];
+  invoices: InvoiceModel[];
 }
 
 export const initialState: State = {
@@ -44,6 +45,7 @@ export const initialState: State = {
   balance: null,
   isNewComer: false,
   invoiceStats: [],
+  invoices: [],
 };
 
 export const financeReducer = createReducer(
@@ -354,5 +356,21 @@ export const financeReducer = createReducer(
     isLoading: false,
     errorMessage: error.message,
     invoiceStats: [],
+  })),
+  on(invoiceActions.fetchInvoices, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(invoiceActions.fetchInvoicesSuccess, (state, { invoices }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    invoices,
+  })),
+  on(invoiceActions.fetchInvoicesFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
   }))
 );

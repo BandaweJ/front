@@ -22,6 +22,12 @@ export class PaymentsService {
 
   getInvoiceStats(num: number, year: number): Observable<InvoiceStatsModel[]> {
     return this.httpClient.get<InvoiceStatsModel[]>(
+      `${this.baseURL}stats/${num}/${year}`
+    );
+  }
+
+  getInvoices(num: number, year: number): Observable<InvoiceModel[]> {
+    return this.httpClient.get<InvoiceModel[]>(
       `${this.baseURL}invoice/${num}/${year}`
     );
   }

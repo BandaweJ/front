@@ -1,0 +1,10 @@
+<mat-form-field class="invoice-search-field">
+  <mat-label>Search for Invoice</mat-label>
+  <input type="text" matInput [formControl]="searchControl" [matAutocomplete]="auto" />
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectInvoice($event.option.value)">
+    <mat-option *ngFor="let invoice of searchResults$ | async" [value]="invoice">
+      {{ invoice.invoiceNumber }} {{ invoice.student.name }} {{ invoice.student.surname }} ({{
+      invoice.student.studentNumber }})
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>

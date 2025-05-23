@@ -160,6 +160,24 @@ export class FinanceEffects {
     )
   );
 
+  fetchInvoices$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.fetchInvoices),
+      switchMap((data) =>
+        this.paymentsService.getInvoices(data.num, data.year).pipe(
+          map((invoices) => {
+            return invoiceActions.fetchInvoicesSuccess({
+              invoices,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(invoiceActions.fetchInvoicesFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
   fetchInvoiceStats$ = createEffect(() =>
     this.actions$.pipe(
       ofType(invoiceActions.fetchInvoiceStats),

@@ -1,8 +1,10 @@
 import {
   Component,
+  EventEmitter,
   Input,
   OnChanges,
   OnInit,
+  Output,
   SimpleChanges,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -10,6 +12,7 @@ import { invoiceActions } from '../../store/finance.actions';
 import { InvoiceModel } from '../../models/invoice.model';
 import {
   selectedStudentInvoice,
+  selectInVoices,
   selectInVoiceStats,
   selectIsNewComer,
 } from '../../store/finance.selector';
@@ -24,6 +27,7 @@ import {
 } from 'src/app/enrolment/store/enrolment.actions';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
+import { InvoiceItemComponent } from './invoice-item/invoice-item.component';
 
 @Component({
   selector: 'app-invoice',
@@ -35,6 +39,9 @@ export class InvoiceComponent implements OnInit {
   term!: TermsModel;
   terms$ = this.store.select(selectTerms);
   invoiceStats$ = this.store.select(selectInVoiceStats);
+  invoices$ = this.store.select(selectInVoices);
+  invoice!: InvoiceModel;
+
   constructor(private store: Store, public sharedService: SharedService) {
     this.store.dispatch(fetchTerms());
     this.store.select(selectUser).subscribe((user) => {
@@ -51,6 +58,41 @@ export class InvoiceComponent implements OnInit {
     this.store.dispatch(
       invoiceActions.fetchInvoiceStats({ num: term.num, year: term.year })
     );
+    this.store.dispatch(
+      invoiceActions.fetchInvoices({ num: term.num, year: term.year })
+    );
+  }
+
+  onInvoiceSelected(invoice: InvoiceModel) {
+    this.invoice = invoice;
+  }
+
+  namesToString(name: string) {
+    switch (name) {
+      case 'amount':
+        return 'Amount';
+
+      case 'tuition':
+        return 'Tuition';
+      case 'boarders':
+        return 'Boarders';
+      case 'dayScholars':
+        return 'Day';
+      case 'food':
+        return 'Food';
+      case 'transport':
+        return 'Transport';
+      case 'science':
+        return 'Science Levy';
+      case 'desk':
+        return 'Desk Fee';
+      case 'development':
+        return 'Development';
+      case 'application':
+        return 'Application';
+      default:
+        return name;
+    }
   }
 
   // ngOnChanges(changes: SimpleChanges): void {

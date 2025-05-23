@@ -1,0 +1,78 @@
+.term-select {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 1rem 0;
+}
+
+.breakdown-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap; /* <-- This is the key property */
+  justify-content: center;
+}
+
+.total-widget {
+  width: fit-content;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* align-items: center; */
+  /* justify-content: center; */
+  background-color: #eff2f1;
+  color: #0a2342;
+
+  /* Optional: Give each widget a flexible basis so they take up space smartly */
+  flex: 1 1 auto; /* Shorthand for flex-grow: 1; flex-shrink: 1; flex-basis: auto; */
+  max-width: 300px; /* Optional: Prevent widgets from getting too wide on very large screens */
+
+  /* Add any other styling for your cards */
+  margin-bottom: 0.5rem; /* Add some vertical margin when they wrap */
+}
+
+.total-value {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #0f6fe4;
+}
+
+.breakdown {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #eff2f1;
+  color: #0a2342;
+}
+
+.mat-mdc-card-content {
+  padding: 0;
+}
+
+.money {
+  /* font-size: 1.2rem; */
+  font-weight: 200;
+  color: #0f6fe4;
+}
+
+.invoices-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+}
+
+.invoice-container {
+  position: relative;
+}
+
+.invoice-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  align-items: center;
+  background-color: #eff2f1;
+  color: #0a2342;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
