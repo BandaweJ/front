@@ -14,11 +14,11 @@
     </app-students-to-bill>
   </mat-card> -->
 
-  <mat-card class="invoice-container">
+  <mat-card>
     <!-- <app-invoice *ngIf="selectedStudentEnrol" [enrolment]="selectedStudentEnrol" [downloadable]="false">
 
     </app-invoice> -->
-    <app-invoice-item [invoice]="invoice" [downloadable]="false"></app-invoice-item>
+    <app-invoice-item *ngIf="invoice.invoiceNumber" [invoice]="invoice" [downloadable]="false"></app-invoice-item>
   </mat-card>
   <app-billing [enrolment]="selectedStudentEnrol" class="billing-container">
 
