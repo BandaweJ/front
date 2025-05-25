@@ -10,7 +10,7 @@
   box-sizing: border-box; /* Ensures padding and border are included in the width/height */
 
   /* Optional: Add some padding for inner content */
-  padding: 15mm; /* Using mm for consistent spacing on print */
+  padding: 20mm; /* Using mm for consistent spacing on print */
 
   /* Optional: Center the invoice item on the page if it's the main content */
   margin: 0 auto; /* 20px top/bottom margin, auto for left/right to center */

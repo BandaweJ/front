@@ -83,11 +83,11 @@ export class InvoiceComponent implements OnInit {
       case 'transport':
         return 'Transport';
       case 'science':
-        return 'Science Levy';
+        return 'Scie Levy';
       case 'desk':
         return 'Desk Fee';
       case 'development':
-        return 'Development';
+        return 'Dev Levy';
       case 'application':
         return 'Application';
       default:

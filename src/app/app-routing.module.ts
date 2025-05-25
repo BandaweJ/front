@@ -28,6 +28,7 @@ import { FeesComponent } from './finance/fees/fees.component';
 import { StudentFinanceComponent } from './finance/student-finance/student-finance.component';
 import { StudentBalancesComponent } from './finance/student-balances/student-balances.component';
 import { InvoiceComponent } from './finance/student-finance/invoice/invoice.component';
+import { PaymentsComponent } from './finance/payments/payments.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -171,6 +172,12 @@ const routes: Routes = [
     title: 'Individual Student Finance',
   },
   {
+    path: 'payments',
+    component: PaymentsComponent,
+    canActivate: [AuthGuardService],
+    title: 'Receipting',
+  },
+  {
     path: '',
     redirectTo: 'signin',
     pathMatch: 'full',
@@ -179,25 +186,6 @@ const routes: Routes = [
     path: '**',
     component: DashboardComponent,
   },
-  // {
-  //   //   path: 'registration',
-  //   //   component: RegistrationComponent,
-  //   //   canActivate: [AuthGuardService],
-  //   //   children: [
-  //   //     {
-  //   //       path: 'parents',
-  //   //       component: ParentsListComponent,
-  //   //     },
-  //   //     {
-  //   //       path: 'students',
-  //   //       component: StudentsListComponent,
-  //   //     },
-  //   //     {
-  //   //       path: 'teachers',
-  //   //       component: TeachersListComponent,
-  //   //     },
-  //   //   ],
-  // },
 ];
 
 @NgModule({

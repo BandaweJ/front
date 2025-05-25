@@ -23,6 +23,7 @@ import { EnrolmentModule } from '../enrolment/enrolment.module';
 import { InvoiceItemComponent } from './student-finance/invoice/invoice-item/invoice-item.component';
 import { SearchInvoiceComponent } from './student-finance/invoice/search-invoice/search-invoice.component';
 import { InvoiceListComponent } from './student-finance/invoice/invoice-list/invoice-list.component';
+import { ReceiptItemComponent } from './payments/receipt-item/receipt-item.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { InvoiceListComponent } from './student-finance/invoice/invoice-list/inv
     InvoiceItemComponent,
     SearchInvoiceComponent,
     InvoiceListComponent,
+    ReceiptItemComponent,
   ],
   imports: [
     CommonModule,

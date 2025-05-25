@@ -13,6 +13,7 @@ import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
+import { ReceiptModel } from '../models/payment.model';
 
 export interface State {
   fees: FeesModel[];
@@ -24,6 +25,7 @@ export interface State {
   isNewComer: boolean;
   invoiceStats: InvoiceStatsModel[];
   invoices: InvoiceModel[];
+  newReceipt: ReceiptModel;
 }
 
 export const initialState: State = {
@@ -37,7 +39,6 @@ export const initialState: State = {
     balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
     student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
     bills: [],
-    payments: [], // Initialize payments array
     balance: 0, // Provide a default value
     invoiceDate: new Date(),
     invoiceDueDate: new Date(),
@@ -46,6 +47,7 @@ export const initialState: State = {
   isNewComer: false,
   invoiceStats: [],
   invoices: [],
+  newReceipt: {} as ReceiptModel,
 };
 
 export const financeReducer = createReducer(
@@ -132,7 +134,6 @@ export const financeReducer = createReducer(
       balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
       student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
       bills: [],
-      payments: [], // Initialize payments array
       balance: 0, // Provide a default value
       invoiceDate: new Date(),
       invoiceDueDate: new Date(),

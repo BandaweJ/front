@@ -16,7 +16,7 @@ export class InvoiceItemComponent {
   @Input() downloadable!: boolean;
 
   save() {
-    // console.log('called save');
+    console.log('called save with invoice ', this.invoice);
     const invoice = this.invoice;
 
     this.store.dispatch(invoiceActions.saveInvoice({ invoice }));

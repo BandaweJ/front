@@ -5,12 +5,15 @@
 }
 .container {
   display: grid;
-  width: 100%; /* Ensures the grid takes the full width of its parent */
+  width: fit-content; /* Ensures the grid takes the full width of its parent */
   grid-template-columns: auto 1fr auto;
   gap: 16px; /* Add some spacing between grid items */
   align-items: stretch; /* Makes grid items stretch vertically to the height of the tallest item in their row */
+  justify-content: center;
 }
-
+.billing-container {
+  max-width: 30vw;
+}
 .top-panel {
   display: flex; /* 1. Enable Flexbox */
   justify-content: space-between; /* 2. Distribute space between items */

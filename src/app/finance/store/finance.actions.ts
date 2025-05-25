@@ -7,6 +7,7 @@ import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
 import { BillModel } from '../models/bill.model';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
+import { ReceiptModel } from '../models/payment.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -85,5 +86,14 @@ export const billStudentActions = createActionGroup({
     removeBill: props<{ bill: BillModel }>(),
     removeBillSuccess: props<{ bill: BillModel }>(),
     removeBillFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+
+export const receiptActions = createActionGroup({
+  source: 'Receipt Component',
+  events: {
+    fetchNewReceipt: props<{ studentNumber: string }>(),
+    fetchNewReceiptSuccess: props<{ receipt: ReceiptModel }>(),
+    fetchNewReceiptFail: props<{ error: HttpErrorResponse }>(),
   },
 });

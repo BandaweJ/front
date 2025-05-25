@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { InvoiceModel } from '../models/invoice.model';
 import { environment } from 'src/environments/environment';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
+import { ReceiptModel } from '../models/payment.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsService {
@@ -87,5 +88,11 @@ export class PaymentsService {
       console.error('Error downloading PDF:', response.statusText);
       // Handle potential errors
     }
+  }
+
+  getNewReceipt(studentNumber: string): Observable<ReceiptModel> {
+    return this.httpClient.get<ReceiptModel>(
+      `${this.baseURL}receipt/${studentNumber}`
+    );
   }
 }

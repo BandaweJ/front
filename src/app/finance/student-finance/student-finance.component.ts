@@ -41,6 +41,7 @@ export class StudentFinanceComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.select(selectedStudentInvoice).subscribe((invoice) => {
+      console.log('invoice came from store', invoice);
       this.invoice = invoice;
     });
   }

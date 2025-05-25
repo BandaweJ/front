@@ -1,12 +1,16 @@
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { PaymentMethods } from './payment-methods.enum';
 
-export interface PaymentModel {
-  receiptNumber?: number;
-  receiptBookNumber: string;
+export interface ReceiptModel {
+  receiptNumber: number;
+  receiptBookNumber?: string;
   student: StudentsModel;
-  amount: number;
+  amountPaid: number;
   description: string;
   paymentDate?: Date;
-  method: PaymentMethods;
+  paymentMethod: PaymentMethods;
+  approved: boolean;
+  servedBy: string;
+  amountOutstanding: number;
+  amountDue: number;
 }

@@ -11,6 +11,7 @@ import {
   feesActions,
   invoiceActions,
   isNewComerActions,
+  receiptActions,
 } from './finance.actions';
 import { PaymentsService } from '../services/payments.service';
 import { EnrolService } from 'src/app/enrolment/services/enrol.service';
@@ -355,6 +356,24 @@ export class FinanceEffects {
         )
       )
       // tap(() => console.log('saveInvoice$ effect completed for an action')) // Log when the outer effect stream completes
+    )
+  );
+
+  fetchNewReceipt$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(receiptActions.fetchNewReceipt),
+      switchMap((data) =>
+        this.paymentsService.getNewReceipt(data.studentNumber).pipe(
+          map((receipt) => {
+            return receiptActions.fetchNewReceiptSuccess({
+              receipt,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(receiptActions.fetchNewReceiptFail({ ...error }))
+          )
+        )
+      )
     )
   );
 }
