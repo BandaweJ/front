@@ -376,4 +376,74 @@ export class FinanceEffects {
       )
     )
   );
+
+  fetchReceipts$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(receiptActions.fetchReceipts),
+      switchMap(() =>
+        this.paymentsService.getReceipts().pipe(
+          map((receipts) => {
+            return receiptActions.fetchReceiptsSuccess({
+              receipts,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(receiptActions.fetchReceiptsFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
+  saveReceipt$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(receiptActions.saveReceipt),
+      // tap((data) => console.log('saveInvoice action received', data)), // Log when the action fires
+      switchMap((data) =>
+        this.paymentsService.saveReceipt(data.receipt).pipe(
+          tap((receipt) =>
+            this.snackBar.open(
+              'Receipt saved successfully' + receipt.receiptNumber,
+              'OK',
+              {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              }
+            )
+          ), // Log service success
+          map((receipt) => receiptActions.saveReceiptSuccess({ receipt })),
+          catchError((error: HttpErrorResponse) => {
+            // console.error('Error from saveInvoice:', error); // Log the error
+            // console.log('Dispatching saveInvoiceFail'); // Log before dispatching fail
+            return of(
+              receiptActions.saveReceiptFail({
+                ...error,
+              })
+            );
+          })
+          // tap(() => console.log('saveInvoice service stream completed')) // Log when the inner stream completes
+        )
+      )
+      // tap(() => console.log('saveInvoice$ effect completed for an action')) // Log when the outer effect stream completes
+    )
+  );
+
+  downloadReceipt$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(receiptActions.downloadReceiptPdf),
+      switchMap((data) =>
+        this.paymentsService.downloadReceipt(data.receipt).pipe(
+          map(() => receiptActions.downloadReceiptPdfSuccess()),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              receiptActions.downloadReceiptPdfFail({
+                ...error,
+              })
+            )
+          )
+        )
+      )
+    )
+  );
 }

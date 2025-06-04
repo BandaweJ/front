@@ -1,4 +1,9 @@
-import { createAction, createActionGroup, props } from '@ngrx/store';
+import {
+  createAction,
+  createActionGroup,
+  emptyProps,
+  props,
+} from '@ngrx/store';
 import { ClassesModel } from '../models/classes.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TermsModel } from '../models/terms.model';
@@ -215,5 +220,14 @@ export const currentEnrolementActions = createActionGroup({
     updateCurrentEnrolment: props<{ enrol: EnrolsModel }>(),
     updateCurrentEnrolmentSuccess: props<{ enrol: EnrolsModel }>(),
     updateCurrentEnrolmentFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+
+export const currentTermActions = createActionGroup({
+  source: 'Current Term',
+  events: {
+    fetchCurrentTerm: emptyProps(),
+    fetchCurrentTermSuccess: props<{ term: TermsModel }>(),
+    fetchCurrentTermFail: props<{ error: HttpErrorResponse }>(),
   },
 });

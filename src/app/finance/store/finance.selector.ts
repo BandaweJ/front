@@ -40,10 +40,15 @@ export const selectInVoiceStats = createSelector(
 
 export const selectInVoices = createSelector(
   financeState,
-  (state: fromFinanceReducer.State) => state.invoices
+  (state: fromFinanceReducer.State) => state.termInvoices
 );
 
 export const selectNewReceipt = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.newReceipt
+);
+
+export const selectReceipts = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.receipts
 );

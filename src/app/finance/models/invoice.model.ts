@@ -4,12 +4,11 @@ import { BalancesModel } from './balances.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 
 export interface InvoiceModel {
-  totalBill: number;
-  totalPayments: number;
-  balanceBfwd: BalancesModel;
+  totalBill: number; //total of all bills
+  balanceBfwd: BalancesModel; //balance Bfwd if available
   student: StudentsModel;
   bills: BillModel[];
-  balance: number;
+  balance: number; //sum of totalBill and balanceBfwd.amount
   enrol?: EnrolsModel;
   invoiceNumber?: string;
   invoiceDate: Date;

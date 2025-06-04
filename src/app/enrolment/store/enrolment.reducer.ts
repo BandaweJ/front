@@ -22,6 +22,7 @@ export interface State {
   migrateClassResult: boolean;
   totalEnrolment: StudentsSummary | null;
   currentEnrolment: EnrolsModel | null;
+  currentTerm: TermsModel;
 }
 
 export const initialState: State = {
@@ -37,6 +38,7 @@ export const initialState: State = {
   migrateClassResult: false,
   totalEnrolment: null,
   currentEnrolment: null,
+  currentTerm: {} as TermsModel,
 };
 
 export const enrolmentReducer = createReducer(
@@ -306,6 +308,28 @@ export const enrolmentReducer = createReducer(
   ),
   on(
     enrolmentActions.currentEnrolementActions.updateCurrentEnrolmentFail,
+    (state, { error }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: error.message,
+    })
+  ),
+  on(enrolmentActions.currentTermActions.fetchCurrentTerm, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(
+    enrolmentActions.currentTermActions.fetchCurrentTermSuccess,
+    (state, { term }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: '',
+      currentTerm: term,
+    })
+  ),
+  on(
+    enrolmentActions.currentTermActions.fetchCurrentTermFail,
     (state, { error }) => ({
       ...state,
       isLoading: false,

@@ -7,6 +7,7 @@ import {
   feesActions,
   invoiceActions,
   isNewComerActions,
+  receiptActions,
 } from './finance.actions';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
@@ -24,8 +25,10 @@ export interface State {
   balance: BalancesModel | null;
   isNewComer: boolean;
   invoiceStats: InvoiceStatsModel[];
-  invoices: InvoiceModel[];
+  termInvoices: InvoiceModel[];
+  allInvoices: InvoiceModel[];
   newReceipt: ReceiptModel;
+  receipts: ReceiptModel[];
 }
 
 export const initialState: State = {
@@ -35,7 +38,6 @@ export const initialState: State = {
   errorMessage: '',
   selectedStudentInvoice: {
     totalBill: 0, // Provide a default value (or calculate if possible at this stage)
-    totalPayments: 0, // Provide a default value
     balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
     student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
     bills: [],
@@ -46,8 +48,10 @@ export const initialState: State = {
   balance: null,
   isNewComer: false,
   invoiceStats: [],
-  invoices: [],
+  termInvoices: [],
+  allInvoices: [],
   newReceipt: {} as ReceiptModel,
+  receipts: [],
 };
 
 export const financeReducer = createReducer(
@@ -213,13 +217,8 @@ export const financeReducer = createReducer(
     // Calculate the new balance
     const currentBalanceBfwdAmount =
       state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
-    const currentTotalPayments =
-      state.selectedStudentInvoice?.totalPayments || 0;
 
-    const newBalance =
-      Number(newTotalBill) +
-      Number(currentBalanceBfwdAmount) -
-      +currentTotalPayments;
+    const newBalance = Number(newTotalBill) + Number(currentBalanceBfwdAmount);
 
     console.log(newBalance);
 
@@ -242,14 +241,11 @@ export const financeReducer = createReducer(
     // Calculate the new balance
     const currentBalanceBfwdAmount =
       state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
-    const currentTotalPayments =
-      state.selectedStudentInvoice?.totalPayments || 0;
 
     const newBalance =
       state.selectedStudentInvoice?.balance +
       Number(newTotalBill) +
-      Number(currentBalanceBfwdAmount) -
-      currentTotalPayments;
+      Number(currentBalanceBfwdAmount);
 
     return {
       ...state,
@@ -283,11 +279,8 @@ export const financeReducer = createReducer(
     const currentBalanceBfwdAmount = Number(
       state.selectedStudentInvoice?.balanceBfwd?.amount || 0
     );
-    const currentTotalPayments = Number(
-      state.selectedStudentInvoice?.totalPayments || 0
-    );
-    const updatedBalance =
-      updatedTotalBill + currentBalanceBfwdAmount - currentTotalPayments;
+
+    const updatedBalance = updatedTotalBill + currentBalanceBfwdAmount;
 
     return {
       ...state,
@@ -367,9 +360,73 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: '',
-    invoices,
+    termInvoices: [...invoices],
   })),
   on(invoiceActions.fetchInvoicesFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
+  on(receiptActions.fetchNewReceipt, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(receiptActions.fetchNewReceiptSuccess, (state, { receipt }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    newReceipt: receipt,
+  })),
+  on(receiptActions.fetchNewReceiptFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
+  on(receiptActions.fetchReceipts, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(receiptActions.fetchReceiptsSuccess, (state, { receipts }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    receipts,
+  })),
+  on(receiptActions.fetchReceiptsFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
+  on(receiptActions.saveReceipt, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(receiptActions.saveReceiptSuccess, (state, { receipt }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    newReceipt: receipt,
+    receipts: [...state.receipts, receipt],
+  })),
+  on(receiptActions.saveReceiptFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
+  on(receiptActions.downloadReceiptPdf, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(receiptActions.downloadReceiptPdfSuccess, (state) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+  })),
+  on(receiptActions.downloadReceiptPdfFail, (state, { error }) => ({
     ...state,
     isLoading: false,
     errorMessage: error.message,

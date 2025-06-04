@@ -24,6 +24,10 @@ import { InvoiceItemComponent } from './student-finance/invoice/invoice-item/inv
 import { SearchInvoiceComponent } from './student-finance/invoice/search-invoice/search-invoice.component';
 import { InvoiceListComponent } from './student-finance/invoice/invoice-list/invoice-list.component';
 import { ReceiptItemComponent } from './payments/receipt-item/receipt-item.component';
+import { SearchReceiptComponent } from './payments/search-receipt/search-receipt.component';
+import { FilterReceiptsDialogComponent } from './payments/filter-receipts-dialog/filter-receipts-dialog.component';
+import { ReceiptSummaryCardComponent } from './payments/receipt-item/receipt-summary-card.component/receipt-summary-card.component.component';
+import { AddReceiptDialogComponent } from './payments/add-receipt-dialog/add-receipt-dialog.component';
 
 @NgModule({
   declarations: [
@@ -42,6 +46,10 @@ import { ReceiptItemComponent } from './payments/receipt-item/receipt-item.compo
     SearchInvoiceComponent,
     InvoiceListComponent,
     ReceiptItemComponent,
+    SearchReceiptComponent,
+    FilterReceiptsDialogComponent,
+    ReceiptSummaryCardComponent,
+    AddReceiptDialogComponent,
   ],
   imports: [
     CommonModule,

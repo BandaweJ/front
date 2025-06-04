@@ -1,0 +1,75 @@
+/* src/app/receipt-summary-card/receipt-summary-card.component.css */
+.receipt-summary-card {
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease-in-out;
+  /*width: 250px;
+  Examplewidthforacard*/
+  display: flex;
+  flex-direction: column;
+  -webkit-transition: box-shadow 0.2s ease-in-out;
+  -moz-transition: box-shadow 0.2s ease-in-out;
+  -ms-transition: box-shadow 0.2s ease-in-out;
+  -o-transition: box-shadow 0.2s ease-in-out;
+}
+
+.receipt-summary-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.receipt-summary-card mat-card-header {
+  padding-bottom: 0;
+  align-items: flex-start;
+}
+
+.receipt-summary-card .amount-display {
+  font-size: 1.8em;
+  font-weight: 600;
+  color: var(--mdc-theme-primary); /* Use Angular Material primary color */
+  line-height: 1;
+}
+
+.receipt-summary-card mat-card-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8em;
+  margin-top: 4px; /* Space between amount and date */
+}
+
+.receipt-summary-card mat-card-content {
+  padding-top: 0;
+  flex-grow: 1; /* Allow content to take available space */
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Space between content rows */
+}
+
+.receipt-summary-card mat-card-content > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+}
+
+.receipt-summary-card mat-card-content mat-icon {
+  font-size: 1.1em;
+  height: 1.1em;
+  width: 1.1em;
+  color: rgba(0, 0, 0, 0.6); /* Slightly less prominent icon color */
+}
+
+.status-icon {
+  font-size: 1.2em !important;
+  height: 1.2em !important;
+  width: 1.2em !important;
+  vertical-align: middle;
+}
+
+.status-pending {
+  color: var(--mdc-theme-warn);
+}
+
+.status-approved {
+  color: var(--mdc-theme-primary);
+}

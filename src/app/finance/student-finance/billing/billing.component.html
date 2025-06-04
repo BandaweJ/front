@@ -13,7 +13,7 @@
     </div>
     <mat-chip-listbox class="chip-list">
       <mat-chip *ngFor="let fee of fees" [value]="fee" (click)="addToBill(fee)" selectable>
-        {{ sharedService.feesNamesToString(fee.name) + ': $' + fee.amount.toFixed(2) }}
+        {{ sharedService.feesNamesToString(fee.name) + ': $' + fee.amount }}
         <mat-icon *ngIf="isSelected(fee)" color="primary">check</mat-icon>
       </mat-chip>
     </mat-chip-listbox>

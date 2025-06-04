@@ -23,4 +23,8 @@ export class TermsService {
   editTerm(term: TermsModel): Observable<TermsModel> {
     return this.httpClient.patch<TermsModel>(this.baseURL, term);
   }
+
+  getCurrentTerm(): Observable<TermsModel> {
+    return this.httpClient.get<TermsModel>(`${this.baseURL}/current`);
+  }
 }

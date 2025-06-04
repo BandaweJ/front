@@ -1,7 +1,7 @@
 <mat-toolbar class="title">
   <!-- <span>{{ title$ }}</span> -->
-  <div *ngIf="!(authErrMsg$ | async)">{{ today.toDateString() }}, Term {{ currentTermNum }}</div>
-  <div class="error" *ngIf="authErrMsg$ | async">{{ authErrMsg$ | async }}</div>
+  <!-- <div *ngIf="!(authErrMsg$ | async)">{{ today.toDateString() }}, Term {{ currentTermNum }}</div> -->
+  <!-- <div class="error" *ngIf="authErrMsg$ | async">{{ authErrMsg$ | async }}</div> -->
 </mat-toolbar>
 <!--  -->
 <div class="summaries-row" *ngIf="role !== 'student'">

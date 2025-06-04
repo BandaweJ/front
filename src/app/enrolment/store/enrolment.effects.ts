@@ -1,6 +1,6 @@
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as fromEnrolmentActions from './enrolment.actions';
-import { catchError, map, of, switchMap, tap } from 'rxjs';
+import { catchError, concatMap, map, of, switchMap, tap } from 'rxjs';
 import { ClassesService } from '../services/classes.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -160,6 +160,30 @@ export class EnrolmentEffects {
     )
   );
 
+  fetchCurrentTerm$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromEnrolmentActions.currentTermActions.fetchCurrentTerm),
+      switchMap(() =>
+        this.termsService.getCurrentTerm().pipe(
+          map((term) => {
+            return fromEnrolmentActions.currentTermActions.fetchCurrentTermSuccess(
+              {
+                term,
+              }
+            );
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              fromEnrolmentActions.currentTermActions.fetchCurrentTermFail({
+                ...error,
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
   addTerm$ = createEffect(() =>
     this.actions$.pipe(
       ofType(fromEnrolmentActions.addTermAction),
@@ -250,21 +274,38 @@ export class EnrolmentEffects {
     )
   );
 
-  fetchTotalEnrolment$ = createEffect(() =>
-    this.actions$.pipe(
+  fetchTotalEnrols$ = createEffect(() => {
+    return this.actions$.pipe(
       ofType(fromEnrolmentActions.fetchTotalEnrols),
-      switchMap((data) =>
-        this.enrolService.getTotalEnrolment(data.num, data.year).pipe(
+      concatMap(({ num, year }) => {
+        return this.enrolService.getTotalEnrolment(num, year).pipe(
+          // And this method call
           map((summary) =>
             fromEnrolmentActions.fetchTotalEnrolsSuccess({ summary })
           ),
-          catchError((error: HttpErrorResponse) =>
-            of(fromEnrolmentActions.fetchTotalEnrolsFailure({ ...error }))
+          catchError((error) =>
+            of(fromEnrolmentActions.fetchTotalEnrolsFailure({ error }))
           )
-        )
-      )
-    )
-  );
+        );
+      })
+    );
+  });
+
+  // fetchTotalEnrolment$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(fromEnrolmentActions.fetchTotalEnrols),
+  //     switchMap((data) =>
+  //       this.enrolService.getTotalEnrolment(data.num, data.year).pipe(
+  //         map((summary) =>
+  //           fromEnrolmentActions.fetchTotalEnrolsSuccess({ summary })
+  //         ),
+  //         catchError((error: HttpErrorResponse) =>
+  //           of(fromEnrolmentActions.fetchTotalEnrolsFailure({ ...error }))
+  //         )
+  //       )
+  //     )
+  //   )
+  // );
 
   fetchEnrolsStats$ = createEffect(() =>
     this.actions$.pipe(

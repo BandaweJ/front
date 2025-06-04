@@ -1,9 +1,14 @@
-import { Component, Input } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Input,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
 import { ReceiptModel } from '../../models/payment.model';
-import { PaymentMethods } from '../../models/payment-methods.enum';
 import { Store } from '@ngrx/store';
+import { MatDialog } from '@angular/material/dialog';
 import { receiptActions } from '../../store/finance.actions';
-import { selectNewReceipt } from '../../store/finance.selector';
 
 @Component({
   selector: 'app-receipt-item',
@@ -11,19 +16,25 @@ import { selectNewReceipt } from '../../store/finance.selector';
   styleUrls: ['./receipt-item.component.css'],
 })
 export class ReceiptItemComponent {
-  @Input() studentNumber!: string;
-  receipt$ = this.store.select(selectNewReceipt);
+  @Input() receipt!: ReceiptModel;
+  @Input() downloadable = false;
 
-  paymentMethods = [...Object.values(PaymentMethods)];
+  @ViewChild('receiptContainerRef') receiptContainerRef!: ElementRef;
 
-  constructor(private store: Store) {
-    this.store.dispatch(
-      receiptActions.fetchNewReceipt({ studentNumber: this.studentNumber })
-    );
-  }
+  constructor(private store: Store, private dialog: MatDialog) {}
   ngOnInit(): void {
     // Optional: Add some default or mock data for testing if not provided via Input
   }
 
-  save() {}
+  printReceipt(): void {
+    window.print(); // Triggers the browser's print dialog
+  }
+
+  download() {
+    this.store.dispatch(
+      receiptActions.downloadReceiptPdf({
+        receipt: this.receipt,
+      })
+    );
+  }
 }

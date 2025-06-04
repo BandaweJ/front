@@ -51,13 +51,17 @@
         <th>Amount</th>
       </tr>
     </thead>
+    <tr *ngIf="invoice.balanceBfwd.amount > 0">
+      <td>Balance as at {{ invoice.balanceBfwd.dateCreated | date }}</td>
+      <td>{{ invoice.balanceBfwd.amount | currency }}</td>
+    </tr>
     <tr *ngFor="let bill of invoice.bills">
       <td>{{ sharedService.feesNamesToString(bill.fees.name) }}</td>
       <td>{{ bill.fees.amount | currency }}</td>
     </tr>
     <tr>
       <td class="total">Total</td>
-      <td class="total">{{ invoice.totalBill| currency }}</td>
+      <td class="total">{{ invoice.balance| currency }}</td>
     </tr>
   </table>
 

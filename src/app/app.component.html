@@ -1,4 +1,4 @@
-<mat-toolbar color="primary">
+<mat-toolbar color="primary" class="toolbar">
   <mat-icon (click)="sidenav.toggle()" *ngIf="isLoggedIn$ | async">menu</mat-icon>
 
   <span>
@@ -138,7 +138,7 @@
           </div>
           <div class="sidenav-container" *ngIf="role === 'reception'">
             <button mat-button>
-              <a routerLink="/payments" routerLinkActive="active"> Payments </a>
+              <a routerLink="/payments" routerLinkActive="active"> Receipting </a>
             </button>
           </div>
           <div class="sidenav-container" *ngIf="role === 'reception'">

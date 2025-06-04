@@ -56,7 +56,7 @@ export class AuthService {
       return true;
       // return expiryDate <= new Date(); // Check if expiry date is in the past
     } catch (error) {
-      console.error('Error decoding token:', error);
+      // console.error('Error decoding token:', error);
       return true; // Error decoding, consider token invalid/expired
     }
   }
@@ -81,7 +81,7 @@ export class AuthService {
   }
 
   signup(signupData: SignupInterface): Observable<{ response: boolean }> {
-    console.log(signupData);
+    // console.log(signupData);
     return this.http.post<{ response: boolean }>(
       this.baseUrl + 'signup',
       signupData

@@ -57,6 +57,7 @@ export class SearchInvoiceComponent {
     if (!searchTerm?.trim()) {
       return invoices || [];
     }
+
     return (invoices || []).filter(
       (invoice) =>
         invoice.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

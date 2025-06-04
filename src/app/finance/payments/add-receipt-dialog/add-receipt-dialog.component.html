@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>Add New Receipt</h2>
+<div class="search-student">
+  <app-student-search (studentSelected)="getSelectedStudent($event)"></app-student-search>
+</div>
+<div *ngIf="receipt$ | async as receipt">
+  <div class="details">
+    <span *ngIf="receipt.receiptNumber">Receipt Number: <span class="receipt-number">{{ receipt?.receiptNumber
+        }}</span></span>
+
+    <div class="student-details">
+      <span *ngIf="receipt.student" class="blue-detail">{{ receipt?.student?.surname }} {{ receipt?.student?.name }} ({{
+        receipt?.student?.studentNumber
+        }})</span>
+      <span *ngIf="receipt.enrol"> Enrolled in <span class="blue-detail">{{ receipt?.enrol?.name }}</span> Term <span
+          class="blue-detail"> {{
+          receipt?.enrol?.num }}, {{ receipt?.enrol?.year }}</span></span>
+    </div>
+    <div class="amount-details">
+      <span>Amount Due: <span class="amount-due"> {{ receipt?.amountDue | currency : 'USD' : 'symbol' : '1.2-2'
+          }}</span>
+      </span>
+      <span>Amount Outstanding: <span class="amount-outstanding">{{ (receipt?.amountOutstanding ? '0.00' :
+          (+receipt.amountDue - amountPaid?.value)) | currency : 'USD' :
+          'symbol'
+          :
+          '1.2-2' }}</span>
+      </span>
+    </div>
+  </div>
+  <mat-dialog-content [formGroup]="addReceiptForm">
+
+    <mat-form-field appearance="fill">
+      <mat-label>Amount Paid</mat-label>
+      <input matInput type="number" formControlName="amountPaid" required />
+      <mat-error *ngIf="addReceiptForm.get('amountPaid')?.invalid && addReceiptForm.get('amountPaid')?.touched">
+        Amount paid must be a positive number.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Payment Method</mat-label>
+      <mat-select formControlName="paymentMethod" required>
+        <mat-option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="addReceiptForm.get('paymentMethod')?.invalid && addReceiptForm.get('paymentMethod')?.touched">
+        Payment method is required.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="description-field">
+      <mat-label>Description (Optional)</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+
+  </mat-dialog-content>
+</div>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-flat-button color="primary" [disabled]="addReceiptForm.invalid" (click)="onSubmit()">Add Receipt</button>
+</mat-dialog-actions>

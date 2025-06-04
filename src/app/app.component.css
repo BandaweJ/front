@@ -78,3 +78,9 @@ button a {
     margin: auto;
   }
 }
+
+@media print {
+  .toolbar {
+    display: none;
+  }
+}

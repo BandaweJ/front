@@ -53,9 +53,12 @@ export const invoiceActions = createActionGroup({
     fetchInvoiceStats: props<{ num: number; year: number }>(),
     fetchInvoiceStatsSuccess: props<{ invoiceStats: InvoiceStatsModel[] }>(),
     fetchInvoiceStatsFail: props<{ error: HttpErrorResponse }>(),
-    fetchInvoices: props<{ num: number; year: number }>(),
+    fetchInvoices: props<{ num: number; year: number }>(), //invoices for a term
     fetchInvoicesSuccess: props<{ invoices: InvoiceModel[] }>(),
     fetchInvoicesFail: props<{ error: HttpErrorResponse }>(),
+    fetchAllInvoices: emptyProps(),
+    fetchAllInvoicesSuccess: props<{ invoices: InvoiceModel[] }>(),
+    fetchAllInvoicesFail: props<{ error: HttpErrorResponse }>(),
   },
 });
 
@@ -95,5 +98,14 @@ export const receiptActions = createActionGroup({
     fetchNewReceipt: props<{ studentNumber: string }>(),
     fetchNewReceiptSuccess: props<{ receipt: ReceiptModel }>(),
     fetchNewReceiptFail: props<{ error: HttpErrorResponse }>(),
+    fetchReceipts: emptyProps(),
+    fetchReceiptsSuccess: props<{ receipts: ReceiptModel[] }>(),
+    fetchReceiptsFail: props<{ error: HttpErrorResponse }>(),
+    saveReceipt: props<{ receipt: ReceiptModel }>(),
+    saveReceiptSuccess: props<{ receipt: ReceiptModel }>(),
+    saveReceiptFail: props<{ error: HttpErrorResponse }>(),
+    downloadReceiptPdf: props<{ receipt: ReceiptModel }>(),
+    downloadReceiptPdfSuccess: emptyProps(),
+    downloadReceiptPdfFail: props<{ error: HttpErrorResponse }>(),
   },
 });
