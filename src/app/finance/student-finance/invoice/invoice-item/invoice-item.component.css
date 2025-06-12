@@ -127,6 +127,11 @@ h1 {
   font-weight: bold;
 }
 
+.invoice-summary {
+  display: flex;
+  justify-content: space-between;
+}
+
 .bill-to {
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -134,6 +139,29 @@ h1 {
   grid-template-columns: auto 1fr;
   gap: 5px;
   width: fit-content;
+}
+
+.title {
+  /* font-weight: bold; */
+  font-size: 1.2em;
+  margin-bottom: 0.5rem;
+  color: #3185fc;
+  grid-column: 1 / span 2;
+}
+
+.bill-label,
+.summary-label {
+  text-align: left;
+}
+
+.bill-value,
+.summary-value {
+  text-align: left;
+  /* color: #3185fc; */
+}
+
+.status {
+  color: #3185fc;
 }
 
 .terms {

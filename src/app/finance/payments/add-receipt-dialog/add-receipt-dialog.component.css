@@ -2,6 +2,36 @@ h2 {
   text-align: center;
 }
 
+.search-student {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.student-details {
+  display: flex;
+  justify-content: space-around;
+}
+
+.blue-detail {
+  color: #3185fc;
+  /* font-weight: bold; */
+  font-size: 1.2em;
+}
+
+.amount-details {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1rem;
+}
+
+.amounts {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
 mat-dialog-content {
   display: grid;
   gap: 1rem;
@@ -26,23 +56,6 @@ mat-dialog-content {
   font-size: 1.2em;
 }
 
-.blue-detail {
-  color: #3185fc;
-  /* font-weight: bold; */
-  font-size: 1.2em;
-}
-
-.student-deatils {
-  display: flex;
-  justify-content: space-around;
-}
-
-.amount-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-}
-
 .amount-due {
   color: #3185fc;
   font-weight: bold;
@@ -53,11 +66,4 @@ mat-dialog-content {
   color: #3185fc;
   font-weight: bold;
   font-size: 1.3em;
-}
-
-.search-student {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }

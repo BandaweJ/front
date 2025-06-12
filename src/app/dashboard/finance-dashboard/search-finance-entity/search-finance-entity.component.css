@@ -1,0 +1,29 @@
+.finance-search-field {
+  width: 100%;
+}
+
+.search-suggestion-item {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0;
+}
+
+.suggestion-title {
+  font-weight: 500;
+  color: #3f51b5; /* Primary color */
+  display: flex; /* To align icon and text */
+  align-items: center;
+  gap: 8px; /* Space between icon and text */
+}
+
+.suggestion-icon {
+  font-size: 1.2em; /* Adjust icon size */
+  color: #616161; /* Icon color */
+}
+
+.suggestion-detail {
+  font-size: 0.85em; /* Slightly larger than before for more detail */
+  color: #616161;
+  margin-top: 2px; /* Small space below title */
+  padding-left: calc(1.2em + 8px); /* Indent details to align with text */
+}

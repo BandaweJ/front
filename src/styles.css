@@ -1,14 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+/* You might have other global imports here, e.g., Angular Material themes: */
+/* @import '@angular/material/prebuilt-themes/indigo-pink.css'; */
 
+/* Basic reset/global font-sizing if not already handled */
 html,
 body {
   height: 100%;
-}
-body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+/* Optional: Spinner/Title styles (these are general and not tied to the menu) */
 .title {
   display: flex;
   justify-content: center;

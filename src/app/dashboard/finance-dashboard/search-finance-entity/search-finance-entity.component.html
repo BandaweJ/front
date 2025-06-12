@@ -1,0 +1,50 @@
+<mat-form-field appearance="fill" class="finance-search-field">
+  <mat-label>Search financial data...</mat-label>
+  <input type="text" placeholder="Student name, Invoice #, Receipt #, Description..." aria-label="Search financial data"
+    matInput [formControl]="searchControl" [matAutocomplete]="auto" />
+  <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)"
+    [displayWith]="displayFn">
+    <mat-option *ngFor="let entity of filteredEntities$ | async" [value]="entity">
+      <div class="search-suggestion-item">
+        <ng-container *ngIf="entity.type === 'Invoice'">
+          <span class="suggestion-title">
+            <mat-icon class="suggestion-icon">description</mat-icon> Invoice #{{ entity.invoiceNumber || 'N/A' }} - {{
+            entity.studentName || 'Unknown Student' }}
+          </span>
+          <span class="suggestion-detail">
+            Due: {{ entity.invoiceBalance | currency:'ZWL':'symbol':'1.2-2' }} | Date: {{ entity.transactionDate |
+            date:'shortDate' }} | Due By: {{ entity.invoiceDueDate | date:'shortDate' }} | Status: {{ entity.status }}
+          </span>
+        </ng-container>
+
+        <ng-container *ngIf="entity.type === 'Payment'">
+          <span class="suggestion-title">
+            <mat-icon class="suggestion-icon">receipt</mat-icon> Receipt #{{ entity.receiptNumber || 'N/A' }} - {{
+            entity.studentName || 'Unknown Student' }}
+          </span>
+          <span class="suggestion-detail">
+            Paid: {{ entity.amount | currency:'ZWL':'symbol':'1.2-2' }} | Date: {{ entity.transactionDate |
+            date:'shortDate' }} | Method: {{ entity.paymentMethod }} | Status: {{ entity.status }}
+          </span>
+        </ng-container>
+
+        <ng-container *ngIf="!entity.type || (entity.type !== 'Invoice' && entity.type !== 'Payment')">
+          <span class="suggestion-title">
+            <mat-icon class="suggestion-icon">attach_money</mat-icon> {{ entity.description || 'Financial Record' }} -
+            {{ entity.studentName || entity.id }}
+          </span>
+          <span class="suggestion-detail">
+            Amount: {{ entity.amount | currency:'ZWL':'symbol':'1.2-2' }} | Date: {{ entity.transactionDate |
+            date:'shortDate' }} | Type: {{ entity.type }}
+          </span>
+        </ng-container>
+      </div>
+    </mat-option>
+    <mat-option
+      *ngIf="(filteredEntities$ | async)?.length === 0 && searchControl.value && searchControl.value.trim().length >= 3"
+      disabled>
+      No financial records found matching criteria.
+    </mat-option>
+  </mat-autocomplete>
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>

@@ -20,6 +20,7 @@ export interface State {
   };
   lineChartData: ChartConfiguration<'line'>['data'];
   marksProgress: MarksProgressModel[];
+  studentMarks: MarksModel[];
 }
 
 export const initialState: State = {
@@ -39,6 +40,7 @@ export const initialState: State = {
     datasets: [],
   },
   marksProgress: [],
+  studentMarks: [],
 };
 
 export const marksReducer = createReducer(
@@ -271,6 +273,27 @@ export const marksReducer = createReducer(
   ),
   on(
     marksActions.fetchMarksProgressActions.fetchMarksProgressFail,
+    (state, { error }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: error.message,
+    })
+  ),
+  on(marksActions.studentMarksActions.fetchStudentMarks, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(
+    marksActions.studentMarksActions.fetchStudentMarksSuccess,
+    (state, { marks }) => ({
+      ...state,
+      isLoading: false,
+      studentMarks: marks,
+    })
+  ),
+  on(
+    marksActions.studentMarksActions.fetchStudentMarksFail,
     (state, { error }) => ({
       ...state,
       isLoading: false,

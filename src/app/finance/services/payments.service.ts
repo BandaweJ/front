@@ -5,6 +5,7 @@ import { InvoiceModel } from '../models/invoice.model';
 import { environment } from 'src/environments/environment';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
+import { PaymentMethods } from '../models/payment-methods.enum';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsService {
@@ -38,7 +39,7 @@ export class PaymentsService {
 
   getInvoiceStats(num: number, year: number): Observable<InvoiceStatsModel[]> {
     return this.httpClient.get<InvoiceStatsModel[]>(
-      `${this.baseURL}stats/${num}/${year}`
+      `${this.baseURL}invoice/stats/${num}/${year}`
     );
   }
 
@@ -105,9 +106,11 @@ export class PaymentsService {
     }
   }
 
-  getNewReceipt(studentNumber: string): Observable<ReceiptModel> {
-    return this.httpClient.get<ReceiptModel>(
-      `${this.baseURL}receipt/new/${studentNumber}`
+  getStudentOutstandingBalance(
+    studentNumber: string
+  ): Observable<{ amountDue: number }> {
+    return this.httpClient.get<{ amountDue: number }>(
+      `${this.baseURL}studentBalance/${studentNumber}`
     );
   }
 
@@ -115,11 +118,18 @@ export class PaymentsService {
     return this.httpClient.get<ReceiptModel[]>(`${this.baseURL}receipt/`);
   }
 
-  saveReceipt(receipt: ReceiptModel): Observable<ReceiptModel> {
-    return this.httpClient.post<ReceiptModel>(
-      `${this.baseURL}receipt/`,
-      receipt
-    );
+  saveReceipt(
+    studentNumber: string,
+    amountPaid: number,
+    paymentMethod: PaymentMethods,
+    description?: string
+  ): Observable<ReceiptModel> {
+    return this.httpClient.post<ReceiptModel>(`${this.baseURL}receipt/`, {
+      studentNumber,
+      amountPaid,
+      paymentMethod,
+      description,
+    });
   }
 
   downloadReceipt(receipt: ReceiptModel) {

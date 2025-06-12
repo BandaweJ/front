@@ -31,3 +31,8 @@
 .enrolment {
   /* 6. This element will automatically go to the end due to space-between */
 }
+
+.no-invoice {
+  padding: 1rem;
+  text-align: center;
+}

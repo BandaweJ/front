@@ -56,8 +56,8 @@
 
 
         <div class="total-row total-due">
-          <span>Total Due:</span>
-          <span>{{ receipt.amountDue | currency:'USD':'symbol':'1.2-2' }}</span>
+          <span>Invoice Paid:</span>
+          <span *ngFor="let allocation of receipt.allocations">{{ allocation?.invoice?.invoiceNumber }}</span>
         </div>
         <div class="total-row amount-paid">
           <span>Amount Paid:</span>
@@ -65,7 +65,7 @@
         </div>
         <div class="total-row amount-outstanding">
           <span>Amount Outstanding:</span>
-          <span class="outstanding">{{ receipt.amountOutstanding | currency:'USD':'symbol':'1.2-2' }}</span>
+          <span class="outstanding">{{ (balance ? balance : 0) | currency:'USD':'symbol':'1.2-2' }}</span>
         </div>
       </div>
     </div>

@@ -158,3 +158,12 @@ export const fetchMarksProgressActions = createActionGroup({
     fetchMarksProgressSuccess: props<{ marksProgress: MarksProgressModel[] }>(),
   },
 });
+
+export const studentMarksActions = createActionGroup({
+  source: 'Student Dashboard',
+  events: {
+    fetchStudentMarks: props<{ studentNumber: string }>(),
+    fetchStudentMarksSuccess: props<{ marks: MarksModel[] }>(),
+    fetchStudentMarksFail: props<{ error: HttpErrorResponse }>(),
+  },
+});

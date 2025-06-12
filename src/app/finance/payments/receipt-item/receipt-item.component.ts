@@ -9,6 +9,7 @@ import { ReceiptModel } from '../../models/payment.model';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { receiptActions } from '../../store/finance.actions';
+import { ReceiptInvoiceAllocationsModel } from '../../models/receipt-invoice-allocations.model';
 
 @Component({
   selector: 'app-receipt-item',
@@ -18,6 +19,8 @@ import { receiptActions } from '../../store/finance.actions';
 export class ReceiptItemComponent {
   @Input() receipt!: ReceiptModel;
   @Input() downloadable = false;
+
+  balance = '0.00';
 
   @ViewChild('receiptContainerRef') receiptContainerRef!: ElementRef;
 
@@ -36,5 +39,34 @@ export class ReceiptItemComponent {
         receipt: this.receipt,
       })
     );
+  }
+
+  // ngOnChanges is called whenever any data-bound input property changes.
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['receipt']) {
+      const currentReceipt = changes['receipt'].currentValue as ReceiptModel;
+
+      if (
+        currentReceipt &&
+        currentReceipt.allocations &&
+        currentReceipt.allocations.length > 0
+      ) {
+        // --- USING NATIVE JAVASCRIPT NUMBER ARITHMETIC ---
+        const sum = currentReceipt.allocations.reduce(
+          (total: number, allocation: ReceiptInvoiceAllocationsModel) => {
+            // Ensure allocation.invoice.balance is converted to a number.
+            // If it comes as a string (from DECIMAL DB type), the `+` prefix will convert it.
+            return total + +allocation.invoice.balance;
+          },
+          0 // Start the sum with a native JS number 0
+        );
+
+        // Format the result to 2 decimal places as a string for display
+        this.balance = sum.toFixed(2);
+      } else {
+        // If no receipt or no allocations, reset the balance to 0
+        this.balance = '0.00';
+      }
+    }
   }
 }

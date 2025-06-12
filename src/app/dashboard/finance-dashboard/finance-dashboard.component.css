@@ -1,0 +1,106 @@
+/* Styles for the main finance dashboard container */
+.finance-dashboard-container {
+  padding: 20px; /* Add some padding around the content */
+  max-width: 1200px; /* Optional: Constrain width for better readability on large screens */
+  margin: 20px auto; /* Center the container horizontally with top/bottom margin */
+  background-color: #f9f9f9; /* Light background for the content area */
+  border-radius: 8px; /* Slightly rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  min-height: calc(
+    100vh - 120px
+  ); /* Ensure it takes up most of the viewport height */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between different sections of the dashboard */
+}
+
+/* Styles for the toolbar itself */
+.finance-dashboard-toolbar {
+  /* Using Material's default primary color, but you can override */
+  color: white; /* Text/icon color for the toolbar */
+  display: flex;
+  justify-content: space-between; /* Puts title/search left, icons right */
+  align-items: center;
+  padding: 0 16px; /* Standard Material toolbar padding */
+  height: 64px; /* Standard Material toolbar height */
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12); /* Material toolbar shadow */
+}
+
+.toolbar-left-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1; /* Allows it to take available space */
+}
+
+.toolbar-title {
+  font-size: 20px;
+  font-weight: 500;
+  margin-right: 20px; /* Space between title and search */
+  transition: opacity 0.3s ease-in-out; /* Smooth transition for hiding/showing */
+}
+
+.toolbar-search-container {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  display: flex; /* Ensures the search component itself is correctly aligned */
+  align-items: center;
+}
+
+.toolbar-search-container.visible {
+  opacity: 1;
+  width: 300px; /* Adjust search bar width as needed */
+  margin-left: 10px; /* Space after title */
+}
+
+.toolbar-search-component {
+  flex-grow: 1; /* Allow search component to fill its container */
+}
+
+.toolbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Space between icon buttons */
+}
+
+/* Styling for no data found message */
+.no-data-found {
+  text-align: center;
+  padding: 40px;
+  color: #757575;
+  font-style: italic;
+}
+
+/* Basic responsiveness (adjust breakpoints as needed) */
+@media (max-width: 768px) {
+  .finance-dashboard-toolbar {
+    height: 56px; /* Shorter toolbar on smaller screens */
+    padding: 0 8px;
+  }
+
+  .toolbar-title {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+
+  .toolbar-search-container.visible {
+    width: calc(100% - 100px); /* Adjust width to fit smaller screens */
+  }
+
+  .finance-dashboard-container {
+    padding: 10px;
+    margin: 10px auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar-title {
+    /* Might hide title or make it smaller on very small screens if space is tight */
+    font-size: 16px;
+  }
+  .toolbar-search-container.visible {
+    width: calc(100% - 80px); /* Adjust width even more */
+  }
+}

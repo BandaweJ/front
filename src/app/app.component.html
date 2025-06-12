@@ -7,153 +7,183 @@
 
   <app-profile-buttons [isLoggedIn]="isLoggedIn$ | async"></app-profile-buttons>
 </mat-toolbar>
+
 <mat-sidenav-container>
-  <mat-sidenav role="navigation" #sidenav>
+  <mat-sidenav role="navigation" #sidenav [mode]="'side'" [opened]="true" [class.collapsed]="!isSidenavExpanded"
+    (mouseenter)="isSidenavExpanded = true" (mouseleave)="isSidenavExpanded = false">
     <div class="sidenav-container">
-      <button mat-button>
-        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-      </button>
       <mat-accordion>
-        <!-- Registration -->
+        <mat-expansion-panel [hideToggle]="true" routerLink="/dashboard" routerLinkActive="active"
+          #dashboardPanel="matExpansionPanel" (opened)="dashboardPanel.close()">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>dashboard</mat-icon>
+              <span>Dashboard</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+        </mat-expansion-panel>
+
         <mat-expansion-panel *ngIf="role === 'admin' || role === 'reception'">
           <mat-expansion-panel-header>
-            <button mat-button>Registration</button>
+            <mat-panel-title>
+              <mat-icon>app_registration</mat-icon>
+              <span>Registration</span>
+            </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="sidenav-container">
-            <button mat-button>
-              <a routerLink="/teachers" routerLinkActive="active">Teachers</a>
+            <button mat-button routerLink="/teachers" routerLinkActive="active">
+              <mat-icon>people</mat-icon>
+              <span>Teachers</span>
             </button>
-            <button mat-button>
-              <a routerLink="/students" routerLinkActive="active">Students </a>
+            <button mat-button routerLink="/students" routerLinkActive="active">
+              <mat-icon>school</mat-icon>
+              <span>Students</span>
             </button>
-            <button mat-button>
-              <a routerLink="/parents" routerLinkActive="active"> Parents </a>
+            <button mat-button routerLink="/parents" routerLinkActive="active">
+              <mat-icon>family_restroom</mat-icon>
+              <span>Parents</span>
             </button>
           </div>
         </mat-expansion-panel>
 
-        <!-- Enrolment -->
         <mat-expansion-panel *ngIf="role !== 'student'">
           <mat-expansion-panel-header>
-            <button mat-button>Enrolment</button>
+            <mat-panel-title>
+              <mat-icon>how_to_reg</mat-icon>
+              <span>Enrolment</span>
+            </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="sidenav-container">
-            <button mat-button *ngIf="role === 'admin'">
-              <a routerLink="/classes" routerLinkActive="active"> Classes </a>
+            <button mat-button *ngIf="role === 'admin'" routerLink="/classes" routerLinkActive="active">
+              <mat-icon>class</mat-icon>
+              <span>Classes</span>
             </button>
-            <button mat-button *ngIf="role === 'admin' || role === 'reception'">
-              <a routerLink="/terms" routerLinkActive="active"> Terms </a>
+            <button mat-button *ngIf="role === 'admin' || role === 'reception'" routerLink="/terms"
+              routerLinkActive="active">
+              <mat-icon>date_range</mat-icon>
+              <span>Terms</span>
             </button>
-            <button mat-button *ngIf="role === 'admin'">
-              <a routerLink="/enrol" routerLinkActive="active"> Enrol </a>
+            <button mat-button *ngIf="role === 'admin'" routerLink="/enrol" routerLinkActive="active">
+              <mat-icon>add_task</mat-icon>
+              <span>Enrol</span>
             </button>
-            <button mat-button *ngIf="role === 'admin' || role === 'reception' || role === 'teacher' || role === 'hod'">
-              <a routerLink="/class-lists" routerLinkActive="active"> Class Lists </a>
+            <button mat-button *ngIf="role === 'admin' || role === 'reception' || role === 'teacher' || role === 'hod'"
+              routerLink="/class-lists" routerLinkActive="active">
+              <mat-icon>list_alt</mat-icon>
+              <span>Class Lists</span>
             </button>
-            <button mat-button *ngIf="role === 'admin'">
-              <a routerLink="/migrate-class" routerLinkActive="active">
-                Migrate Class
-              </a>
+            <button mat-button *ngIf="role === 'admin'" routerLink="/migrate-class" routerLinkActive="active">
+              <mat-icon>redo</mat-icon>
+              <span>Migrate Class</span>
             </button>
           </div>
         </mat-expansion-panel>
 
-        <!-- Attendance -->
         <mat-expansion-panel *ngIf="role !== 'student' && role !== 'parent'">
           <mat-expansion-panel-header>
-            <button mat-button>Attendance</button>
+            <mat-panel-title>
+              <mat-icon>event_available</mat-icon>
+              <span>Attendance</span>
+            </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="sidenav-container">
-            <button mat-button>
-              <a routerLink="/registers" routerLinkActive="active">
-                Registers
-              </a>
+            <button mat-button routerLink="/registers" routerLinkActive="active">
+              <mat-icon>book</mat-icon>
+              <span>Registers</span>
             </button>
           </div>
           <div class="sidenav-container">
-            <button mat-button *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
-              <a routerLink="/mark-register" routerLinkActive="active">
-                Mark Register
-              </a>
+            <button mat-button *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'"
+              routerLink="/mark-register" routerLinkActive="active">
+              <mat-icon>edit_note</mat-icon>
+              <span>Mark Register</span>
             </button>
           </div>
         </mat-expansion-panel>
 
-        <!-- Marks -->
         <mat-expansion-panel *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
           <mat-expansion-panel-header>
-            <button mat-button>Marks</button>
+            <mat-panel-title>
+              <mat-icon>grade</mat-icon>
+              <span>Marks</span>
+            </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="sidenav-container">
-            <button mat-button *ngIf="role === 'admin'">
-              <a routerLink="/subjects" routerLinkActive="active"> Subjects </a>
+            <button mat-button *ngIf="role === 'admin'" routerLink="/subjects" routerLinkActive="active">
+              <mat-icon>subject</mat-icon>
+              <span>Subjects</span>
             </button>
           </div>
           <div class="sidenav-container">
-            <button mat-button>
-              <a routerLink="/input" routerLinkActive="active"> Marks Input </a>
+            <button mat-button routerLink="/input" routerLinkActive="active">
+              <mat-icon>input</mat-icon>
+              <span>Marks Input</span>
             </button>
-
-            <button mat-button>
-              <a routerLink="/marks-progress" routerLinkActive="active"> Marks Progress </a>
+            <button mat-button routerLink="/marks-progress" routerLinkActive="active">
+              <mat-icon>trending_up</mat-icon>
+              <span>Marks Progress</span>
             </button>
-
-            <button mat-button>
-              <a routerLink="/teachers-comments" routerLinkActive="active"> Teacher's Comments </a>
+            <button mat-button routerLink="/teachers-comments" routerLinkActive="active">
+              <mat-icon>comment</mat-icon>
+              <span>Teacher's Comments</span>
             </button>
-
-            <button mat-button>
-              <a routerLink="/mark-sheets" routerLinkActive="active"> Mark Sheets </a>
+            <button mat-button routerLink="/mark-sheets" routerLinkActive="active">
+              <mat-icon>description</mat-icon>
+              <span>Mark Sheets</span>
             </button>
-
-            <!-- <button mat-button>
-              <a routerLink="/perfomance" routerLinkActive="active">
-                Perfomance
-              </a>
-            </button> -->
           </div>
         </mat-expansion-panel>
 
-        <!-- Progress Reports -->
         <mat-expansion-panel *ngIf="role === 'admin' || role === 'teacher' || role === 'reception'">
           <mat-expansion-panel-header>
-            <button mat-button>Progress Reports</button>
+            <mat-panel-title>
+              <mat-icon>receipt_long</mat-icon>
+              <span>Progress Reports</span>
+            </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="sidenav-container">
-            <button mat-button>
-              <a routerLink="/reports" routerLinkActive="active"> Reports </a>
+            <button mat-button routerLink="/reports" routerLinkActive="active">
+              <mat-icon>assignment</mat-icon>
+              <span>Reports</span>
             </button>
           </div>
         </mat-expansion-panel>
 
-        <!-- Finance -->
         <mat-expansion-panel>
           <mat-expansion-panel-header>
-            <button mat-button>Finance</button>
+            <mat-panel-title>
+              <mat-icon>account_balance</mat-icon>
+              <span>Finance</span>
+            </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="sidenav-container">
-            <button mat-button>
-              <a routerLink="/fees" routerLinkActive="active"> Fees </a>
+            <button mat-button routerLink="/fees" routerLinkActive="active">
+              <mat-icon>money</mat-icon>
+              <span>Fees</span>
             </button>
           </div>
           <div class="sidenav-container" *ngIf="role === 'reception'">
-            <button mat-button>
-              <a routerLink="/payments" routerLinkActive="active"> Receipting </a>
+            <button mat-button routerLink="/payments" routerLinkActive="active">
+              <mat-icon>payments</mat-icon>
+              <span>Receipting</span>
             </button>
           </div>
           <div class="sidenav-container" *ngIf="role === 'reception'">
-            <button mat-button>
-              <a routerLink="/student-finance" routerLinkActive="active"> Billing </a>
+            <button mat-button routerLink="/student-finance" routerLinkActive="active">
+              <mat-icon>request_quote</mat-icon>
+              <span>Billing</span>
             </button>
           </div>
           <div class="sidenav-container" *ngIf="role === 'student' || role === 'admin' || role === 'reception'">
-            <button mat-button>
-              <a routerLink="/invoice" routerLinkActive="active"> Invoices </a>
+            <button mat-button routerLink="/invoice" routerLinkActive="active">
+              <mat-icon>receipt</mat-icon>
+              <span>Invoices</span>
             </button>
           </div>
           <div class="sidenav-container" *ngIf="role === 'reception'">
-            <button mat-button>
-              <a routerLink="/balances" routerLinkActive="active"> Student Balances </a>
+            <button mat-button routerLink="/balances" routerLinkActive="active">
+              <mat-icon>account_balance_wallet</mat-icon>
+              <span>Student Balances</span>
             </button>
           </div>
         </mat-expansion-panel>

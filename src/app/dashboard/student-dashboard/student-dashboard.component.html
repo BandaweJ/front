@@ -1,0 +1,69 @@
+<div class="student-dashboard-main-container">
+  <div class="summary-cards-container">
+    <ng-container *ngIf="summaryLoading$ | async">
+      <div class="loading-spinner">Loading student summary...</div>
+    </ng-container>
+
+    <ng-container *ngIf="dashboardSummary$ | async as summary; else noSummaryData">
+      <div class="summary-card financial-card">
+        <h4>Financial Overview</h4>
+        <div class="data-item">
+          <label>Total Billed:</label>
+          <span>{{ summary.financialSummary.totalBilled | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="data-item">
+          <label>Total Paid:</label>
+          <span>{{ summary.financialSummary.totalPaid | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="data-item amount-owed">
+          <label>Amount Owed:</label>
+          <span [class.positive]="summary.financialSummary.amountOwed <= 0"
+            [class.negative]="summary.financialSummary.amountOwed > 0">
+            {{ summary.financialSummary.amountOwed | currency:'USD':'symbol':'1.2-2' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="summary-card academic-card">
+        <h4>Academic Overview</h4>
+        <div class="data-item">
+          <label>Report Cards:</label>
+          <span>{{ summary.academicSummary.numberOfReportCards }}</span>
+        </div>
+        <div class="data-item">
+          <label>Best Position:</label>
+          <span *ngIf="summary.academicSummary.bestPosition">
+            {{ summary.academicSummary.bestPosition.position }} ({{ summary.academicSummary.bestPosition.term }} {{
+            summary.academicSummary.bestPosition.year }}, {{ summary.academicSummary.bestPosition.class }})
+          </span>
+          <span *ngIf="!summary.academicSummary.bestPosition" class="no-data-text">N/A</span>
+        </div>
+        <div class="data-item">
+          <label>Worst Position:</label>
+          <span *ngIf="summary.academicSummary.worstPosition">
+            {{ summary.academicSummary.worstPosition.position }} ({{ summary.academicSummary.worstPosition.term }} {{
+            summary.academicSummary.worstPosition.year }}, {{ summary.academicSummary.worstPosition.class }})
+          </span>
+          <span *ngIf="!summary.academicSummary.worstPosition" class="no-data-text">N/A</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #noSummaryData>
+      <div *ngIf="!(summaryLoading$ | async)" class="no-data-message">
+        No summary data available for this student.
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="marks-graph-container">
+    <h3>Student Performance Over Time - All Subjects</h3>
+    <div style="display: block;">
+      <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType">
+      </canvas>
+    </div>
+    <p *ngIf="!(lineChartData.datasets && lineChartData.datasets.length > 0)" class="no-data-message">
+      No marks data available for this student across subjects and terms.
+    </p>
+  </div>
+</div>

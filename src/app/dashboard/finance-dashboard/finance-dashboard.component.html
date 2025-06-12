@@ -1,0 +1,52 @@
+<mat-toolbar color="primary" class="finance-dashboard-toolbar">
+  <div class="toolbar-left-content">
+    <span class="toolbar-title" *ngIf="!isSearchBarVisible">Finance Dashboard</span>
+
+    <div class="toolbar-search-container" [class.visible]="isSearchBarVisible">
+      <app-search-finance-entity *ngIf="isSearchBarVisible"
+        (entitySelected)="onFinancialEntitySelectedFromSearch($event)"
+        class="toolbar-search-component"></app-search-finance-entity>
+    </div>
+  </div>
+
+  <div class="toolbar-icons">
+    <button mat-icon-button (click)="toggleSearchBar()" aria-label="Toggle search">
+      <mat-icon>{{ isSearchBarVisible ? 'close' : 'search' }}</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="openDateRangePicker()" aria-label="Select Date Range">
+      <mat-icon>date_range</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="onFilter()" aria-label="Filter financial data">
+      <mat-icon>filter_list</mat-icon>
+    </button>
+
+    <button mat-icon-button [matMenuTriggerFor]="sortMenu" aria-label="Sort financial data">
+      <mat-icon>sort</mat-icon>
+    </button>
+    <mat-menu #sortMenu="matMenu">
+      <button mat-menu-item *ngFor="let option of sortOptions" (click)="onSortChange(option.value)">
+        {{ option.label }}
+        <mat-icon *ngIf="(currentSort$ | async) === option.value">done</mat-icon>
+      </button>
+    </mat-menu>
+    <button mat-icon-button (click)="onClearFilters()" aria-label="Clear all filters">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+</mat-toolbar>
+
+<div class="finance-dashboard-container">
+  <div *ngIf="(filteredAndSortedFinancialData$ | async) as data">
+    <div *ngIf="data.length > 0; else noDataFound">
+      <p>Displaying {{ data.length }} financial records.</p>
+    </div>
+    <ng-template #noDataFound>
+      <p>No financial data found matching your criteria.</p>
+    </ng-template>
+  </div>
+
+  <div *ngIf="selectedFinancialEntity" class="selected-entity-details">
+  </div>
+</div>

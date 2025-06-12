@@ -64,7 +64,12 @@ export class BillingComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.store.select(selectedStudentInvoice).subscribe((invoice) => {
-      this.selectedBills = [...invoice.bills];
+      // this.selectedBills = [...invoice.bills];
+      if (invoice && Array.isArray(invoice.bills)) {
+        this.selectedBills = [...invoice.bills];
+      } else {
+        this.selectedBills = [];
+      }
     });
   }
 

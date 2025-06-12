@@ -43,12 +43,27 @@ export const selectInVoices = createSelector(
   (state: fromFinanceReducer.State) => state.termInvoices
 );
 
-export const selectNewReceipt = createSelector(
+export const selectCreatedReceipt = createSelector(
   financeState,
-  (state: fromFinanceReducer.State) => state.newReceipt
+  (state: fromFinanceReducer.State) => state.createdReceipt
+);
+
+export const selectAmountDue = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.studentOutstandingBalance
 );
 
 export const selectReceipts = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.receipts
+);
+
+export const selectIsLoadingFinancials = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.isLoadingStudentBalance
+);
+
+export const selectFechInvoiceError = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.fetchInvoiceError
 );

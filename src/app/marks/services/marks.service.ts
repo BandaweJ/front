@@ -112,4 +112,10 @@ export class MarksService {
       xAxes: number[];
     }>(`${this.baseUrl}perf/${num}/${year}/${name}/${examType}`);
   }
+
+  getStudentMarks(studentNumber: string): Observable<MarksModel[]> {
+    return this.httpClient.get<MarksModel[]>(
+      `${this.baseUrl}studentMarks/${studentNumber}`
+    );
+  }
 }

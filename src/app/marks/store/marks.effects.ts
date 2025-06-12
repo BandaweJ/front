@@ -294,4 +294,26 @@ export class MarksEffects {
       )
     )
   );
+
+  fetchStudentMarks$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(marksActions.studentMarksActions.fetchStudentMarks),
+      switchMap((data) =>
+        this.marksService.getStudentMarks(data.studentNumber).pipe(
+          map((marks) =>
+            marksActions.studentMarksActions.fetchStudentMarksSuccess({
+              marks,
+            })
+          ),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              marksActions.studentMarksActions.fetchStudentMarksFail({
+                ...error,
+              })
+            )
+          )
+        )
+      )
+    )
+  );
 }

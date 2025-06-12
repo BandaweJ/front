@@ -1,0 +1,32 @@
+/* Styles for the overall dialog content */
+mat-dialog-content {
+  padding: 20px 24px; /* Standard Material Dialog content padding (top/bottom 20px, left/right 24px) */
+  display: flex; /* Use flexbox for consistent vertical stacking */
+  flex-direction: column;
+  gap: 16px; /* Adds consistent spacing between each mat-form-field group */
+}
+
+/* Styles for form fields that should take full available width */
+.full-width {
+  width: 100%;
+  /* Removed individual margin-bottom here because 'gap' on mat-dialog-content handles it */
+}
+
+/* Container for amount range fields (min/max) */
+.amount-range-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px; /* Consistent spacing between min/max amount fields */
+  width: 100%; /* Ensure the group itself takes full width */
+  /* Removed individual margin-bottom here because 'gap' on mat-dialog-content handles it */
+}
+
+/* Individual fields within the amount range group */
+.half-width {
+  flex: 1; /* Makes them take equal width within their group */
+}
+
+/* Optional: Adjust padding for dialog actions if needed, though Material default is usually fine */
+mat-dialog-actions {
+  padding: 8px 24px 16px; /* Standard Material Dialog actions padding */
+}

@@ -22,13 +22,16 @@ export interface State {
   isLoading: boolean;
   errorMessage: string;
   selectedStudentInvoice: InvoiceModel;
+  fetchInvoiceError: string;
   balance: BalancesModel | null;
   isNewComer: boolean;
   invoiceStats: InvoiceStatsModel[];
   termInvoices: InvoiceModel[];
   allInvoices: InvoiceModel[];
-  newReceipt: ReceiptModel;
   receipts: ReceiptModel[];
+  studentOutstandingBalance: number;
+  createdReceipt: ReceiptModel;
+  isLoadingStudentBalance: boolean;
 }
 
 export const initialState: State = {
@@ -36,22 +39,17 @@ export const initialState: State = {
   studentsToBill: [],
   isLoading: false,
   errorMessage: '',
-  selectedStudentInvoice: {
-    totalBill: 0, // Provide a default value (or calculate if possible at this stage)
-    balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
-    student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
-    bills: [],
-    balance: 0, // Provide a default value
-    invoiceDate: new Date(),
-    invoiceDueDate: new Date(),
-  },
+  selectedStudentInvoice: {} as InvoiceModel,
+  fetchInvoiceError: '',
   balance: null,
   isNewComer: false,
   invoiceStats: [],
   termInvoices: [],
   allInvoices: [],
-  newReceipt: {} as ReceiptModel,
   receipts: [],
+  studentOutstandingBalance: 0,
+  createdReceipt: {} as ReceiptModel,
+  isLoadingStudentBalance: false,
 };
 
 export const financeReducer = createReducer(
@@ -131,39 +129,23 @@ export const financeReducer = createReducer(
   on(invoiceActions.fetchInvoice, (state) => ({
     ...state,
     isLoading: true,
-    errorMessage: '',
-    selectedStudentInvoice: {
-      totalBill: 0, // Provide a default value (or calculate if possible at this stage)
-      totalPayments: 0, // Provide a default value
-      balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
-      student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
-      bills: [],
-      balance: 0, // Provide a default value
-      invoiceDate: new Date(),
-      invoiceDueDate: new Date(),
-    },
+    fetchInvoiceError: '',
+    // errorMessage: '',
+    selectedStudentInvoice: {} as InvoiceModel,
   })),
   on(invoiceActions.fetchInvoiceSuccess, (state, { invoice }) => ({
     ...state,
     isLoading: false,
-    errorMessage: '',
+    fetchInvoiceError: '',
+    // errorMessage: '',
     selectedStudentInvoice: invoice,
   })),
   on(invoiceActions.fetchInvoiceFail, (state, { error }) => ({
     ...state,
     isLoading: false,
-    errorMessage: error.message,
-    selectedStudentInvoice: {
-      totalBill: 0, // Provide a default value (or calculate if possible at this stage)
-      totalPayments: 0, // Provide a default value
-      balanceBfwd: {} as BalancesModel, // Provide an initial empty object or a default BalancesModel
-      student: {} as StudentsModel, // Provide an initial empty object or handle based on your logic
-      bills: [],
-      payments: [], // Initialize payments array
-      balance: 0, // Provide a default value
-      invoiceDate: new Date(),
-      invoiceDueDate: new Date(),
-    },
+    // errorMessage: error.message,
+    fetchInvoiceError: error.message,
+    selectedStudentInvoice: {} as InvoiceModel,
   })),
   on(balancesActions.saveBalance, (state) => ({
     ...state,
@@ -214,13 +196,13 @@ export const financeReducer = createReducer(
     );
     // console.log(newTotalBill);
 
-    // Calculate the new balance
+    // include balanceBfwd in totalBill
     const currentBalanceBfwdAmount =
-      state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
+      +state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
 
-    const newBalance = Number(newTotalBill) + Number(currentBalanceBfwdAmount);
+    const newTotal = Number(newTotalBill) + Number(currentBalanceBfwdAmount);
 
-    console.log(newBalance);
+    // console.log(newBalance);
 
     return {
       ...state,
@@ -229,8 +211,7 @@ export const financeReducer = createReducer(
       selectedStudentInvoice: {
         ...state.selectedStudentInvoice,
         bills: [...updatedBills],
-        totalBill: newTotalBill, // Update totalBill with the calculated value
-        balance: newBalance, // Update balance with the calculated value
+        totalBill: newTotal, // Update totalBill with the calculated value
       },
     };
   }),
@@ -240,10 +221,10 @@ export const financeReducer = createReducer(
 
     // Calculate the new balance
     const currentBalanceBfwdAmount =
-      state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
+      +state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
 
-    const newBalance =
-      state.selectedStudentInvoice?.balance +
+    const newTotal =
+      +state.selectedStudentInvoice?.balance +
       Number(newTotalBill) +
       Number(currentBalanceBfwdAmount);
 
@@ -254,8 +235,7 @@ export const financeReducer = createReducer(
       selectedStudentInvoice: {
         ...state.selectedStudentInvoice,
         bills: [...state.selectedStudentInvoice.bills, ...bills],
-        totalBill: newTotalBill, // Update totalBill with the calculated value
-        balance: newBalance, // Update balance with the calculated value
+        totalBill: newTotal, // Update totalBill with the calculated value
       },
     };
   }),
@@ -275,12 +255,12 @@ export const financeReducer = createReducer(
   })),
   on(billStudentActions.removeBill, (state, { bill }) => {
     const updatedTotalBill =
-      state.selectedStudentInvoice.totalBill - bill.fees.amount;
+      +state.selectedStudentInvoice.totalBill - +bill.fees.amount;
     const currentBalanceBfwdAmount = Number(
-      state.selectedStudentInvoice?.balanceBfwd?.amount || 0
+      +state.selectedStudentInvoice?.balanceBfwd?.amount || 0
     );
 
-    const updatedBalance = updatedTotalBill + currentBalanceBfwdAmount;
+    const updatedTotal = +updatedTotalBill + +currentBalanceBfwdAmount;
 
     return {
       ...state,
@@ -291,8 +271,7 @@ export const financeReducer = createReducer(
         bills: state.selectedStudentInvoice.bills.filter(
           (b) => b.id !== bill.id
         ),
-        totalBill: updatedTotalBill, // Use the updated totalBill
-        balance: updatedBalance, // Use the recalculated balance
+        totalBill: updatedTotal, // Use the updated totalBill
       },
     };
   }),
@@ -367,22 +346,6 @@ export const financeReducer = createReducer(
     isLoading: false,
     errorMessage: error.message,
   })),
-  on(receiptActions.fetchNewReceipt, (state) => ({
-    ...state,
-    isLoading: true,
-    errorMessage: '',
-  })),
-  on(receiptActions.fetchNewReceiptSuccess, (state, { receipt }) => ({
-    ...state,
-    isLoading: false,
-    errorMessage: '',
-    newReceipt: receipt,
-  })),
-  on(receiptActions.fetchNewReceiptFail, (state, { error }) => ({
-    ...state,
-    isLoading: false,
-    errorMessage: error.message,
-  })),
   on(receiptActions.fetchReceipts, (state) => ({
     ...state,
     isLoading: true,
@@ -408,7 +371,7 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: '',
-    newReceipt: receipt,
+    createdReceipt: receipt,
     receipts: [...state.receipts, receipt],
   })),
   on(receiptActions.saveReceiptFail, (state, { error }) => ({
@@ -430,5 +393,39 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.message,
+  })),
+  on(receiptActions.fetchStudentOutstandingBalance, (state) => ({
+    ...state,
+
+    isLoadingStudentBalance: true,
+    errorMessage: '',
+  })),
+  on(
+    receiptActions.fetchStudentOutstandingBalanceSuccess,
+    (state, { amountDue }) => ({
+      ...state,
+
+      isLoadingStudentBalance: false,
+      errorMessage: '',
+      studentOutstandingBalance: amountDue,
+    })
+  ),
+  on(receiptActions.fetchStudentOutstandingBalanceFail, (state, { error }) => ({
+    ...state,
+
+    isLoadingStudentBalance: false,
+    errorMessage: error.message,
+  })),
+  on(receiptActions.clearStudentFinancials, (state) => ({
+    ...state,
+    studentOutstandingBalance: 0, // Reset balance
+    createdReceipt: {} as ReceiptModel, // Reset created receipt
+    // You might also want to reset isLoading and errorMessage if they are tied specifically to the dialog/financial flow
+    isLoading: false,
+    errorMessage: '',
+  })),
+  on(receiptActions.clearCreatedReceipt, (state) => ({
+    ...state,
+    createdReceipt: {} as ReceiptModel,
   }))
 );

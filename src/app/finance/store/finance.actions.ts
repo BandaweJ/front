@@ -8,6 +8,7 @@ import { BalancesModel } from '../models/balances.model';
 import { BillModel } from '../models/bill.model';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
+import { PaymentMethods } from '../models/payment-methods.enum';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -95,17 +96,26 @@ export const billStudentActions = createActionGroup({
 export const receiptActions = createActionGroup({
   source: 'Receipt Component',
   events: {
-    fetchNewReceipt: props<{ studentNumber: string }>(),
-    fetchNewReceiptSuccess: props<{ receipt: ReceiptModel }>(),
-    fetchNewReceiptFail: props<{ error: HttpErrorResponse }>(),
+    fetchStudentOutstandingBalance: props<{ studentNumber: string }>(),
+    fetchStudentOutstandingBalanceSuccess: props<{
+      amountDue: number;
+    }>(),
+    fetchStudentOutstandingBalanceFail: props<{ error: HttpErrorResponse }>(),
+    clearStudentFinancials: emptyProps(),
     fetchReceipts: emptyProps(),
     fetchReceiptsSuccess: props<{ receipts: ReceiptModel[] }>(),
     fetchReceiptsFail: props<{ error: HttpErrorResponse }>(),
-    saveReceipt: props<{ receipt: ReceiptModel }>(),
+    saveReceipt: props<{
+      studentNumber: string;
+      amountPaid: number;
+      paymentMethod: PaymentMethods;
+      description?: string;
+    }>(),
     saveReceiptSuccess: props<{ receipt: ReceiptModel }>(),
     saveReceiptFail: props<{ error: HttpErrorResponse }>(),
     downloadReceiptPdf: props<{ receipt: ReceiptModel }>(),
     downloadReceiptPdfSuccess: emptyProps(),
     downloadReceiptPdfFail: props<{ error: HttpErrorResponse }>(),
+    clearCreatedReceipt: emptyProps(),
   },
 });

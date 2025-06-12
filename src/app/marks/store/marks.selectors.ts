@@ -43,3 +43,8 @@ export const isLoading = createSelector(
   marksState,
   (state: fromMarksReducer.State) => state.isLoading
 );
+
+export const selectStudentMarks = createSelector(
+  marksState,
+  (state: fromMarksReducer.State) => state.studentMarks
+);

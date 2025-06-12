@@ -143,7 +143,6 @@ export class PaymentsComponent implements OnInit, OnDestroy {
    */
   onReceiptSelectedFromSearch(receipt: ReceiptModel): void {
     this.selectedReceipt = receipt;
-    console.log('Receipt selected from search:', receipt);
     this.isSearchBarVisible = false; // Hide search bar after selection
     // TODO: You might want to navigate to the Receipt Details Page here,
     // or display the details prominently on the current page.
@@ -277,18 +276,19 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     dialogRef
       .afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((receipt) => {
-        if (receipt) {
-          // 'result' would be the new receipt data if the dialog returned it on success
-          this.store.dispatch(receiptActions.saveReceipt({ receipt: receipt }));
-          // this.store.dispatch(receiptActions.addReceipt({ receipt: result }));
+      .subscribe((newReceipt: ReceiptModel | undefined) => {
+        // Type the result
+        if (newReceipt) {
+          console.log(
+            'New receipt created and received from dialog:',
+            newReceipt
+          );
 
-          // After adding a receipt, you might want to refetch the list
-          // or let your NgRx effects handle the store update.
-          // For simplicity, if your 'fetchReceipts' reloads everything:
-          // this.store.dispatch(receiptActions.fetchReceipts());
+          this.selectedReceipt = newReceipt;
         } else {
-          console.log('Add New Receipt dialog closed without saving.');
+          console.log(
+            'Add Receipt dialog closed without a new receipt (cancelled or failed)'
+          );
         }
       });
   }

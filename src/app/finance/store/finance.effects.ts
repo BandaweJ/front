@@ -100,7 +100,6 @@ export class FinanceEffects {
             })
           ),
           map((fee) => {
-            // console.log(teacher);
             return feesActions.editFeeSuccess({
               fee,
             });
@@ -246,67 +245,9 @@ export class FinanceEffects {
     )
   );
 
-  // createBills$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(billStudentActions.billStudent),
-  //     switchMap((data) =>
-  //       this.financeService.createBills(data.bills).pipe(
-  //         tap(() =>
-  //           this.snackBar.open('Bills Added Successfully', 'OK', {
-  //             duration: 3000,
-  //             verticalPosition: 'top',
-  //             horizontalPosition: 'center',
-  //           })
-  //         ),
-  //         map((bills) => {
-  //           return billStudentActions.billStudentSuccess({ bills });
-  //         }),
-  //         catchError((error: HttpErrorResponse) =>
-  //           of(billStudentActions.billStudentFail({ ...error }))
-  //         )
-  //       )
-  //     )
-  //   )
-  // );
-
-  // removeBill$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(billStudentActions.removeBill),
-  //     switchMap((data) =>
-  //       this.financeService.removeBill(data.bill).pipe(
-  //         tap((data) => {
-  //           // console.log(data),
-  //           this.snackBar.open('Bill removed successfully', 'OK', {
-  //             duration: 3000,
-  //             verticalPosition: 'top',
-  //             horizontalPosition: 'center',
-  //           });
-  //         }),
-  //         map((bill) => {
-  //           return billStudentActions.removeBillSuccess({
-  //             bill,
-  //           });
-  //         }),
-  //         catchError((error: HttpErrorResponse) =>
-  //           of(billStudentActions.removeBillFail({ ...error })).pipe(
-  //             tap(() =>
-  //               this.snackBar.open(error.message, 'OK', {
-  //                 duration: 3000,
-  //                 verticalPosition: 'top',
-  //                 horizontalPosition: 'center',
-  //               })
-  //             )
-  //           )
-  //         )
-  //       )
-  //     )
-  //   )
-  // );
-
   downloadInvoice$ = createEffect(() =>
     this.actions$.pipe(
       ofType(invoiceActions.downloadInvoice),
-      tap((data) => console.log('downloadInvoice action received', data)),
       switchMap((data) =>
         this.paymentsService
           .downloadInvoice(data.studentNumber, data.num, data.year)
@@ -328,7 +269,6 @@ export class FinanceEffects {
   saveInvoice$ = createEffect(() =>
     this.actions$.pipe(
       ofType(invoiceActions.saveInvoice),
-      // tap((data) => console.log('saveInvoice action received', data)), // Log when the action fires
       switchMap((data) =>
         this.paymentsService.saveInvoice(data.invoice).pipe(
           tap((invoice) =>
@@ -345,34 +285,35 @@ export class FinanceEffects {
           map((invoice) => invoiceActions.saveInvoiceSuccess({ invoice })),
           catchError((error: HttpErrorResponse) => {
             console.error('Error from saveInvoice:', error); // Log the error
-            // console.log('Dispatching saveInvoiceFail'); // Log before dispatching fail
             return of(
               invoiceActions.saveInvoiceFail({
                 ...error,
               })
             );
           })
-          // tap(() => console.log('saveInvoice service stream completed')) // Log when the inner stream completes
         )
       )
-      // tap(() => console.log('saveInvoice$ effect completed for an action')) // Log when the outer effect stream completes
     )
   );
 
-  fetchNewReceipt$ = createEffect(() =>
+  fetchStudentOutstandingBalance$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(receiptActions.fetchNewReceipt),
+      ofType(receiptActions.fetchStudentOutstandingBalance),
       switchMap((data) =>
-        this.paymentsService.getNewReceipt(data.studentNumber).pipe(
-          map((receipt) => {
-            return receiptActions.fetchNewReceiptSuccess({
-              receipt,
-            });
-          }),
-          catchError((error: HttpErrorResponse) =>
-            of(receiptActions.fetchNewReceiptFail({ ...error }))
+        this.paymentsService
+          .getStudentOutstandingBalance(data.studentNumber)
+          .pipe(
+            map(({ amountDue }) => {
+              return receiptActions.fetchStudentOutstandingBalanceSuccess({
+                amountDue,
+              });
+            }),
+            catchError((error: HttpErrorResponse) =>
+              of(
+                receiptActions.fetchStudentOutstandingBalanceFail({ ...error })
+              )
+            )
           )
-        )
       )
     )
   );
@@ -398,34 +339,37 @@ export class FinanceEffects {
   saveReceipt$ = createEffect(() =>
     this.actions$.pipe(
       ofType(receiptActions.saveReceipt),
-      // tap((data) => console.log('saveInvoice action received', data)), // Log when the action fires
       switchMap((data) =>
-        this.paymentsService.saveReceipt(data.receipt).pipe(
-          tap((receipt) =>
-            this.snackBar.open(
-              'Receipt saved successfully' + receipt.receiptNumber,
-              'OK',
-              {
-                duration: 3000,
-                verticalPosition: 'top',
-                horizontalPosition: 'center',
-              }
-            )
-          ), // Log service success
-          map((receipt) => receiptActions.saveReceiptSuccess({ receipt })),
-          catchError((error: HttpErrorResponse) => {
-            // console.error('Error from saveInvoice:', error); // Log the error
-            // console.log('Dispatching saveInvoiceFail'); // Log before dispatching fail
-            return of(
-              receiptActions.saveReceiptFail({
-                ...error,
-              })
-            );
-          })
-          // tap(() => console.log('saveInvoice service stream completed')) // Log when the inner stream completes
-        )
+        this.paymentsService
+          .saveReceipt(
+            data.studentNumber,
+            data.amountPaid,
+            data.paymentMethod,
+            data.description
+          )
+          .pipe(
+            tap((receipt) =>
+              this.snackBar.open(
+                'Receipt saved successfully' + receipt.receiptNumber,
+                'OK',
+                {
+                  duration: 3000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                }
+              )
+            ), // Log service success
+            map((receipt) => receiptActions.saveReceiptSuccess({ receipt })),
+            catchError((error: HttpErrorResponse) => {
+              // console.error('Error from saveInvoice:', error); // Log the error
+              return of(
+                receiptActions.saveReceiptFail({
+                  ...error,
+                })
+              );
+            })
+          )
       )
-      // tap(() => console.log('saveInvoice$ effect completed for an action')) // Log when the outer effect stream completes
     )
   );
 

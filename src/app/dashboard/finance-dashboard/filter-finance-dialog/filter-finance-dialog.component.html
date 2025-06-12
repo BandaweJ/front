@@ -1,0 +1,104 @@
+<h2 mat-dialog-title>Filter Financial Data</h2>
+
+<mat-dialog-content [formGroup]="filterForm">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Transaction Date Range</mat-label>
+    <mat-date-range-input [rangePicker]="transactionDateRangePicker">
+      <input matStartDate formControlName="startDate" placeholder="Start date" />
+      <input matEndDate formControlName="endDate" placeholder="End date" />
+    </mat-date-range-input>
+    <mat-datepicker-toggle matSuffix [for]="transactionDateRangePicker"></mat-datepicker-toggle>
+    <mat-date-range-picker #transactionDateRangePicker></mat-date-range-picker>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Transaction Type</mat-label>
+    <mat-select formControlName="transactionType">
+      <mat-option>-- All --</mat-option>
+      <mat-option *ngFor="let type of transactionTypes" [value]="type">{{ type }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Status</mat-label>
+    <mat-select formControlName="status">
+      <mat-option>-- All --</mat-option>
+      <mat-option *ngFor="let status of unifiedStatuses" [value]="status">{{ status }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Student ID</mat-label>
+    <input matInput formControlName="studentId" placeholder="e.g., S00123" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Student Name</mat-label>
+    <input matInput formControlName="studentName" placeholder="e.g., John Doe" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Invoice Number</mat-label>
+    <input matInput formControlName="invoiceNumber" placeholder="e.g., INV-2025-001" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Receipt Number</mat-label>
+    <input matInput formControlName="receiptNumber" placeholder="e.g., RCPT-2025-001" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Payment Method</mat-label>
+    <mat-select formControlName="paymentMethod">
+      <mat-option>-- All --</mat-option>
+      <mat-option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Academic Year</mat-label>
+    <mat-select formControlName="enrolAcademicYear">
+      <mat-option>-- All --</mat-option>
+      <mat-option *ngFor="let year of academicYears" [value]="year">{{ year }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Term</mat-label>
+    <mat-select formControlName="enrolTerm">
+      <mat-option>-- All --</mat-option>
+      <mat-option *ngFor="let term of terms" [value]="term">{{ term }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Grade Level</mat-label>
+    <mat-select formControlName="enrolGradeLevel">
+      <mat-option>-- All --</mat-option>
+      <mat-option *ngFor="let grade of gradeLevels" [value]="grade">{{ grade }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div class="amount-range-group">
+    <mat-form-field appearance="outline" class="half-width">
+      <mat-label>Min Amount</mat-label>
+      <input matInput type="number" formControlName="minAmount" placeholder="e.g., 50.00" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="half-width">
+      <mat-label>Max Amount</mat-label>
+      <input matInput type="number" formControlName="maxAmount" placeholder="e.g., 1000.00" />
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Served By</mat-label>
+    <input matInput formControlName="servedBy" placeholder="e.g., Admin Staff" />
+  </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onClearFilters()">Clear Filters</button>
+  <button mat-raised-button color="primary" (click)="onApplyFilters()">Apply Filters</button>
+</mat-dialog-actions>
