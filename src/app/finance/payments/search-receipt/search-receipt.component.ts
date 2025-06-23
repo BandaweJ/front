@@ -11,7 +11,7 @@ import {
   takeUntil,
 } from 'rxjs';
 import { select, Store } from '@ngrx/store';
-import { selectReceipts } from '../../store/finance.selector';
+import { selectAllReceipts } from '../../store/finance.selector';
 
 @Component({
   selector: 'app-search-receipt',
@@ -26,7 +26,7 @@ export class SearchReceiptComponent {
 
   // Observable of all receipts from NgRx store
   receipts$: Observable<ReceiptModel[]> = this.store.pipe(
-    select(selectReceipts) // Select all receipts from your NgRx store
+    select(selectAllReceipts) // Select all receipts from your NgRx store
   );
 
   private initialReceipts: ReceiptModel[] = []; // Store the initial array for filtering

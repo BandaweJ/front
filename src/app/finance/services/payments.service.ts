@@ -43,10 +43,14 @@ export class PaymentsService {
     );
   }
 
-  getInvoices(num: number, year: number): Observable<InvoiceModel[]> {
+  getTermInvoices(num: number, year: number): Observable<InvoiceModel[]> {
     return this.httpClient.get<InvoiceModel[]>(
       `${this.baseURL}invoice/${num}/${year}`
     );
+  }
+
+  getAllInvoices(): Observable<InvoiceModel[]> {
+    return this.httpClient.get<InvoiceModel[]>(`${this.baseURL}invoice/`);
   }
 
   saveInvoice(invoice: InvoiceModel): Observable<InvoiceModel> {
@@ -56,54 +60,14 @@ export class PaymentsService {
       invoice
     );
   }
-
-  downloadInvoice(studentNumber: string, num: number, year: number) {
-    console.log('called download');
-    const result = this.httpClient.get(
-      `${this.baseURL}invoicepdf/${studentNumber}/${num}/${year}`,
+  downloadInvoice(invoiceNumber: string): Observable<HttpResponse<Blob>> {
+    return this.httpClient.get(
+      `${this.baseURL}invoicepdf/${invoiceNumber}`, // Use baseURL + specific endpoint
       {
-        observe: 'response',
         responseType: 'blob',
+        observe: 'response', // <--- Crucial change: observe the full response
       }
     );
-
-    result.subscribe((response: HttpResponse<Blob>) => {
-      this.handlePdfResponse(response);
-    });
-
-    return result;
-  }
-
-  handlePdfResponse(response: HttpResponse<Blob>) {
-    // Check for successful response
-    if (response.status === 200) {
-      let filename = 'invoice.pdf'; // Default filename
-      const contentDisposition = response.headers.get('Content-Disposition');
-
-      if (contentDisposition && contentDisposition.includes('filename=')) {
-        filename = contentDisposition
-          .split('filename=')[1]
-          .split(';')[0]
-          .trim()
-          .replace(/"/g, '');
-      }
-
-      const blob = response.body;
-
-      // Option 2: Open the PDF in a new browser tab/window and enable saving with a default filename
-      const link = document.createElement('a');
-      if (blob) {
-        link.href = window.URL.createObjectURL(blob);
-        link.target = '_blank';
-        link.download = filename; // Always set a filename for saving
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(link.href); // release the blob object
-      }
-    } else {
-      console.error('Error downloading PDF:', response.statusText);
-      // Handle potential errors
-    }
   }
 
   getStudentOutstandingBalance(
@@ -114,7 +78,7 @@ export class PaymentsService {
     );
   }
 
-  getReceipts(): Observable<ReceiptModel[]> {
+  getAllReceipts(): Observable<ReceiptModel[]> {
     return this.httpClient.get<ReceiptModel[]>(`${this.baseURL}receipt/`);
   }
 
@@ -132,56 +96,25 @@ export class PaymentsService {
     });
   }
 
-  downloadReceipt(receipt: ReceiptModel) {
-    const result = this.httpClient.get(
-      `${this.baseURL}receiptpdf/${receipt.receiptNumber}`,
+  downloadReceipt(receiptNumber: string): Observable<HttpResponse<Blob>> {
+    return this.httpClient.get(
+      `${this.baseURL}receiptpdf/${receiptNumber}`, // Use baseURL + specific endpoint
       {
-        observe: 'response',
         responseType: 'blob',
+        observe: 'response', // <--- Crucial change: observe the full response
       }
     );
-
-    result.subscribe((response: HttpResponse<Blob>) => {
-      this.handleReceiptPdfResponse(response);
-    });
-
-    return result;
   }
 
-  handleReceiptPdfResponse(response: HttpResponse<Blob>) {
-    // Check for successful response
-    if (response.status === 200) {
-      let filename = 'receipt.pdf';
-      const contentDisposition = response.headers.get('Content-Disposition');
+  getStudentInvoices(studentNumber: string): Observable<InvoiceModel[]> {
+    return this.httpClient.get<InvoiceModel[]>(
+      `${this.baseURL}invoice/${studentNumber}`
+    );
+  }
 
-      if (contentDisposition && contentDisposition.includes('filename=')) {
-        // Your existing extraction logic is correct for the provided header
-        filename = contentDisposition
-          .split('filename=')[1]
-          .split(';')[0]
-          .trim()
-          .replace(/"/g, '');
-        console.log(filename);
-      }
-
-      const blob = response.body;
-
-      const link = document.createElement('a');
-      if (blob) {
-        link.href = window.URL.createObjectURL(blob);
-        // *** REMOVE THIS LINE: link.target = '_blank'; ***
-        link.download = filename; // This attribute suggests the filename for saving
-
-        // Temporarily append the link to the document body, then click it, then remove it
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        window.URL.revokeObjectURL(link.href); // Release the blob object URL
-      }
-    } else {
-      console.error('Error downloading PDF:', response.statusText);
-      // Handle potential errors like showing a user-friendly message
-    }
+  getStudentReceipts(studentNumber: string): Observable<ReceiptModel[]> {
+    return this.httpClient.get<ReceiptModel[]>(
+      `${this.baseURL}receipt/student/${studentNumber}`
+    );
   }
 }

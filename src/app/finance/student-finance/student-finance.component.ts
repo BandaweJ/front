@@ -48,7 +48,6 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.store.select(selectCurrentEnrolment).subscribe((enrolment) => {
         this.selectedStudentEnrol = enrolment;
-        // console.log('Current Enrolment from Store for other component:', this.selectedStudentEnrol);
       })
     );
 
@@ -56,7 +55,6 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.store.select(selectedStudentInvoice).subscribe((invoice) => {
         this.invoice = invoice;
-        // console.log('Invoice from Store:', this.invoice);
       })
     );
   }

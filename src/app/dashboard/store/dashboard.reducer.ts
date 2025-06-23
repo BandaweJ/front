@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
-import { FinanceDataModel } from '../models/finance-data.model';
-import { financeActions, studentDashboardActions } from './dashboard.actions';
+import { FinanceDataModel } from '../../finance/models/finance-data.model';
+import { studentDashboardActions } from './dashboard.actions';
 import { StudentDashboardSummary } from '../models/student-dashboard-summary';
 
 export interface State {
@@ -8,7 +8,6 @@ export interface State {
   loading: boolean;
   loaded: boolean;
   errorMessage: string;
-  allFinanceData: FinanceDataModel[];
 }
 
 export const initialState: State = {
@@ -16,28 +15,11 @@ export const initialState: State = {
   loading: false,
   loaded: false,
   errorMessage: '',
-  allFinanceData: [],
 };
 
 export const dashboardReducer = createReducer(
   initialState,
-  on(financeActions.fetchAllFinanceData, (state) => ({
-    ...state,
-    // loading: true,
-    errorMessage: '',
-  })),
-  on(financeActions.fetchAllFinanceDataSuccess, (state, { financeData }) => ({
-    ...state,
-    // loading: false,
-    errorMessage: '',
-    allFinanceData: financeData,
-  })),
-  on(financeActions.fetchAllFinanceDataFail, (state, { error }) => ({
-    ...state,
-    // loading: false,
-    errorMessage: error.message,
-    allFinanceData: [],
-  })),
+
   on(studentDashboardActions.fetchStudentDashboardSummary, (state) => ({
     ...state,
     loading: true,

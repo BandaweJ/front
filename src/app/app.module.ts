@@ -1,4 +1,4 @@
-import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -62,13 +62,6 @@ import { SharedModule } from './shared/shared.module';
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     AuthService,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (authService: AuthService) => () =>
-        authService.checkTokenAndNavigate(),
-      deps: [AuthService],
-      multi: true,
-    },
   ],
   bootstrap: [AppComponent],
 })

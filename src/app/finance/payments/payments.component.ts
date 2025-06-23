@@ -10,10 +10,9 @@ import { ReceiptFilter } from '../models/receipt-filter.model';
 import { FilterReceiptsDialogComponent } from './filter-receipts-dialog/filter-receipts-dialog.component';
 
 // Import your NgRx selectors and actions
-import { selectReceipts } from '../store/finance.selector'; // Assuming selectReceipts is correct
 import { receiptActions } from '../store/finance.actions'; // Assuming receiptActions.fetchReceipts() is correct
-import { ReceiptSummaryCardComponent } from './receipt-item/receipt-summary-card.component/receipt-summary-card.component.component';
 import { AddReceiptDialogComponent } from './add-receipt-dialog/add-receipt-dialog.component';
+import { selectAllReceipts } from '../store/finance.selector';
 @Component({
   selector: 'app-payments', // Assuming this is your ReceiptsPageComponent
   templateUrl: './payments.component.html',
@@ -42,7 +41,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
 
   // Stream of all receipts from the NgRx store
   allReceipts$: Observable<ReceiptModel[]> = this.store.pipe(
-    select(selectReceipts)
+    select(selectAllReceipts)
   );
 
   // The final observable that combines all receipts, current filters, and current sort
@@ -76,7 +75,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Dispatch action to fetch receipts from backend when component initializes
     // This populates the 'allReceipts$' observable from the store.
-    this.store.dispatch(receiptActions.fetchReceipts());
+    this.store.dispatch(receiptActions.fetchAllReceipts());
   }
 
   ngOnDestroy(): void {

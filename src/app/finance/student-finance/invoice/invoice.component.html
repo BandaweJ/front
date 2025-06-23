@@ -7,7 +7,7 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="breakdown-container" *ngIf="invoiceStats$ | async as invoiceStats">
+  <!-- <div class="breakdown-container" *ngIf="invoiceStats$ | async as invoiceStats">
     <mat-card class="total-widget" *ngFor="let stat of invoiceStats">
       <mat-card-title>
         {{ namesToString(stat.title) }}
@@ -22,7 +22,7 @@
         </div>
       </mat-card-content>
     </mat-card>
-  </div>
+  </div> -->
 
   <div class="invoices-container">
     <div class="invoice-selection" *ngIf="invoices$ | async as invoices">

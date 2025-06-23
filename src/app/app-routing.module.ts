@@ -29,6 +29,16 @@ import { StudentFinanceComponent } from './finance/student-finance/student-finan
 import { StudentBalancesComponent } from './finance/student-balances/student-balances.component';
 import { InvoiceComponent } from './finance/student-finance/invoice/invoice.component';
 import { PaymentsComponent } from './finance/payments/payments.component';
+import { StudentFinancialsDashboardComponent } from './finance/student-financials/student-financials-dashboard/student-financials-dashboard.component';
+import { StudentInvoicesComponent } from './finance/student-financials/student-invoices/student-invoices.component';
+import { StudentReceiptsComponent } from './finance/student-financials/student-receipts/student-receipts.component';
+import { StudentPaymentHistoryComponent } from './finance/student-financials/student-payment-history/student-payment-history.component';
+import { StudentLedgerReportComponent } from './finance/reports/student-ledger-report/student-ledger-report.component';
+import { FeesCollectionReportComponent } from './finance/reports/fees-collection-report/fees-collection-report.component';
+import { OutstandingFeesReportComponent } from './finance/reports/outstanding-fees-report/outstanding-fees-report.component';
+import { AgedDebtorsReportComponent } from './finance/reports/aged-debtors-report/aged-debtors-report.component';
+import { RevenueRecognitionReportComponent } from './finance/reports/revenue-recognition-report/revenue-recognition-report.component';
+import { EnrollmentBillingReconciliationReportComponent } from './finance/reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -56,6 +66,18 @@ const routes: Routes = [
     component: TeacherViewComponent,
     canActivate: [AuthGuardService],
     title: 'Teacher Details',
+  },
+  {
+    path: 'student-financials', // Route with studentNumber parameter
+    component: StudentFinancialsDashboardComponent,
+    canActivate: [AuthGuardService],
+    children: [
+      // Child routes for the tabs
+      { path: '', redirectTo: 'invoices', pathMatch: 'full' },
+      { path: 'invoices', component: StudentInvoicesComponent },
+      { path: 'receipts', component: StudentReceiptsComponent },
+      { path: 'payment-history', component: StudentPaymentHistoryComponent },
+    ],
   },
   {
     path: 'students',
@@ -178,13 +200,50 @@ const routes: Routes = [
     title: 'Receipting',
   },
   {
-    path: '',
+    canActivate: [AuthGuardService],
+    path: 'student-ledger',
+    component: StudentLedgerReportComponent,
+    title: 'Student Ledger Reports',
+  },
+  {
+    canActivate: [AuthGuardService],
+    path: 'fees-collection',
+    component: FeesCollectionReportComponent,
+    title: 'Fees Collection Report',
+  },
+  {
+    canActivate: [AuthGuardService],
+    path: 'outstanding-fees',
+    component: OutstandingFeesReportComponent,
+    title: 'Outstanding Fees Report',
+  },
+  {
+    canActivate: [AuthGuardService],
+    path: 'aged-debtors',
+    component: AgedDebtorsReportComponent,
+    title: 'Aged Debtors Report',
+  },
+  {
+    canActivate: [AuthGuardService],
+    path: 'enrollment-billing-reconciliation',
+    component: EnrollmentBillingReconciliationReportComponent,
+  },
+  {
+    canActivate: [AuthGuardService],
+    path: 'revenue-recognition',
+    component: RevenueRecognitionReportComponent,
+    title: 'Revenue Recognition',
+  },
+  {
+    path: '', // Default route for the root path
     redirectTo: 'signin',
     pathMatch: 'full',
   },
   {
-    path: '**',
-    component: DashboardComponent,
+    path: '**', // Wildcard route for any unmatched paths
+    // Redirect to 'signin' if any unknown route is hit.
+    // This prevents hitting guarded routes when not logged in.
+    redirectTo: 'signin',
   },
 ];
 

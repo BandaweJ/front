@@ -40,11 +40,11 @@ export class SharedService {
         return 'Boarder';
       case Residence.Day:
         return 'Day';
-      case Residence.DayFood:
-        return 'Day With Food';
-      case Residence.DayTransport:
-        return 'Day With Transport';
-      case Residence.DayFoodTransport:
+        // case Residence.DayFood:
+        //   return 'Day With Food';
+        // case Residence.DayTransport:
+        //   return 'Day With Transport';
+        // case Residence.DayFoodTransport:
         return 'Day With Food and Transport';
     }
   }

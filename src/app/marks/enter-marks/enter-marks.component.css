@@ -1,43 +1,179 @@
+/* Ensure the body or a main container allows scrolling */
+body,
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .input-elements {
+  /* This class might not be needed anymore if using the new mark-comment-group */
   margin: 0 20px 0;
 }
 
-.conatiner {
+.container {
   width: 95vw;
   padding: 2rem;
   margin: 0 auto;
+  box-sizing: border-box; /* Ensures padding is included in the width */
 }
 
 .top-btns {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 0.5rem auto;
-  width: 98vw;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center; /* CHANGE: Align items vertically in the center */
+  margin-bottom: 1.5rem;
+}
+
+.top-btns mat-form-field {
+  flex: 1 1 auto;
+  min-width: 180px;
+  /* You might want to ensure they don't have large default bottom margins */
+  margin-bottom: 0; /* Add this if mat-form-field has default bottom margin */
 }
 
 .sticky-progress-bar {
   position: sticky;
-  top: 10px;
-  z-index: 1000; /* Ensure it's above other elements */
-  width: 100%; /* Make it span the full width */
+  top: 0; /* Stick to the very top of the viewport */
+  z-index: 1000;
+  width: 100%;
+  padding-bottom: 8px;
+  /* Use a consistent background to avoid content showing through as it scrolls */
+  background-color: var(--mdc-theme-surface, #fff);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for elevation */
 }
 
-/* Optional: Add background color to the sticky bar */
-.sticky-progress-bar .mat-elevation-z10 {
-  background-color: rgb(227, 219, 219); /* or any color you want */
+.progress-bar-container {
+  position: relative;
+  height: 24px; /* Slightly taller for better visibility and text positioning */
+  display: flex;
+  align-items: center;
+  background-color: var(
+    --mdc-theme-background,
+    #f5f5f5
+  ); /* More subtle background */
+  border-radius: 4px;
+  overflow: hidden; /* To keep progress bar inside bounds */
 }
 
 .progress-value {
   position: absolute;
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Adjust for centering */
-  color: white; /* Or any color you prefer */
-  font-size: 14px; /* Adjust font size as needed */
-  font-weight: bold;
-  pointer-events: none; /* Allows clicks to pass through the text */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(0, 0, 0, 0.7); /* Darker text for contrast on subtle background */
+  font-size: 13px;
+  font-weight: 500; /* Medium weight */
+  pointer-events: none;
+  text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.5); /* Subtle text shadow for readability */
 }
+
 mat-progress-bar {
-  --mdc-linear-progress-track-height: 20px; /* Or any desired height */
+  --mdc-linear-progress-track-height: 100%; /* Make track fill container height */
+  --mdc-linear-progress-active-indicator-height: 100%; /* Make indicator fill container height */
+  /* Using 'accent' color in HTML, you can define it in your theme */
+  /* Example of custom color if you want to override theme: */
+  /* --mdc-linear-progress-active-indicator-color: #673ab7; */ /* Deep Purple */
+  /* --mdc-linear-progress-track-color: #ede7f6; */ /* Lighter Deep Purple */
+}
+
+.table-container {
+  overflow-x: auto; /* Enable horizontal scrolling for the table */
+}
+
+.top-panel {
+  display: flex;
+  justify-content: flex-end; /* Align filter to the right */
+  padding: 16px;
+  background-color: var(--mdc-theme-surface, #fff);
+}
+
+.top-panel mat-form-field {
+  width: 300px; /* Adjust filter input width */
+}
+
+/* Table styles */
+table {
+  width: 100%;
+}
+
+.mat-column-studentNumber,
+.mat-column-surname,
+.mat-column-name,
+.mat-column-gender {
+  min-width: 120px; /* Ensure these columns have enough space */
+  padding-right: 16px;
+}
+
+.mat-column-markComment {
+  min-width: 350px; /* Enough space for two form fields and errors */
+  padding: 8px 16px;
+}
+
+.mark-comment-group {
+  display: flex;
+  gap: 10px; /* Space between mark and comment inputs */
+  align-items: flex-end; /* Align bottoms of inputs */
+  width: 100%;
+}
+
+.mark-input {
+  flex: 0 0 100px; /* Fixed width for mark */
+}
+
+.comment-input {
+  flex: 1 1 auto; /* Fill remaining space for comment */
+}
+
+.mat-column-action {
+  min-width: 100px;
+  text-align: center;
+  padding-right: 8px;
+}
+
+.action-btns {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.mat-header-cell {
+  font-weight: bold;
+  background-color: #f0f0f0; /* Light grey header */
+}
+
+.mat-row:hover {
+  background-color: #f5f5f5; /* Subtle hover effect */
+}
+
+.no-data-message {
+  padding: 20px;
+  text-align: center;
+  color: #757575;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .top-btns {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .top-btns mat-form-field {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .mark-comment-group {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mark-input,
+  .comment-input {
+    width: 100%;
+    flex: 1 1 auto; /* Allow full width on small screens */
+  }
 }

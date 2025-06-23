@@ -1,0 +1,40 @@
+<div class="financials-dashboard-container">
+  <mat-card class="dashboard-card">
+    <mat-card-header>
+      <mat-card-title>Student Financials</mat-card-title>
+      <mat-card-subtitle *ngIf="studentNumber">Student Number: {{ studentNumber }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="outstanding-balance">
+        <h3>
+          Outstanding Balance:
+          <span *ngIf="loadingOutstandingBalance$ | async">
+            <mat-spinner diameter="20"></mat-spinner>
+          </span>
+          <span *ngIf="(outstandingBalance$ | async) !== null && !(loadingOutstandingBalance$ | async)">
+            {{ outstandingBalance$ | async | currency:'USD':'symbol':'1.2-2' }}
+          </span>
+          <span *ngIf="(outstandingBalanceError$ | async) && !(loadingOutstandingBalance$ | async)"
+            class="error-message">
+            Error loading balance.
+          </span>
+          <span
+            *ngIf="(outstandingBalance$ | async) === null && !(loadingOutstandingBalance$ | async) && !(outstandingBalanceError$ | async)">
+            N/A
+          </span>
+        </h3>
+      </div>
+
+      <nav mat-tab-nav-bar class="dashboard-tabs" [tabPanel]="financialsTabPanel">
+        <a mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" routerLinkActive #rla="routerLinkActive"
+          [active]="rla.isActive">
+          {{ link.label }}
+        </a>
+      </nav>
+
+      <mat-tab-nav-panel #financialsTabPanel class="tab-content">
+        <router-outlet></router-outlet>
+      </mat-tab-nav-panel>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -23,6 +23,8 @@ export interface State {
   totalEnrolment: StudentsSummary | null;
   currentEnrolment: EnrolsModel | null;
   currentTerm: TermsModel;
+  allEnrols: EnrolsModel[];
+  termEnrols: EnrolsModel[];
 }
 
 export const initialState: State = {
@@ -39,6 +41,8 @@ export const initialState: State = {
   totalEnrolment: null,
   currentEnrolment: null,
   currentTerm: {} as TermsModel,
+  allEnrols: [],
+  termEnrols: [],
 };
 
 export const enrolmentReducer = createReducer(
@@ -330,6 +334,28 @@ export const enrolmentReducer = createReducer(
   ),
   on(
     enrolmentActions.currentTermActions.fetchCurrentTermFail,
+    (state, { error }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: error.message,
+    })
+  ),
+  on(enrolmentActions.termEnrolsActions.fetchTermEnrols, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(
+    enrolmentActions.termEnrolsActions.fetchTermEnrolsSuccess,
+    (state, { termEnrols }) => ({
+      ...state,
+      isLoading: false,
+      errorMessage: '',
+      termEnrols,
+    })
+  ),
+  on(
+    enrolmentActions.termEnrolsActions.fetchTermEnrolsFail,
     (state, { error }) => ({
       ...state,
       isLoading: false,

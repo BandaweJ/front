@@ -1,0 +1,75 @@
+<div class="receipts-container">
+  <mat-card class="receipts-card">
+    <mat-card-header>
+      <mat-card-title>Student Receipts</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="loadingReceipts$ | async" class="loading-state">
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Loading receipts...</p>
+      </div>
+
+      <div *ngIf="errorReceipts$ | async" class="error-state">
+        <mat-icon color="warn">error</mat-icon>
+        <p>Error loading receipts. Please try again later.</p>
+        <p class="error-details">{{ errorReceipts$ | async | json }}</p>
+      </div>
+
+      <div *ngIf="(receipts$ | async) as receipts; else noReceiptsFound">
+        <div *ngIf="receipts.length > 0; else noReceiptsFound">
+          <mat-accordion multi="true" class="receipts-accordion">
+            <mat-expansion-panel *ngFor="let receipt of receipts" class="receipt-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title class="receipt-header-title">
+                  <strong>Receipt #{{ receipt.receiptNumber }}</strong>
+                  <span class="receipt-status" [class]="getApprovalClass(receipt.approved)">
+                    {{ receipt.approved ? 'Approved' : 'Pending Approval' }}
+                  </span>
+                </mat-panel-title>
+                <mat-panel-description class="receipt-header-summary">
+                  <span>Date: {{ receipt.paymentDate | date:'mediumDate' }}</span>
+                  <span>Method: {{ receipt.paymentMethod }}</span>
+                  <span>Amount: {{ receipt.amountPaid | currency:'USD':'symbol':'1.2-2' }}</span>
+                  <span>Served By: {{ receipt.servedBy }}</span>
+                </mat-panel-description>
+
+                <button mat-icon-button (click)="downloadReceipt(receipt.receiptNumber); $event.stopPropagation()"
+                  matTooltip="Download Receipt" aria-label="Download receipt PDF">
+                  <mat-icon>file_download</mat-icon>
+                </button>
+              </mat-expansion-panel-header>
+
+              <div class="receipt-details">
+                <h4>Receipt Description</h4>
+                <p>{{ receipt.description || 'No detailed description provided.' }}</p>
+
+                <div *ngIf="receipt.allocations && receipt.allocations.length > 0" class="allocations-section">
+                  <h4>Allocations to Invoices</h4>
+                  <mat-list>
+                    <mat-list-item *ngFor="let allocation of receipt.allocations">
+                      <mat-icon matListItemIcon>assignment</mat-icon>
+                      <div matListItemTitle>Invoice #{{ allocation.invoice.invoiceNumber }}</div>
+                      <div matListItemLine>Amount Applied: {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2'
+                        }}</div>
+                      <div matListItemLine>Allocation Date: {{ allocation.allocationDate | date:'shortDate' }}</div>
+                      <mat-divider></mat-divider>
+                    </mat-list-item>
+                  </mat-list>
+                </div>
+                <div *ngIf="!receipt.allocations || receipt.allocations.length === 0" class="no-allocations">
+                  <p>No specific invoice allocations recorded for this receipt.</p>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+      <ng-template #noReceiptsFound>
+        <div class="no-data-state">
+          <mat-icon>info</mat-icon>
+          <p>No receipts found for this student.</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</div>

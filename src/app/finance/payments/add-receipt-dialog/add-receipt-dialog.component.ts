@@ -54,6 +54,7 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
     });
 
     this.amountDue$ = this.store.select(selectAmountDue);
+    this.store.select(selectAmountDue).subscribe((val) => console.log(val));
 
     // Initialize loading and error observables if you re-add them
     this.isLoadingFinancials$ = this.store.select(selectIsLoadingFinancials);

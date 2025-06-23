@@ -1,0 +1,20 @@
+/* src/app/profile-buttons/profile-buttons.component.css */
+.profile-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Adds a small gap between the Login button and the profile icon if they were both visible (they won't be) or if you add other buttons */
+}
+
+/* Style the menu trigger icon for better visibility if needed */
+.profile-buttons-container button.mat-icon-button {
+  color: white; /* Ensures the icon is visible against the primary toolbar color */
+}
+
+/* Style the Login button text/icon if needed */
+.profile-buttons-container button.mat-flat-button {
+  color: white; /* Ensures text is visible */
+}
+
+.profile-buttons-container button.mat-flat-button .mat-icon {
+  margin-right: 4px; /* Space between icon and text */
+}

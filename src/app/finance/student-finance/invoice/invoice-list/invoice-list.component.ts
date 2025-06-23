@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { InvoiceModel } from 'src/app/finance/models/invoice.model';
-import { selectInVoices } from 'src/app/finance/store/finance.selector';
+import { selectTermInvoices } from 'src/app/finance/store/finance.selector';
 
 @Component({
   selector: 'app-invoice-list',
@@ -10,7 +10,7 @@ import { selectInVoices } from 'src/app/finance/store/finance.selector';
 })
 export class InvoiceListComponent {
   @Output() invoiceSelected = new EventEmitter<InvoiceModel>();
-  invoices$ = this.store.select(selectInVoices);
+  invoices$ = this.store.select(selectTermInvoices);
   constructor(private store: Store) {}
 
   selectInvoice(invoice: InvoiceModel) {

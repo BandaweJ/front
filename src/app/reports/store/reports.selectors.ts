@@ -23,3 +23,8 @@ export const selectStudentReports = createSelector(
   reportsState,
   (state: fromReportsReducer.State) => state.studentReports
 );
+
+export const selectSelectedReport = createSelector(
+  reportsState,
+  (state: fromReportsReducer.State) => state.selectedReport
+);

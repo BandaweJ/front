@@ -1,0 +1,90 @@
+<mat-card class="ledger-report-card">
+  <mat-card-header>
+    <mat-card-title>Student Ledger Report</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="search-section">
+      <app-student-search (studentSelected)="onStudentSelected($event)"></app-student-search>
+    </div>
+
+    <div *ngIf="selectedStudent" class="selected-student-info">
+      <h3>Ledger for: {{ selectedStudent.name }} {{ selectedStudent.surname }} ({{ selectedStudent.studentNumber }})
+      </h3>
+      <p>
+        Overall Balance:
+        <ng-container *ngIf="(studentLedger$ | async) as ledger">
+          <span *ngIf="ledger.length > 0" [class]="getBalanceClass(ledger[ledger.length - 1].runningBalance)">
+            {{ ledger[ledger.length - 1].runningBalance | currency:'USD':'symbol':'1.2-2' }}
+          </span>
+          <span *ngIf="ledger.length === 0">N/A (No transactions)</span>
+        </ng-container>
+      </p>
+    </div>
+
+    <div *ngIf="isLoading$ | async" class="loading-state">
+      <mat-spinner diameter="30"></mat-spinner>
+      <p>Loading ledger data...</p>
+    </div>
+
+    <div *ngIf="error$ | async" class="error-state">
+      <mat-icon color="warn">error</mat-icon>
+      <p>Error loading ledger. Please try again later.</p>
+      <p class="error-details">{{ error$ | async | json }}</p>
+    </div>
+
+    <div *ngIf="(studentLedger$ | async) as ledger; else noLedgerFound">
+      <div *ngIf="ledger.length > 0; else noLedgerFound">
+        <div class="ledger-table-container mat-elevation-z2">
+          <table mat-table [dataSource]="ledger" class="full-width-table">
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef> Date </th>
+              <td mat-cell *matCellDef="let element"> {{ element.date | date:'shortDate' }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef> Type </th>
+              <td mat-cell *matCellDef="let element">
+                <mat-icon [color]="element.direction === 'in' ? 'primary' : 'warn'">
+                  {{ getTransactionIcon(element.type) }}
+                </mat-icon>
+                {{ element.type }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef> Description </th>
+              <td mat-cell *matCellDef="let element"> {{ element.description }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef> Amount </th>
+              <td mat-cell *matCellDef="let element" [class]="getTransactionDirectionClass(element.direction)">
+                {{ element.amount | currency:'USD':'symbol':'1.2-2' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="runningBalance">
+              <th mat-header-cell *matHeaderCellDef> Balance </th>
+              <td mat-cell *matCellDef="let element" [class]="getBalanceClass(element.runningBalance)">
+                {{ element.runningBalance | currency:'USD':'symbol':'1.2-2' }}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['date', 'type', 'description', 'amount', 'runningBalance']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['date', 'type', 'description', 'amount', 'runningBalance'];">
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noLedgerFound>
+      <div class="no-data-state">
+        <mat-icon>info</mat-icon>
+        <p *ngIf="!selectedStudent">Please select a student to view their ledger.</p>
+        <p *ngIf="selectedStudent">No ledger entries found for {{ selectedStudent.name }} {{ selectedStudent.surname }}.
+        </p>
+      </div>
+    </ng-template>
+  </mat-card-content>
+</mat-card>

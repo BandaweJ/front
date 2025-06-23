@@ -14,7 +14,7 @@ import {
   switchMap,
   takeUntil,
 } from 'rxjs/operators';
-import { FinanceDataModel } from '../../models/finance-data.model'; // Make sure this path is correct
+import { FinanceDataModel } from '../../../finance/models/finance-data.model'; // Make sure this path is correct
 import { FinanceSearchService } from 'src/app/finance/services/finance-search.service';
 
 @Component({

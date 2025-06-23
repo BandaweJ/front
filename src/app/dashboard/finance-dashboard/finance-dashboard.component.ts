@@ -6,13 +6,21 @@ import { MatDialog } from '@angular/material/dialog';
 
 // Adjust imports for your new financial models and filter types
 // You'll need to define FinanceDataModel and FinanceFilter models
-import { FinanceDataModel } from '../models/finance-data.model'; // Define this model for general financial data
-import { FinanceFilter } from '../models/finance-filter.model'; // Define this model for dashboard filters
+import { FinanceDataModel } from '../../finance/models/finance-data.model'; // Define this model for general financial data
+import { FinanceFilter } from '../../finance/models/finance-filter.model'; // Define this model for dashboard filters
 import { FilterFinanceDialogComponent } from './filter-finance-dialog/filter-finance-dialog.component'; // New dialog for finance filters
 
 // Adjust NgRx selectors and actions for general finance data
-import { selectAllFinanceData } from '../store/dashboard.selectors'; // Example: select all data for the dashboard
-import { financeActions } from '../store/dashboard.actions'; // Example: actions for general finance data (e.g., fetchAllFinanceData)
+import { selectAllCombinedFinanceData } from 'src/app/finance/store/finance.selector';
+import {
+  invoiceActions,
+  receiptActions,
+} from 'src/app/finance/store/finance.actions';
+import {
+  fetchClasses,
+  fetchTerms,
+} from 'src/app/enrolment/store/enrolment.actions';
+import { fetchStudents } from 'src/app/registration/store/registration.actions';
 
 // You might have a generic search component if you need to search for students, invoices, etc.
 // import { SearchFinanceEntityComponent } from './search-finance-entity/search-finance-entity.component';
@@ -47,7 +55,7 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
   // Stream of all finance data from the NgRx store
   // This needs to fetch a broader set of financial data than just receipts
   allFinanceData$: Observable<FinanceDataModel[]> = this.store.pipe(
-    select(selectAllFinanceData) // Make sure this selector fetches comprehensive finance data
+    select(selectAllCombinedFinanceData) // Make sure this selector fetches comprehensive finance data
   );
 
   // The final observable that combines all finance data, current filters, and current sort
@@ -77,8 +85,11 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Dispatch action to fetch all relevant financial data when component initializes
-    this.store.dispatch(financeActions.fetchAllFinanceData()); // New action for dashboard data
+    this.store.dispatch(receiptActions.fetchAllReceipts());
+    this.store.dispatch(invoiceActions.fetchAllInvoices());
+    this.store.dispatch(fetchTerms()); // Fetch terms as well if needed
+    this.store.dispatch(fetchStudents());
+    this.store.dispatch(fetchClasses());
   }
 
   ngOnDestroy(): void {
@@ -180,10 +191,13 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
       // Example filters (you'll need to define these in FinanceFilter model and implement logic)
       if (
         filters.startDate &&
-        new Date(item.date) < new Date(filters.startDate)
+        new Date(item.transactionDate) < new Date(filters.startDate)
       )
         return false;
-      if (filters.endDate && new Date(item.date) > new Date(filters.endDate))
+      if (
+        filters.endDate &&
+        new Date(item.transactionDate) > new Date(filters.endDate)
+      )
         return false;
 
       if (filters.transactionType && item.type !== filters.transactionType)

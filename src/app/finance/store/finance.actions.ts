@@ -1,8 +1,10 @@
+// src/app/finance/store/finance.actions.ts
+
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { FeesModel } from '../models/fees.model';
 import { HttpErrorResponse } from '@angular/common/http';
-import { StudentsModel } from 'src/app/registration/models/students.model';
-import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
+import { StudentsModel } from 'src/app/registration/models/students.model'; // Assuming this path is correct
+import { EnrolsModel } from 'src/app/enrolment/models/enrols.model'; // Assuming this path is correct
 import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
 import { BillModel } from '../models/bill.model';
@@ -22,11 +24,9 @@ export const feesActions = createActionGroup({
     editFee: props<{ id: number; fee: FeesModel }>(),
     editFeeSuccess: props<{ fee: FeesModel }>(),
     editFeeFail: props<{ error: HttpErrorResponse }>(),
-    // deleteFee: props<{ id: number }>(),
-    // deleteFeeSuccess: props<{ id: number }>(),
-    // deleteFeeFail: props<{ error: HttpErrorResponse }>(),
   },
 });
+
 export const billingActions = createActionGroup({
   source: 'Student Finance Component',
   events: {
@@ -35,31 +35,38 @@ export const billingActions = createActionGroup({
     fetchStudentsToBillFail: props<{ error: HttpErrorResponse }>(),
   },
 });
+
 export const invoiceActions = createActionGroup({
   source: 'Student Finance Component',
   events: {
     fetchInvoice: props<{ studentNumber: string; num: number; year: number }>(),
     fetchInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     fetchInvoiceFail: props<{ error: HttpErrorResponse }>(),
-    downloadInvoice: props<{
-      studentNumber: string;
-      num: number;
-      year: number;
-    }>(),
-    downloadInvoiceSuccess: emptyProps(),
+
+    // --- AMENDED downloadInvoice action ---
+    downloadInvoice: props<{ invoiceNumber: string }>(), // Only needs invoiceNumber
+    downloadInvoiceSuccess: props<{ fileName: string }>(), // Pass filename for clarity/feedback
     downloadInvoiceFail: props<{ error: HttpErrorResponse }>(),
+
     saveInvoice: props<{ invoice: InvoiceModel }>(),
     saveInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     saveInvoiceFail: props<{ error: HttpErrorResponse }>(),
+
     fetchInvoiceStats: props<{ num: number; year: number }>(),
     fetchInvoiceStatsSuccess: props<{ invoiceStats: InvoiceStatsModel[] }>(),
     fetchInvoiceStatsFail: props<{ error: HttpErrorResponse }>(),
-    fetchInvoices: props<{ num: number; year: number }>(), //invoices for a term
-    fetchInvoicesSuccess: props<{ invoices: InvoiceModel[] }>(),
-    fetchInvoicesFail: props<{ error: HttpErrorResponse }>(),
+
+    fetchTermInvoices: props<{ num: number; year: number }>(), //invoices for a term
+    fetchTermInvoicesSuccess: props<{ invoices: InvoiceModel[] }>(),
+    fetchTermInvoicesFail: props<{ error: HttpErrorResponse }>(),
+
     fetchAllInvoices: emptyProps(),
-    fetchAllInvoicesSuccess: props<{ invoices: InvoiceModel[] }>(),
+    fetchAllInvoicesSuccess: props<{ allInvoices: InvoiceModel[] }>(),
     fetchAllInvoicesFail: props<{ error: HttpErrorResponse }>(),
+
+    fetchStudentInvoices: props<{ studentNumber: string }>(),
+    fetchStudentInvoicesSuccess: props<{ studentInvoices: InvoiceModel[] }>(),
+    fetchStudentInvoicesFail: props<{ error: HttpErrorResponse }>(),
   },
 });
 
@@ -101,10 +108,13 @@ export const receiptActions = createActionGroup({
       amountDue: number;
     }>(),
     fetchStudentOutstandingBalanceFail: props<{ error: HttpErrorResponse }>(),
+
     clearStudentFinancials: emptyProps(),
-    fetchReceipts: emptyProps(),
-    fetchReceiptsSuccess: props<{ receipts: ReceiptModel[] }>(),
-    fetchReceiptsFail: props<{ error: HttpErrorResponse }>(),
+
+    fetchAllReceipts: emptyProps(),
+    fetchAllReceiptsSuccess: props<{ allReceipts: ReceiptModel[] }>(),
+    fetchAllReceiptsFail: props<{ error: HttpErrorResponse }>(),
+
     saveReceipt: props<{
       studentNumber: string;
       amountPaid: number;
@@ -113,9 +123,16 @@ export const receiptActions = createActionGroup({
     }>(),
     saveReceiptSuccess: props<{ receipt: ReceiptModel }>(),
     saveReceiptFail: props<{ error: HttpErrorResponse }>(),
-    downloadReceiptPdf: props<{ receipt: ReceiptModel }>(),
-    downloadReceiptPdfSuccess: emptyProps(),
+
+    // --- AMENDED downloadReceiptPdf action ---
+    downloadReceiptPdf: props<{ receiptNumber: string }>(), // Only needs receiptId
+    downloadReceiptPdfSuccess: props<{ fileName: string }>(), // Pass filename for clarity/feedback
     downloadReceiptPdfFail: props<{ error: HttpErrorResponse }>(),
+
     clearCreatedReceipt: emptyProps(),
+
+    fetchStudentReceipts: props<{ studentNumber: string }>(),
+    fetchStudentReceiptsSuccess: props<{ studentReceipts: ReceiptModel[] }>(),
+    fetchStudentReceiptsFail: props<{ error: HttpErrorResponse }>(),
   },
 });

@@ -6,6 +6,7 @@ import { ReportModel } from '../models/report.model';
 export interface State {
   reports: ReportsModel[];
   studentReports: ReportsModel[];
+  selectedReport: ReportsModel | null;
   isLoading: boolean;
   errorMessage: string;
 }
@@ -13,6 +14,7 @@ export interface State {
 export const initialState: State = {
   reports: [],
   studentReports: [],
+  selectedReport: null,
   isLoading: false,
   errorMessage: '',
 };
@@ -112,6 +114,7 @@ export const reportsReducer = createReducer(
     isLoading: true,
     errorMessage: '',
     reports: [],
+    selectedReport: null,
   })),
   on(
     reportsActions.viewReportsActions.fetchStudentReportsSuccess,
@@ -121,6 +124,7 @@ export const reportsReducer = createReducer(
       errorMessage: '',
       reports: [],
       studentReports: [...reports],
+      selectedReport: null,
     })
   ),
   on(
@@ -131,7 +135,20 @@ export const reportsReducer = createReducer(
       errorMessage: error.message,
       reports: [],
       studentReports: [],
+      selectedReport: null,
     })
-  )
+  ),
+  on(
+    reportsActions.viewReportsActions.selectStudentReport,
+    (state, { report }) => ({
+      ...state,
+      selectedReport: report, // Set the selected report for display
+      errorMessage: '', // Clear any previous error
+    })
+  ),
+  on(reportsActions.viewReportsActions.clearSelectedReport, (state) => ({
+    ...state,
+    selectedReport: null, // Clear the currently displayed report
+  }))
   // on(reportsActions.saveHeadCommentActions.saveHeadCommentSuccess, (state))
 );

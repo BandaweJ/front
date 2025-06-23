@@ -231,3 +231,12 @@ export const currentTermActions = createActionGroup({
     fetchCurrentTermFail: props<{ error: HttpErrorResponse }>(),
   },
 });
+
+export const termEnrolsActions = createActionGroup({
+  source: 'Term Enrols',
+  events: {
+    fetchTermEnrols: props<{ num: number; year: number }>(),
+    fetchTermEnrolsSuccess: props<{ termEnrols: EnrolsModel[] }>(),
+    fetchTermEnrolsFail: props<{ error: HttpErrorResponse }>(),
+  },
+});

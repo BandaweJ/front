@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FinanceFilter } from '../../models/finance-filter.model'; // Ensure path is correct
+import { FinanceFilter } from '../../../finance/models/finance-filter.model'; // Ensure path is correct
 import { PaymentMethods } from '../../../finance/models/payment-methods.enum'; // Import your PaymentMethods enum
 
 @Component({

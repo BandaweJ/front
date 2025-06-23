@@ -15,6 +15,10 @@ export class EnrolService {
 
   constructor(private httpClient: HttpClient) {}
 
+  getTermEnrolments(num: number, year: number): Observable<EnrolsModel[]> {
+    return this.httpClient.get<EnrolsModel[]>(`${this.baseURL}${num}/${year}`);
+  }
+
   getEnrolmentByClass(
     name: string,
     num: number,

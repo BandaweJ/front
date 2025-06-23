@@ -460,4 +460,28 @@ export class EnrolmentEffects {
       )
     )
   );
+
+  fetchTermEnrols$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromEnrolmentActions.termEnrolsActions.fetchTermEnrols),
+      switchMap((data) =>
+        this.enrolService.getTermEnrolments(data.num, data.year).pipe(
+          map((termEnrols) => {
+            return fromEnrolmentActions.termEnrolsActions.fetchTermEnrolsSuccess(
+              {
+                termEnrols,
+              }
+            );
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              fromEnrolmentActions.termEnrolsActions.fetchTermEnrolsFail({
+                ...error,
+              })
+            )
+          )
+        )
+      )
+    )
+  );
 }

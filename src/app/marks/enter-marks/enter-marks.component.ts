@@ -1,23 +1,33 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  ViewChild,
+  OnDestroy,
+} from '@angular/core';
+import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subject, combineLatest } from 'rxjs';
+import {
+  map,
+  startWith,
+  takeUntil,
+  debounceTime,
+  distinctUntilChanged,
+} from 'rxjs/operators';
 import { ClassesModel } from '../../enrolment/models/classes.model';
-import { EnrolsModel } from '../../enrolment/models/enrols.model';
 import { TermsModel } from '../../enrolment/models/terms.model';
 import {
   fetchClasses,
   fetchTerms,
-  getEnrolmentByClass,
 } from '../../enrolment/store/enrolment.actions';
 import { MatTableDataSource } from '@angular/material/table';
 import {
   selectClasses,
-  selectEnrols,
   selectTerms,
 } from '../../enrolment/store/enrolment.selectors';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatSort } from '@angular/material/sort';
 import { MarksModel } from '../models/marks.model';
 import { SubjectsModel } from '../models/subjects.model';
 import {
@@ -29,65 +39,183 @@ import {
 import { selectMarks, selectSubjects } from '../store/marks.selectors';
 import { Title } from '@angular/platform-browser';
 import { ExamType } from '../models/examtype.enum';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
+interface MarkFormGroup {
+  mark: FormControl<number | null>;
+  comment: FormControl<string | null>;
+}
 
 @Component({
   selector: 'app-enter-marks',
   templateUrl: './enter-marks.component.html',
   styleUrls: ['./enter-marks.component.css'],
 })
-export class EnterMarksComponent implements OnInit, AfterViewInit {
+export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   classes$!: Observable<ClassesModel[]>;
   terms$!: Observable<TermsModel[]>;
   subjects$!: Observable<SubjectsModel[]>;
   private errorMsg$!: Observable<string>;
+
   enrolForm!: FormGroup;
+  marksFormArray: FormArray<FormGroup<MarkFormGroup>> = new FormArray<
+    FormGroup<MarkFormGroup>
+  >([]);
   public dataSource = new MatTableDataSource<MarksModel>();
-  marksForm!: FormGroup;
+
   value = 0;
   maxValue = 0;
-  examtype: ExamType[] = [
-    // ExamType.choose,
-    ExamType.midterm,
-    ExamType.endofterm,
+
+  examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
+
+  commentOptions: string[] = [
+    'Excellent effort',
+    'Good work, keep it up',
+    'Needs to improve concentration',
+    'Struggling with concepts',
+    'Showing great potential',
+    'Requires more practice',
+    'Completed all assignments',
+    'Participates well in class',
+    'Absent for key lessons',
+    'Handwriting needs improvement',
+    'Neat and organized work',
+    'Struggling with time management',
   ];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private store: Store, public title: Title) {
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private store: Store,
+    public title: Title,
+    private snackBar: MatSnackBar
+  ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
     this.store.dispatch(fetchSubjects());
+
+    this.dataSource.filterPredicate = this.customFilterPredicate;
   }
+
+  customFilterPredicate = (data: MarksModel, filter: string): boolean => {
+    const searchString = filter.trim().toLowerCase();
+
+    const dataStr = (
+      data.student.studentNumber +
+      data.student.surname +
+      data.student.name +
+      data.student.gender +
+      (data.mark !== null ? data.mark.toString() : '') +
+      data.comment
+    ).toLowerCase();
+
+    return dataStr.includes(searchString);
+  };
 
   ngOnInit(): void {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
-
     this.subjects$ = this.store.select(selectSubjects);
 
-    this.store.select(selectMarks).subscribe((marks) => {
-      this.dataSource.data = marks;
-      this.value = 0;
-      this.maxValue = marks.length;
-      marks.forEach((mark) => {
-        if (mark.comment && mark.mark) {
-          this.value++;
-        }
+    this.store
+      .select(selectMarks)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((marks) => {
+        this.dataSource.data = marks;
+        this.maxValue = marks.length;
+        this.updateMarksFormArray(marks);
+        this.updateProgressBar();
       });
-    });
 
     this.enrolForm = new FormGroup({
-      clas: new FormControl('', [Validators.required]),
+      class: new FormControl('', [Validators.required]),
       term: new FormControl('', [Validators.required]),
       subject: new FormControl('', Validators.required),
-      examType: new FormControl(''),
+      examType: new FormControl('', Validators.required),
     });
   }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  private updateMarksFormArray(marks: MarksModel[]): void {
+    this.marksFormArray.clear();
+
+    marks.forEach((mark) => {
+      const markControl = new FormControl<number | null>(mark.mark || null, [
+        Validators.required,
+        Validators.min(0),
+        Validators.max(100),
+      ]);
+      const commentControl = new FormControl<string | null>(
+        mark.comment || null,
+        Validators.required
+      );
+
+      const markFormGroup = new FormGroup<MarkFormGroup>({
+        mark: markControl,
+        comment: commentControl,
+      });
+
+      this.marksFormArray.push(markFormGroup);
+
+      combineLatest([
+        markControl.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged()
+        ),
+        commentControl.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged()
+        ),
+      ])
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          this.updateProgressBar();
+        });
+    });
+  }
+
+  private updateProgressBar(): void {
+    let completedCount = 0;
+    this.dataSource.data.forEach((markModel, index) => {
+      const formGroup = this.marksFormArray.at(
+        index
+      ) as FormGroup<MarkFormGroup>;
+      if (
+        formGroup &&
+        formGroup.controls.mark.valid &&
+        formGroup.controls.comment.valid
+      ) {
+        completedCount++;
+      }
+    });
+    this.value = completedCount;
+  }
+
+  // This method will be called from the template
+  private _filterComments(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.commentOptions.filter((option) =>
+      option.toLowerCase().includes(filterValue)
+    );
+  }
+
+  /**
+   * Returns an Observable of filtered comment options for a specific row.
+   * This method is called from the template for each autocomplete.
+   */
+  getFilteredCommentOptions(index: number): Observable<string[]> {
+    const commentControl = this.getCommentControl(index);
+    return commentControl.valueChanges.pipe(
+      startWith(commentControl.value || ''), // Initialize with current value
+      map((value) => this._filterComments(value || ''))
+    );
   }
 
   applyFilter(event: Event) {
@@ -99,19 +227,19 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     }
   }
 
-  get clas() {
-    return this.enrolForm.get('clas');
+  get classControl() {
+    return this.enrolForm.get('class');
   }
 
-  get term() {
+  get termControl() {
     return this.enrolForm.get('term');
   }
 
-  get subject() {
+  get subjectControl() {
     return this.enrolForm.get('subject');
   }
 
-  get examType() {
+  get examTypeControl() {
     return this.enrolForm.get('examType');
   }
 
@@ -120,53 +248,112 @@ export class EnterMarksComponent implements OnInit, AfterViewInit {
     'surname',
     'name',
     'gender',
-    'mark',
-    // 'comment',
+    'markComment',
     'action',
   ];
 
   fetchClassList() {
-    const name = this.clas?.value;
-    const term: TermsModel = this.term?.value;
-    const subject: SubjectsModel = this.subject?.value;
+    if (this.enrolForm.invalid) {
+      this.snackBar.open(
+        'Please select Term, Exam Type, Class, and Subject to fetch data.',
+        'Close',
+        { duration: 3000 }
+      );
+      this.enrolForm.markAllAsTouched();
+      return;
+    }
+
+    const name = this.classControl?.value;
+    const term: TermsModel = this.termControl?.value;
+    const subject: SubjectsModel = this.subjectControl?.value;
 
     const num = term.num;
     const year = term.year;
     const subjectCode = subject.code;
+    const examType = this.examTypeControl?.value;
 
-    const examType = this.examType?.value;
-
-    // console.log(`Name: ${name}, Num: ${num}, Year: ${year}`);
     this.store.dispatch(
       fetchSubjectMarksInClass({ name, num, year, subjectCode, examType })
     );
   }
 
-  saveMark(mark: MarksModel, mrk: string, cmmnt: string) {
-    mark = {
-      ...mark,
-      examType: this.examType?.value,
-    };
+  getMarkFormGroup(index: number): FormGroup<MarkFormGroup> {
+    return this.marksFormArray.at(index) as FormGroup<MarkFormGroup>;
+  }
 
-    if (mrk && cmmnt) {
-      mark = {
-        ...mark,
-        mark: Number(mrk),
-        comment: cmmnt,
-        year: Number(mark.year),
-        num: Number(mark.num),
+  getMarkControl(index: number): FormControl<number | null> {
+    return this.getMarkFormGroup(index).get('mark') as FormControl<
+      number | null
+    >;
+  }
+
+  getCommentControl(index: number): FormControl<string | null> {
+    return this.getMarkFormGroup(index).get('comment') as FormControl<
+      string | null
+    >;
+  }
+
+  saveMark(markModel: MarksModel, index: number) {
+    const formGroup = this.getMarkFormGroup(index);
+
+    if (formGroup.valid) {
+      const updatedMark: MarksModel = {
+        ...markModel,
+        mark: formGroup.value.mark!,
+        comment: formGroup.value.comment!,
+        examType: this.examTypeControl?.value,
+        year: this.termControl?.value.year,
+        num: this.termControl?.value.num,
       };
 
-      this.store.dispatch(saveMarkAction({ mark }));
-      // console.log('Mark', mark);
-    }
+      this.store.dispatch(saveMarkAction({ mark: updatedMark }));
+      this.snackBar.open('Mark saved successfully!', 'Dismiss', {
+        duration: 2000,
+      });
 
-    // console.log(mark);
+      formGroup.markAsPristine();
+      formGroup.markAsUntouched();
+      formGroup.updateValueAndValidity(); // Ensure validity is re-evaluated after state change
+    } else {
+      formGroup.markAllAsTouched();
+      this.snackBar.open(
+        'Please enter a valid mark (0-100) and comment for this row.',
+        'Error',
+        { duration: 3000 }
+      );
+      console.log(
+        'Invalid form group for mark:',
+        formGroup.controls.mark.errors,
+        formGroup.controls.comment.errors
+      );
+    }
   }
 
   deleteMark(mark: MarksModel) {
     if (mark.id) {
       this.store.dispatch(deleteMarkActions.deleteMark({ mark }));
+      this.snackBar.open('Mark deleted.', 'Dismiss', { duration: 2000 });
+    } else {
+      this.snackBar.open('Cannot delete: Mark has no ID.', 'Error', {
+        duration: 3000,
+      });
     }
+  }
+
+  trackByTerm(index: number, term: TermsModel): string {
+    return `${term.num}-${term.year}`;
+  }
+
+  trackByClass(index: number, clas: ClassesModel): string {
+    return clas.id;
+  }
+
+  trackBySubject(index: number, subject: SubjectsModel): string {
+    return subject.code;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

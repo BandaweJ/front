@@ -44,6 +44,8 @@ export const resetErrorMessage = createAction(
 
 export const logout = createAction('App Component logout');
 
+export const checkAuthStatus = createAction('[Auth] Check Auth Status');
+
 export const fetchAccountStats = createAction(
   '[Dashboard Component] fetch account stats'
 );

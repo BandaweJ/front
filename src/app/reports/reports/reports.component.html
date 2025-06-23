@@ -45,3 +45,5 @@
     <app-report *ngFor="let report of reports$ | async" [report]="report"></app-report>
   </div>
 </mat-card>
+
+<app-student-report-cards *ngIf="role === 'student'"></app-student-report-cards>

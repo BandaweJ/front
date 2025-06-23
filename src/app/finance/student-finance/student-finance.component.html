@@ -14,19 +14,9 @@
 </div>
 
 <div class="container">
-  <!-- <mat-card class="student-container" *ngIf="selectedStudentEnrol">
-    <app-student-enrolment-details *ngIf="selectedStudentEnrol" [studentEnrol]="selectedStudentEnrol">
-
-    </app-student-enrolment-details>
-    <app-students-to-bill (selectedEnrolChange)="selectedEnrolChanged($event)">
-
-    </app-students-to-bill>
-  </mat-card> -->
 
   <mat-card>
-    <!-- <app-invoice *ngIf="selectedStudentEnrol" [enrolment]="selectedStudentEnrol" [downloadable]="false">
 
-    </app-invoice> -->
     <app-invoice-item *ngIf="invoice && invoice.invoiceNumber, else noInvoice" [invoice]="invoice"
       [downloadable]="false"></app-invoice-item>
     <ng-template #noInvoice>
@@ -38,7 +28,8 @@
       </ng-template>
     </ng-template>
   </mat-card>
-  <app-billing [enrolment]="selectedStudentEnrol" class="billing-container">
+  <app-billing *ngIf="selectedStudentEnrol && selectedTerm" [enrolment]="selectedStudentEnrol"
+    [enrolment]="selectedStudentEnrol" class="billing-container">
 
 
   </app-billing>

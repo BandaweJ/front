@@ -12,7 +12,7 @@
   justify-content: center;
 }
 .billing-container {
-  max-width: 30vw;
+  max-width: 650px;
 }
 .top-panel {
   display: flex; /* 1. Enable Flexbox */

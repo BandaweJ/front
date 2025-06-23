@@ -1,0 +1,179 @@
+<div class="report-container">
+  <h1>Aged Debtors Report</h1>
+
+  <form [formGroup]="filterForm" class="report-filters">
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>As of Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="asOfDate">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Select Term</mat-label>
+      <mat-select formControlName="termFilter">
+        <mat-option [value]="null">All Terms</mat-option>
+        <mat-option *ngFor="let term of (terms$ | async)" [value]="term">
+          Term {{ term.num }} ({{ term.year }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Select Class</mat-label>
+      <mat-select formControlName="classFilter">
+        <mat-option [value]="null">All Classes</mat-option>
+        <mat-option *ngFor="let class of (classes$ | async)" [value]="class">
+          {{ class.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Select Student</mat-label>
+      <mat-select formControlName="studentFilter">
+        <mat-option [value]="null">All Students</mat-option>
+        <mat-option *ngFor="let student of (students$ | async)" [value]="student">
+          {{ student.name }} {{ student.surname }} ({{ student.studentNumber }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="warn" (click)="onClearFilters()">Clear Filters</button>
+  </form>
+
+  <div *ngIf="reportData$ | async as report; else loadingOrError">
+    <div class="summary-cards">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Total Outstanding</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="total-outstanding">{{ report.totalOutstanding | currency }}</p>
+          <p class="as-of-date">As of {{ report.asOfDate | date:'mediumDate' }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Current (Not Due)</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="amount">{{ report.current | currency }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="overdue-card">
+        <mat-card-header>
+          <mat-card-title>1-30 Days Overdue</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="amount">{{ report.due1_30Days | currency }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="overdue-card">
+        <mat-card-header>
+          <mat-card-title>31-60 Days Overdue</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="amount">{{ report.due31_60Days | currency }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="overdue-card">
+        <mat-card-header>
+          <mat-card-title>61-90 Days Overdue</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="amount">{{ report.due61_90Days | currency }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="overdue-card critical">
+        <mat-card-header>
+          <mat-card-title>90+ Days Overdue</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="amount">{{ report.due90PlusDays | currency }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <h2>Detailed Outstanding Invoices</h2>
+    <table mat-table [dataSource]="report.detailedInvoices" class="report-table">
+      <ng-container matColumnDef="invoiceNumber">
+        <th mat-header-cell *matHeaderCellDef>Invoice No.</th>
+        <td mat-cell *matCellDef="let element">{{ element.invoiceNumber }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="studentName">
+        <th mat-header-cell *matHeaderCellDef>Student Name</th>
+        <td mat-cell *matCellDef="let element">{{ element.studentName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="studentNumber">
+        <th mat-header-cell *matHeaderCellDef>Student No.</th>
+        <td mat-cell *matCellDef="let element">{{ element.studentNumber }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="className">
+        <th mat-header-cell *matHeaderCellDef>Class</th>
+        <td mat-cell *matCellDef="let element">{{ element.className }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="termName">
+        <th mat-header-cell *matHeaderCellDef>Term</th>
+        <td mat-cell *matCellDef="let element">{{ element.termName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="invoiceDate">
+        <th mat-header-cell *matHeaderCellDef>Inv. Date</th>
+        <td mat-cell *matCellDef="let element">{{ element.invoiceDate | date:'shortDate' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="dueDate">
+        <th mat-header-cell *matHeaderCellDef>Due Date</th>
+        <td mat-cell *matCellDef="let element">{{ element.dueDate | date:'shortDate' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="currentBalance">
+        <th mat-header-cell *matHeaderCellDef>Balance</th>
+        <td mat-cell *matCellDef="let element">{{ element.currentBalance | currency }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="daysOverdue">
+        <th mat-header-cell *matHeaderCellDef>Days Overdue</th>
+        <td mat-cell *matCellDef="let element">{{ element.daysOverdue }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="statusBucket">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let element"
+          [ngClass]="{'status-critical': element.statusBucket === '90+ Days', 'status-warning': (element.statusBucket === '31-60 Days' || element.statusBucket === '61-90 Days')}">
+          {{ element.statusBucket }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">No outstanding invoices for the selected criteria.
+        </td>
+      </tr>
+    </table>
+
+  </div>
+
+  <ng-template #loadingOrError>
+    <div *ngIf="isLoading$ | async" class="loading-spinner">
+      <mat-spinner></mat-spinner>
+      <p>Loading aged debtors report...</p>
+    </div>
+    <div *ngIf="!(isLoading$ | async) && !(reportData$ | async)" class="no-data-message">
+      <p>Select filters to generate the Aged Debtors Report.</p>
+    </div>
+  </ng-template>
+</div>

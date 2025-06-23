@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { FinanceDataModel } from '../../dashboard/models/finance-data.model'; // Ensure this is the correct, updated model
+import { FinanceDataModel } from '../models/finance-data.model'; // Ensure this is the correct, updated model
 import { environment } from 'src/environments/environment';
 
 @Injectable({

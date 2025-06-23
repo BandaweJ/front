@@ -23,14 +23,15 @@ export class InvoiceItemComponent {
   }
 
   download() {
-    // console.log('called download');
-    if (this.invoice.enrol) {
-      const studentNumber = this.invoice.student.studentNumber;
-      const num = this.invoice.enrol?.num;
-      const year = this.invoice.enrol?.year;
-
+    if (this.invoice && this.invoice.invoiceNumber) {
       this.store.dispatch(
-        invoiceActions.downloadInvoice({ studentNumber, num, year })
+        invoiceActions.downloadInvoice({
+          invoiceNumber: this.invoice.invoiceNumber,
+        })
+      );
+    } else {
+      console.warn(
+        'Cannot download invoice: Invoice object or invoice number is missing.'
       );
     }
   }

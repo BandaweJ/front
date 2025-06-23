@@ -84,13 +84,6 @@ export class ReportsComponent implements OnInit {
       this.store.dispatch(
         viewReportsActions.fetchStudentReports({ studentNumber: this.id })
       );
-
-      const studentNumber = this.id;
-      const num = this.currentEnrolment.num;
-      const year = this.currentEnrolment.year;
-      this.store.dispatch(
-        invoiceActions.fetchInvoice({ studentNumber, num, year })
-      );
     }
   }
 

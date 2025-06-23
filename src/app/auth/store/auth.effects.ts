@@ -106,4 +106,57 @@ export class AuthEffects {
       )
     )
   );
+
+  logout$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(fromAuthActions.logout), // Listen specifically for the 'logout' action
+        tap(() => {
+          // Side effect 1: Clear the token from localStorage
+          localStorage.removeItem('token');
+
+          // Side effect 2: Navigate to the sign-in page
+          this.router.navigateByUrl('/signin');
+        })
+      ),
+    { dispatch: false } // Important: This effect does NOT dispatch a new action
+    // after it's done. It only performs side effects.
+  );
+
+  checkAuthStatus$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(fromAuthActions.checkAuthStatus), // Listens for the new action triggered on app startup
+        map(() => {
+          const authStatus = this.authService.getAuthStatus(); // Get current auth status from service
+
+          if (
+            authStatus.isLoggedIn &&
+            authStatus.user &&
+            authStatus.accessToken
+          ) {
+            // If a valid token was found and decoded
+            console.log(
+              'AuthEffects: Valid token found. User is logged in. Navigating to /dashboard.'
+            );
+            this.router.navigateByUrl('/dashboard'); // Navigate to dashboard
+            return fromAuthActions.signinSuccess({
+              // Dispatch success to update NGRX state
+              user: authStatus.user,
+              accessToken: authStatus.accessToken,
+            });
+          } else {
+            // No valid token found (expired or not present)
+            console.log(
+              'AuthEffects: No valid token found. Navigating to /signin.'
+            );
+            // Ensure any expired token is cleared if it wasn't already by getAuthStatus itself
+            localStorage.removeItem('token');
+            this.router.navigateByUrl('/signin'); // Navigate to signin page
+            return fromAuthActions.logout(); // Dispatch logout to ensure state is clean
+          }
+        })
+      )
+    // No `dispatch: false` because this effect explicitly dispatches `loginSuccess` or `logout`.
+  );
 }

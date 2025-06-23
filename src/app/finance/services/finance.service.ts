@@ -9,7 +9,7 @@ import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
 import { EnrolService } from 'src/app/enrolment/services/enrol.service';
 import { BillModel } from '../models/bill.model';
-import { FinanceDataModel } from 'src/app/dashboard/models/finance-data.model';
+import { FinanceDataModel } from 'src/app/finance/models/finance-data.model';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {

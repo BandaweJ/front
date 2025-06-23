@@ -28,6 +28,17 @@ import { SearchReceiptComponent } from './payments/search-receipt/search-receipt
 import { FilterReceiptsDialogComponent } from './payments/filter-receipts-dialog/filter-receipts-dialog.component';
 import { ReceiptSummaryCardComponent } from './payments/receipt-item/receipt-summary-card.component/receipt-summary-card.component.component';
 import { AddReceiptDialogComponent } from './payments/add-receipt-dialog/add-receipt-dialog.component';
+import { StudentFinancialsDashboardComponent } from './student-financials/student-financials-dashboard/student-financials-dashboard.component';
+import { StudentInvoicesComponent } from './student-financials/student-invoices/student-invoices.component';
+import { StudentReceiptsComponent } from './student-financials/student-receipts/student-receipts.component';
+import { StudentPaymentHistoryComponent } from './student-financials/student-payment-history/student-payment-history.component';
+import { StudentLedgerReportComponent } from './reports/student-ledger-report/student-ledger-report.component';
+import { FeesCollectionReportComponent } from './reports/fees-collection-report/fees-collection-report.component';
+import { NgChartsModule } from 'ng2-charts';
+import { OutstandingFeesReportComponent } from './reports/outstanding-fees-report/outstanding-fees-report.component';
+import { AgedDebtorsReportComponent } from './reports/aged-debtors-report/aged-debtors-report.component';
+import { RevenueRecognitionReportComponent } from './reports/revenue-recognition-report/revenue-recognition-report.component';
+import { EnrollmentBillingReconciliationReportComponent } from './reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component';
 
 @NgModule({
   declarations: [
@@ -50,6 +61,16 @@ import { AddReceiptDialogComponent } from './payments/add-receipt-dialog/add-rec
     FilterReceiptsDialogComponent,
     ReceiptSummaryCardComponent,
     AddReceiptDialogComponent,
+    StudentFinancialsDashboardComponent,
+    StudentInvoicesComponent,
+    StudentReceiptsComponent,
+    StudentPaymentHistoryComponent,
+    StudentLedgerReportComponent,
+    FeesCollectionReportComponent,
+    OutstandingFeesReportComponent,
+    AgedDebtorsReportComponent,
+    RevenueRecognitionReportComponent,
+    EnrollmentBillingReconciliationReportComponent,
   ],
   imports: [
     CommonModule,
@@ -61,6 +82,7 @@ import { AddReceiptDialogComponent } from './payments/add-receipt-dialog/add-rec
     EnrolmentModule,
     StoreModule.forFeature('finance', financeReducer),
     EffectsModule.forFeature([FinanceEffects]),
+    NgChartsModule,
   ],
   exports: [CurrentEnrolmentComponent, StudentEnrolmentDetailsComponent],
 })

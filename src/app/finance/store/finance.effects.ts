@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { FinanceService } from '../services/finance.service';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import {
   balancesActions,
   billingActions,
@@ -160,18 +160,72 @@ export class FinanceEffects {
     )
   );
 
-  fetchInvoices$ = createEffect(() =>
+  fetchTermInvoices$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(invoiceActions.fetchInvoices),
+      ofType(invoiceActions.fetchTermInvoices),
       switchMap((data) =>
-        this.paymentsService.getInvoices(data.num, data.year).pipe(
+        this.paymentsService.getTermInvoices(data.num, data.year).pipe(
           map((invoices) => {
-            return invoiceActions.fetchInvoicesSuccess({
+            return invoiceActions.fetchTermInvoicesSuccess({
               invoices,
             });
           }),
           catchError((error: HttpErrorResponse) =>
-            of(invoiceActions.fetchInvoicesFail({ ...error }))
+            of(invoiceActions.fetchTermInvoicesFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
+  fetchAllInvoices$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.fetchAllInvoices),
+      switchMap((data) =>
+        this.paymentsService.getAllInvoices().pipe(
+          map((allInvoices) => {
+            return invoiceActions.fetchAllInvoicesSuccess({
+              allInvoices,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(invoiceActions.fetchAllInvoicesFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
+  fetchStudentInvoices$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.fetchStudentInvoices),
+      switchMap((data) =>
+        this.paymentsService.getStudentInvoices(data.studentNumber).pipe(
+          map((studentInvoices) => {
+            return invoiceActions.fetchStudentInvoicesSuccess({
+              studentInvoices,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(invoiceActions.fetchStudentInvoicesFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
+  fetchStudentReceipts$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(receiptActions.fetchStudentReceipts),
+      switchMap((data) =>
+        this.paymentsService.getStudentReceipts(data.studentNumber).pipe(
+          map((studentReceipts) => {
+            return receiptActions.fetchStudentReceiptsSuccess({
+              studentReceipts,
+            });
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(receiptActions.fetchStudentReceiptsFail({ ...error }))
           )
         )
       )
@@ -245,23 +299,98 @@ export class FinanceEffects {
     )
   );
 
+  // AMENDED downloadInvoice$ effect
   downloadInvoice$ = createEffect(() =>
     this.actions$.pipe(
       ofType(invoiceActions.downloadInvoice),
-      switchMap((data) =>
-        this.paymentsService
-          .downloadInvoice(data.studentNumber, data.num, data.year)
-          // .unsubscribe()
-          .pipe(
-            map(() => invoiceActions.downloadInvoiceSuccess()),
-            catchError((error: HttpErrorResponse) =>
-              of(
-                invoiceActions.downloadInvoiceFail({
-                  ...error,
-                })
-              )
-            )
-          )
+      switchMap(({ invoiceNumber }) =>
+        this.paymentsService.downloadInvoice(invoiceNumber).pipe(
+          tap((response: HttpResponse<Blob>) => {
+            // <--- Receive HttpResponse
+            const blob = response.body; // Extract the Blob
+            let filename = `Invoice_${invoiceNumber}.pdf`; // Default filename
+
+            // Extract filename from Content-Disposition header, like your old function
+            const contentDisposition = response.headers.get(
+              'Content-Disposition'
+            );
+            if (contentDisposition) {
+              const filenameMatch = contentDisposition.match(
+                /filename\*?=['"]?(.*?)['"]?(;|$)/i
+              );
+              if (filenameMatch && filenameMatch[1]) {
+                try {
+                  // Decode URI component to handle non-ASCII characters properly
+                  filename = decodeURIComponent(
+                    filenameMatch[1].replace(/^utf-8''/, '')
+                  );
+                } catch (e) {
+                  filename = filenameMatch[1].replace(/"/g, ''); // Fallback for simple cases
+                }
+              }
+            }
+
+            if (blob) {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              document.body.appendChild(a);
+              a.href = url;
+              a.download = filename; // Use the extracted filename
+              a.click();
+              window.URL.revokeObjectURL(url);
+              document.body.removeChild(a);
+              this.snackBar.open('Invoice downloaded successfully', 'OK', {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              });
+            } else {
+              this.snackBar.open(
+                'Error: No file data received for invoice download.',
+                'OK',
+                {
+                  duration: 5000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                }
+              );
+            }
+          }),
+          map(({ headers }) => {
+            // Map returns filename from headers
+            let filename = `Invoice_${invoiceNumber}.pdf`;
+            const contentDisposition = headers.get('Content-Disposition');
+            if (contentDisposition) {
+              const filenameMatch = contentDisposition.match(
+                /filename\*?=['"]?(.*?)['"]?(;|$)/i
+              );
+              if (filenameMatch && filenameMatch[1]) {
+                try {
+                  filename = decodeURIComponent(
+                    filenameMatch[1].replace(/^utf-8''/, '')
+                  );
+                } catch (e) {
+                  filename = filenameMatch[1].replace(/"/g, '');
+                }
+              }
+            }
+            return invoiceActions.downloadInvoiceSuccess({
+              fileName: filename,
+            });
+          }),
+          catchError((error: HttpErrorResponse) => {
+            this.snackBar.open(
+              `Error downloading invoice: ${error.message}`,
+              'OK',
+              {
+                duration: 5000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              }
+            );
+            return of(invoiceActions.downloadInvoiceFail({ ...error }));
+          })
+        )
       )
     )
   );
@@ -284,7 +413,6 @@ export class FinanceEffects {
           ), // Log service success
           map((invoice) => invoiceActions.saveInvoiceSuccess({ invoice })),
           catchError((error: HttpErrorResponse) => {
-            console.error('Error from saveInvoice:', error); // Log the error
             return of(
               invoiceActions.saveInvoiceFail({
                 ...error,
@@ -318,18 +446,18 @@ export class FinanceEffects {
     )
   );
 
-  fetchReceipts$ = createEffect(() =>
+  fetchAllReceipts$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(receiptActions.fetchReceipts),
+      ofType(receiptActions.fetchAllReceipts),
       switchMap(() =>
-        this.paymentsService.getReceipts().pipe(
-          map((receipts) => {
-            return receiptActions.fetchReceiptsSuccess({
-              receipts,
+        this.paymentsService.getAllReceipts().pipe(
+          map((allReceipts) => {
+            return receiptActions.fetchAllReceiptsSuccess({
+              allReceipts,
             });
           }),
           catchError((error: HttpErrorResponse) =>
-            of(receiptActions.fetchReceiptsFail({ ...error }))
+            of(receiptActions.fetchAllReceiptsFail({ ...error }))
           )
         )
       )
@@ -361,7 +489,6 @@ export class FinanceEffects {
             ), // Log service success
             map((receipt) => receiptActions.saveReceiptSuccess({ receipt })),
             catchError((error: HttpErrorResponse) => {
-              // console.error('Error from saveInvoice:', error); // Log the error
               return of(
                 receiptActions.saveReceiptFail({
                   ...error,
@@ -376,16 +503,92 @@ export class FinanceEffects {
   downloadReceipt$ = createEffect(() =>
     this.actions$.pipe(
       ofType(receiptActions.downloadReceiptPdf),
-      switchMap((data) =>
-        this.paymentsService.downloadReceipt(data.receipt).pipe(
-          map(() => receiptActions.downloadReceiptPdfSuccess()),
-          catchError((error: HttpErrorResponse) =>
-            of(
-              receiptActions.downloadReceiptPdfFail({
-                ...error,
-              })
-            )
-          )
+      switchMap(({ receiptNumber }) =>
+        this.paymentsService.downloadReceipt(receiptNumber).pipe(
+          tap((response: HttpResponse<Blob>) => {
+            // <--- Receive HttpResponse
+            const blob = response.body; // Extract the Blob
+            let filename = `Receipt_${receiptNumber}.pdf`; // Default filename
+
+            // Extract filename from Content-Disposition header, like your old function
+            const contentDisposition = response.headers.get(
+              'Content-Disposition'
+            );
+            if (contentDisposition) {
+              const filenameMatch = contentDisposition.match(
+                /filename\*?=['"]?(.*?)['"]?(;|$)/i
+              );
+              if (filenameMatch && filenameMatch[1]) {
+                try {
+                  filename = decodeURIComponent(
+                    filenameMatch[1].replace(/^utf-8''/, '')
+                  );
+                } catch (e) {
+                  filename = filenameMatch[1].replace(/"/g, '');
+                }
+              }
+            }
+
+            if (blob) {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              document.body.appendChild(a);
+              a.href = url;
+              a.download = filename; // Use the extracted filename
+              a.click();
+              window.URL.revokeObjectURL(url);
+              document.body.removeChild(a);
+              this.snackBar.open('Receipt downloaded successfully', 'OK', {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              });
+            } else {
+              this.snackBar.open(
+                'Error: No file data received for receipt download.',
+                'OK',
+                {
+                  duration: 5000,
+                  verticalPosition: 'top',
+                  horizontalPosition: 'center',
+                }
+              );
+            }
+          }),
+          map(({ headers }) => {
+            // Map returns filename from headers
+            let filename = `Receipt_${receiptNumber}.pdf`;
+            const contentDisposition = headers.get('Content-Disposition');
+            if (contentDisposition) {
+              const filenameMatch = contentDisposition.match(
+                /filename\*?=['"]?(.*?)['"]?(;|$)/i
+              );
+              if (filenameMatch && filenameMatch[1]) {
+                try {
+                  filename = decodeURIComponent(
+                    filenameMatch[1].replace(/^utf-8''/, '')
+                  );
+                } catch (e) {
+                  filename = filenameMatch[1].replace(/"/g, '');
+                }
+              }
+            }
+            return receiptActions.downloadReceiptPdfSuccess({
+              fileName: filename,
+            });
+          }),
+          catchError((error: HttpErrorResponse) => {
+            this.snackBar.open(
+              `Error downloading receipt: ${error.message}`,
+              'OK',
+              {
+                duration: 5000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              }
+            );
+            return of(receiptActions.downloadReceiptPdfFail({ ...error }));
+          })
         )
       )
     )

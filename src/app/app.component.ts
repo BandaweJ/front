@@ -1,53 +1,114 @@
-import { Component, OnInit, ViewChild } from '@angular/core'; // Import ViewChild
+import {
+  Component,
+  ViewChild,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { MatSidenav } from '@angular/material/sidenav';
+import { Observable, of, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { MediaMatcher } from '@angular/cdk/layout';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { Router } from '@angular/router';
 import { selectIsLoggedIn, selectUser } from './auth/store/auth.selectors';
-import { ROLES } from './registration/models/roles.enum';
-import { MatSidenav } from '@angular/material/sidenav'; // Import MatSidenav
+import { checkAuthStatus } from './auth/store/auth.actions';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit {
-  @ViewChild('sidenav') sidenav!: MatSidenav; // Get a reference to your sidenav
+export class AppComponent implements OnInit, OnDestroy {
+  title = 'My App';
 
-  constructor(private store: Store, private router: Router) {}
+  @ViewChild('sidenav') sidenav!: MatSidenav;
 
-  role!: ROLES;
-  isLoggedIn$!: Observable<boolean>;
-  showProfile = false; // Unused for now, can remove if not needed elsewhere
+  isSidenavCollapsed: boolean = true; // Initial state: collapsed on large screens
+  isScreenSmall: boolean = false;
+
+  mobileQuery: MediaQueryList;
+  private _mobileQueryListener: () => void;
+
   user$ = this.store.select(selectUser);
+  role!: string;
+  isLoggedIn$: Observable<boolean>; // Simulate logged-in state, typically from an auth service
+  isLoggedInStatus!: boolean; // Store the actual boolean status for TS logic
 
-  isSidenavExpanded: boolean = false; // New property to control sidenav expansion
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private changeDetectorRef: ChangeDetectorRef,
+    private media: MediaMatcher,
+    private store: Store
+  ) {
+    this.mobileQuery = media.matchMedia('(max-width: 767px)');
+    this._mobileQueryListener = () => {
+      this.changeDetectorRef.detectChanges();
+      this.checkScreenSize();
+    };
+    this.mobileQuery.addListener(this._mobileQueryListener);
+    this.isLoggedIn$ = this.store.select(selectIsLoggedIn);
+  }
 
   ngOnInit(): void {
-    this.isLoggedIn$ = this.store.select(selectIsLoggedIn);
-    this.user$.subscribe((user) => {
-      if (user?.role) {
+    this.store.dispatch(checkAuthStatus());
+
+    this.checkScreenSize(); // Initial screen size check
+
+    // Subscribe to isLoggedIn$ to update isLoggedInStatus
+    this.isLoggedIn$.pipe(takeUntil(this.destroy$)).subscribe((loggedIn) => {
+      this.isLoggedInStatus = loggedIn;
+      // Re-evaluate sidenav state and margin when login status changes
+      this.checkScreenSize(); // This will ensure sidenav opens/closes based on isLoggedInStatus
+      this.changeDetectorRef.detectChanges(); // Force update view to reflect margin change
+    });
+
+    this.user$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
+      if (user) {
         this.role = user.role;
       }
     });
+  }
 
-    // Set initial sidenav state based on screen size or preference
-    // For large screens, start collapsed (icons only)
-    if (window.innerWidth >= 768) {
-      // Or whatever your "large screen" breakpoint is
-      this.isSidenavExpanded = false;
-      // Also, on large screens, you might want to initially open the sidenav in 'side' mode.
-      // This is handled by [opened]="true" in HTML, but you might need to call sidenav.open()
-      // if you dynamically set opened to false initially.
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.mobileQuery.removeListener(this._mobileQueryListener);
+  }
+
+  checkScreenSize() {
+    this.isScreenSmall = this.mobileQuery.matches;
+
+    if (this.isScreenSmall) {
+      // On small screens, ensure sidenav is closed (over mode)
+      this.sidenav?.close();
+      this.isSidenavCollapsed = false; // Collapsed state is irrelevant for width on overlay mode
+    } else {
+      // On large screens, manage sidenav open/close based on login status
+      if (this.isLoggedInStatus) {
+        // Only open if logged in
+        this.sidenav?.open();
+      } else {
+        this.sidenav?.close(); // Explicitly close if not logged in on large screen
+      }
+      this.isSidenavCollapsed = true; // Ensure it starts collapsed on large screens
     }
   }
 
-  // If you still want the toggle button to work, you can define this:
-  toggleSidenav() {
-    this.sidenav.toggle();
-    // You might want to update isSidenavExpanded if you use the toggle button,
-    // depending on your desired behavior. For hover, it's automatic.
-    // This could also be used to switch between 'collapsed' and 'full' manually.
-    this.isSidenavExpanded = !this.isSidenavExpanded;
+  onSidenavOpenedChange(isOpen: boolean) {
+    if (!this.isScreenSmall) {
+      // Only manage isSidenavCollapsed on large screens (for side mode)
+      this.isSidenavCollapsed = !isOpen;
+    }
   }
+
+  // getSidenavContentMargin(): string {
+  //   // Use isLoggedInStatus (the boolean property)
+  //   if (this.isScreenSmall || !this.isLoggedInStatus) {
+  //     return '0px'; // No margin on small screens (overlay mode) OR when not logged in
+  //   } else {
+  //     // On large screens (side mode) AND logged in
+  //     return this.isSidenavCollapsed ? '64px' : '250px'; // Margin based on collapsed/expanded state
+  //   }
+  // }
 }

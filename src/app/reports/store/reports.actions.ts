@@ -54,6 +54,10 @@ export const viewReportsActions = createActionGroup({
     fetchStudentReports: props<{ studentNumber: string }>(),
     fetchStudentReportsSuccess: props<{ reports: ReportsModel[] }>(),
     fetchStudentReportsFail: props<{ error: HttpErrorResponse }>(),
+    // --- NEW ACTION ---
+    selectStudentReport: props<{ report: ReportsModel }>(),
+    // --- NEW ACTION TO CLEAR DISPLAYED REPORT ---
+    clearSelectedReport: emptyProps(),
   },
 });
 

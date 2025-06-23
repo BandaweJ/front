@@ -11,7 +11,7 @@ import {
   takeUntil,
 } from 'rxjs';
 import { InvoiceModel } from 'src/app/finance/models/invoice.model';
-import { selectInVoices } from 'src/app/finance/store/finance.selector';
+import { selectAllInvoices } from 'src/app/finance/store/finance.selector';
 
 @Component({
   selector: 'app-search-invoice',
@@ -24,7 +24,7 @@ export class SearchInvoiceComponent {
   searchControl = new FormControl('');
   searchResults$: Observable<InvoiceModel[]> = of([]);
   invoices$: Observable<InvoiceModel[]> = this.store.pipe(
-    select(selectInVoices)
+    select(selectAllInvoices)
   );
   initialInvoices: InvoiceModel[] = [];
   private ngUnsubscribe = new Subject<void>();

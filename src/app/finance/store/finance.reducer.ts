@@ -12,7 +12,6 @@ import {
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
-import { StudentsModel } from 'src/app/registration/models/students.model';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
 
@@ -23,15 +22,23 @@ export interface State {
   errorMessage: string;
   selectedStudentInvoice: InvoiceModel;
   fetchInvoiceError: string;
+  generateEmptyInvoiceErr: string;
   balance: BalancesModel | null;
   isNewComer: boolean;
   invoiceStats: InvoiceStatsModel[];
   termInvoices: InvoiceModel[];
   allInvoices: InvoiceModel[];
-  receipts: ReceiptModel[];
+  allReceipts: ReceiptModel[];
   studentOutstandingBalance: number;
   createdReceipt: ReceiptModel;
   isLoadingStudentBalance: boolean;
+
+  studentInvoices: InvoiceModel[];
+  loadingStudentInvoices: boolean;
+  loadStudentReceiptsErr: string;
+  studentReceipts: ReceiptModel[];
+  loadingStudentReceipts: boolean;
+  loadStudentInvoicesErr: string;
 }
 
 export const initialState: State = {
@@ -41,15 +48,23 @@ export const initialState: State = {
   errorMessage: '',
   selectedStudentInvoice: {} as InvoiceModel,
   fetchInvoiceError: '',
+  generateEmptyInvoiceErr: '',
   balance: null,
   isNewComer: false,
   invoiceStats: [],
   termInvoices: [],
   allInvoices: [],
-  receipts: [],
+  allReceipts: [],
   studentOutstandingBalance: 0,
   createdReceipt: {} as ReceiptModel,
   isLoadingStudentBalance: false,
+
+  studentInvoices: [],
+  loadingStudentInvoices: false,
+  loadStudentInvoicesErr: '',
+  studentReceipts: [],
+  loadingStudentReceipts: false,
+  loadStudentReceiptsErr: '',
 };
 
 export const financeReducer = createReducer(
@@ -184,102 +199,71 @@ export const financeReducer = createReducer(
     errorMessage: error.message,
   })),
   on(billStudentActions.billStudent, (state, { bills }) => {
-    // Combine the existing bills with the new bills
-    const updatedBills = [
-      ...(state.selectedStudentInvoice?.bills || []),
-      ...bills,
-    ];
-    // Calculate the new totalBill from the bills array
-    const newTotalBill = updatedBills.reduce(
+    // The 'bills' array coming from the action (which is your component's 'toBill')
+    // should already contain the *final, desired set* of bills for the invoice.
+    // So, we replace the existing bills with these new ones.
+    const finalBillsForInvoice = bills;
+
+    // Calculate the new totalBill from this final set of bills
+    const newTotalBill = finalBillsForInvoice.reduce(
       (sum, bill) => sum + +bill.fees.amount,
       0
     );
-    // console.log(newTotalBill);
 
-    // include balanceBfwd in totalBill
+    // Include balanceBfwd in totalBill
     const currentBalanceBfwdAmount =
       +state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
 
     const newTotal = Number(newTotalBill) + Number(currentBalanceBfwdAmount);
 
-    // console.log(newBalance);
-
     return {
       ...state,
-      isLoading: false, // Corrected to false on success
-      errorMessage: '',
+      isLoading: false, // Assuming these are part of your state management for the billing process
+      errorMessage: '', // Assuming these are part of your state management for the billing process
       selectedStudentInvoice: {
         ...state.selectedStudentInvoice,
-        bills: [...updatedBills],
+        bills: [...finalBillsForInvoice], // Use the new, complete array of bills
         totalBill: newTotal, // Update totalBill with the calculated value
+        // Note: Other invoice fields like 'balance', 'amountPaidOnInvoice', 'status'
+        // might also need to be recalculated or updated depending on your business logic
+        // and if this action triggers a payment recalculation or status change.
+        // For now, only 'bills' and 'totalBill' are directly addressed as per your request.
       },
     };
   }),
-  on(billStudentActions.billStudentSuccess, (state, { bills }) => {
-    // Calculate the new totalBill from the bills array
-    const newTotalBill = bills.reduce((sum, bill) => sum + bill.fees.amount, 0);
 
-    // Calculate the new balance
-    const currentBalanceBfwdAmount =
-      +state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
+  // on(billStudentActions.removeBillSuccess, (state) => ({
+  //   ...state,
+  //   isLoading: true,
+  //   errorMessage: '',
+  // })),
+  // on(billStudentActions.removeBill, (state, { bill }) => {
+  //   const updatedTotalBill =
+  //     +state.selectedStudentInvoice.totalBill - +bill.fees.amount;
+  //   const currentBalanceBfwdAmount = Number(
+  //     +state.selectedStudentInvoice?.balanceBfwd?.amount || 0
+  //   );
 
-    const newTotal =
-      +state.selectedStudentInvoice?.balance +
-      Number(newTotalBill) +
-      Number(currentBalanceBfwdAmount);
+  //   const updatedTotal = +updatedTotalBill + +currentBalanceBfwdAmount;
 
-    return {
-      ...state,
-      isLoading: false, // Corrected to false on success
-      errorMessage: '',
-      selectedStudentInvoice: {
-        ...state.selectedStudentInvoice,
-        bills: [...state.selectedStudentInvoice.bills, ...bills],
-        totalBill: newTotal, // Update totalBill with the calculated value
-      },
-    };
-  }),
-  on(billStudentActions.billStudentFail, (state, { error }) => ({
-    ...state,
-    isLoading: false,
-    errorMessage: error.message,
-    selectedStudentInvoice: {
-      ...state.selectedStudentInvoice,
-      bills: [],
-    },
-  })),
-  on(billStudentActions.removeBillSuccess, (state) => ({
-    ...state,
-    isLoading: true,
-    errorMessage: '',
-  })),
-  on(billStudentActions.removeBill, (state, { bill }) => {
-    const updatedTotalBill =
-      +state.selectedStudentInvoice.totalBill - +bill.fees.amount;
-    const currentBalanceBfwdAmount = Number(
-      +state.selectedStudentInvoice?.balanceBfwd?.amount || 0
-    );
-
-    const updatedTotal = +updatedTotalBill + +currentBalanceBfwdAmount;
-
-    return {
-      ...state,
-      isLoading: false,
-      errorMessage: '',
-      selectedStudentInvoice: {
-        ...state.selectedStudentInvoice,
-        bills: state.selectedStudentInvoice.bills.filter(
-          (b) => b.id !== bill.id
-        ),
-        totalBill: updatedTotal, // Use the updated totalBill
-      },
-    };
-  }),
-  on(billStudentActions.removeBillFail, (state, { error }) => ({
-    ...state,
-    isLoading: false,
-    errorMessage: error.message,
-  })),
+  //   return {
+  //     ...state,
+  //     isLoading: false,
+  //     errorMessage: '',
+  //     selectedStudentInvoice: {
+  //       ...state.selectedStudentInvoice,
+  //       bills: state.selectedStudentInvoice.bills.filter(
+  //         (b) => b.id !== bill.id
+  //       ),
+  //       totalBill: updatedTotal, // Use the updated totalBill
+  //     },
+  //   };
+  // }),
+  // on(billStudentActions.removeBillFail, (state, { error }) => ({
+  //   ...state,
+  //   isLoading: false,
+  //   errorMessage: error.message,
+  // })),
   on(invoiceActions.downloadInvoice, (state) => ({
     ...state,
     isLoading: true,
@@ -330,34 +314,51 @@ export const financeReducer = createReducer(
     errorMessage: error.message,
     invoiceStats: [],
   })),
-  on(invoiceActions.fetchInvoices, (state) => ({
+  on(invoiceActions.fetchTermInvoices, (state) => ({
     ...state,
     isLoading: true,
     errorMessage: '',
   })),
-  on(invoiceActions.fetchInvoicesSuccess, (state, { invoices }) => ({
+  on(invoiceActions.fetchTermInvoicesSuccess, (state, { invoices }) => ({
     ...state,
     isLoading: false,
     errorMessage: '',
     termInvoices: [...invoices],
   })),
-  on(invoiceActions.fetchInvoicesFail, (state, { error }) => ({
+  on(invoiceActions.fetchTermInvoicesFail, (state, { error }) => ({
     ...state,
     isLoading: false,
     errorMessage: error.message,
   })),
-  on(receiptActions.fetchReceipts, (state) => ({
+
+  on(invoiceActions.fetchAllInvoices, (state) => ({
     ...state,
     isLoading: true,
     errorMessage: '',
   })),
-  on(receiptActions.fetchReceiptsSuccess, (state, { receipts }) => ({
+  on(invoiceActions.fetchAllInvoicesSuccess, (state, { allInvoices }) => ({
     ...state,
     isLoading: false,
     errorMessage: '',
-    receipts,
+    allInvoices: allInvoices,
   })),
-  on(receiptActions.fetchReceiptsFail, (state, { error }) => ({
+  on(invoiceActions.fetchAllInvoicesFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
+  on(receiptActions.fetchAllReceipts, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(receiptActions.fetchAllReceiptsSuccess, (state, { allReceipts }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    allReceipts: allReceipts,
+  })),
+  on(receiptActions.fetchAllReceiptsFail, (state, { error }) => ({
     ...state,
     isLoading: false,
     errorMessage: error.message,
@@ -372,7 +373,7 @@ export const financeReducer = createReducer(
     isLoading: false,
     errorMessage: '',
     createdReceipt: receipt,
-    receipts: [...state.receipts, receipt],
+    allReceipts: [...state.allReceipts, receipt],
   })),
   on(receiptActions.saveReceiptFail, (state, { error }) => ({
     ...state,
@@ -427,5 +428,41 @@ export const financeReducer = createReducer(
   on(receiptActions.clearCreatedReceipt, (state) => ({
     ...state,
     createdReceipt: {} as ReceiptModel,
+  })),
+  on(receiptActions.fetchStudentReceipts, (state) => ({
+    ...state,
+    loadingStudentReceipts: true,
+    loadStudentReceiptsErr: '',
+  })),
+  on(
+    receiptActions.fetchStudentReceiptsSuccess,
+    (state, { studentReceipts }) => ({
+      ...state,
+      studentReceipts,
+      loadingStudentReceipts: false,
+    })
+  ),
+  on(receiptActions.fetchStudentReceiptsFail, (state, { error }) => ({
+    ...state,
+    loadingStudentReceipts: false,
+    loadStudentReceiptsErr: error.message,
+  })),
+  on(invoiceActions.fetchStudentInvoices, (state) => ({
+    ...state,
+    loadingStudentInvoices: true,
+    loadStudentInvoiceErr: '',
+  })),
+  on(
+    invoiceActions.fetchStudentInvoicesSuccess,
+    (state, { studentInvoices }) => ({
+      ...state,
+      studentInvoices,
+      loadingStudentInvoices: false,
+    })
+  ),
+  on(invoiceActions.fetchStudentInvoicesFail, (state, { error }) => ({
+    ...state,
+    loadingStudentInvoices: false,
+    loadStudentInvoicesErr: error.message,
   }))
 );

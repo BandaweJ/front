@@ -9,11 +9,6 @@ export const selectErrorMsg = createSelector(
   (state: fromDashboardReducer.State) => state.errorMessage
 );
 
-export const selectAllFinanceData = createSelector(
-  dashboardState,
-  (state: fromDashboardReducer.State) => state.allFinanceData
-);
-
 export const selectStudentDashboardSummary = createSelector(
   dashboardState,
   (state: fromDashboardReducer.State) => state.studentSummary

@@ -34,11 +34,16 @@ export class ReceiptItemComponent {
   }
 
   download() {
-    this.store.dispatch(
-      receiptActions.downloadReceiptPdf({
-        receipt: this.receipt,
-      })
-    );
+    if (this.receipt && this.receipt.id) {
+      this.store.dispatch(
+        receiptActions.downloadReceiptPdf({
+          receiptNumber: this.receipt.receiptNumber, // Pass only the ID
+        })
+      );
+    } else {
+      console.warn('Cannot download receipt: Receipt object or ID is missing.');
+      // Optionally, show a user-friendly message
+    }
   }
 
   // ngOnChanges is called whenever any data-bound input property changes.

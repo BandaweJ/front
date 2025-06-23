@@ -58,3 +58,8 @@ export const selectCurrentTerm = createSelector(
   enrolmentState,
   (state: fromEnrolmentReducer.State) => state.currentTerm
 );
+
+export const selectTermEnrols = createSelector(
+  enrolmentState,
+  (state: fromEnrolmentReducer.State) => state.termEnrols
+);

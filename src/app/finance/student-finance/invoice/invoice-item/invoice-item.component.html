@@ -1,5 +1,5 @@
 <div class="invoice-item">
-  <div class="invoice-download">
+  <div class="invoice-download" *ngIf="invoice.bills.length > 0">
     <button type="button" mat-mini-fab color="primary" class="download-btn" (click)="downloadable? download() : save()">
       <span class="material-icons">{{ downloadable? 'download' : 'save' }}</span>
     </button>
@@ -66,7 +66,7 @@
         <th>Amount</th>
       </tr>
     </thead>
-    <tr *ngIf="invoice.balanceBfwd.amount > 0">
+    <tr *ngIf="invoice && invoice.balanceBfwd && invoice.balanceBfwd.amount">
       <td>Balance as at {{ invoice.balanceBfwd.dateCreated | date }}</td>
       <td>{{ invoice.balanceBfwd.amount | currency }}</td>
     </tr>

@@ -1,3 +1,13 @@
+/* General body/html styles to prevent external scrollbars */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden; /* Prevent horizontal scroll on the entire page */
+  overflow-y: auto; /* Allow vertical scroll on the entire page if content overflows */
+}
+
 /* Toolbar styles */
 mat-toolbar {
   display: flex;
@@ -8,11 +18,12 @@ mat-toolbar {
   top: 0;
   left: 0;
   width: 100%;
+  height: 64px; /* Explicit height for the toolbar */
   z-index: 2; /* Ensure it's above other content */
 }
 
 .mat-icon {
-  font-size: 24px; /* Adjust icon size if desired */
+  font-size: 24px;
   width: 24px;
   height: 24px;
 }
@@ -22,278 +33,224 @@ h1 {
   padding: 0;
 }
 
-/* Sidenav Container */
+/* Sidenav Container: Flexbox for side-by-side below toolbar */
 mat-sidenav-container {
-  height: 100vh;
-  width: 100vw;
-  margin-top: 64px; /* Account for toolbar height (adjust if your toolbar height is different) */
+  display: flex; /* Make the container a flex container */
+  flex-direction: row; /* Arrange sidenav and content side-by-side */
+  height: calc(100vh - 64px); /* Occupy remaining height below the toolbar */
+  width: 100vw; /* Occupy full viewport width */
+  margin-top: 64px; /* Push container down to start below the fixed toolbar */
+  overflow: hidden; /* Prevent scrollbars on the container itself, let mat-sidenav-content handle it */
 }
 
 /* Sidenav itself */
 mat-sidenav {
   width: 250px; /* Default expanded width */
-  transition: width 0.3s ease-in-out; /* Smooth transition for width */
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Optional: add a subtle shadow */
-  overflow-x: hidden; /* Crucial: hide horizontal scrollbar that might appear during transition */
+  transition: width 0.3s ease-in-out;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  overflow-x: hidden; /* Hide horizontal scrollbar inside sidenav */
   flex-shrink: 0; /* Prevent sidenav from shrinking unnecessarily */
+  /* Remove position: static; and height: auto; if mat-sidenav-container is flex */
+  /* Let flex properties manage its height */
+  /* Ensure it's not positioned fixed on large screens */
+  /* position: static; - Remove or ensure it doesn't conflict */
+  /* height: auto; - Remove or ensure it doesn't conflict */
+  top: auto;
+  left: auto;
+  padding-top: 0;
+  z-index: 1;
+  transform: none;
 }
 
 /* When the sidenav is collapsed, apply the narrow width */
 mat-sidenav.collapsed {
-  width: 64px; /* Collapsed width (standard for Material Design mini-sidebar) */
+  width: 90px; /*collapsed width*/
 }
 
 /* Sidenav Content inside mat-sidenav */
 .sidenav-container {
   display: flex;
   flex-direction: column;
-  padding-top: 1rem; /* Add some top padding */
+  padding-top: 1rem;
 }
 
-/* Styles for all main menu items (buttons for sub-items and expansion headers for top-level) */
-mat-expansion-panel-header {
-  width: 100%; /* Make them take full width */
-  justify-content: flex-start; /* Align content to the start */
-  height: 48px; /* Standard height for buttons/headers */
-  transition: background-color 0.2s ease-in-out; /* Smooth hover */
-  border-radius: 0; /* Ensure no border-radius */
-  box-sizing: border-box; /* Include padding in the element's total width and height */
-}
-
-/* Default padding for top-level items when sidenav is expanded */
-mat-sidenav:not(.collapsed) mat-expansion-panel-header {
-  padding: 0 16px; /* Standard padding when expanded */
-}
-
-/* Padding for top-level items when sidenav is collapsed (to center icon) */
-mat-sidenav.collapsed mat-expansion-panel-header {
-  padding: 0 20px; /* Center icon in 64px width (64 - 24 (icon) = 40. 40/2 = 20px padding on each side) */
-}
-
-/* Specific styling for the active state of the Dashboard panel */
-/* Targeting the expansion panel itself if it's active based on routerLinkActive */
-mat-expansion-panel.active > mat-expansion-panel-header {
-  background-color: rgba(0, 0, 0, 0.1); /* Example active background */
-  color: var(
-    --primary-color-text-on-dark,
-    white
-  ); /* Text color for active state */
-}
-
-/* Hover effect for all main menu items */
-mat-expansion-panel-header:hover {
-  background-color: rgba(0, 0, 0, 0.04); /* Subtle hover background */
-}
-
-/* Styling for icons within expansion panel headers - ALWAYS VISIBLE */
-mat-expansion-panel-header .mat-icon {
-  flex-shrink: 0; /* Prevent icon from shrinking */
-  /* Default margin when expanded */
-  margin-right: 16px;
-  transition: margin-right 0.3s ease-in-out; /* Smooth transition for icon margin */
-}
-
-/* Adjust icon margin when sidenav is collapsed - NO MARGIN */
-mat-sidenav.collapsed mat-expansion-panel-header .mat-icon {
-  margin-right: 0; /* No margin when collapsed */
-}
-
-/* Styling for text (span) within mat-panel-title within expansion headers */
-/* This ensures consistency for text behavior */
-mat-expansion-panel-header .mat-panel-title span:not(.mat-icon) {
-  opacity: 1; /* Default visible */
-  width: auto; /* Allow text to take natural width when visible */
-  white-space: nowrap; /* Prevent text from wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for hidden text */
-  transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out,
-    margin-left 0.3s ease-in-out;
-  flex-grow: 1; /* Allow text to grow and take space */
-}
-
-/* === THE KEY FIX: Hide text ONLY when the sidenav is collapsed === */
-/* This targets ONLY the <span> for text, leaving the icons visible */
-mat-sidenav.collapsed
-  mat-expansion-panel-header
-  .mat-panel-title
-  span:not(.mat-icon) {
-  opacity: 0;
-  width: 0; /* Collapse width to hide text */
-  margin-left: -16px; /* Adjust margin to pull text into hidden space */
-  pointer-events: none; /* Prevent interaction with hidden text */
-  flex-grow: 0; /* Crucial: prevent hidden text from taking up space */
-}
-
-/* Fix for the expansion arrow being cut off (only applies to actual expandable panels) */
-mat-expansion-panel-header .mat-expansion-indicator {
-  margin-left: auto; /* Push the arrow to the far right */
-  padding-right: 0; /* Ensure no extra padding pushing it off */
-  /* If still cut off, you might need to increase padding-right on mat-expansion-panel-header itself */
-}
-
-/* Adjust expansion panel body padding */
-.mat-expansion-panel-body {
-  padding: 0 !important; /* Remove default padding */
-}
-
-/* Styles for sub-items (buttons) within expansion panels */
+/* Menu item styles (as before) */
+mat-expansion-panel-header,
 .sidenav-container button.mat-button {
   width: 100%;
-  justify-content: flex-start;
   height: 48px;
+  display: flex;
+  align-items: center;
   border-radius: 0;
   box-sizing: border-box;
-  transition: background-color 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
 }
 
-/* Padding for sub-items when expanded */
-mat-sidenav:not(.collapsed)
-  mat-expansion-panel
-  .sidenav-container
-  button.mat-button {
-  padding: 0 16px 0 32px; /* Indent sub-items when sidenav is expanded */
+mat-sidenav:not(.collapsed) mat-expansion-panel-header {
+  padding: 0 16px;
+  justify-content: flex-start;
 }
 
-/* Padding for sub-items when collapsed (icon centered, no text) */
-mat-sidenav.collapsed mat-expansion-panel .sidenav-container button.mat-button {
-  padding: 0 20px; /* Center icon in 64px width */
+mat-sidenav:not(.collapsed) .sidenav-container button.mat-button {
+  padding: 0 16px 0 32px;
+  justify-content: flex-start;
 }
 
-/* Active state for sub-items */
+mat-sidenav.collapsed mat-expansion-panel-header,
+mat-sidenav.collapsed .sidenav-container button.mat-button {
+  padding: 0 8px;
+}
+
+mat-expansion-panel.active > mat-expansion-panel-header,
 .sidenav-container button.mat-button.active {
   background-color: rgba(0, 0, 0, 0.1);
   color: var(--primary-color-text-on-dark, white);
 }
 
-/* Hover for sub-items */
+mat-expansion-panel-header:hover,
 .sidenav-container button.mat-button:hover {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
-/* Icon styling for sub-items */
-.sidenav-container button.mat-button .mat-icon {
+mat-sidenav:not(.collapsed) mat-expansion-panel-header .mat-icon,
+mat-sidenav:not(.collapsed) .sidenav-container button.mat-button .mat-icon {
   flex-shrink: 0;
-  margin-right: 16px; /* Default margin for expanded */
-  transition: margin-right 0.3s ease-in-out;
+  margin-right: 16px;
 }
 
-/* Icon styling for sub-items when collapsed */
+mat-sidenav.collapsed mat-expansion-panel-header .mat-icon,
 mat-sidenav.collapsed .sidenav-container button.mat-button .mat-icon {
-  margin-right: 0; /* No margin when collapsed */
+  flex-shrink: 0;
+  margin-right: 0;
 }
 
-/* Text styling for sub-items */
-.sidenav-container
-  button.mat-button
-  span:not(.mat-icon):not(.mat-mdc-button-touch-target) {
-  opacity: 1;
-  width: auto;
+.menu-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out,
-    margin-left 0.3s ease-in-out;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+  min-width: 0;
+}
+
+mat-panel-title,
+.mdc-button__label {
+  display: flex;
+  align-items: center;
   flex-grow: 1;
 }
 
-/* Hide text for sub-items when sidenav is collapsed */
-mat-sidenav.collapsed
-  .sidenav-container
-  button.mat-button
-  span:not(.mat-icon):not(.mat-mdc-button-touch-target) {
-  opacity: 0;
-  width: 0;
-  margin-left: -16px;
-  pointer-events: none;
-  flex-grow: 0;
+mat-sidenav.collapsed mat-panel-title,
+mat-sidenav.collapsed .mdc-button__label {
+  justify-content: center;
 }
 
-/* Override default mat-button focus outline */
+mat-expansion-panel-header .mat-expansion-indicator {
+  margin-left: auto;
+  padding-right: 0;
+  flex-shrink: 0;
+  transition: transform 0.3s ease-in-out;
+}
+
+mat-sidenav.collapsed mat-expansion-panel-header .mat-expansion-indicator {
+  padding-right: 0px;
+}
+
+.mat-expansion-panel-body {
+  padding: 0 !important;
+}
+
 .mat-button:focus {
   outline: none;
 }
 
+/* --- Mat Sidenav Content (the main content area) --- */
+mat-sidenav-content {
+  flex-grow: 1; /* Allow content to take remaining space */
+  overflow: auto; /* Allow content to scroll if it overflows its own area */
+  padding: 16px; /* Add some padding around your actual content */
+  box-sizing: border-box; /* Include padding in width/height calculation */
+  min-width: 0; /* CRUCIAL: Allow flex item to shrink below its content's default width */
+  display: flex; /* Make mat-sidenav-content a flex container itself */
+  flex-direction: column; /* Stack content vertically within it */
+  /* margin-left is no longer controlled by JS, flexbox handles it */
+}
+
 /* --- Media Queries --- */
 
-/* Extra small devices (phones, max-width: 767px) */
+/* Small devices (phones, max-width: 767px) */
 @media only screen and (max-width: 767px) {
-  /* No margin-left on sidenav-container on mobile */
+  /* Sidenav Container layout for mobile (still flex, but sidenav overlays) */
   mat-sidenav-container {
-    margin-left: 0 !important; /* Ensure no left margin */
+    flex-direction: row; /* Keep as row */
   }
 
-  /* Sidenav in 'over' mode, hidden by default on small screens */
+  /* Sidenav on mobile (will be in 'over' mode) */
   mat-sidenav {
-    width: 250px; /* Full width when opened on mobile */
-    min-width: 250px;
+    position: fixed; /* Overlay on mobile */
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
     max-width: 250px;
-    transform: translateX(-100%); /* Start hidden off-screen */
-    position: fixed; /* Ensures it slides over content */
-    height: 100vh; /* Full height */
-    top: 0; /* Align to top */
-    padding-top: 64px; /* Account for toolbar */
-    z-index: 3; /* Above toolbar */
+    padding-top: 64px; /* Pushed down by toolbar */
+    z-index: 3;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
   }
+
   mat-sidenav.mat-sidenav-opened {
-    transform: translateX(0%); /* Slide in when opened */
+    transform: translateX(0%);
   }
-  /* On mobile, the toolbar menu icon should be visible */
+
+  /* Content on mobile: no margin-left, allow scroll */
+  mat-sidenav-content {
+    /* No explicit margin-left needed here, it will naturally take 100% width on mobile */
+    flex-grow: 1;
+  }
+
+  /* The toolbar menu icon should be visible on small screens */
   .toolbar mat-icon {
     display: block;
   }
 
-  /* Text should always be visible when mobile sidenav is OPENED for both top-level and sub-items */
-  mat-sidenav.collapsed
-    mat-expansion-panel-header
-    .mat-panel-title
-    span:not(.mat-icon),
-  mat-sidenav.collapsed
-    .sidenav-container
-    button.mat-button
-    span:not(.mat-icon):not(.mat-mdc-button-touch-target) {
-    opacity: 1; /* Text always visible when mobile sidenav is opened */
-    width: auto; /* Allow text to take its natural width */
-    margin-left: 0;
-    pointer-events: auto;
-    flex-grow: 1; /* Allow text to grow */
-  }
-  /* On mobile, icons should always have their margin */
-  mat-sidenav.collapsed mat-expansion-panel-header .mat-icon,
-  mat-sidenav.collapsed .sidenav-container button.mat-button .mat-icon {
-    margin-right: 16px;
-    padding: initial; /* Reset any specific padding applied for collapsed state desktop */
-  }
-
-  /* Ensure correct padding for items on mobile */
   mat-expansion-panel-header,
   .sidenav-container button.mat-button {
-    padding: 0 16px; /* Standard padding on mobile, regardless of collapsed state */
+    padding: 0 16px;
+    justify-content: flex-start;
   }
 
-  /* Adjust padding for sub-items on mobile to match others */
   mat-expansion-panel .sidenav-container button.mat-button {
-    padding: 0 16px; /* No extra indent on mobile */
+    padding: 0 16px 0 32px;
+  }
+
+  mat-expansion-panel-header .mat-icon,
+  .sidenav-container button.mat-button .mat-icon {
+    margin-right: 16px;
   }
 }
 
 /* Medium and Large devices (tablets, laptops, desktops, 768px and up) */
 @media only screen and (min-width: 768px) {
-  /* Apply margin-left to mat-sidenav-content only on desktop */
+  /* On large screens, the sidenav is in 'side' mode */
+  mat-sidenav {
+    position: static; /* Sidenav is part of the normal document flow */
+    height: auto; /* Let flex container manage height */
+    top: auto;
+    left: auto;
+    padding-top: 0;
+    z-index: 1;
+    transform: none;
+    /* Ensure default width for side mode is applied, handled by .collapsed or default 250px */
+  }
+
   mat-sidenav-content {
-    margin-left: 64px; /* Initial margin for collapsed state */
-    transition: margin-left 0.3s ease-in-out;
+    flex-grow: 1;
+    /* No explicit margin-left needed as flexbox positions it next to the sidenav */
   }
 
-  /* This ensures the content shifts when sidenav expands/collapses */
-  mat-sidenav.collapsed + mat-sidenav-content {
-    margin-left: 64px;
-  }
-
-  mat-sidenav + mat-sidenav-content {
-    margin-left: 250px; /* Margin when expanded */
-  }
-
-  /* On larger screens, the menu icon in the toolbar is generally not needed if sidenav is always visible */
+  /* On larger screens, the toolbar menu icon is not needed */
   .toolbar mat-icon {
     display: none;
   }
@@ -302,5 +259,18 @@ mat-sidenav.collapsed
 @media print {
   .toolbar {
     display: none;
+  }
+}
+
+/* Override any default Angular Material inline margin-left on mat-sidenav-content */
+mat-sidenav-content {
+  margin-left: 0px !important; /* This is the key to force it to 0 */
+}
+
+/* Optional: If you want to be extra specific with media queries,
+   though the general rule above should be enough due to !important */
+@media only screen and (min-width: 768px) {
+  mat-sidenav-content {
+    margin-left: 0px !important;
   }
 }
