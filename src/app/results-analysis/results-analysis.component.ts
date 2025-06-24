@@ -21,8 +21,7 @@ import {
   selectClasses,
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
-// Removed selectComments and isLoading from marks/store/marks.selectors as they refer to marks
-// Using selectors from reports/store/reports.selectors as per your adjustment
+
 import {
   selectIsLoading,
   selectReports,
@@ -71,7 +70,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     select(selectReportsErrorMsg)
   );
 
-  private destroy$ = new Subject<void>(); // Used for managing subscriptions
+  private destroy$ = new Subject<void>();
 
   // Processed data observables for display in template
   overallAnalysisData$!: Observable<OverallAnalysisData | null>;
