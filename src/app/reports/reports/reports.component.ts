@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { select, Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
@@ -15,57 +15,50 @@ import {
 } from 'src/app/enrolment/store/enrolment.selectors';
 import * as reportsActions from '../store/reports.actions';
 import { ReportsModel } from '../models/reports.model';
-import {
-  selectIsLoading,
-  selectReports,
-  selectStudentReports,
-} from '../store/reports.selectors';
+import { selectIsLoading, selectReports } from '../store/reports.selectors';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { viewReportsActions } from '../store/reports.actions';
-import { invoiceActions } from 'src/app/finance/store/finance.actions';
-import { selectedStudentInvoice } from 'src/app/finance/store/finance.selector';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
+import { take } from 'rxjs/operators'; // Import take operator for saveReports
 
 @Component({
   selector: 'app-reports',
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css'],
 })
-export class ReportsComponent implements OnInit {
+export class ReportsComponent implements OnInit, OnDestroy {
   reportsForm!: FormGroup;
   terms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
-  // reports$: Observable<ReportsModel[]> = this.store.select(selectReports);
-  reports$ = this.store.pipe(select(selectReports));
-  reports!: ReportsModel[];
+
+  reports$: Observable<ReportsModel[]> = this.store.select(selectReports);
+
   role = '';
   id!: string;
   mode!: 'generate' | 'view';
-  isLoading$ = this.store.select(selectIsLoading);
+  isLoading$ = this.store.select(selectIsLoading); // This is crucial for the spinner
   currentEnrolment!: EnrolsModel;
+
+  private subscriptions: Subscription[] = [];
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
   constructor(private store: Store) {
     this.store.dispatch(fetchTerms());
     this.store.dispatch(fetchClasses());
-    this.store.select(selectCurrentEnrolment).subscribe((enrolment) => {
-      if (enrolment) this.currentEnrolment = enrolment;
-    });
+
+    this.subscriptions.push(
+      this.store.select(selectCurrentEnrolment).subscribe((enrolment) => {
+        if (enrolment) this.currentEnrolment = enrolment;
+      })
+    );
   }
 
   ngOnInit(): void {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
-    this.reports$ = this.store.select(selectReports);
-
-    this.reports$.subscribe((reps) => {
-      this.reports = reps;
-      // if (reps)
-      // console.log('first head comment is : ', reps[0].report.headComment);
-    });
 
     this.reportsForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
@@ -73,18 +66,20 @@ export class ReportsComponent implements OnInit {
       examType: new FormControl('', Validators.required),
     });
 
-    this.store.select(selectUser).subscribe((user) => {
-      if (user) {
-        this.role = user.role;
-        this.id = user.id;
-      }
-    });
+    this.subscriptions.push(
+      this.store.select(selectUser).subscribe((user) => {
+        if (user) {
+          this.role = user.role;
+          this.id = user.id;
 
-    if (this.role === ROLES.student) {
-      this.store.dispatch(
-        viewReportsActions.fetchStudentReports({ studentNumber: this.id })
-      );
-    }
+          if (this.role === ROLES.student) {
+            this.store.dispatch(
+              viewReportsActions.fetchStudentReports({ studentNumber: this.id })
+            );
+          }
+        }
+      })
+    );
   }
 
   get term() {
@@ -99,61 +94,70 @@ export class ReportsComponent implements OnInit {
     return this.reportsForm.get('examType');
   }
 
+  // Consolidated method for fetching reports based on form selections
+  fetchReportsBasedOnForm() {
+    const { term, clas, examType } = this.reportsForm.value;
+
+    if (this.reportsForm.valid) {
+      this.store.dispatch(
+        reportsActions.viewReportsActions.viewReports({
+          name: clas,
+          num: term.num,
+          year: term.year,
+          examType: examType,
+        })
+      );
+    } else {
+      // Optional: Provide user feedback if form is invalid
+      console.warn('Form is invalid. Cannot fetch reports.');
+    }
+  }
+
   generate() {
     this.mode = 'generate';
-    const name = this.clas?.value;
+    const { term, clas, examType } = this.reportsForm.value;
 
-    const term: TermsModel = this.term?.value;
-    const num = term.num;
-    const year = term.year;
-    const examType = this.examType?.value;
-
-    // console.log('name', name, 'num', num, 'year', year);
-
-    this.store.dispatch(
-      reportsActions.generateReports({ name, num, year, examType })
-    );
+    if (this.reportsForm.valid) {
+      this.store.dispatch(
+        reportsActions.generateReports({
+          name: clas,
+          num: term.num,
+          year: term.year,
+          examType: examType,
+        })
+      );
+    } else {
+      console.warn('Form is invalid. Cannot generate reports.');
+    }
   }
 
   saveReports() {
-    const reports = this.reports;
+    // Use take(1) to get the current reports value once and complete the subscription
+    this.reports$.pipe(take(1)).subscribe((reportsToSave) => {
+      const { term, clas, examType } = this.reportsForm.value;
 
-    const name = this.clas?.value;
-
-    const term: TermsModel = this.term?.value;
-    const num = term.num;
-    const year = term.year;
-    const examType = this.examType?.value;
-
-    this.store.dispatch(
-      reportsActions.saveReportActions.saveReports({
-        name,
-        num,
-        year,
-        reports,
-        examType,
-      })
-    );
+      if (this.reportsForm.valid && reportsToSave && reportsToSave.length > 0) {
+        this.store.dispatch(
+          reportsActions.saveReportActions.saveReports({
+            name: clas,
+            num: term.num,
+            year: term.year,
+            reports: reportsToSave,
+            examType: examType,
+          })
+        );
+      } else {
+        console.warn('No reports to save or form is invalid.');
+      }
+    });
   }
 
   viewReports() {
-    // this.mode = 'view';
-    // const reports = this.reports;
+    this.mode = 'view';
+    this.fetchReportsBasedOnForm(); // Call the fetch method when 'View' is clicked
+  }
 
-    const name = this.clas?.value;
-
-    const term: TermsModel = this.term?.value;
-    const num = term.num;
-    const year = term.year;
-    const examType = this.examType?.value;
-
-    this.store.dispatch(
-      reportsActions.viewReportsActions.viewReports({
-        name,
-        num,
-        year,
-        examType,
-      })
-    );
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

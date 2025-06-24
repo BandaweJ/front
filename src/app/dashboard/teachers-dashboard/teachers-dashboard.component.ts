@@ -96,15 +96,6 @@ export class TeachersDashboardComponent {
             this.store.dispatch(fetchClasses());
             this.store.dispatch(fetchSubjects());
           }
-
-          // Dispatch actions specific to student role
-          if (user!.role === ROLES.student) {
-            this.store.dispatch(
-              viewReportsActions.fetchStudentReports({ studentNumber: this.id })
-            );
-            // Invoice fetch for student is dependent on currentTermYear/Num,
-            // so it's handled below in the combineLatest
-          }
         }),
         takeUntil(this.destroy$) // Unsubscribe when component is destroyed
       )
@@ -124,18 +115,6 @@ export class TeachersDashboardComponent {
           this.femaleTeachers = arr.filter(
             (tr) => tr.gender === 'Female'
           ).length;
-        }),
-        takeUntil(this.destroy$) // Unsubscribe
-      )
-      .subscribe();
-
-    // Assign invoice if available
-    this.invoice$
-      .pipe(
-        tap((inv) => {
-          if (inv) {
-            this.invoice = inv;
-          }
         }),
         takeUntil(this.destroy$) // Unsubscribe
       )
@@ -164,18 +143,6 @@ export class TeachersDashboardComponent {
           const num = this.currentTermNum;
           const year = this.currentTermYear;
           this.store.dispatch(fetchTotalEnrols({ num, year }));
-
-          // Also dispatch other actions that depend on valid term data, if applicable
-          if (user?.role === ROLES.student) {
-            // Use string literal or constant for role if it's not ROLES.student
-            this.store.dispatch(
-              invoiceActions.fetchInvoice({
-                studentNumber: user.id,
-                year: year,
-                num: num,
-              })
-            );
-          }
         }),
         takeUntil(this.destroy$)
       )

@@ -12,6 +12,5 @@ export interface StudentsModel {
   address: string;
   prevSchool: string;
   studentNumber: string;
-  residence?: 'Day' | 'Boarder';
   role: ROLES;
 }

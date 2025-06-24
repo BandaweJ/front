@@ -1,6 +1,13 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  AfterViewInit,
+  OnDestroy,
+} from '@angular/core'; // Import OnDestroy
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs'; // Import Subject
+import { takeUntil, tap } from 'rxjs/operators'; // Import takeUntil and tap
 import { ClassesModel } from '../models/classes.model';
 import { TermsModel } from '../models/terms.model';
 import { EnrolsModel } from '../models/enrols.model';
@@ -8,6 +15,7 @@ import {
   selectClasses,
   selectEnrols,
   selectTerms,
+  selectEnrolErrorMsg, // Import error message selector
 } from '../store/enrolment.selectors';
 import {
   UnenrolStudentActions,
@@ -24,14 +32,15 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { EnrolStudentComponent } from './enrol-student/enrol-student.component';
 import { Title } from '@angular/platform-browser';
 import { Residence } from '../models/residence.enum';
-import { SharedService } from 'src/app/shared.service';
+import { SharedService } from 'src/app/shared.service'; // Ensure this path is correct
 
 @Component({
   selector: 'app-terms-classes',
   templateUrl: './terms-classes.component.html',
   styleUrls: ['./terms-classes.component.css'],
 })
-export class TermsClassesComponent implements OnInit, AfterViewInit {
+export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
+  // Implement OnDestroy
   classes$!: Observable<ClassesModel[]>;
   terms$!: Observable<TermsModel[]>;
   enrols$!: Observable<EnrolsModel[]>;
@@ -39,11 +48,11 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
   public dataSource = new MatTableDataSource<EnrolsModel>();
   enrolForm!: FormGroup;
   residences = [...Object.values(Residence)];
-  // selectedResidence: Residence = Residence.Boarder;
-  // selectedResidence: { [studentNumber: string]: Residence } = {};
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+
+  private destroy$ = new Subject<void>(); // Subject for managing subscriptions
 
   constructor(
     private store: Store,
@@ -54,40 +63,56 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
-    // this.store.dispatch(fetchEnrols());
+    // Set the custom filter predicate once in the constructor
+    this.dataSource.filterPredicate = this.customFilterPredicate;
   }
 
   ngOnInit(): void {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
     this.enrols$ = this.store.select(selectEnrols);
-    this.enrols$.subscribe((enrols) => {
-      this.dataSource.filterPredicate = (data: EnrolsModel, filter: string) => {
-        const surname = data.student?.surname.toString(); // Access nested property
-        const name = data.student?.name.toString();
-        const studentNumber = data.student?.studentNumber.toString();
+    this.errorMsg$ = this.store.select(selectEnrolErrorMsg); // Initialize errorMsg$
 
-        return (
-          surname.indexOf(filter) !== -1 ||
-          name.indexOf(filter) !== -1 ||
-          studentNumber.indexOf(filter) !== -1
-        );
-      };
+    this.enrols$
+      .pipe(
+        takeUntil(this.destroy$), // Unsubscribe when component is destroyed
+        tap((enrols) => {
+          this.dataSource.data = enrols;
+          // Re-apply filter and sort if they are active, when data changes
+          if (this.dataSource.filter) {
+            this.dataSource.filter = this.dataSource.filter;
+          }
+          if (this.dataSource.sort) {
+            this.dataSource.sort.active = this.dataSource.sort.active;
+            this.dataSource.sort.direction = this.dataSource.sort.direction;
+          }
+        })
+      )
+      .subscribe();
 
-      this.dataSource.data = enrols;
-
-      //init selected residence values.
-      // enrols.forEach((enrol) => {
-      //   this.selectedResidence[enrol.student.studentNumber] = enrol.residence;
-      // });
-    });
-
-    // Customize the filterPredicate
+    // Subscribe to error messages
+    // this.errorMsg$.pipe(takeUntil(this.destroy$)).subscribe((msg) => {
+    //   if (msg) {
+    //     this.snackBar.open(msg, 'Dismiss', {
+    //       duration: 5000,
+    //       verticalPosition: 'top',
+    //       panelClass: ['error-snackbar'],
+    //     });
+    //     // Dispatch action to clear error message if needed
+    //     // this.store.dispatch(clearEnrolErrorMsg());
+    //   }
+    // });
 
     this.enrolForm = new FormGroup({
       clas: new FormControl('', [Validators.required]),
       term: new FormControl('', [Validators.required]),
     });
+  }
+
+  // Implement ngOnDestroy to clean up subscriptions
+  ngOnDestroy(): void {
+    this.destroy$.next(); // Emit a value to signal destruction
+    this.destroy$.complete(); // Complete the subject
   }
 
   get clas() {
@@ -104,9 +129,6 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
     'name',
     'gender',
     'residence',
-    // 'cell',
-    // 'address',
-    // 'prevSchool',
     'action',
   ];
 
@@ -125,17 +147,36 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
   }
 
   fetchClassList() {
+    if (this.enrolForm.invalid) {
+      this.snackBar.open(
+        'Please select both Class and Term to fetch student list.',
+        'Close',
+        { duration: 3000 }
+      );
+      this.enrolForm.markAllAsTouched();
+      return;
+    }
+
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
 
     const num = term.num;
     const year = term.year;
 
-    // console.log(`Name: ${name}, Num: ${num}, Year: ${year}`);
     this.store.dispatch(getEnrolmentByClass({ name, num, year }));
   }
 
   openEnrolStudentsDialog() {
+    if (this.enrolForm.invalid) {
+      this.snackBar.open(
+        'Please select Class and Term before enrolling students.',
+        'Close',
+        { duration: 3000 }
+      );
+      this.enrolForm.markAllAsTouched();
+      return;
+    }
+
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
 
@@ -154,32 +195,50 @@ export class TermsClassesComponent implements OnInit, AfterViewInit {
       width: '70vw',
     });
     dialogRef.disableClose = true;
+    // You might want to subscribe to afterClosed() here to refresh the list
+    // dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(() => {
+    //   this.fetchClassList(); // Refresh data after dialog closes
+    // });
   }
 
   unenrolStudent(enrol: EnrolsModel) {
-    this.store.dispatch(UnenrolStudentActions.unenrolStudent({ enrol }));
+    // Add a confirmation dialog for unenrolling a student
+    const confirmUnenrol = confirm(
+      `Are you sure you want to unenrol ${enrol.student.name} ${enrol.student.surname}?`
+    );
+    if (confirmUnenrol) {
+      this.store.dispatch(UnenrolStudentActions.unenrolStudent({ enrol }));
+    }
   }
 
+  /**
+   * Custom filter predicate for MatTableDataSource to search within EnrolsModel.
+   * Filters by student's number, surname, name, gender, and enrol's residence.
+   * @param data The EnrolsModel object for the current row.
+   * @param filter The filter string entered by the user.
+   * @returns True if the row matches the filter, false otherwise.
+   */
+  customFilterPredicate = (data: EnrolsModel, filter: string): boolean => {
+    const searchString = filter.trim().toLowerCase();
+
+    // Safely access nested student properties and combine with enrolment residence
+    const dataStr = (
+      (data.student?.studentNumber || '') +
+      (data.student?.surname || '') +
+      (data.student?.name || '') +
+      (data.student?.gender || '') +
+      (data.residence || '')
+    ) // Residence is directly on EnrolsModel
+      .toLowerCase();
+
+    return dataStr.includes(searchString);
+  };
+
+  // Keep these commented out if not actively used.
   // updateResidence(resi: string, enrol: EnrolsModel) {
   //   const residence = resi as Residence;
   //   const updatedEnrol = { ...enrol, residence };
   //   console.log(updatedEnrol);
   //   // this.store.dispatch(updateEnrol({ enrol }));
-  // }
-
-  // updateResidence(row: EnrolsModel): void {
-  //   // Create a new EnrolsModel object with the updated residence
-  //   const updatedRow: EnrolsModel = {
-  //     ...row,
-  //     residence: this.selectedResidence[row.student.studentNumber],
-  //   };
-
-  //   // Update the dataSource.data array
-  //   // this.dataSource.data = this.dataSource.data.map((item) =>
-  //   //   item === row ? updatedRow : item
-  //   // );
-
-  //   // Perform any other necessary logic (e.g., dispatch an action to update the backend)
-  //   console.log('Residence updated:', updatedRow);
   // }
 }

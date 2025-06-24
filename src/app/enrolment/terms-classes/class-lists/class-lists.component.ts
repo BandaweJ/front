@@ -1,7 +1,15 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  OnDestroy,
+  AfterViewInit,
+} from '@angular/core'; // Import OnDestroy
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TermsModel } from '../../models/terms.model';
 import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs'; // Import Subject
+import { takeUntil } from 'rxjs/operators'; // Import takeUntil
 import {
   selectClasses,
   selectEnrols,
@@ -10,25 +18,28 @@ import {
 import { Title } from '@angular/platform-browser';
 import { getEnrolmentByClass } from '../../store/enrolment.actions';
 import { MatTableDataSource } from '@angular/material/table';
-import { EnrolsModel } from '../../models/enrols.model';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import { EnrolsModel } from '../../models/enrols.model';
 
 @Component({
   selector: 'app-class-lists',
   templateUrl: './class-lists.component.html',
   styleUrls: ['./class-lists.component.css'],
 })
-export class ClassListsComponent implements OnInit {
-  constructor(private store: Store, public title: Title) {}
+export class ClassListsComponent implements OnInit, AfterViewInit, OnDestroy {
+  // Implement OnDestroy
+  constructor(private store: Store, public title: Title) {
+    this.dataSource.filterPredicate = this.customFilterPredicate;
+  }
 
   classes$ = this.store.select(selectClasses);
   terms$ = this.store.select(selectTerms);
   enrols$ = this.store.select(selectEnrols);
   classForm!: FormGroup;
 
-  public dataSource = new MatTableDataSource<StudentsModel>();
+  public dataSource = new MatTableDataSource<EnrolsModel>();
   displayedColumns: string[] = [
     'studentNumber',
     'surname',
@@ -37,24 +48,34 @@ export class ClassListsComponent implements OnInit {
     'residence',
   ];
 
+  // Subject to signal component destruction
+  private destroy$ = new Subject<void>(); // Added this
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
   ngOnInit(): void {
     this.classForm = new FormGroup({
       term: new FormControl('', Validators.required),
       clas: new FormControl('', Validators.required),
     });
 
-    this.enrols$.subscribe((enrols) => {
-      const students: StudentsModel[] = enrols.map((enrol) => enrol.student);
-      this.dataSource.data = students;
-    });
+    this.enrols$
+      .pipe(takeUntil(this.destroy$)) // Added takeUntil here
+      .subscribe((enrols) => {
+        this.dataSource.data = enrols;
+      });
   }
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  ngOnDestroy(): void {
+    // Added this lifecycle hook
+    this.destroy$.next(); // Emit a value to complete the destroy$ subject
+    this.destroy$.complete(); // Complete the subject to ensure it's closed
   }
 
   get clas() {
@@ -66,6 +87,12 @@ export class ClassListsComponent implements OnInit {
   }
 
   fetchClassList() {
+    if (this.classForm.invalid) {
+      this.classForm.markAllAsTouched();
+      // Optional: Add a snackbar/toast notification here to inform the user
+      return;
+    }
+
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
 
@@ -83,4 +110,18 @@ export class ClassListsComponent implements OnInit {
       this.dataSource.paginator.firstPage();
     }
   }
+
+  customFilterPredicate = (data: EnrolsModel, filter: string): boolean => {
+    const searchString = filter.trim().toLowerCase();
+
+    const dataStr = (
+      data.student.studentNumber +
+      data.student.surname +
+      data.student.name +
+      data.student.gender +
+      (data.residence || '')
+    ).toLowerCase();
+
+    return dataStr.includes(searchString);
+  };
 }

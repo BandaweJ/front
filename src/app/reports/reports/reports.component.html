@@ -1,6 +1,6 @@
-<mat-card *ngIf="role !== 'student'">
+<mat-card *ngIf="role !== 'student'" class="reports-main-card">
   <div class="select-reports-form">
-    <form [formGroup]="reportsForm">
+    <form [formGroup]="reportsForm" (ngSubmit)="fetchReportsBasedOnForm()">
       <div class="top-btns">
         <mat-form-field>
           <mat-label>Choose Term</mat-label>
@@ -27,6 +27,7 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
+
       </div>
     </form>
 
@@ -35,15 +36,27 @@
       <button mat-flat-button color="primary" [disabled]="reportsForm.invalid" (click)="generate()">
         Generate
       </button>
-      <button mat-flat-button color="accent" (click)="saveReports()" [disabled]="reportsForm.invalid">Save</button>
+      <button mat-flat-button color="accent" (click)="saveReports()"
+        [disabled]="reportsForm.invalid || (reports$ | async)?.length === 0">Save</button>
       <button mat-flat-button color="primary" (click)="viewReports()" [disabled]="reportsForm.invalid">View</button>
     </div>
   </div>
-  <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
 
-  <div class="report-container" *ngIf="reports$ | async">
-    <app-report *ngFor="let report of reports$ | async" [report]="report"></app-report>
+  <div class="spinner-container" *ngIf="(isLoading$ | async)">
+    <mat-spinner class="spinner"></mat-spinner>
   </div>
+
+
+  <div class="reports-display-area">
+    <div class="no-reports-message" *ngIf="!(isLoading$ | async) && (reports$ | async)?.length === 0">
+      <p>No reports found for the selected criteria. Please generate or view reports.</p>
+    </div>
+
+    <div class="report-cards-container" *ngIf="(reports$ | async)!.length > 0 && !(isLoading$ | async)">
+      <app-report *ngFor="let report of reports$ | async" [report]="report"></app-report>
+    </div>
+  </div>
+
 </mat-card>
 
 <app-student-report-cards *ngIf="role === 'student'"></app-student-report-cards>

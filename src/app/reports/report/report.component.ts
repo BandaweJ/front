@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core'; // No OnDestroy needed here if no subscriptions are kept
 import { ReportsModel } from '../models/reports.model';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -12,7 +12,9 @@ import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 import { selectIsLoading } from '../store/reports.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
-// pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import { Subscription } from 'rxjs'; // Import Subscription
+
+// pdfMake.vfs = pdfFonts.pdfMake.vfs; // Commented out as per original
 
 @Component({
   selector: 'app-report',
@@ -23,11 +25,11 @@ export class ReportComponent implements OnInit {
   @Input()
   report!: ReportsModel;
   editState = false;
-  role = '';
+  role = ''; // Initialize role
   isLoading$ = this.store.select(selectIsLoading);
   studentNumber = '';
 
-  // print = false;
+  private userSubscription: Subscription | undefined; // Declare subscription
 
   constructor(private store: Store) {}
 
@@ -41,11 +43,21 @@ export class ReportComponent implements OnInit {
     });
     this.studentNumber = this.report.report.studentNumber;
 
-    this.store.select(selectUser).subscribe((user) => {
+    // Manual subscription for user role, ensure it's unsubscribed if this component's lifecycle is long
+    // If this component is *always* recreated when the parent's *ngFor re-renders,
+    // then manual unsubscribe might not be strictly necessary, but it's good practice.
+    this.userSubscription = this.store.select(selectUser).subscribe((user) => {
       if (user) {
         this.role = user.role;
       }
     });
+  }
+
+  // Add ngOnDestroy to unsubscribe if the component might not be destroyed and recreated quickly
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   get comment() {
@@ -53,8 +65,8 @@ export class ReportComponent implements OnInit {
   }
 
   saveComment() {
-    if (this.comment?.value) {
-      // console.log(this.comment?.value);
+    if (this.comment?.valid) {
+      // Check for validity of the form control
       const rep = this.report;
       const comm: string = this.comment.value;
 
@@ -64,78 +76,44 @@ export class ReportComponent implements OnInit {
       };
 
       this.store.dispatch(saveHeadCommentActions.saveHeadComment({ comment }));
-      // this.comment?.setValue(report.headComment);
-      this.toggleEditState();
+      this.toggleEditState(); // Toggle state after dispatching
     }
   }
 
   toggleEditState() {
     this.editState = !this.editState;
+    // When toggling to edit state, ensure the form control value is updated
+    // with the latest report comment, in case it was updated by another user or process.
+    if (this.editState) {
+      this.commentForm.get('comment')?.setValue(this.report.report.headComment);
+    }
   }
 
   download() {
-    // server side pdf generation using pdfkit
+    const { report } = this.report; // Destructure for cleaner access
+    const {
+      className: name,
+      termNumber: num,
+      termYear: year,
+      examType,
+      studentNumber,
+    } = report;
 
-    const name = this.report.report.className;
-    const num = this.report.report.termNumber;
-    const year = this.report.report.termYear;
-    // const examType = this.report.report.examType;
-    const studentNumber = this.report.studentNumber;
-
-    let examType: ExamType;
-
-    if (this.report.report.examType) {
-      const examType = this.report.report.examType;
-
+    if (examType) {
+      // Check if examType exists before dispatching
       this.store.dispatch(
         downloadReportActions.downloadReport({
           name,
           num,
           year,
-          examType,
-          studentNumber,
+          // Re-evaluate if you need `examType` if you already have it from `report.report.examType`
+          // If the action expects `ExamType`, ensure 'examType' from 'report.report' is that type.
+          examType: examType as ExamType, // Explicit cast if necessary
+          studentNumber: this.report.studentNumber, // Use this.report.studentNumber from the top level
         })
       );
+    } else {
+      console.warn('Cannot download report: ExamType is missing.');
     }
-
-    // client side pdf generation using jspdf
-    // this.store.dispatch(generatePdfActions.generatePdf());
-    // // this.print = true;
-    // let data = document.getElementById(`${this.studentNumber}`);
-    // if (data)
-    //   html2canvas(data, { scale: 2.0 }).then((canvas) => {
-    //     const contentDataURL = canvas.toDataURL('image/png'); // 'image/jpeg' for lower quality output.
-    //     // let pdf = new jspdf('l', 'cm', 'a4'); //Generates PDF in landscape mode
-    //     let pdf = new jspdf.jsPDF('p', 'cm', 'a4'); //Generates PDF in portrait mode
-
-    //     pdf.addImage(contentDataURL, 'PNG', 0, 0, 21, 29.7, 'fit');
-    //     // pdf.save('Filename.pdf');
-    //     pdf.save(
-    //       `${this.report.studentNumber}-${this.report.report.surname} ${this.report.report.name}.pdf`
-    //     );
-    //     this.store.dispatch(generatePdfActions.generatePdfSuccess());
-    //   });
-    // this.print = false;
-
-    //client side pdf generation using pdfmake
-    // let docDefinition = {
-    //   header: 'C#Corner PDF Header',
-    //   content:
-    //     'Sample PDF generated with Angular and PDFMake for C#Corner Blog',
-    // };
-
-    // pdfMake.createPdf(docDefinition).open();
   }
-
-  //   async savePdf() {
-  //     const doc = document.getElementById('content');
-
-  //     if (doc) {
-  //       html2PDF(doc).then((canvas) => {
-  //          var img = canvas.toDataURL('image/PNG');
-  //          var doc = new jsPDF('l', 'mm', 'a4', 1);
-  //       })
-
-  //     }
-  // }
 }
