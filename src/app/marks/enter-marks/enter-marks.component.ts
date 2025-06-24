@@ -140,16 +140,14 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   customFilterPredicate = (data: MarksModel, filter: string): boolean => {
     const searchString = filter.trim().toLowerCase();
 
-    const dataStr = (
-      data.student.studentNumber +
-      data.student.surname +
-      data.student.name +
-      data.student.gender +
-      (data.mark !== null ? data.mark.toString() : '') +
-      data.comment
-    ).toLowerCase();
+    // Explicitly extract and combine only the desired properties, handling potential null/undefined
+    const studentName = data.student?.name?.toLowerCase() || '';
+    const studentSurname = data.student?.surname?.toLowerCase() || '';
+    const studentNumber = data.student?.studentNumber?.toLowerCase() || ''; // StudentNumber is already a string
 
-    return dataStr.includes(searchString);
+    const combinedString = `${studentName} ${studentSurname} ${studentNumber}`;
+
+    return combinedString.includes(searchString);
   };
 
   ngOnInit(): void {
