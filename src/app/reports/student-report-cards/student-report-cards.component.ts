@@ -27,9 +27,7 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
   // For displaying available terms/years in filter (optional, can be generated from studentReports$)
   availableTerms: number[] = [];
   availableYears: number[] = [];
-  availableExamTypes: ExamType[] = Object.values(ExamType).filter(
-    (value) => typeof value === 'string' && value !== ''
-  ) as ExamType[];
+  availableExamTypes: ExamType[] = [...Object.values(ExamType)];
 
   // Filter form controls
   selectedTerm: number | null = null;

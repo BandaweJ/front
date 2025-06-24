@@ -24,12 +24,14 @@ import { AuthService } from './auth/auth.service';
 import { FinanceModule } from './finance/finance.module';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog/confirm-delete-dialog.component';
 import { SharedModule } from './shared/shared.module';
+import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ProfileButtonsComponent,
     ConfirmDeleteDialogComponent,
+    ResultsAnalysisComponent,
   ],
   imports: [
     HttpClientModule,

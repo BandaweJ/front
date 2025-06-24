@@ -153,6 +153,21 @@
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>
+              <mat-icon>analytics</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Results Analysis</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="sidenav-container">
+            <button mat-button routerLink="/results-analysis" routerLinkActive="active">
+              <mat-icon>leaderboard</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Termly Results</span>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
               <mat-icon>account_balance</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Finance</span>
             </mat-panel-title>

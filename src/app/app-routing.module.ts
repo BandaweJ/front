@@ -39,6 +39,7 @@ import { OutstandingFeesReportComponent } from './finance/reports/outstanding-fe
 import { AgedDebtorsReportComponent } from './finance/reports/aged-debtors-report/aged-debtors-report.component';
 import { RevenueRecognitionReportComponent } from './finance/reports/revenue-recognition-report/revenue-recognition-report.component';
 import { EnrollmentBillingReconciliationReportComponent } from './finance/reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component';
+import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -168,6 +169,12 @@ const routes: Routes = [
     component: TeachersCommentsComponent,
     canActivate: [AuthGuardService],
     title: 'Teacher Comments',
+  },
+  {
+    path: 'results-analysis',
+    component: ResultsAnalysisComponent,
+    canActivate: [AuthGuardService],
+    title: 'Results Analysis',
   },
   {
     path: 'fees',
