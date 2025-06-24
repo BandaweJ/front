@@ -167,6 +167,7 @@ th.mat-header-cell {
   }
 
   .top-btns mat-form-field {
+    flex: auto;
     width: 100%;
     min-width: unset; /* Remove min-width to allow full flexibility */
   }

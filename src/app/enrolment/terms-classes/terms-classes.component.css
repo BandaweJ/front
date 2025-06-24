@@ -119,10 +119,11 @@ table {
 @media (max-width: 768px) {
   .top-btns {
     flex-direction: column; /* Stack form fields vertically */
-    align-items: stretch; /* Stretch items to full width */
+    align-items: stretch; /*Stretch items to full width*/
   }
 
   .top-btns mat-form-field {
+    flex: 1 1 auto; /* Grow, shrink, base width 200px */
     max-width: 100%; /* Take full width on smaller screens */
     margin-bottom: 10px; /* Space between stacked fields */
   }

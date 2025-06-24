@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store, select } from '@ngrx/store';
 import { Observable, combineLatest, Subject } from 'rxjs';
-import { takeUntil, tap, map, filter } from 'rxjs/operators';
+import { takeUntil, tap, map, filter, startWith } from 'rxjs/operators'; // Import startWith
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 // Models from your existing project structure
@@ -63,7 +63,6 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   classes$!: Observable<ClassesModel[]>;
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
-  // Raw reports data from NgRx store (aliasing selectComments as selectReports for clarity)
   reports$: Observable<ReportsModel[]> = this.store.pipe(select(selectReports));
   isLoading$: Observable<boolean> = this.store.pipe(select(selectIsLoading));
   errorMsg$: Observable<string> = this.store.pipe(
@@ -72,29 +71,25 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  // Processed data observables for display in template
   overallAnalysisData$!: Observable<OverallAnalysisData | null>;
   subjectAnalysisData$!: Observable<SubjectAnalysisData | null>;
   studentPerformanceDataArray$!: Observable<
     StudentPerformanceDisplayData[] | null
   >;
 
-  // For per-subject analysis selection
   selectedSubjectCode: string = '';
   availableSubjectsForSelection: { code: string; name: string }[] = [];
 
-  // For per-student analysis selection
   selectedStudent: StudentsModel | null = null;
   availableStudentsForSelection: StudentsModel[] = [];
 
-  // Chart configuration for ng2-charts
   public lineChartOptions: ChartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Important for flexible sizing
+    maintainAspectRatio: false,
     scales: {
       y: {
         beginAtZero: true,
-        max: 100, // Marks are out of 100
+        max: 100,
         title: {
           display: true,
           text: 'Mark (%)',
@@ -109,7 +104,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     },
     plugins: {
       legend: {
-        display: false, // No legend for single student performance
+        display: false,
       },
       tooltip: {
         callbacks: {
@@ -123,89 +118,83 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   public lineChartType: ChartType = 'line';
 
   constructor(private store: Store, private snackBar: MatSnackBar) {
-    // Dispatch initial actions to load terms and classes for the form
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
   }
 
   ngOnInit(): void {
-    // Initialize observables for terms and classes
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
 
-    // Initialize the analysis form
     this.analysisForm = new FormGroup({
       term: new FormControl(null, Validators.required),
       clas: new FormControl(null, Validators.required),
       examType: new FormControl(null, Validators.required),
-
-      selectedSubject: new FormControl(null),
-      selectedStudent: new FormControl(null),
+      selectedSubject: new FormControl(null), // For reactive form tracking of subject dropdown
+      selectedStudent: new FormControl(null), // For reactive form tracking of student dropdown
     });
-
-    // --- Data Processing Pipelines ---
 
     // Overall Analysis Data pipeline
     this.overallAnalysisData$ = this.reports$.pipe(
       map((reports) => this.processOverallAnalysis(reports)),
       tap((overallData) => {
-        // When overall data is processed, update available subjects and students for dropdowns
         if (overallData) {
           this.availableSubjectsForSelection = overallData.uniqueSubjects;
           this.availableStudentsForSelection = this.extractAllStudents(
             overallData.reportsRaw || []
-          ); // reportsRaw holds original reports
+          );
         } else {
           this.availableSubjectsForSelection = [];
           this.availableStudentsForSelection = [];
         }
-        // Reset selections if reports change or become null
+        // Reset selections and form controls to null when new reports are loaded/cleared
         this.selectedSubjectCode = '';
         this.selectedStudent = null;
-        // Also update form controls for consistency
-        this.analysisForm.get('selectedSubject')?.patchValue(null);
-        this.analysisForm.get('selectedStudent')?.patchValue(null);
+        this.analysisForm
+          .get('selectedSubject')
+          ?.patchValue(null, { emitEvent: false }); // Use emitEvent: false to prevent recursive triggering of valueChanges
+        this.analysisForm
+          .get('selectedStudent')
+          ?.patchValue(null, { emitEvent: false }); // Same here
       }),
       takeUntil(this.destroy$)
     );
 
-    // Subject Analysis Data pipeline (depends on reports and selectedSubjectCode from form control)
+    // Subject Analysis Data pipeline
     this.subjectAnalysisData$ = combineLatest([
       this.reports$,
       this.analysisForm.get('selectedSubject')!.valueChanges.pipe(
-        map((code) => code),
+        startWith(this.analysisForm.get('selectedSubject')!.value), // Emit initial value of form control
         tap((code) => (this.selectedSubjectCode = code)) // Keep selectedSubjectCode in sync
       ),
     ]).pipe(
       filter(
         ([reports, subjectCode]) =>
           !!reports && reports.length > 0 && !!subjectCode
-      ), // Only proceed if data and subjectCode exist
+      ),
       map(([reports, subjectCode]) =>
         this.processSubjectAnalysis(reports, subjectCode)
       ),
       takeUntil(this.destroy$)
     );
 
-    // Student Performance Data pipeline (depends on reports and selectedStudent from form control)
+    // Student Performance Data pipeline
     this.studentPerformanceDataArray$ = combineLatest([
       this.reports$,
       this.analysisForm.get('selectedStudent')!.valueChanges.pipe(
-        // Start with the initial value for immediate processing
-        map((student) => student),
+        startWith(this.analysisForm.get('selectedStudent')!.value), // Emit initial value of form control
         tap((student) => (this.selectedStudent = student)) // Keep selectedStudent in sync
       ),
     ]).pipe(
       filter(
         ([reports, student]) => !!reports && reports.length > 0 && !!student
-      ), // Only proceed if data and student exist
+      ),
       map(([reports, student]) =>
         this.processStudentPerformance(reports, student)
       ),
       takeUntil(this.destroy$)
     );
 
-    // --- Error Message Subscription ---
     this.errorMsg$.pipe(takeUntil(this.destroy$)).subscribe((msg) => {
       if (msg) {
         this.snackBar.open(msg, 'Dismiss', {
@@ -218,10 +207,10 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next(); // Signal to all subscriptions to unsubscribe
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  // --- Form Control Getters ---
   get termControl() {
     return this.analysisForm.get('term');
   }
@@ -238,18 +227,14 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     return this.analysisForm.get('selectedStudent');
   }
 
-  // New getter to get the name of the currently selected subject
   get selectedSubjectName(): string {
     const selectedCode = this.analysisForm.get('selectedSubject')?.value;
     const subject = this.availableSubjectsForSelection.find(
       (s) => s.code === selectedCode
     );
-    return subject ? subject.name : 'Selected Subject'; // Default text if not found
+    return subject ? subject.name : 'Selected Subject';
   }
 
-  // --- Event Handlers ---
-
-  // Called when "Get Analysis" button is clicked
   fetchAnalysisData() {
     if (this.analysisForm.invalid) {
       this.snackBar.open(
@@ -262,10 +247,8 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     }
 
     const { term, clas, examType } = this.analysisForm.value;
-    // Dispatch the action to fetch reports based on the form criteria
     this.store.dispatch(
       viewReportsActions.viewReports({
-        // Corrected action from marksActions
         name: clas,
         num: term.num,
         year: term.year,
@@ -274,66 +257,51 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Helper for mat-select when comparing objects (StudentsModel, TermsModel, ClassesModel)
   compareFn(o1: any, o2: any): boolean {
     if (o1 && o2) {
       if (o1.studentNumber && o2.studentNumber) {
-        // For StudentsModel
         return o1.studentNumber === o2.studentNumber;
       }
       if (
         typeof o1.num === 'number' &&
-        typeof o2.num === 'number' &&
         typeof o1.year === 'number' &&
+        typeof o2.num === 'number' &&
         typeof o2.year === 'number'
       ) {
-        // For TermsModel
         return o1.num === o2.num && o1.year === o2.year;
       }
       if (o1.id && o2.id) {
-        // For ClassesModel (assuming ClassesModel has an 'id')
         return o1.id === o2.id;
       }
-      return o1 === o2; // Fallback for primitive values or direct string comparisons
+      return o1 === o2;
     }
     return o1 === o2;
   }
 
-  // Event handler for tab changes (optional, but good for clearing state/defaults)
   onTabChange(event: any): void {
-    // Logic to reset selections when changing tabs if desired
     if (event.index === 0) {
-      // Overall Class Analysis tab
-      this.selectedStudent = null; // Clear student selection
-      this.analysisForm.get('selectedStudent')?.patchValue(null);
+      this.selectedStudent = null;
+      this.analysisForm
+        .get('selectedStudent')
+        ?.patchValue(null, { emitEvent: false });
     } else if (event.index === 1) {
-      // Individual Student Performance tab
-      this.selectedSubjectCode = ''; // Clear subject selection
-      this.analysisForm.get('selectedSubject')?.patchValue(null);
+      this.selectedSubjectCode = '';
+      this.analysisForm
+        .get('selectedSubject')
+        ?.patchValue(null, { emitEvent: false });
     }
   }
 
-  // Handler for subject selection dropdown (in Overall Analysis tab for subject-specific view)
   onSubjectSelectedForOverallAnalysis(subjectCode: string): void {
-    this.selectedSubjectCode = subjectCode;
-    this.analysisForm.get('selectedSubject')?.patchValue(subjectCode); // Keep form control in sync
-    // The subjectAnalysisData$ observable will automatically react via the form control
+    // Setting form control value will trigger the pipeline
+    this.analysisForm.get('selectedSubject')?.patchValue(subjectCode);
   }
 
-  // Handler for student selection dropdown (in Individual Student Performance tab)
   onStudentSelectedForIndividualPerformance(student: StudentsModel): void {
-    this.selectedStudent = student;
-    this.analysisForm.get('selectedStudent')?.patchValue(student); // Keep form control in sync
-    // The studentPerformanceDataArray$ observable will automatically react via the form control
+    // Setting form control value will trigger the pipeline
+    this.analysisForm.get('selectedStudent')?.patchValue(student);
   }
 
-  // --- Data Processing Helper Functions (Pure functions or class methods) ---
-
-  /**
-   * Processes raw ReportsModel[] to generate overall class analysis data.
-   * @param reports The array of ReportsModel fetched from the store.
-   * @returns OverallAnalysisData or null if no reports.
-   */
   private processOverallAnalysis(
     reports: ReportsModel[]
   ): OverallAnalysisData | null {
@@ -353,28 +321,25 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     const uniqueSubjectsMap = new Map<string, { code: string; name: string }>();
 
     reports.forEach((reportItem) => {
-      // Collect student overall averages
-      // Ensure all required StudentsModel properties are initialized, even if empty, to match interface
       const studentFullName: StudentsModel = {
         studentNumber: reportItem.studentNumber,
         name: reportItem.report.name,
         surname: reportItem.report.surname,
-        dob: new Date(), // Placeholder
-        gender: '', // Assuming gender might be in ReportModel.report, or provide default
-        idnumber: '', // Placeholder
-        dateOfJoining: new Date(), // Placeholder
-        cell: '', // Placeholder
-        email: '', // Placeholder
-        address: '', // Placeholder
-        prevSchool: '', // Placeholder
-        role: null as any, // Placeholder
+        dob: new Date(),
+        gender: '',
+        idnumber: '',
+        dateOfJoining: new Date(),
+        cell: '',
+        email: '',
+        address: '',
+        prevSchool: '',
+        role: null as any,
       };
       studentAverages.push({
         student: studentFullName,
         averageMark: reportItem.report.percentageAverge,
       });
 
-      // Collect subject pass rates and unique subjects
       reportItem.report.subjectsTable.forEach((subjectInfo) => {
         if (!subjectPassCounts[subjectInfo.subjectCode]) {
           subjectPassCounts[subjectInfo.subjectCode] = {
@@ -402,9 +367,8 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
             ? (data.passedStudents / data.totalStudents) * 100
             : 0,
       }))
-      .sort((a, b) => a.subjectName.localeCompare(b.subjectName)); // Sort for consistent display
+      .sort((a, b) => a.subjectName.localeCompare(b.subjectName));
 
-    // Sort and slice for top/bottom 5 students
     studentAverages.sort((a, b) => b.averageMark - a.averageMark);
     const top5StudentsOverall = studentAverages.slice(0, 5);
     const bottom5StudentsOverall = studentAverages.slice(
@@ -416,16 +380,10 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
       top5StudentsOverall,
       bottom5StudentsOverall,
       uniqueSubjects: Array.from(uniqueSubjectsMap.values()),
-      reportsRaw: reports, // Pass raw reports to extract students later
+      reportsRaw: reports,
     };
   }
 
-  /**
-   * Processes raw ReportsModel[] to generate per-subject analysis data for a specific subject.
-   * @param reports The array of ReportsModel.
-   * @param subjectCode The code of the subject to analyze.
-   * @returns SubjectAnalysisData or null.
-   */
   private processSubjectAnalysis(
     reports: ReportsModel[],
     subjectCode: string
@@ -446,27 +404,25 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
         (s) => s.subjectCode === subjectCode
       );
       if (subjectInfo && subjectInfo.mark !== null) {
-        // Ensure all required StudentsModel properties are initialized, even if empty, to match interface
         studentsForSubject.push({
           student: {
             studentNumber: reportItem.studentNumber,
             name: reportItem.report.name,
             surname: reportItem.report.surname,
-            dob: new Date(), // Placeholder
-            gender: '', // Assuming gender is in ReportModel
-            idnumber: '', // Placeholder
-            dateOfJoining: new Date(), // Placeholder
-            cell: '', // Placeholder
-            email: '', // Placeholder
-            address: '', // Placeholder
-            prevSchool: '', // Placeholder
-            role: null as any, // Placeholder
+            dob: new Date(),
+            gender: '',
+            idnumber: '',
+            dateOfJoining: new Date(),
+            cell: '',
+            email: '',
+            address: '',
+            prevSchool: '',
+            role: null as any,
           },
           mark: subjectInfo.mark,
           grade: subjectInfo.grade,
         });
 
-        // Count grades
         gradeCounts[subjectInfo.grade] =
           (gradeCounts[subjectInfo.grade] || 0) + 1;
       }
@@ -478,8 +434,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
       Math.max(0, studentsForSubject.length - 5)
     );
 
-    // Sort grades by a predefined order (e.g., A*, A, B, C...)
-    const gradeOrder = ['A*', 'A', 'B', 'C', 'D', 'E', 'F', 'Ungraded']; // Example order, adjust as needed
+    const gradeOrder = ['A*', 'A', 'B', 'C', 'D', 'E', 'F', 'Ungraded'];
     const gradeDistribution = Object.keys(gradeCounts)
       .map((grade) => ({
         grade,
@@ -501,12 +456,6 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     };
   }
 
-  /**
-   * Extracts a unique list of StudentsModel from the reports data.
-   * Used for the student selection dropdown for individual performance.
-   * @param reports The array of ReportsModel.
-   * @returns A unique array of StudentsModel.
-   */
   private extractAllStudents(reports: ReportsModel[]): StudentsModel[] {
     if (!reports) return [];
     const studentsMap = new Map<string, StudentsModel>();
@@ -515,15 +464,15 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
         studentNumber: reportItem.studentNumber,
         name: reportItem.report.name,
         surname: reportItem.report.surname,
-        dob: new Date(), // Placeholder
-        gender: '', // Assuming gender is in ReportModel
-        idnumber: '', // Placeholder
-        dateOfJoining: new Date(), // Placeholder
-        cell: '', // Placeholder
-        email: '', // Placeholder
-        address: '', // Placeholder
-        prevSchool: '', // Placeholder
-        role: null as any, // Placeholder
+        dob: new Date(),
+        gender: '',
+        idnumber: '',
+        dateOfJoining: new Date(),
+        cell: '',
+        email: '',
+        address: '',
+        prevSchool: '',
+        role: null as any,
       };
       if (!studentsMap.has(studentDetails.studentNumber)) {
         studentsMap.set(studentDetails.studentNumber, studentDetails);
@@ -536,12 +485,6 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Processes raw ReportsModel[] to generate performance chart data for a specific student.
-   * @param reports The array of ReportsModel.
-   * @param student The selected student.
-   * @returns An array containing the processed chart data for the student.
-   */
   private processStudentPerformance(
     reports: ReportsModel[],
     student: StudentsModel
@@ -558,11 +501,10 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     }
 
     const subjectsData = studentReport.report.subjectsTable;
-    // Sort subjects alphabetically for consistent chart display
     subjectsData.sort((a, b) => a.subjectName.localeCompare(b.subjectName));
 
     const labels = subjectsData.map((s) => s.subjectName);
-    const marks = subjectsData.map((s) => (s.mark !== null ? s.mark : 0)); // Use 0 for null marks on chart
+    const marks = subjectsData.map((s) => (s.mark !== null ? s.mark : 0));
 
     const chartData: ChartConfiguration<'line'>['data'] = {
       labels: labels,
@@ -571,7 +513,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
           data: marks,
           label: `${student.name} ${student.surname}'s Performance`,
           fill: true,
-          tension: 0.3, // Smoothness of the line
+          tension: 0.3,
           borderColor: 'rgba(75,192,192,1)',
           backgroundColor: 'rgba(75,192,192,0.2)',
           pointBackgroundColor: 'rgba(75,192,192,1)',
