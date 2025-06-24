@@ -150,7 +150,7 @@
           </div>
         </mat-expansion-panel>
 
-        <mat-expansion-panel>
+        <mat-expansion-panel *ngIf="role === 'admin' || role ==='teacher' || role === 'hod'">
           <mat-expansion-panel-header>
             <mat-panel-title>
               <mat-icon>analytics</mat-icon>
