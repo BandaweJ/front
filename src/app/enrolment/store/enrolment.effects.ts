@@ -326,21 +326,23 @@ export class EnrolmentEffects {
   unEnrolStudents$ = createEffect(() =>
     this.actions$.pipe(
       ofType(fromEnrolmentActions.UnenrolStudentActions.unenrolStudent),
-      switchMap((data) =>
-        this.enrolService.unenrolStudent(data.enrol).pipe(
-          tap((data) =>
+      // 'action' here is the original action dispatched, containing { enrol: EnrolsModel }
+      switchMap((action) =>
+        this.enrolService.unenrolStudent(action.enrol).pipe(
+          tap(() =>
+            // tap receives the service response, but we don't need it for the snackbar
             this.snackBar.open('Student Removed From Class', 'OK', {
               duration: 3000,
               verticalPosition: 'top',
               horizontalPosition: 'center',
             })
           ),
-          map((enrol) => {
-            // console.log(teacher);
-            return fromEnrolmentActions.UnenrolStudentActions.unenrolStudentSuccess(
-              { enrol }
-            );
-          }),
+          // CORRECTED LINE: Pass the original 'action.enrol' to the success action
+          map(() =>
+            fromEnrolmentActions.UnenrolStudentActions.unenrolStudentSuccess({
+              enrol: action.enrol,
+            })
+          ),
           catchError((error: HttpErrorResponse) =>
             of(
               fromEnrolmentActions.UnenrolStudentActions.unenrolStudentFail({

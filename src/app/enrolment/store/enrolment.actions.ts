@@ -8,9 +8,7 @@ import { ClassesModel } from '../models/classes.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TermsModel } from '../models/terms.model';
 import { EnrolsModel } from '../models/enrols.model';
-import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolStats } from '../models/enrol-stats.model';
-import { RegisterModel } from '../../attendance/models/register.model';
 import { StudentsSummary } from '../models/students-summary.model';
 
 export const fetchClasses = createAction('[Enrolment] fetch classes list');
