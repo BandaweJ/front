@@ -42,9 +42,9 @@
   </form>
 
   <!-- Loading spinner and error messages -->
-  <div class="feedback-area">
-    <mat-spinner *ngIf="(isLoading$ | async)" class="loading-spinner"></mat-spinner>
-    <div *ngIf="!(isLoading$ | async) && (errorMsg$ | async) as error" class="error-message mat-error">
+  <div class="feedback-area" *ngIf="isLoading$ | async as isLoading">
+    <mat-spinner *ngIf="isLoading" class="loading-spinner"></mat-spinner>
+    <div *ngIf="isLoading && (errorMsg$ | async) as error" class="error-message mat-error">
       {{ error }}
     </div>
   </div>

@@ -22,7 +22,7 @@ mat-toolbar span {
   display: flex;
   flex-wrap: wrap;
   gap: 20px; /* Space between form fields and button */
-  align-items: flex-end; /* Align inputs and button bottoms */
+  align-items: flex-start; /* Align inputs and button bottoms */
   margin-bottom: 30px;
   padding: 0 10px; /* Slight padding from card edge */
 }
