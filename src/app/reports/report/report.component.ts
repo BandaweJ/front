@@ -43,9 +43,6 @@ export class ReportComponent implements OnInit {
     });
     this.studentNumber = this.report.report.studentNumber;
 
-    // Manual subscription for user role, ensure it's unsubscribed if this component's lifecycle is long
-    // If this component is *always* recreated when the parent's *ngFor re-renders,
-    // then manual unsubscribe might not be strictly necessary, but it's good practice.
     this.userSubscription = this.store.select(selectUser).subscribe((user) => {
       if (user) {
         this.role = user.role;

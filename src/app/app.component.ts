@@ -6,7 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Store } from '@ngrx/store';
@@ -101,14 +101,4 @@ export class AppComponent implements OnInit, OnDestroy {
       this.isSidenavCollapsed = !isOpen;
     }
   }
-
-  // getSidenavContentMargin(): string {
-  //   // Use isLoggedInStatus (the boolean property)
-  //   if (this.isScreenSmall || !this.isLoggedInStatus) {
-  //     return '0px'; // No margin on small screens (overlay mode) OR when not logged in
-  //   } else {
-  //     // On large screens (side mode) AND logged in
-  //     return this.isSidenavCollapsed ? '64px' : '250px'; // Margin based on collapsed/expanded state
-  //   }
-  // }
 }

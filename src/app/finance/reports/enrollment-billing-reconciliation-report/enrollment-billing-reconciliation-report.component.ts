@@ -17,10 +17,7 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 // Ngrx actions and selectors
-import {
-  fetchTerms,
-  fetchClasses,
-} from 'src/app/enrolment/store/enrolment.actions';
+
 import * as enrolmentActions from 'src/app/enrolment/store/enrolment.actions'; // Alias for fetchEnrols / fetchTermEnrols
 import {
   selectTerms,

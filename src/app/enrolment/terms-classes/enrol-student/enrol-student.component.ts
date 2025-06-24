@@ -17,7 +17,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { enrolStudents } from '../../store/enrolment.actions';
 import { Subject, combineLatest } from 'rxjs'; // Import Subject and combineLatest
-import { takeUntil, map, filter as rxFilter } from 'rxjs/operators'; // Import takeUntil and rename filter to rxFilter
+import { takeUntil, filter as rxFilter } from 'rxjs/operators'; // Import takeUntil and rename filter to rxFilter
 import { selectEnrols } from '../../store/enrolment.selectors';
 import { Residence } from '../../models/residence.enum';
 

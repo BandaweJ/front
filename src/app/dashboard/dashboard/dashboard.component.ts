@@ -4,26 +4,11 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subject, combineLatest, filter, tap, takeUntil } from 'rxjs'; // Added Subject, combineLatest, filter, map, takeUntil
 import { selectUser } from 'src/app/auth/store/auth.selectors';
-import {
-  fetchClasses,
-  fetchTerms,
-  fetchTotalEnrols,
-} from 'src/app/enrolment/store/enrolment.actions';
-import {
-  selectClasses,
-  selectCurrentTerm,
-  selectTotalEnroment,
-} from 'src/app/enrolment/store/enrolment.selectors';
+
+import { selectCurrentTerm } from 'src/app/enrolment/store/enrolment.selectors';
 
 import { ROLES } from 'src/app/registration/models/roles.enum';
-import {
-  fetchStudents,
-  fetchTeachers,
-} from 'src/app/registration/store/registration.actions';
-import {
-  selectStudents,
-  selectTeachers,
-} from 'src/app/registration/store/registration.selectors';
+
 import { currentTermActions } from '../../enrolment/store/enrolment.actions';
 
 @Component({

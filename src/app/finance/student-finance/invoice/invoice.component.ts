@@ -2,18 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { invoiceActions } from '../../store/finance.actions';
 import { InvoiceModel } from '../../models/invoice.model';
-import {
-  selectInVoiceStats,
-  selectTermInvoices,
-} from '../../store/finance.selector';
+import { selectTermInvoices } from '../../store/finance.selector';
 
 import { SharedService } from 'src/app/shared.service';
 
 import { selectUser } from 'src/app/auth/store/auth.selectors';
-import {
-  currentEnrolementActions,
-  fetchTerms,
-} from 'src/app/enrolment/store/enrolment.actions';
+import { fetchTerms } from 'src/app/enrolment/store/enrolment.actions';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
 

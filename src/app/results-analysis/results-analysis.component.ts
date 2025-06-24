@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store, select } from '@ngrx/store';
-import { Observable, Subscription, combineLatest, Subject } from 'rxjs';
+import { Observable, combineLatest, Subject } from 'rxjs';
 import { takeUntil, tap, map, filter } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -138,8 +138,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
       term: new FormControl(null, Validators.required),
       clas: new FormControl(null, Validators.required),
       examType: new FormControl(null, Validators.required),
-      // Adding form controls for selectedSubject and selectedStudent for reactive forms
-      // Even if they are bound via [(ngModel)] in template, having them here ensures reactivity if needed
+
       selectedSubject: new FormControl(null),
       selectedStudent: new FormControl(null),
     });
@@ -174,9 +173,6 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     this.subjectAnalysisData$ = combineLatest([
       this.reports$,
       this.analysisForm.get('selectedSubject')!.valueChanges.pipe(
-        // Start with the initial value for immediate processing if selection is pre-set
-        // or if overallData processing sets it. This ensures it doesn't wait for a change.
-        // Also, use distinctUntilChanged() to prevent unnecessary re-emissions
         map((code) => code),
         tap((code) => (this.selectedSubjectCode = code)) // Keep selectedSubjectCode in sync
       ),
@@ -217,8 +213,6 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
           verticalPosition: 'top',
           panelClass: ['error-snackbar'],
         });
-        // You might want to dispatch an action to clear the error state after showing it
-        // this.store.dispatch(marksActions.clearReportsError()); // Define this action if needed
       }
     });
   }

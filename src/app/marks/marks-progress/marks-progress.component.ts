@@ -12,10 +12,7 @@ import {
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors'; // Ensure correct path
 import { ExamType } from '../models/examtype.enum';
-import {
-  fetchMarksProgressActions,
-  fetchSubjectMarksInClass, // Not used here, can remove if truly not used
-} from '../store/marks.actions';
+import { fetchMarksProgressActions } from '../store/marks.actions';
 import { TermsModel } from 'src/app/enrolment/models/terms.model'; // Ensure correct path
 import { ClassesModel } from 'src/app/enrolment/models/classes.model'; // Ensure correct path
 import { SubjectsModel } from '../models/subjects.model'; // Ensure this model is actually used (it's not in the displayedColumns)

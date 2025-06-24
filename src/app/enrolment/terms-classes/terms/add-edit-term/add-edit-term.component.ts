@@ -9,7 +9,6 @@ import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
   addTermAction,
   editTermAction,
-  fetchTerms,
 } from 'src/app/enrolment/store/enrolment.actions';
 import { selectEnrolErrorMsg } from 'src/app/enrolment/store/enrolment.selectors';
 

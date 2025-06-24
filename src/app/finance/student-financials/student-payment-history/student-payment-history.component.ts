@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { PaymentHistoryItem } from '../../models/payment-history.model';
 import {
   selectCombinedPaymentHistory, // This is the new selector we'll create

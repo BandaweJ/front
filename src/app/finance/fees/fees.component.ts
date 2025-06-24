@@ -1,6 +1,5 @@
 import { ROLES } from './../../registration/models/roles.enum';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { feesActions } from '../store/finance.actions';

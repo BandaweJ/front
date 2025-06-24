@@ -4,7 +4,6 @@ import { SigninComponent } from './auth/signin/signin.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { DashboardComponent } from './dashboard/dashboard/dashboard.component';
 import { AuthGuardService } from './auth/auth-guard.service';
-import { ParentsListComponent } from './registration/parents-list/parents-list.component';
 import { StudentsListComponent } from './registration/students-list/students-list.component';
 import { TeachersListComponent } from './registration/teachers-list/teachers-list.component';
 import { TermsClassesComponent } from './enrolment/terms-classes/terms-classes.component';
@@ -12,14 +11,12 @@ import { TermsComponent } from './enrolment/terms-classes/terms/terms.component'
 import { ClassesComponent } from './enrolment/terms-classes/classes/classes.component';
 import { SubjectsComponent } from './marks/subjects/subjects.component';
 import { EnterMarksComponent } from './marks/enter-marks/enter-marks.component';
-import { PerfomanceComponent } from './marks/perfomance/perfomance.component';
 import { ReportsComponent } from './reports/reports/reports.component';
 import { MarkRegisterComponent } from './attendance/mark-register/mark-register.component';
 import { MigrateClassEnrolmentComponent } from './enrolment/migrate-class-enrolment/migrate-class-enrolment.component';
 import { TeachersCommentsComponent } from './marks/teachers-comments/teachers-comments.component';
 import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.component';
 import { ProfileComponent } from './auth/profile/profile.component';
-import { TeachersSummaryListComponent } from './registration/teachers-list/teachers-summary-list/teachers-summary-list.component';
 import { TeacherViewComponent } from './registration/teachers-list/teacher-view/teacher-view.component';
 import { StudentViewComponent } from './registration/students-list/student-view/student-view.component';
 import { ClassListsComponent } from './enrolment/terms-classes/class-lists/class-lists.component';
@@ -146,12 +143,7 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
     title: 'Mark Sheets',
   },
-  {
-    path: 'perfomance',
-    component: PerfomanceComponent,
-    canActivate: [AuthGuardService],
-    title: 'Student Perfomance',
-  },
+
   {
     path: 'reports',
     component: ReportsComponent,

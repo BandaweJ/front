@@ -16,7 +16,6 @@ import {
   selectTotalEnroment,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { InvoiceModel } from 'src/app/finance/models/invoice.model';
-import { invoiceActions } from 'src/app/finance/store/finance.actions';
 import { selectedStudentInvoice } from 'src/app/finance/store/finance.selector';
 import { fetchSubjects } from 'src/app/marks/store/marks.actions';
 import { selectSubjects } from 'src/app/marks/store/marks.selectors';
@@ -30,7 +29,6 @@ import {
   selectTeachers,
 } from 'src/app/registration/store/registration.selectors';
 import { ReportsModel } from 'src/app/reports/models/reports.model';
-import { viewReportsActions } from 'src/app/reports/store/reports.actions';
 import { selectStudentReports } from 'src/app/reports/store/reports.selectors';
 
 @Component({

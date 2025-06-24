@@ -24,8 +24,6 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { PaymentMethods } from '../../models/payment-methods.enum';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
-import { invoiceActions, receiptActions } from '../../store/finance.actions';
-import { fetchTerms } from 'src/app/enrolment/store/enrolment.actions';
 
 @Component({
   selector: 'app-fees-collection-report',

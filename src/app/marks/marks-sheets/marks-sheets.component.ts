@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -19,7 +19,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { SubjectsModel } from '../models/subjects.model';
 import { SubjectInfoModel } from 'src/app/reports/models/subject-info.model';
-import { ReportModel } from 'src/app/reports/models/report.model';
 import * as jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ExamType } from '../models/examtype.enum';

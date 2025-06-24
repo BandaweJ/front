@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { User } from '../models/user.model';
+
 import { Store } from '@ngrx/store';
 import { selectUser, selectUserDetails } from '../store/auth.selectors';
 import { fetchUserDetailsActions } from '../store/auth.actions';

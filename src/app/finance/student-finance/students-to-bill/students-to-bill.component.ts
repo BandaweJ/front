@@ -1,9 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Store, on } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { selectStudentsToBill } from '../../store/finance.selector';
 import { billingActions } from '../../store/finance.actions';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
-import { StudentsModel } from 'src/app/registration/models/students.model';
 import { Observable } from 'rxjs';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';

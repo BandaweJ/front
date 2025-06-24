@@ -15,7 +15,6 @@ import {
   editStudentAction,
 } from '../../store/registration.actions';
 import * as moment from 'moment';
-import { resetErrorMessage } from 'src/app/auth/store/auth.actions';
 import { ROLES } from '../../models/roles.enum';
 import { Residence } from '../../models/residence.enum';
 

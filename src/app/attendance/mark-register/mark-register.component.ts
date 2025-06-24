@@ -9,7 +9,6 @@ import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
-import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
   fetchClasses,
@@ -21,7 +20,6 @@ import {
   selectEnrols,
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
-import { StudentsModel } from 'src/app/registration/models/students.model';
 import { RegisterModel } from '../models/register.model';
 import { markRegisterActions } from '../store/attendance.actions';
 import { selectAttendances } from '../store/attendance.selectors';

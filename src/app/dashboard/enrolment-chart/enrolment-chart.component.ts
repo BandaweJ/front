@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { ChartConfiguration, ChartType } from 'chart.js';
 import { fetchEnrolsStats } from 'src/app/enrolment/store/enrolment.actions';
 import { selectEnrolsStats } from 'src/app/enrolment/store/enrolment.selectors';
 
@@ -15,23 +15,22 @@ export class EnrolmentChartComponent implements OnInit {
   public barChartPlugins = [];
   public barChartData!: ChartConfiguration<'bar'>['data'];
 
-  constructor(private store: Store) { 
-    this.store.dispatch(fetchEnrolsStats())
+  constructor(private store: Store) {
+    this.store.dispatch(fetchEnrolsStats());
   }
-  
+
   ngOnInit(): void {
-    this.store.select(selectEnrolsStats).subscribe(res => {
+    this.store.select(selectEnrolsStats).subscribe((res) => {
       if (res) {
         this.barChartData = {
           labels: [...res.clas],
           datasets: [
             { data: [...res.boys], label: 'Boys' },
-            { data: [...res.girls], label: 'Girls' }
-          ]
-        }
+            { data: [...res.girls], label: 'Girls' },
+          ],
+        };
       }
-      
-      })
+    });
   }
 
   // public barChartDat: ChartConfiguration<'bar'>['data'] = {
@@ -44,12 +43,12 @@ export class EnrolmentChartComponent implements OnInit {
 
   public barChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
-    
+
     plugins: {
       title: {
         display: false,
-        text: 'Current School Enrolment'
-      }
-    }
+        text: 'Current School Enrolment',
+      },
+    },
   };
 }

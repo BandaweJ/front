@@ -1,10 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { TeachersModel } from '../models/teachers.model';
 import {
@@ -32,7 +26,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
-import { SharedService } from 'src/app/shared.service';
 
 @Component({
   selector: 'app-teachers-list',

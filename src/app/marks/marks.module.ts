@@ -9,7 +9,6 @@ import { EffectsModule } from '@ngrx/effects';
 import { MarksEffects } from './store/marks.effects';
 import { AddEditSubjectComponent } from './subjects/add-edit-subject/add-edit-subject.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { PerfomanceComponent } from './perfomance/perfomance.component';
 import { NgChartsModule } from 'ng2-charts';
 import { TeachersCommentsComponent } from './teachers-comments/teachers-comments.component';
 import { MarksSheetsComponent } from './marks-sheets/marks-sheets.component';
@@ -22,7 +21,6 @@ import { MarksProgressComponent } from './marks-progress/marks-progress.componen
     EnterMarksComponent,
     SubjectsComponent,
     AddEditSubjectComponent,
-    PerfomanceComponent,
     TeachersCommentsComponent,
     MarksSheetsComponent,
     MarksProgressComponent,

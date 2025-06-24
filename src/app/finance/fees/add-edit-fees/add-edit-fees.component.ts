@@ -1,15 +1,10 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { FeesModel } from '../../models/fees.model';
-import { Residence } from 'src/app/enrolment/models/residence.enum';
 import { feesActions } from '../../store/finance.actions';
 import { Title } from '@angular/platform-browser';
-import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
-import { TermsModel } from 'src/app/enrolment/models/terms.model';
-import { map } from 'rxjs';
 import { SharedService } from 'src/app/shared.service';
 import { FeesNames } from '../../models/fees-names.enum';
 

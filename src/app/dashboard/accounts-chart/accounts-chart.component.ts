@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { ChartConfiguration, ChartType } from 'chart.js';
-import { fetchAccountStats } from 'src/app/auth/store/auth.actions';
 import { selectAccStats } from 'src/app/auth/store/auth.selectors';
 
 @Component({

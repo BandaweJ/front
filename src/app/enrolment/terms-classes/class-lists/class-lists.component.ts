@@ -20,7 +20,6 @@ import { getEnrolmentByClass } from '../../store/enrolment.actions';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { StudentsModel } from 'src/app/registration/models/students.model';
 import { EnrolsModel } from '../../models/enrols.model';
 
 @Component({

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
+import { ChartConfiguration, ChartOptions } from 'chart.js';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -13,7 +13,6 @@ import {
   tap,
 } from 'rxjs';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
-import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { MarksModel } from 'src/app/marks/models/marks.model';
 import { studentMarksActions } from 'src/app/marks/store/marks.actions';
 import { selectStudentMarks } from 'src/app/marks/store/marks.selectors';

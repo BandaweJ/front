@@ -6,7 +6,6 @@ import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
-import { markRegisterActions } from 'src/app/attendance/store/attendance.actions';
 
 @Component({
   selector: 'app-class-attendance-summary',
