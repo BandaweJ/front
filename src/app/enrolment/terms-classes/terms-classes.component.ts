@@ -221,24 +221,17 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
   customFilterPredicate = (data: EnrolsModel, filter: string): boolean => {
     const searchString = filter.trim().toLowerCase();
 
-    // Safely access nested student properties and combine with enrolment residence
-    const dataStr = (
-      (data.student?.studentNumber || '') +
-      (data.student?.surname || '') +
-      (data.student?.name || '') +
-      (data.student?.gender || '') +
-      (data.residence || '')
-    ) // Residence is directly on EnrolsModel
-      .toLowerCase();
+    // Explicitly concatenate all searchable fields, handling potential null/undefined
+    const studentNumber =
+      data.student?.studentNumber?.toString().toLowerCase() || '';
+    const surname = data.student?.surname?.toLowerCase() || '';
+    const name = data.student?.name?.toLowerCase() || '';
+    const gender = data.student?.gender?.toLowerCase() || '';
+    const residence = data.residence?.toLowerCase() || ''; // Assuming Residence enum can be converted to string
 
-    return dataStr.includes(searchString);
+    // Combine all parts into a single searchable string
+    const combinedString = `${studentNumber} ${surname} ${name} ${gender} ${residence}`;
+
+    return combinedString.includes(searchString);
   };
-
-  // Keep these commented out if not actively used.
-  // updateResidence(resi: string, enrol: EnrolsModel) {
-  //   const residence = resi as Residence;
-  //   const updatedEnrol = { ...enrol, residence };
-  //   console.log(updatedEnrol);
-  //   // this.store.dispatch(updateEnrol({ enrol }));
-  // }
 }
