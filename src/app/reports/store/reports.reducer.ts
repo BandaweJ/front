@@ -76,14 +76,14 @@ export const reportsReducer = createReducer(
     reportsActions.saveHeadCommentActions.saveHeadComment,
     (state, { comment }) => ({
       ...state,
-      isLoading: true,
+      // isLoading: true,
     })
   ),
   on(
     reportsActions.saveHeadCommentActions.saveHeadCommentSuccess,
     (state, { report }) => ({
       ...state,
-      isLoading: false,
+      // isLoading: false,
       reports: [
         ...state.reports.map((rep) =>
           rep.studentNumber === report.studentNumber
@@ -97,7 +97,7 @@ export const reportsReducer = createReducer(
     reportsActions.saveHeadCommentActions.saveHeadCommentFail,
     (state, { error }) => ({
       ...state,
-      isLoading: false,
+      // isLoading: false,
       errorMessage: error.message,
     })
   ),
