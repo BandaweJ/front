@@ -149,6 +149,10 @@ export const reportsReducer = createReducer(
   on(reportsActions.viewReportsActions.clearSelectedReport, (state) => ({
     ...state,
     selectedReport: null, // Clear the currently displayed report
+  })),
+  on(reportsActions.viewReportsActions.resetReports, (state) => ({
+    ...state,
+    reports: [],
   }))
   // on(reportsActions.saveHeadCommentActions.saveHeadCommentSuccess, (state))
 );

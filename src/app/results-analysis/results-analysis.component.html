@@ -72,7 +72,7 @@
                   <div *ngFor="let sr of overallData.subjectPassRates" class="pass-rate-item">
                     <span>{{ sr.subjectName }}:</span>
                     <span [ngClass]="{'pass': sr.passRate >= 50, 'fail': sr.passRate < 50}">
-                      {{ sr.passRate.toFixed(1) }}%
+                      {{ sr?.passRate?.toFixed(1) }}%
                     </span>
                   </div>
                   <div *ngIf="overallData.subjectPassRates.length === 0" class="no-data-small">No subject pass rates
@@ -86,7 +86,7 @@
               <mat-card-content>
                 <ol>
                   <li *ngFor="let student of overallData.top5StudentsOverall">
-                    {{ student.student.name }} {{ student.student.surname }} - {{ student.averageMark.toFixed(1) }}%
+                    {{ student.student.name }} {{ student.student.surname }} - {{ student?.averageMark?.toFixed(1) }}%
                   </li>
                   <li *ngIf="overallData.top5StudentsOverall.length === 0" class="no-data-small">No top students found.
                   </li>
@@ -99,7 +99,7 @@
               <mat-card-content>
                 <ol>
                   <li *ngFor="let student of overallData.bottom5StudentsOverall">
-                    {{ student.student.name }} {{ student.student.surname }} - {{ student.averageMark.toFixed(1) }}%
+                    {{ student.student.name }} {{ student.student.surname }} - {{ student?.averageMark?.toFixed(1) }}%
                   </li>
                   <li *ngIf="overallData.bottom5StudentsOverall.length === 0" class="no-data-small">No bottom students
                     found.</li>

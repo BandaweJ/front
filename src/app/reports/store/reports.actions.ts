@@ -58,6 +58,7 @@ export const viewReportsActions = createActionGroup({
     selectStudentReport: props<{ report: ReportsModel }>(),
     // --- NEW ACTION TO CLEAR DISPLAYED REPORT ---
     clearSelectedReport: emptyProps(),
+    resetReports: emptyProps(),
   },
 });
 

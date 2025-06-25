@@ -343,13 +343,22 @@ export class EnrolmentEffects {
               enrol: action.enrol,
             })
           ),
-          catchError((error: HttpErrorResponse) =>
-            of(
+          catchError((error: HttpErrorResponse) => {
+            this.snackBar.open(
+              'Error Removing Student From Class due to : ' + error.statusText,
+              'OK',
+              {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              }
+            );
+            return of(
               fromEnrolmentActions.UnenrolStudentActions.unenrolStudentFail({
                 ...error,
               })
-            )
-          )
+            );
+          })
         )
       )
     )

@@ -57,6 +57,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.store.dispatch(reportsActions.viewReportsActions.resetReports());
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
 

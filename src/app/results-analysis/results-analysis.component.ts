@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { viewReportsActions } from './../reports/store/reports.actions';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core'; // Import ChangeDetectorRef
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store, select } from '@ngrx/store';
 import { Observable, combineLatest, Subject } from 'rxjs';
-import { takeUntil, tap, map, filter, startWith } from 'rxjs/operators'; // Import startWith
+import { takeUntil, tap, map, filter, startWith } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 // Models from your existing project structure
@@ -27,7 +28,6 @@ import {
   selectReports,
   selectReportsErrorMsg,
 } from 'src/app/reports/store/reports.selectors'; // Corrected selectors
-import { viewReportsActions } from 'src/app/reports/store/reports.actions'; // Corrected action
 
 // Charting imports
 import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
@@ -117,12 +117,18 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   };
   public lineChartType: ChartType = 'line';
 
-  constructor(private store: Store, private snackBar: MatSnackBar) {
+  constructor(
+    private store: Store,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
+  ) {
+    // Inject ChangeDetectorRef
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
   }
 
   ngOnInit(): void {
+    this.store.dispatch(viewReportsActions.resetReports());
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
 
@@ -147,15 +153,21 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
           this.availableSubjectsForSelection = [];
           this.availableStudentsForSelection = [];
         }
-        // Reset selections and form controls to null when new reports are loaded/cleared
-        this.selectedSubjectCode = '';
-        this.selectedStudent = null;
-        this.analysisForm
-          .get('selectedSubject')
-          ?.patchValue(null, { emitEvent: false }); // Use emitEvent: false to prevent recursive triggering of valueChanges
-        this.analysisForm
-          .get('selectedStudent')
-          ?.patchValue(null, { emitEvent: false }); // Same here
+        // --- FIX for ExpressionChangedAfterItHasBeenCheckedError ---
+        // Defer resetting selections to the next change detection cycle
+        setTimeout(() => {
+          this.selectedSubjectCode = ''; // Set property directly
+          this.selectedStudent = null; // Set property directly
+          // Patch form controls with emitEvent: false to prevent triggering valueChanges
+          this.analysisForm
+            .get('selectedSubject')
+            ?.patchValue(null, { emitEvent: false });
+          this.analysisForm
+            .get('selectedStudent')
+            ?.patchValue(null, { emitEvent: false });
+          this.cdr.detectChanges(); // <--- Explicitly trigger change detection after state update
+        }, 0); // Defer to the next microtask queue/event loop tick
+        // --- END FIX ---
       }),
       takeUntil(this.destroy$)
     );
@@ -164,7 +176,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     this.subjectAnalysisData$ = combineLatest([
       this.reports$,
       this.analysisForm.get('selectedSubject')!.valueChanges.pipe(
-        startWith(this.analysisForm.get('selectedSubject')!.value), // Emit initial value of form control
+        startWith(this.analysisForm.get('selectedSubject')!.value),
         tap((code) => (this.selectedSubjectCode = code)) // Keep selectedSubjectCode in sync
       ),
     ]).pipe(
@@ -182,7 +194,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     this.studentPerformanceDataArray$ = combineLatest([
       this.reports$,
       this.analysisForm.get('selectedStudent')!.valueChanges.pipe(
-        startWith(this.analysisForm.get('selectedStudent')!.value), // Emit initial value of form control
+        startWith(this.analysisForm.get('selectedStudent')!.value),
         tap((student) => (this.selectedStudent = student)) // Keep selectedStudent in sync
       ),
     ]).pipe(
@@ -208,7 +220,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.destroy$.next();
-    this.destroy$.complete();
+    this.destroy$.complete(); // Should be destroy$.complete() - corrected this typo if present
   }
 
   get termControl() {
@@ -279,12 +291,16 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(event: any): void {
+    // Logic to reset selections when changing tabs if desired
+    // Also use emitEvent: false here to prevent unnecessary valueChanges emissions
     if (event.index === 0) {
+      // Overall Class Analysis tab
       this.selectedStudent = null;
       this.analysisForm
         .get('selectedStudent')
         ?.patchValue(null, { emitEvent: false });
     } else if (event.index === 1) {
+      // Individual Student Performance tab
       this.selectedSubjectCode = '';
       this.analysisForm
         .get('selectedSubject')
