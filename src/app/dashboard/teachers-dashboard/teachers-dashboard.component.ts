@@ -7,12 +7,14 @@ import { selectUser } from 'src/app/auth/store/auth.selectors';
 import {
   currentTermActions,
   fetchClasses,
+  fetchEnrolsStats,
   fetchTerms,
   fetchTotalEnrols,
 } from 'src/app/enrolment/store/enrolment.actions';
 import {
   selectClasses,
   selectCurrentTerm,
+  selectEnrolsStats,
   selectTotalEnroment,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { InvoiceModel } from 'src/app/finance/models/invoice.model';
@@ -101,7 +103,6 @@ export class TeachersDashboardComponent {
 
     // Always fetch terms regardless of role
     this.store.dispatch(fetchTerms());
-    this.store.dispatch(currentTermActions.fetchCurrentTerm());
   }
 
   ngOnInit(): void {

@@ -116,7 +116,7 @@
               (selectionChange)="onSubjectSelectedForOverallAnalysis($event.value)"
               [ngModelOptions]="{standalone: true}">
               <mat-option value="">-- Select a Subject --</mat-option>
-              <mat-option *ngFor="let subj of availableSubjectsForSelection" [value]="subj.code">
+              <mat-option *ngFor="let subj of availableSubjectsForSelection$ | async" [value]="subj.code">
                 {{ subj.name }} ({{ subj.code }})
               </mat-option>
             </mat-select>
@@ -127,7 +127,7 @@
           <div *ngIf="selectedSubjectCode && (subjectAnalysisData$ | async) as subjectData"
             class="subject-analysis-results">
             <mat-card>
-              <mat-card-title>Analysis for {{ selectedSubjectName }}</mat-card-title>
+              <mat-card-title>Analysis for {{ selectedSubjectName$ | async }}</mat-card-title>
               <mat-card-content>
                 <div class="subject-detail-grid">
                   <div>
@@ -178,7 +178,7 @@
               (selectionChange)="onStudentSelectedForIndividualPerformance($event.value)"
               [ngModelOptions]="{standalone: true}" [compareWith]="compareFn">
               <mat-option value="">-- Select a Student --</mat-option>
-              <mat-option *ngFor="let student of availableStudentsForSelection" [value]="student">
+              <mat-option *ngFor="let student of availableStudentsForSelection$ | async" [value]="student">
                 {{ student.name }} {{ student.surname }} ({{ student.studentNumber }})
               </mat-option>
             </mat-select>

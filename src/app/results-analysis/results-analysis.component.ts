@@ -1,9 +1,16 @@
 import { viewReportsActions } from './../reports/store/reports.actions';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core'; // Import ChangeDetectorRef
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store, select } from '@ngrx/store';
-import { Observable, combineLatest, Subject } from 'rxjs';
-import { takeUntil, tap, map, filter, startWith } from 'rxjs/operators';
+import { Observable, combineLatest, Subject, of } from 'rxjs'; // Added 'of'
+import {
+  takeUntil,
+  tap,
+  map,
+  filter,
+  startWith,
+  switchMap,
+} from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 // Models from your existing project structure
@@ -11,7 +18,7 @@ import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { ReportsModel } from 'src/app/reports/models/reports.model';
-import { StudentsModel } from 'src/app/registration/models/students.model'; // Make sure this path is correct
+import { StudentsModel } from 'src/app/registration/models/students.model';
 
 // NgRx Actions, Selectors from your existing project structure
 import {
@@ -27,18 +34,23 @@ import {
   selectIsLoading,
   selectReports,
   selectReportsErrorMsg,
-} from 'src/app/reports/store/reports.selectors'; // Corrected selectors
+  selectOverallAnalysisData,
+  selectAvailableSubjectsForSelection,
+  selectAvailableStudentsForSelection,
+  selectSubjectAnalysisData,
+  selectStudentPerformanceData,
+} from 'src/app/reports/store/reports.selectors';
 
 // Charting imports
 import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
 
-// Interfaces for processed data (derived from your request)
+// Interfaces for processed data (copied for local component type safety)
 interface OverallAnalysisData {
   subjectPassRates: { subjectName: string; passRate: number }[];
   top5StudentsOverall: { student: StudentsModel; averageMark: number }[];
   bottom5StudentsOverall: { student: StudentsModel; averageMark: number }[];
   uniqueSubjects: { code: string; name: string }[];
-  reportsRaw: ReportsModel[]; // Added this property to resolve the error
+  reportsRaw: ReportsModel[];
 }
 
 interface SubjectAnalysisData {
@@ -71,17 +83,24 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  overallAnalysisData$!: Observable<OverallAnalysisData | null>;
+  overallAnalysisData$: Observable<OverallAnalysisData | null> =
+    this.store.pipe(select(selectOverallAnalysisData));
+  availableSubjectsForSelection$: Observable<{ code: string; name: string }[]> =
+    this.store.pipe(select(selectAvailableSubjectsForSelection));
+  availableStudentsForSelection$: Observable<StudentsModel[]> = this.store.pipe(
+    select(selectAvailableStudentsForSelection)
+  );
+
+  selectedSubjectCode: string = '';
+  selectedStudent: StudentsModel | null = null;
+
   subjectAnalysisData$!: Observable<SubjectAnalysisData | null>;
   studentPerformanceDataArray$!: Observable<
     StudentPerformanceDisplayData[] | null
   >;
 
-  selectedSubjectCode: string = '';
-  availableSubjectsForSelection: { code: string; name: string }[] = [];
-
-  selectedStudent: StudentsModel | null = null;
-  availableStudentsForSelection: StudentsModel[] = [];
+  // --- NEW: Observable for selected subject name ---
+  selectedSubjectName$!: Observable<string>;
 
   public lineChartOptions: ChartOptions = {
     responsive: true,
@@ -120,15 +139,15 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef // Keep ChangeDetectorRef for potential future use, though not directly used in this specific fix.
   ) {
-    // Inject ChangeDetectorRef
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
   }
 
   ngOnInit(): void {
     this.store.dispatch(viewReportsActions.resetReports());
+
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
 
@@ -136,48 +155,38 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
       term: new FormControl(null, Validators.required),
       clas: new FormControl(null, Validators.required),
       examType: new FormControl(null, Validators.required),
-      selectedSubject: new FormControl(null), // For reactive form tracking of subject dropdown
-      selectedStudent: new FormControl(null), // For reactive form tracking of student dropdown
+      selectedSubject: new FormControl(null),
+      selectedStudent: new FormControl(null),
     });
 
-    // Overall Analysis Data pipeline
-    this.overallAnalysisData$ = this.reports$.pipe(
-      map((reports) => this.processOverallAnalysis(reports)),
-      tap((overallData) => {
-        if (overallData) {
-          this.availableSubjectsForSelection = overallData.uniqueSubjects;
-          this.availableStudentsForSelection = this.extractAllStudents(
-            overallData.reportsRaw || []
-          );
-        } else {
-          this.availableSubjectsForSelection = [];
-          this.availableStudentsForSelection = [];
+    // --- NEW: Initialize selectedSubjectName$ ---
+    this.selectedSubjectName$ = combineLatest([
+      this.analysisForm
+        .get('selectedSubject')!
+        .valueChanges.pipe(
+          startWith(this.analysisForm.get('selectedSubject')!.value)
+        ),
+      this.availableSubjectsForSelection$.pipe(
+        startWith([]) // Ensure it always has an initial array value
+      ),
+    ]).pipe(
+      map(([selectedCode, availableSubjects]) => {
+        if (!selectedCode) {
+          return 'Selected Subject';
         }
-        // --- FIX for ExpressionChangedAfterItHasBeenCheckedError ---
-        // Defer resetting selections to the next change detection cycle
-        setTimeout(() => {
-          this.selectedSubjectCode = ''; // Set property directly
-          this.selectedStudent = null; // Set property directly
-          // Patch form controls with emitEvent: false to prevent triggering valueChanges
-          this.analysisForm
-            .get('selectedSubject')
-            ?.patchValue(null, { emitEvent: false });
-          this.analysisForm
-            .get('selectedStudent')
-            ?.patchValue(null, { emitEvent: false });
-          this.cdr.detectChanges(); // <--- Explicitly trigger change detection after state update
-        }, 0); // Defer to the next microtask queue/event loop tick
-        // --- END FIX ---
+        const subject = availableSubjects.find((s) => s.code === selectedCode);
+        return subject ? subject.name : 'Selected Subject';
       }),
       takeUntil(this.destroy$)
     );
+    // --- END NEW ---
 
-    // Subject Analysis Data pipeline
+    // Subject Analysis Data pipeline - now uses selector factory
     this.subjectAnalysisData$ = combineLatest([
       this.reports$,
       this.analysisForm.get('selectedSubject')!.valueChanges.pipe(
         startWith(this.analysisForm.get('selectedSubject')!.value),
-        tap((code) => (this.selectedSubjectCode = code)) // Keep selectedSubjectCode in sync
+        tap((code) => (this.selectedSubjectCode = code))
       ),
     ]).pipe(
       filter(
@@ -185,25 +194,31 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
           !!reports && reports.length > 0 && !!subjectCode
       ),
       map(([reports, subjectCode]) =>
-        this.processSubjectAnalysis(reports, subjectCode)
+        this.store
+          .pipe(select(selectSubjectAnalysisData(subjectCode)))
+          .pipe(takeUntil(this.destroy$))
       ),
+      switchMap((selectorObservable) => selectorObservable),
       takeUntil(this.destroy$)
     );
 
-    // Student Performance Data pipeline
+    // Student Performance Data pipeline - now uses selector factory
     this.studentPerformanceDataArray$ = combineLatest([
       this.reports$,
       this.analysisForm.get('selectedStudent')!.valueChanges.pipe(
         startWith(this.analysisForm.get('selectedStudent')!.value),
-        tap((student) => (this.selectedStudent = student)) // Keep selectedStudent in sync
+        tap((student) => (this.selectedStudent = student))
       ),
     ]).pipe(
       filter(
         ([reports, student]) => !!reports && reports.length > 0 && !!student
       ),
       map(([reports, student]) =>
-        this.processStudentPerformance(reports, student)
+        this.store
+          .pipe(select(selectStudentPerformanceData(student)))
+          .pipe(takeUntil(this.destroy$))
       ),
+      switchMap((selectorObservable) => selectorObservable),
       takeUntil(this.destroy$)
     );
 
@@ -220,7 +235,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.destroy$.next();
-    this.destroy$.complete(); // Should be destroy$.complete() - corrected this typo if present
+    this.destroy$.complete();
   }
 
   get termControl() {
@@ -239,13 +254,22 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     return this.analysisForm.get('selectedStudent');
   }
 
-  get selectedSubjectName(): string {
-    const selectedCode = this.analysisForm.get('selectedSubject')?.value;
-    const subject = this.availableSubjectsForSelection.find(
-      (s) => s.code === selectedCode
-    );
-    return subject ? subject.name : 'Selected Subject';
-  }
+  // --- REMOVED: Synchronous getter, now replaced by selectedSubjectName$ observable ---
+  // get selectedSubjectName(): string {
+  //   const selectedCode = this.selectedSubjectCode;
+  //   const availableSubjects = this.availableSubjectsForSelection$;
+  //   let subjectName = 'Selected Subject';
+
+  //   availableSubjects.pipe(takeUntil(this.destroy$)).subscribe(subjects => {
+  //     const foundSubject = subjects.find(
+  //       (s) => s.code === selectedCode
+  //     );
+  //     if (foundSubject) {
+  //       subjectName = foundSubject.name;
+  //     }
+  //   });
+  //   return subjectName;
+  // }
 
   fetchAnalysisData() {
     if (this.analysisForm.invalid) {
@@ -257,6 +281,15 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
       this.analysisForm.markAllAsTouched();
       return;
     }
+
+    this.selectedSubjectCode = '';
+    this.selectedStudent = null;
+    this.analysisForm
+      .get('selectedSubject')
+      ?.patchValue(null, { emitEvent: false });
+    this.analysisForm
+      .get('selectedStudent')
+      ?.patchValue(null, { emitEvent: false });
 
     const { term, clas, examType } = this.analysisForm.value;
     this.store.dispatch(
@@ -291,16 +324,12 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(event: any): void {
-    // Logic to reset selections when changing tabs if desired
-    // Also use emitEvent: false here to prevent unnecessary valueChanges emissions
     if (event.index === 0) {
-      // Overall Class Analysis tab
       this.selectedStudent = null;
       this.analysisForm
         .get('selectedStudent')
         ?.patchValue(null, { emitEvent: false });
     } else if (event.index === 1) {
-      // Individual Student Performance tab
       this.selectedSubjectCode = '';
       this.analysisForm
         .get('selectedSubject')
@@ -309,237 +338,10 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   }
 
   onSubjectSelectedForOverallAnalysis(subjectCode: string): void {
-    // Setting form control value will trigger the pipeline
     this.analysisForm.get('selectedSubject')?.patchValue(subjectCode);
   }
 
   onStudentSelectedForIndividualPerformance(student: StudentsModel): void {
-    // Setting form control value will trigger the pipeline
     this.analysisForm.get('selectedStudent')?.patchValue(student);
-  }
-
-  private processOverallAnalysis(
-    reports: ReportsModel[]
-  ): OverallAnalysisData | null {
-    if (!reports || reports.length === 0) {
-      return null;
-    }
-
-    const subjectPassCounts: {
-      [subjectCode: string]: {
-        totalStudents: number;
-        passedStudents: number;
-        subjectName: string;
-      };
-    } = {};
-    const studentAverages: { student: StudentsModel; averageMark: number }[] =
-      [];
-    const uniqueSubjectsMap = new Map<string, { code: string; name: string }>();
-
-    reports.forEach((reportItem) => {
-      const studentFullName: StudentsModel = {
-        studentNumber: reportItem.studentNumber,
-        name: reportItem.report.name,
-        surname: reportItem.report.surname,
-        dob: new Date(),
-        gender: '',
-        idnumber: '',
-        dateOfJoining: new Date(),
-        cell: '',
-        email: '',
-        address: '',
-        prevSchool: '',
-        role: null as any,
-      };
-      studentAverages.push({
-        student: studentFullName,
-        averageMark: reportItem.report.percentageAverge,
-      });
-
-      reportItem.report.subjectsTable.forEach((subjectInfo) => {
-        if (!subjectPassCounts[subjectInfo.subjectCode]) {
-          subjectPassCounts[subjectInfo.subjectCode] = {
-            totalStudents: 0,
-            passedStudents: 0,
-            subjectName: subjectInfo.subjectName,
-          };
-        }
-        subjectPassCounts[subjectInfo.subjectCode].totalStudents++;
-        if (subjectInfo.mark !== null && subjectInfo.mark >= 50) {
-          subjectPassCounts[subjectInfo.subjectCode].passedStudents++;
-        }
-        uniqueSubjectsMap.set(subjectInfo.subjectCode, {
-          code: subjectInfo.subjectCode,
-          name: subjectInfo.subjectName,
-        });
-      });
-    });
-
-    const subjectPassRates = Object.values(subjectPassCounts)
-      .map((data) => ({
-        subjectName: data.subjectName,
-        passRate:
-          data.totalStudents > 0
-            ? (data.passedStudents / data.totalStudents) * 100
-            : 0,
-      }))
-      .sort((a, b) => a.subjectName.localeCompare(b.subjectName));
-
-    studentAverages.sort((a, b) => b.averageMark - a.averageMark);
-    const top5StudentsOverall = studentAverages.slice(0, 5);
-    const bottom5StudentsOverall = studentAverages.slice(
-      Math.max(0, studentAverages.length - 5)
-    );
-
-    return {
-      subjectPassRates,
-      top5StudentsOverall,
-      bottom5StudentsOverall,
-      uniqueSubjects: Array.from(uniqueSubjectsMap.values()),
-      reportsRaw: reports,
-    };
-  }
-
-  private processSubjectAnalysis(
-    reports: ReportsModel[],
-    subjectCode: string
-  ): SubjectAnalysisData | null {
-    if (!reports || reports.length === 0 || !subjectCode) {
-      return null;
-    }
-
-    const studentsForSubject: {
-      student: StudentsModel;
-      mark: number;
-      grade: string;
-    }[] = [];
-    const gradeCounts: { [grade: string]: number } = {};
-
-    reports.forEach((reportItem) => {
-      const subjectInfo = reportItem.report.subjectsTable.find(
-        (s) => s.subjectCode === subjectCode
-      );
-      if (subjectInfo && subjectInfo.mark !== null) {
-        studentsForSubject.push({
-          student: {
-            studentNumber: reportItem.studentNumber,
-            name: reportItem.report.name,
-            surname: reportItem.report.surname,
-            dob: new Date(),
-            gender: '',
-            idnumber: '',
-            dateOfJoining: new Date(),
-            cell: '',
-            email: '',
-            address: '',
-            prevSchool: '',
-            role: null as any,
-          },
-          mark: subjectInfo.mark,
-          grade: subjectInfo.grade,
-        });
-
-        gradeCounts[subjectInfo.grade] =
-          (gradeCounts[subjectInfo.grade] || 0) + 1;
-      }
-    });
-
-    studentsForSubject.sort((a, b) => b.mark - a.mark);
-    const bestStudents = studentsForSubject.slice(0, 5);
-    const worstStudents = studentsForSubject.slice(
-      Math.max(0, studentsForSubject.length - 5)
-    );
-
-    const gradeOrder = ['A*', 'A', 'B', 'C', 'D', 'E', 'F', 'Ungraded'];
-    const gradeDistribution = Object.keys(gradeCounts)
-      .map((grade) => ({
-        grade,
-        count: gradeCounts[grade],
-      }))
-      .sort((a, b) => {
-        const indexA = gradeOrder.indexOf(a.grade);
-        const indexB = gradeOrder.indexOf(b.grade);
-        return (
-          (indexA === -1 ? Infinity : indexA) -
-          (indexB === -1 ? Infinity : indexB)
-        );
-      });
-
-    return {
-      bestStudents,
-      worstStudents,
-      gradeDistribution,
-    };
-  }
-
-  private extractAllStudents(reports: ReportsModel[]): StudentsModel[] {
-    if (!reports) return [];
-    const studentsMap = new Map<string, StudentsModel>();
-    reports.forEach((reportItem) => {
-      const studentDetails: StudentsModel = {
-        studentNumber: reportItem.studentNumber,
-        name: reportItem.report.name,
-        surname: reportItem.report.surname,
-        dob: new Date(),
-        gender: '',
-        idnumber: '',
-        dateOfJoining: new Date(),
-        cell: '',
-        email: '',
-        address: '',
-        prevSchool: '',
-        role: null as any,
-      };
-      if (!studentsMap.has(studentDetails.studentNumber)) {
-        studentsMap.set(studentDetails.studentNumber, studentDetails);
-      }
-    });
-    return Array.from(studentsMap.values()).sort((a, b) => {
-      const nameA = `${a.name} ${a.surname}`.toLowerCase();
-      const nameB = `${b.name} ${b.surname}`.toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-  }
-
-  private processStudentPerformance(
-    reports: ReportsModel[],
-    student: StudentsModel
-  ): StudentPerformanceDisplayData[] | null {
-    if (!reports || reports.length === 0 || !student) {
-      return null;
-    }
-
-    const studentReport = reports.find(
-      (r) => r.studentNumber === student.studentNumber
-    );
-    if (!studentReport) {
-      return null;
-    }
-
-    const subjectsData = studentReport.report.subjectsTable;
-    subjectsData.sort((a, b) => a.subjectName.localeCompare(b.subjectName));
-
-    const labels = subjectsData.map((s) => s.subjectName);
-    const marks = subjectsData.map((s) => (s.mark !== null ? s.mark : 0));
-
-    const chartData: ChartConfiguration<'line'>['data'] = {
-      labels: labels,
-      datasets: [
-        {
-          data: marks,
-          label: `${student.name} ${student.surname}'s Performance`,
-          fill: true,
-          tension: 0.3,
-          borderColor: 'rgba(75,192,192,1)',
-          backgroundColor: 'rgba(75,192,192,0.2)',
-          pointBackgroundColor: 'rgba(75,192,192,1)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgba(75,192,192,1)',
-        },
-      ],
-    };
-
-    return [{ student: student, chartData: chartData }];
   }
 }
