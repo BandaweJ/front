@@ -43,14 +43,14 @@ interface OverallAnalysisData {
 }
 
 interface SubjectAnalysisData {
-  bestStudents: { student: StudentsModel; mark: number; grade: string }[];
-  worstStudents: { student: StudentsModel; mark: number; grade: string }[];
+  bestStudents: { student: StudentsModel; mark: number; grade: string }[]; // Changed 'mark' to 'averageMark' in concept
+  worstStudents: { student: StudentsModel; mark: number; grade: string }[]; // Changed 'mark' to 'averageMark' in concept
   gradeDistribution: { grade: string; count: number }[];
 }
 
 interface StudentPerformanceDisplayData {
   student: StudentsModel;
-  chartData: any; // ChartConfiguration<'line'>['data'] - use 'any' to avoid circular dependency with chart.js in selector file
+  chartData: any;
 }
 // --- END Interfaces ---
 
@@ -159,7 +159,7 @@ function processOverallAnalysis(
   reports.forEach((reportItem) => {
     const studentNumber = reportItem.studentNumber;
 
-    // Aggregate student averages
+    // Aggregate student overall averages
     if (!studentAverageMap.has(studentNumber)) {
       studentAverageMap.set(studentNumber, {
         totalPercentage: 0,
@@ -169,7 +169,7 @@ function processOverallAnalysis(
           studentNumber: reportItem.studentNumber,
           name: reportItem.report.name,
           surname: reportItem.report.surname,
-          dob: new Date(), // Placeholder or derive from reportItem if available
+          dob: new Date(),
           gender: '',
           idnumber: '',
           dateOfJoining: new Date(),
@@ -232,12 +232,13 @@ function processOverallAnalysis(
     top5StudentsOverall,
     bottom5StudentsOverall,
     uniqueSubjects: Array.from(uniqueSubjectsMap.values()),
-    reportsRaw: reports, // Keep raw reports for other calculations or component needs
+    reportsRaw: reports,
   };
 }
 
 /**
  * Processes raw ReportsModel[] to generate per-subject analysis data for a specific subject.
+ * Now correctly aggregates marks for unique students within the subject.
  * @param reports The array of ReportsModel.
  * @param subjectCode The code of the subject to analyze.
  * @returns SubjectAnalysisData or null.
@@ -250,43 +251,66 @@ function processSubjectAnalysis(
     return null;
   }
 
+  // Use a Map to aggregate marks for each unique student for the specific subject
+  const studentSubjectMarksMap = new Map<
+    string,
+    {
+      totalMark: number;
+      count: number;
+      student: StudentsModel;
+      className: string;
+    }
+  >();
+  const gradeCounts: { [grade: string]: number } = {};
+
+  reports.forEach((reportItem) => {
+    const studentNumber = reportItem.studentNumber;
+    const subjectInfo = reportItem.report.subjectsTable.find(
+      (s) => s.subjectCode === subjectCode
+    );
+
+    if (subjectInfo && subjectInfo.mark !== null) {
+      if (!studentSubjectMarksMap.has(studentNumber)) {
+        studentSubjectMarksMap.set(studentNumber, {
+          totalMark: 0,
+          count: 0,
+          student: {
+            // Capture student details once
+            studentNumber: reportItem.studentNumber,
+            name: reportItem.report.name,
+            surname: reportItem.report.surname,
+            dob: new Date(),
+            gender: '',
+            idnumber: '',
+            dateOfJoining: new Date(),
+            cell: '',
+            email: '',
+            address: '',
+            prevSchool: '',
+            role: null as any,
+          },
+          className: reportItem.report.className, // Need class name for grade calculation
+        });
+      }
+      const studentData = studentSubjectMarksMap.get(studentNumber)!;
+      studentData.totalMark += subjectInfo.mark;
+      studentData.count++;
+    }
+  });
+
   const studentsForSubject: {
     student: StudentsModel;
     mark: number;
     grade: string;
-  }[] = [];
-  const gradeCounts: { [grade: string]: number } = {};
-
-  reports.forEach((reportItem) => {
-    const subjectInfo = reportItem.report.subjectsTable.find(
-      (s) => s.subjectCode === subjectCode
-    );
-    if (subjectInfo && subjectInfo.mark !== null) {
-      studentsForSubject.push({
-        student: {
-          studentNumber: reportItem.studentNumber,
-          name: reportItem.report.name,
-          surname: reportItem.report.surname,
-          dob: new Date(),
-          gender: '',
-          idnumber: '',
-          dateOfJoining: new Date(),
-          cell: '',
-          email: '',
-          address: '',
-          prevSchool: '',
-          role: null as any,
-        },
-        mark: subjectInfo.mark,
-        grade: computeGrade(subjectInfo.mark, reportItem.report.className),
-      });
-
-      // Use the computed grade for gradeCounts to ensure consistency
-      gradeCounts[computeGrade(subjectInfo.mark, reportItem.report.className)] =
-        (gradeCounts[
-          computeGrade(subjectInfo.mark, reportItem.report.className)
-        ] || 0) + 1;
-    }
+  }[] = Array.from(studentSubjectMarksMap.values()).map((data) => {
+    const averageMark = data.count > 0 ? data.totalMark / data.count : 0;
+    const grade = computeGrade(averageMark, data.className); // Compute grade based on average mark for this subject
+    gradeCounts[grade] = (gradeCounts[grade] || 0) + 1; // Accumulate grade counts
+    return {
+      student: data.student,
+      mark: averageMark, // Use the average mark for the subject
+      grade: grade,
+    };
   });
 
   studentsForSubject.sort((a, b) => b.mark - a.mark);
@@ -331,7 +355,6 @@ function processStudentPerformance(
     return null;
   }
 
-  // Find all reports for this specific student to handle multiple reports (e.g., from different exam types if aggregated)
   const studentReports = reports.filter(
     (r) => r.studentNumber === student.studentNumber
   );
@@ -340,7 +363,6 @@ function processStudentPerformance(
     return null;
   }
 
-  // Aggregate marks for each subject across all reports for this student
   const subjectMarksMap = new Map<
     string,
     { totalMark: number; count: number; subjectName: string }
