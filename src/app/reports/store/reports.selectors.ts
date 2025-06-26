@@ -66,7 +66,7 @@ interface StudentPerformanceDisplayData {
  * @returns The computed grade as a string.
  */
 function computeGrade(mark: number, clasName: string): string {
-  const form = clasName.charAt(0); // Assuming class name like '1 Blue', '5 Red'
+  const form = clasName.charAt(0);
 
   switch (form) {
     case '5':
@@ -89,10 +89,10 @@ function computeGrade(mark: number, clasName: string): string {
       else if (mark >= 50) return 'C';
       else if (mark >= 40) return 'D';
       else if (mark >= 35) return 'E';
-      else return 'U'; // 'U' for ungraded in junior forms
+      else return 'U';
     }
     default:
-      return 'N/A'; // Handle unexpected class names
+      return 'N/A';
   }
 }
 
@@ -110,15 +110,15 @@ function extractAllStudents(reports: ReportsModel[]): StudentsModel[] {
       studentNumber: reportItem.studentNumber,
       name: reportItem.report.name,
       surname: reportItem.report.surname,
-      dob: new Date(), // Placeholder
-      gender: '', // Assuming gender is in ReportModel
-      idnumber: '', // Placeholder
-      dateOfJoining: new Date(), // Placeholder
-      cell: '', // Placeholder
-      email: '', // Placeholder
-      address: '', // Placeholder
-      prevSchool: '', // Placeholder
-      role: null as any, // Placeholder
+      dob: new Date(),
+      gender: '',
+      idnumber: '',
+      dateOfJoining: new Date(),
+      cell: '',
+      email: '',
+      address: '',
+      prevSchool: '',
+      role: null as any,
     };
     if (!studentsMap.has(studentDetails.studentNumber)) {
       studentsMap.set(studentDetails.studentNumber, studentDetails);
@@ -150,28 +150,40 @@ function processOverallAnalysis(
       subjectName: string;
     };
   } = {};
-  const studentAverages: { student: StudentsModel; averageMark: number }[] = [];
+  const studentAverageMap = new Map<
+    string,
+    { totalPercentage: number; reportCount: number; student: StudentsModel }
+  >();
   const uniqueSubjectsMap = new Map<string, { code: string; name: string }>();
 
   reports.forEach((reportItem) => {
-    const studentFullName: StudentsModel = {
-      studentNumber: reportItem.studentNumber,
-      name: reportItem.report.name,
-      surname: reportItem.report.surname,
-      dob: new Date(),
-      gender: '',
-      idnumber: '',
-      dateOfJoining: new Date(),
-      cell: '',
-      email: '',
-      address: '',
-      prevSchool: '',
-      role: null as any,
-    };
-    studentAverages.push({
-      student: studentFullName,
-      averageMark: reportItem.report.percentageAverge,
-    });
+    const studentNumber = reportItem.studentNumber;
+
+    // Aggregate student averages
+    if (!studentAverageMap.has(studentNumber)) {
+      studentAverageMap.set(studentNumber, {
+        totalPercentage: 0,
+        reportCount: 0,
+        student: {
+          // Capture student details once per unique student
+          studentNumber: reportItem.studentNumber,
+          name: reportItem.report.name,
+          surname: reportItem.report.surname,
+          dob: new Date(), // Placeholder or derive from reportItem if available
+          gender: '',
+          idnumber: '',
+          dateOfJoining: new Date(),
+          cell: '',
+          email: '',
+          address: '',
+          prevSchool: '',
+          role: null as any,
+        },
+      });
+    }
+    const studentData = studentAverageMap.get(studentNumber)!;
+    studentData.totalPercentage += reportItem.report.percentageAverge;
+    studentData.reportCount++;
 
     reportItem.report.subjectsTable.forEach((subjectInfo) => {
       if (!subjectPassCounts[subjectInfo.subjectCode]) {
@@ -191,6 +203,13 @@ function processOverallAnalysis(
       });
     });
   });
+
+  const studentAverages: { student: StudentsModel; averageMark: number }[] =
+    Array.from(studentAverageMap.values()).map((data) => ({
+      student: data.student,
+      averageMark:
+        data.reportCount > 0 ? data.totalPercentage / data.reportCount : 0,
+    }));
 
   const subjectPassRates = Object.values(subjectPassCounts)
     .map((data) => ({
@@ -213,7 +232,7 @@ function processOverallAnalysis(
     top5StudentsOverall,
     bottom5StudentsOverall,
     uniqueSubjects: Array.from(uniqueSubjectsMap.values()),
-    reportsRaw: reports,
+    reportsRaw: reports, // Keep raw reports for other calculations or component needs
   };
 }
 
@@ -259,9 +278,10 @@ function processSubjectAnalysis(
           role: null as any,
         },
         mark: subjectInfo.mark,
-        grade: computeGrade(subjectInfo.mark, reportItem.report.className), // Use the shared computeGrade
+        grade: computeGrade(subjectInfo.mark, reportItem.report.className),
       });
 
+      // Use the computed grade for gradeCounts to ensure consistency
       gradeCounts[computeGrade(subjectInfo.mark, reportItem.report.className)] =
         (gradeCounts[
           computeGrade(subjectInfo.mark, reportItem.report.className)
@@ -275,7 +295,7 @@ function processSubjectAnalysis(
     Math.max(0, studentsForSubject.length - 5)
   );
 
-  const gradeOrder = ['A*', 'A', 'B', 'C', 'D', 'E', 'F', 'U', 'N/A']; // Ensure this matches computeGrade
+  const gradeOrder = ['A*', 'A', 'B', 'C', 'D', 'E', 'F', 'U', 'N/A'];
   const gradeDistribution = Object.keys(gradeCounts)
     .map((grade) => ({
       grade,
@@ -311,21 +331,53 @@ function processStudentPerformance(
     return null;
   }
 
-  const studentReport = reports.find(
+  // Find all reports for this specific student to handle multiple reports (e.g., from different exam types if aggregated)
+  const studentReports = reports.filter(
     (r) => r.studentNumber === student.studentNumber
   );
-  if (!studentReport) {
+
+  if (studentReports.length === 0) {
     return null;
   }
 
-  const subjectsData = studentReport.report.subjectsTable;
-  subjectsData.sort((a, b) => a.subjectName.localeCompare(b.subjectName));
+  // Aggregate marks for each subject across all reports for this student
+  const subjectMarksMap = new Map<
+    string,
+    { totalMark: number; count: number; subjectName: string }
+  >();
 
-  const labels = subjectsData.map((s) => s.subjectName);
-  const marks = subjectsData.map((s) => (s.mark !== null ? s.mark : 0));
+  studentReports.forEach((sReport) => {
+    sReport.report.subjectsTable.forEach((sInfo) => {
+      if (sInfo.mark !== null) {
+        if (!subjectMarksMap.has(sInfo.subjectCode)) {
+          subjectMarksMap.set(sInfo.subjectCode, {
+            totalMark: 0,
+            count: 0,
+            subjectName: sInfo.subjectName,
+          });
+        }
+        const current = subjectMarksMap.get(sInfo.subjectCode)!;
+        current.totalMark += sInfo.mark;
+        current.count++;
+      }
+    });
+  });
+
+  const aggregatedSubjectsData = Array.from(subjectMarksMap.values()).map(
+    (data) => ({
+      subjectName: data.subjectName,
+      averageMark: data.count > 0 ? data.totalMark / data.count : 0,
+    })
+  );
+
+  aggregatedSubjectsData.sort((a, b) =>
+    a.subjectName.localeCompare(b.subjectName)
+  );
+
+  const labels = aggregatedSubjectsData.map((s) => s.subjectName);
+  const marks = aggregatedSubjectsData.map((s) => s.averageMark);
 
   const chartData: any = {
-    // Use 'any' to avoid strict ChartConfiguration type here due to circular dependency
     labels: labels,
     datasets: [
       {

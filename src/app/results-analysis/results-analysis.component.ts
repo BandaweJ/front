@@ -99,7 +99,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     StudentPerformanceDisplayData[] | null
   >;
 
-  // --- NEW: Observable for selected subject name ---
+  // --- Initialized Observable for selected subject name ---
   selectedSubjectName$!: Observable<string>;
 
   public lineChartOptions: ChartOptions = {
@@ -139,7 +139,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef // Keep ChangeDetectorRef for potential future use, though not directly used in this specific fix.
+    private cdr: ChangeDetectorRef
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
@@ -159,25 +159,27 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
       selectedStudent: new FormControl(null),
     });
 
-    // --- NEW: Initialize selectedSubjectName$ ---
+    // --- NEW: Initialize selectedSubjectName$ correctly ---
     this.selectedSubjectName$ = combineLatest([
+      // Watch for changes in the selectedSubject form control value
       this.analysisForm
         .get('selectedSubject')!
         .valueChanges.pipe(
           startWith(this.analysisForm.get('selectedSubject')!.value)
         ),
+      // Watch for changes in the available subjects (from the store)
       this.availableSubjectsForSelection$.pipe(
-        startWith([]) // Ensure it always has an initial array value
+        startWith([]) // Ensure it always has an initial array value for combineLatest
       ),
     ]).pipe(
       map(([selectedCode, availableSubjects]) => {
         if (!selectedCode) {
-          return 'Selected Subject';
+          return 'Selected Subject'; // Default text if nothing is selected
         }
         const subject = availableSubjects.find((s) => s.code === selectedCode);
-        return subject ? subject.name : 'Selected Subject';
+        return subject ? subject.name : 'Selected Subject'; // Return name or default
       }),
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$) // Ensure cleanup
     );
     // --- END NEW ---
 
@@ -254,7 +256,7 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     return this.analysisForm.get('selectedStudent');
   }
 
-  // --- REMOVED: Synchronous getter, now replaced by selectedSubjectName$ observable ---
+  // --- REMOVED: Synchronous getter (no longer needed) ---
   // get selectedSubjectName(): string {
   //   const selectedCode = this.selectedSubjectCode;
   //   const availableSubjects = this.availableSubjectsForSelection$;
