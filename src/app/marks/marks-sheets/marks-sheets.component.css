@@ -182,11 +182,19 @@ form {
 }
 
 /* --- @media print BLOCK: CRITICAL FOR NATIVE PRINTING --- */
+/* --- @media print BLOCK: CRITICAL FOR NATIVE PRINTING --- */
 @media print {
   /* Force landscape orientation for the print job */
   @page {
     size: A4 landscape; /* Specifies A4 and landscape */
     margin: 1cm; /* Set consistent margins for the entire page */
+  }
+
+  /* Aggressive reset for print: Ensure content can flow */
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
   }
 
   /* Hide everything not part of the report */
@@ -197,14 +205,15 @@ form {
   /* Make the pdf-report-container the sole visible element for printing */
   .pdf-report-container {
     width: 100%; /* Take full available width within the @page margins */
-    height: auto; /* Allow content to dictate height */
+    height: auto !important; /* CRITICAL: Ensure height is auto */
     margin: 0; /* Remove any screen-specific margins */
     padding: 0; /* Remove any screen-specific padding on the container */
     box-shadow: none; /* No shadow in print */
     background-color: white; /* Ensure white background */
-    /* IMPORTANT: Remove or comment out any 'overflow' property here if it's present. */
-    /* overflow: visible; /* Explicitly ensure content is not hidden */
+    overflow: visible !important; /* CRITICAL: Allow content to flow out */
     /* IMPORTANT: Make sure 'page-break-after: always;' is NOT active here! */
+    /* Temporary debug borders */
+    border: 2px solid red !important; /* Retain for debugging */
   }
 
   /* Print Header Styles - Optimized for space */
@@ -217,6 +226,8 @@ form {
     line-height: 1.1;
     page-break-after: avoid; /* Ensure header doesn't break from first row of table */
     page-break-inside: avoid; /* Keep header content together */
+    /* Temporary debug borders */
+    border: 2px solid blue !important; /* Retain for debugging */
   }
 
   .logo-title-wrapper {
@@ -272,27 +283,29 @@ form {
     border-collapse: collapse;
     font-size: 8pt; /* Main table text size for print */
     line-height: 1.2; /* Tighter line spacing for more rows */
-    table-layout: fixed; /* Helps maintain column widths even if content is sparse */
+    table-layout: auto; /* Changed to auto for testing, allows natural column width */
+    height: auto !important; /* CRITICAL: Ensure table height is auto */
     /* IMPORTANT: Remove any 'overflow' property from the table itself! */
-    /* overflow: visible; /* Explicitly allow table to paginate */
+    overflow: visible !important; /* CRITICAL: Allow table to paginate */
+    /* Temporary debug borders */
+    border: 2px solid green !important; /* Retain for debugging */
   }
 
   .marksheet-table thead {
     display: table-header-group; /* CRITICAL: Repeat table header on each new page */
-    /* Ensure thead itself doesn't cause breaking issues */
     page-break-inside: avoid;
   }
 
   .marksheet-table tbody {
-    /* This is important for tbody */
     display: table-row-group; /* Treat tbody as a group of rows */
   }
 
   .marksheet-table tbody tr {
     page-break-inside: avoid !important; /* CRITICAL: Prevent rows from splitting across pages */
     page-break-after: auto !important; /* Allow page breaks between rows */
-    /* Ensure row content doesn't create overflow that prevents page breaks */
     height: auto !important; /* Ensure row height is dynamic */
+    /* Temporary debug borders */
+    /* border: 1px solid purple !important; */ /* You can add this back if needed to debug individual rows */
   }
 
   .marksheet-table th,
@@ -302,8 +315,7 @@ form {
     text-align: center;
     word-wrap: break-word; /* Allow long words to break within cells */
     white-space: normal; /* Allow text to wrap in cells generally */
-    /* IMPORTANT: Remove overflow: hidden; and text-overflow: ellipsis; from cells in print */
-    /* These can hide content instead of allowing it to wrap */
+    /* IMPORTANT: Ensure no overflow properties on cells */
   }
 
   .marksheet-table th {
@@ -354,20 +366,5 @@ form {
 
   .select-marksheet-form {
     display: none;
-  }
-
-  @media print {
-    .pdf-report-container {
-      border: 2px solid red !important;
-    }
-    .pdf-header {
-      border: 2px solid blue !important;
-    }
-    .marksheet-table {
-      border: 2px solid green !important;
-    }
-    .marksheet-table tbody tr {
-      border: 1px solid purple !important;
-    }
   }
 }
