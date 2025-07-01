@@ -45,21 +45,27 @@ mat-sidenav-container {
 
 /* Sidenav itself */
 mat-sidenav {
-  width: 250px; /* Default expanded width */
+  width: 250px;
+  /*Defaultexpandedwidth*/
   transition: width 0.3s ease-in-out;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-  overflow-x: hidden; /* Hide horizontal scrollbar inside sidenav */
-  flex-shrink: 0; /* Prevent sidenav from shrinking unnecessarily */
-  /* Remove position: static; and height: auto; if mat-sidenav-container is flex */
-  /* Let flex properties manage its height */
-  /* Ensure it's not positioned fixed on large screens */
-  /* position: static; - Remove or ensure it doesn't conflict */
-  /* height: auto; - Remove or ensure it doesn't conflict */
+  overflow-x: hidden;
+  /*Hidehorizontalscrollbarinsidesidenav*/
+  flex-shrink: 0;
+  /*Preventsidenavfromshrinkingunnecessarily*/ /*Removeposition: static;
+  andheight: auto;
+  ifmat-sidenav-containerisflex*/ /*Letflexpropertiesmanageitsheight*/ /*Ensureit'snotpositionedfixedonlargescreens*/ /*position: static;
+  -Removeorensureitdoesn'tconflict*/ /*height: auto;
+  -Removeorensureitdoesn'tconflict*/
   top: auto;
   left: auto;
   padding-top: 0;
   z-index: 1;
   transform: none;
+  -webkit-transition: width 0.3s ease-in-out;
+  -moz-transition: width 0.3s ease-in-out;
+  -ms-transition: width 0.3s ease-in-out;
+  -o-transition: width 0.3s ease-in-out;
 }
 
 /* When the sidenav is collapsed, apply the narrow width */
@@ -84,6 +90,11 @@ mat-expansion-panel-header,
   border-radius: 0;
   box-sizing: border-box;
   transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
+  -webkit-transition: background-color 0.2s ease-in-out,
+    padding 0.3s ease-in-out;
+  -moz-transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
+  -ms-transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
+  -o-transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
 }
 
 mat-sidenav:not(.collapsed) mat-expansion-panel-header {
@@ -258,6 +269,10 @@ mat-sidenav-content {
 
 @media print {
   .toolbar {
+    display: none;
+  }
+
+  mat-sidenav {
     display: none;
   }
 }

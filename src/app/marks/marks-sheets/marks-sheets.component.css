@@ -1,5 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates&family=Tektur&display=swap");
+/* General Form and Button Layouts (Likely for Screen View) */
 .select-marksheet-form {
   display: flex;
   flex-flow: row nowrap;
@@ -27,25 +26,22 @@ form {
 }
 
 .btns {
-  /* align-self: flex-end; */
   display: flex;
   justify-content: space-around;
   width: 35vw;
 }
-/* Report Cards */
+
+/* Report Cards (If you have other report display functionality) */
 .report-container {
   width: 25cm;
   margin: auto;
-  /* padding: 1rem 0.5rem; */
   background-color: #587586;
-  /* background-color: blue; */
-
   position: relative;
 }
 
 .report {
   width: 21cm;
-  height: 29.7cm;
+  height: 29.7cm; /* A4 Portrait */
   background-color: white;
   margin: 2rem auto;
   box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
@@ -55,10 +51,6 @@ form {
   background-size: cover;
   padding: 1rem;
   border-radius: 0.5rem;
-  -webkit-border-radius: 0.5rem;
-  -moz-border-radius: 0.5rem;
-  -ms-border-radius: 0.5rem;
-  -o-border-radius: 0.5rem;
   position: relative;
 }
 
@@ -69,49 +61,117 @@ form {
   display: block;
 }
 
-.marksheet {
+/* --- Screen View Styles for the PDF Report Container --- */
+/* This is what users see on screen before printing */
+.pdf-report-container {
+  /* A4 Landscape ratio in pixels for a good screen representation */
+  width: 1122px; /* ~29.7cm at 96 DPI */
+  margin: 2rem auto;
+  padding: 1cm; /* Padding for the entire printable area on screen */
+  box-sizing: border-box;
+  background-color: white;
+  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.2);
 }
 
-/* Mark Sheet Table */
-table {
-  /* width: 29.7cm; */
-  margin: auto;
-  /* background-color: #eaeef1; */
+/* Screen View Header Styles */
+.pdf-header {
+  text-align: center;
+  margin-bottom: 0.5cm; /* Space between header and table */
+  padding-bottom: 0.2cm;
+  border-bottom: 1px solid #eee;
+  font-family: "Arial", sans-serif;
+  line-height: 1.1;
+  overflow: hidden; /* Prevent content from breaking out */
 }
 
-table,
-td,
-th {
-  border: 1px solid #96d4d4;
-  border-collapse: collapse;
-  /* border-radius: 10px; */
+.logo-title-wrapper {
+  display: flex;
+  align-items: center; /* Vertically centers logo and title */
+  justify-content: center; /* Horizontally centers the combined block */
+  gap: 0.8cm; /* Space between the logo and the title */
+  margin-bottom: 0.3cm;
+  width: 100%;
+  flex-shrink: 0;
 }
 
-td,
-th {
-  padding: 2px 5px;
+.pdf-logo-wrapper {
+  width: 3cm; /* Wrapper provides the fixed space */
+  height: 3cm;
+  flex-shrink: 0;
+  display: flex; /* Use flex to center the img inside */
+  justify-content: center;
+  align-items: center;
+  /* REMOVED: background-image and related properties */
+}
+
+/* NEW: Style the img inside the wrapper */
+.pdf-logo-wrapper img {
+  max-width: 100%; /* Ensure image doesn't overflow its wrapper */
+  max-height: 100%;
+  object-fit: contain; /* Scales the image to fit its content box while maintaining its aspect ratio */
+  display: block; /* Remove any extra space below the image */
+}
+
+.pdf-title {
+  font-size: 16pt; /* Slightly larger for screen legibility */
+  font-weight: bold;
+  margin: 0;
+  line-height: 1.1;
+  flex-grow: 1; /* Allow title to take remaining space */
+  text-align: left;
+}
+
+.report-info {
+  display: flex;
+  justify-content: center;
+  gap: 1.5cm;
+  font-size: 10pt; /* Slightly larger for screen legibility */
+  margin-top: 0.2cm;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.report-info span {
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
   text-align: center;
 }
 
-tr:nth-child(even) {
-  background-color: #d6eeee;
-}
-
-.st-name {
-  width: 3cm;
-}
-
-/* .mat-mdc-form-field {
-  font-size: 14px;
+/* Screen View Mark Sheet Table Styles */
+.marksheet-table {
   width: 100%;
-} */
+  border-collapse: collapse;
+  font-size: 9pt; /* Base font size for table cells on screen */
+  background-color: white;
+  line-height: 1.4; /* Slightly more space for readability */
+}
 
-/* Mark Sheet container */
-.marksheet-container {
-  width: 29.7cm;
-  height: 21cm;
-  margin: 2rem auto;
-  padding: 1rem;
+.marksheet-table th,
+.marksheet-table td {
+  border: 1px solid #96d4d4;
+  padding: 4px 6px; /* Good padding for screen view */
+  text-align: center;
+  white-space: normal; /* Allow text to wrap by default */
+  word-wrap: break-word; /* Ensure long words break */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Still useful for screen, if overflow hidden */
+}
+
+.marksheet-table th {
+  font-weight: bold;
+  background-color: #f0f0f0;
+}
+
+.marksheet-table tr:nth-child(even) {
+  background-color: #e6f7f7;
+}
+
+.marksheet-table .st-name {
+  width: 3cm; /* Consistent width for student name */
+  text-align: left;
+  white-space: normal;
 }
 
 .red-text {
@@ -120,4 +180,174 @@ tr:nth-child(even) {
 
 .blue-text {
   color: blue;
+}
+
+/* --- @media print BLOCK: CRITICAL FOR NATIVE PRINTING --- */
+@media print {
+  /* Force landscape orientation for the print job */
+  @page {
+    size: A4 landscape; /* Specifies A4 and landscape */
+    margin: 1cm; /* Set consistent margins for the entire page */
+  }
+
+  /* REMOVED: print-color-adjust is no longer needed for img tags */
+  /* html, body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+  } */
+
+  /* Hide everything not part of the report */
+  body > *:not(.pdf-report-container) {
+    display: none !important;
+  }
+
+  /* Make the pdf-report-container the sole visible element for printing */
+  .pdf-report-container {
+    width: 100%; /* Take full available width within the @page margins */
+    height: auto; /* Let content dictate height */
+    margin: 0; /* Remove any screen-specific margins */
+    padding: 0; /* Remove any screen-specific padding on the container */
+    box-shadow: none; /* No shadow in print */
+    background-color: white; /* Ensure white background */
+  }
+
+  /* Print Header Styles - Optimized for space */
+  .pdf-header {
+    text-align: center;
+    margin-bottom: 0.5cm; /* Space between header and table */
+    padding: 0.2cm 0.5cm; /* Reduced padding for print */
+    border-bottom: 1px solid #ccc; /* Lighter border for print */
+    font-size: 8pt; /* Smaller overall font for header info */
+    line-height: 1.1;
+    page-break-after: avoid;
+  }
+
+  .logo-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5cm; /* Reduced gap for print */
+    margin-bottom: 0.2cm;
+    flex-shrink: 0;
+    height: 3cm; /* Explicit height for the logo/title wrapper */
+  }
+
+  .pdf-logo-wrapper {
+    /* Wrapper remains, to provide a container for the img */
+    width: 3cm; /* Force 3cm width */
+    height: 3cm; /* Force 3cm height */
+    flex-shrink: 0;
+    display: flex; /* Ensure img is centered for print too */
+    justify-content: center;
+    align-items: center;
+    /* REMOVED: background-image related properties */
+  }
+
+  /* NEW: Style the img inside the wrapper for print */
+  .pdf-logo-wrapper img {
+    max-width: 100%; /* Ensure image fits within its wrapper */
+    max-height: 100%;
+    object-fit: contain; /* Maintain aspect ratio and fit inside */
+    display: block;
+  }
+
+  .pdf-title {
+    font-size: 14pt; /* Adjusted title font size for print */
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.1;
+    flex-grow: 1;
+    text-align: left;
+  }
+
+  .report-info {
+    display: flex;
+    justify-content: center;
+    gap: 1cm; /* Reduced gap for info line in print */
+    font-size: 8pt; /* Smaller font for info line in print */
+    margin-top: 0.1cm;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Print Table Styles - Optimized for many rows and legibility */
+  .marksheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt; /* Main table text size for print */
+    line-height: 1.2; /* Tighter line spacing for more rows */
+    table-layout: fixed; /* Helps maintain column widths even if content is sparse */
+  }
+
+  .marksheet-table th,
+  .marksheet-table td {
+    border: 1px solid #96d4d4;
+    padding: 2px 4px; /* Tighten cell padding for more rows per page */
+    text-align: center;
+    word-wrap: break-word; /* Allow long words to break within cells */
+    white-space: normal; /* Allow text to wrap in cells generally */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Visual cue if text is truly clipped by fixed-layout */
+  }
+
+  .marksheet-table th {
+    font-weight: bold;
+    background-color: #f8f8f8; /* Very light background for print headers */
+  }
+
+  .marksheet-table tr:nth-child(even) {
+    background-color: #f2fafa; /* Very light alternate row color for print */
+  }
+
+  .marksheet-table .st-name {
+    width: 20%; /* Give ample space for student names */
+    text-align: left;
+    white-space: normal;
+  }
+
+  /* Page break rules for table content */
+  .marksheet-table thead {
+    display: table-header-group; /* Repeat table header on each new page */
+  }
+
+  .marksheet-table tbody tr {
+    page-break-inside: avoid !important; /* Prevent rows from splitting across pages */
+    page-break-after: auto !important; /* Allow page breaks between rows */
+  }
+
+  /* Explicit column widths for print (adjust based on your subject count) */
+  .marksheet-table th:nth-child(1) {
+    width: 3%;
+  } /* # */
+  .marksheet-table th:nth-child(2) {
+    width: 18%;
+  } /* Name (st-name) */
+  .marksheet-table th:nth-child(n + 3):nth-child(-n + 12) {
+    width: 4.5%;
+  } /* Subject columns (adjust range and width as needed) */
+  .marksheet-table th:nth-child(13) {
+    width: 6%;
+  } /* Passed */
+  .marksheet-table th:nth-child(14),
+  .marksheet-table th:nth-child(15) {
+    width: 4%;
+  } /* A*s, As */
+  .marksheet-table th:nth-child(16),
+  .marksheet-table th:nth-child(17) {
+    width: 4%;
+  } /* Bs, Cs */
+  .marksheet-table th:nth-child(18) {
+    width: 4%;
+  } /* Ds */
+  .marksheet-table th:nth-child(19) {
+    width: 7%;
+  } /* Av Mark */
+  .marksheet-table th:last-child {
+    width: 5%;
+  } /* Pstn */
+
+  .select-marksheet-form {
+    display: none;
+  }
 }
