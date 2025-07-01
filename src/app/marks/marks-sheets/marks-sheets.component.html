@@ -1,63 +1,14 @@
-<mat-card>
-  <div class="select-marksheet-form">
-    <form [formGroup]="markSheetForm">
-      <div class="top-btns">
-        <mat-form-field>
-          <mat-label>Choose Term</mat-label>
-          <mat-select formControlName="term">
-            <mat-option *ngFor="let term of terms$ | async" [value]="term">
-              {{ term.num + " " + term.year }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Choose Class</mat-label>
-          <mat-select formControlName="clas">
-            <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
-              {{ clas.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field>
-          <mat-label>Exam Type</mat-label>
-          <mat-select formControlName="examType">
-            <mat-option *ngFor="let type of examtype" [value]="type">
-              {{ type }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </form>
-
-
-    <div class="btns">
-      <button mat-flat-button color="primary" [disabled]="markSheetForm.invalid" (click)="fetchMarkSheet()">
-        Create
-      </button>
-      <button mat-mini-fab aria-label="Click to download marksheet" *ngIf="reports.length" (click)="download()">
-        <mat-icon>download</mat-icon>
-      </button>
-      <!-- <button mat-flat-button color="accent" (click)="download()">Save</button> -->
-      <!-- <button mat-flat-button color="primary" (click)="viewReports()">View</button> -->
-    </div>
-  </div>
-  <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
-</mat-card>
-<!-- Start Mark Sheet Table -->
-<table *ngIf="reports.length" id="marksheet">
+<table *ngIf="reports.length" id="marksheet" #marksheetTable>
   <caption>
     <img src="../../../assets/banner.jpeg">
     <h1>
       {{ reports[0].examType }}, {{ reports[0].year }}. {{ reports[0].name }} Marksheet
     </h1>
   </caption>
-
   <tr>
     <th>#</th>
     <th class="st-name">Name</th>
     <th *ngFor="let subj of subjects">
-      <!-- {{ subj.code }} -->
       {{ subj.name.substring(0, 9) }}
     </th>
     <th>Passed</th>
@@ -68,8 +19,6 @@
     <th>Ds</th>
     <th>Av Mark</th>
     <th>Pstn</th>
-
-
   </tr>
   <tr *ngFor="let rep of reports; let i = index">
     <td>{{ i + 1 }}</td>
@@ -84,11 +33,5 @@
     </td>
     <td>{{ rep.report.percentageAverge ? rep.report.percentageAverge.toFixed(1) : '' }}</td>
     <td>{{ rep.report.classPosition }}</td>
-
   </tr>
-
 </table>
-
-
-
-<!-- End Mark Sheet Table -->

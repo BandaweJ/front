@@ -92,7 +92,7 @@ export class ReportComponent implements OnInit {
       className: name,
       termNumber: num,
       termYear: year,
-      examType,
+      examType: examType,
       studentNumber,
     } = report;
 
@@ -105,7 +105,7 @@ export class ReportComponent implements OnInit {
           year,
           // Re-evaluate if you need `examType` if you already have it from `report.report.examType`
           // If the action expects `ExamType`, ensure 'examType' from 'report.report' is that type.
-          examType: examType as ExamType, // Explicit cast if necessary
+          examType: examType, // Explicit cast if necessary
           studentNumber: this.report.studentNumber, // Use this.report.studentNumber from the top level
         })
       );
