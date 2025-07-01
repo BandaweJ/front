@@ -101,7 +101,6 @@ form {
   display: flex; /* Use flex to center the img inside */
   justify-content: center;
   align-items: center;
-  /* REMOVED: background-image and related properties */
 }
 
 /* NEW: Style the img inside the wrapper */
@@ -190,12 +189,6 @@ form {
     margin: 1cm; /* Set consistent margins for the entire page */
   }
 
-  /* REMOVED: print-color-adjust is no longer needed for img tags */
-  /* html, body {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-  } */
-
   /* Hide everything not part of the report */
   body > *:not(.pdf-report-container) {
     display: none !important;
@@ -209,6 +202,9 @@ form {
     padding: 0; /* Remove any screen-specific padding on the container */
     box-shadow: none; /* No shadow in print */
     background-color: white; /* Ensure white background */
+    /* REMOVED: overflow: hidden; from here, let content flow to new pages */
+    /* IMPORTANT: Make sure this is commented out or removed if it's there! */
+    /* page-break-after: always; */
   }
 
   /* Print Header Styles - Optimized for space */
@@ -219,7 +215,7 @@ form {
     border-bottom: 1px solid #ccc; /* Lighter border for print */
     font-size: 8pt; /* Smaller overall font for header info */
     line-height: 1.1;
-    page-break-after: avoid;
+    page-break-after: avoid; /* Ensure header doesn't break from first row of table */
   }
 
   .logo-title-wrapper {
@@ -230,20 +226,18 @@ form {
     margin-bottom: 0.2cm;
     flex-shrink: 0;
     height: 3cm; /* Explicit height for the logo/title wrapper */
+    overflow: hidden; /* Safety for its content, as it has fixed height */
   }
 
   .pdf-logo-wrapper {
-    /* Wrapper remains, to provide a container for the img */
     width: 3cm; /* Force 3cm width */
     height: 3cm; /* Force 3cm height */
     flex-shrink: 0;
     display: flex; /* Ensure img is centered for print too */
     justify-content: center;
     align-items: center;
-    /* REMOVED: background-image related properties */
   }
 
-  /* NEW: Style the img inside the wrapper for print */
   .pdf-logo-wrapper img {
     max-width: 100%; /* Ensure image fits within its wrapper */
     max-height: 100%;
@@ -278,6 +272,16 @@ form {
     font-size: 8pt; /* Main table text size for print */
     line-height: 1.2; /* Tighter line spacing for more rows */
     table-layout: fixed; /* Helps maintain column widths even if content is sparse */
+    /* REMOVED: overflow: hidden; from here to allow pagination */
+  }
+
+  .marksheet-table thead {
+    display: table-header-group; /* CRITICAL: Repeat table header on each new page */
+  }
+
+  .marksheet-table tbody tr {
+    page-break-inside: avoid !important; /* CRITICAL: Prevent rows from splitting across pages */
+    page-break-after: auto !important; /* Allow page breaks between rows */
   }
 
   .marksheet-table th,
@@ -287,8 +291,7 @@ form {
     text-align: center;
     word-wrap: break-word; /* Allow long words to break within cells */
     white-space: normal; /* Allow text to wrap in cells generally */
-    overflow: hidden;
-    text-overflow: ellipsis; /* Visual cue if text is truly clipped by fixed-layout */
+    /* Removed overflow: hidden; and text-overflow: ellipsis; from cells as they might clip legitimate content */
   }
 
   .marksheet-table th {
@@ -304,16 +307,6 @@ form {
     width: 20%; /* Give ample space for student names */
     text-align: left;
     white-space: normal;
-  }
-
-  /* Page break rules for table content */
-  .marksheet-table thead {
-    display: table-header-group; /* Repeat table header on each new page */
-  }
-
-  .marksheet-table tbody tr {
-    page-break-inside: avoid !important; /* Prevent rows from splitting across pages */
-    page-break-after: auto !important; /* Allow page breaks between rows */
   }
 
   /* Explicit column widths for print (adjust based on your subject count) */
