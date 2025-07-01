@@ -197,14 +197,14 @@ form {
   /* Make the pdf-report-container the sole visible element for printing */
   .pdf-report-container {
     width: 100%; /* Take full available width within the @page margins */
-    height: auto; /* Let content dictate height */
+    height: auto; /* Allow content to dictate height */
     margin: 0; /* Remove any screen-specific margins */
     padding: 0; /* Remove any screen-specific padding on the container */
     box-shadow: none; /* No shadow in print */
     background-color: white; /* Ensure white background */
-    /* REMOVED: overflow: hidden; from here, let content flow to new pages */
-    /* IMPORTANT: Make sure this is commented out or removed if it's there! */
-    /* page-break-after: always; */
+    /* IMPORTANT: Remove or comment out any 'overflow' property here if it's present. */
+    /* overflow: visible; /* Explicitly ensure content is not hidden */
+    /* IMPORTANT: Make sure 'page-break-after: always;' is NOT active here! */
   }
 
   /* Print Header Styles - Optimized for space */
@@ -216,6 +216,7 @@ form {
     font-size: 8pt; /* Smaller overall font for header info */
     line-height: 1.1;
     page-break-after: avoid; /* Ensure header doesn't break from first row of table */
+    page-break-inside: avoid; /* Keep header content together */
   }
 
   .logo-title-wrapper {
@@ -226,7 +227,7 @@ form {
     margin-bottom: 0.2cm;
     flex-shrink: 0;
     height: 3cm; /* Explicit height for the logo/title wrapper */
-    overflow: hidden; /* Safety for its content, as it has fixed height */
+    overflow: hidden; /* Keep this for the logo wrapper if it's strictly a container */
   }
 
   .pdf-logo-wrapper {
@@ -272,16 +273,26 @@ form {
     font-size: 8pt; /* Main table text size for print */
     line-height: 1.2; /* Tighter line spacing for more rows */
     table-layout: fixed; /* Helps maintain column widths even if content is sparse */
-    /* REMOVED: overflow: hidden; from here to allow pagination */
+    /* IMPORTANT: Remove any 'overflow' property from the table itself! */
+    /* overflow: visible; /* Explicitly allow table to paginate */
   }
 
   .marksheet-table thead {
     display: table-header-group; /* CRITICAL: Repeat table header on each new page */
+    /* Ensure thead itself doesn't cause breaking issues */
+    page-break-inside: avoid;
+  }
+
+  .marksheet-table tbody {
+    /* This is important for tbody */
+    display: table-row-group; /* Treat tbody as a group of rows */
   }
 
   .marksheet-table tbody tr {
     page-break-inside: avoid !important; /* CRITICAL: Prevent rows from splitting across pages */
     page-break-after: auto !important; /* Allow page breaks between rows */
+    /* Ensure row content doesn't create overflow that prevents page breaks */
+    height: auto !important; /* Ensure row height is dynamic */
   }
 
   .marksheet-table th,
@@ -291,7 +302,8 @@ form {
     text-align: center;
     word-wrap: break-word; /* Allow long words to break within cells */
     white-space: normal; /* Allow text to wrap in cells generally */
-    /* Removed overflow: hidden; and text-overflow: ellipsis; from cells as they might clip legitimate content */
+    /* IMPORTANT: Remove overflow: hidden; and text-overflow: ellipsis; from cells in print */
+    /* These can hide content instead of allowing it to wrap */
   }
 
   .marksheet-table th {
@@ -342,5 +354,20 @@ form {
 
   .select-marksheet-form {
     display: none;
+  }
+
+  @media print {
+    .pdf-report-container {
+      border: 2px solid red !important;
+    }
+    .pdf-header {
+      border: 2px solid blue !important;
+    }
+    .marksheet-table {
+      border: 2px solid green !important;
+    }
+    .marksheet-table tbody tr {
+      border: 1px solid purple !important;
+    }
   }
 }
