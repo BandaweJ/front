@@ -1,3 +1,50 @@
+<mat-card>
+  <div class="select-marksheet-form">
+    <form [formGroup]="markSheetForm">
+      <div class="top-btns">
+        <mat-form-field>
+          <mat-label>Choose Term</mat-label>
+          <mat-select formControlName="term">
+            <mat-option *ngFor="let term of terms$ | async" [value]="term">
+              {{ term.num + " " + term.year }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Choose Class</mat-label>
+          <mat-select formControlName="clas">
+            <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+              {{ clas.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Exam Type</mat-label>
+          <mat-select formControlName="examType">
+            <mat-option *ngFor="let type of examtype" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </form>
+
+
+    <div class="btns">
+      <button mat-flat-button color="primary" [disabled]="markSheetForm.invalid" (click)="fetchMarkSheet()">
+        Create
+      </button>
+      <button mat-mini-fab aria-label="Click to download marksheet" *ngIf="reports.length" (click)="download()">
+        <mat-icon>download</mat-icon>
+      </button>
+      <!-- <button mat-flat-button color="accent" (click)="download()">Save</button> -->
+      <!-- <button mat-flat-button color="primary" (click)="viewReports()">View</button> -->
+    </div>
+  </div>
+  <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
+</mat-card>
+<!-- Start Mark Sheet Table -->
 <table *ngIf="reports.length" id="marksheet" #marksheetTable>
   <caption>
     <img src="../../../assets/banner.jpeg">
@@ -35,3 +82,7 @@
     <td>{{ rep.report.classPosition }}</td>
   </tr>
 </table>
+
+
+
+<!-- End Mark Sheet Table -->
