@@ -31,8 +31,8 @@ import {
 } from '@angular/forms';
 import { Residence } from 'src/app/enrolment/models/residence.enum';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subscription, combineLatest, Subject } from 'rxjs'; // Added Subject
-import { startWith, distinctUntilChanged, map } from 'rxjs/operators'; // Added map
+import { Subscription, combineLatest, Subject } from 'rxjs';
+import { startWith, distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-billing',
@@ -55,18 +55,6 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
   // --- Subscriptions to manage memory leaks ---
   private subscriptions: Subscription[] = [];
-  private feesSubscription!: Subscription;
-  private selectedAcademicLevelSubscription!: Subscription;
-  private oLevelNewComerSubscription!: Subscription;
-  private aLevelNewComerSubscription!: Subscription;
-  private aLevelScienceLevySubscription!: Subscription;
-  private oLevelAccommodationSubscription!: Subscription;
-  private aLevelAccommodationSubscription!: Subscription;
-  private foodOptionSubscription!: Subscription;
-  private transportOptionSubscription!: Subscription;
-  private selectedStudentInvoiceSubscription!: Subscription;
-
-  // Subject to manually trigger updates for combined accommodation logic
   private accommodationTypeTrigger$: Subject<void> = new Subject<void>();
 
   // --- Properties to track currently selected exclusive fees ---
@@ -117,7 +105,12 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
-    // 1. Initialize the form group with default values
+    this.initializeForm();
+    this.subscribeToStoreChanges();
+    this.setupFormControlListeners();
+  }
+
+  private initializeForm(): void {
     this.academicSettingsForm = this.fb.group({
       selectedAcademicLevel: ['O Level', Validators.required],
       oLevelNewComer: [false],
@@ -128,67 +121,50 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       foodOption: [false],
       transportOption: [false],
     });
+  }
 
-    // 2. Subscribe to fees from Ngrx store. This is crucial as fee IDs are needed for billing.
-    this.feesSubscription = this.store.select(selectFees).subscribe((fees) => {
-      this.fees = fees;
-      // After fees are loaded, if an enrolment is already present, attempt to populate form/toBill
-      // based on selectedBills (which would have been updated by selectedStudentInvoiceSubscription).
-      // This handles cases where fees load *after* the invoice.
-      if (this.enrolment && this.selectedBills.length > 0) {
-        this.populateFormAndToBillFromSelectedBills(this.selectedBills);
-      }
-    });
-    this.subscriptions.push(this.feesSubscription);
+  private subscribeToStoreChanges(): void {
+    // Subscribe to fees from Ngrx store. This is crucial as fee IDs are needed for billing.
+    this.subscriptions.push(
+      this.store.select(selectFees).subscribe((fees) => {
+        this.fees = fees;
+        // After fees are loaded, if an enrolment is already present, attempt to populate form/toBill
+        // based on selectedBills (which would have been updated by selectedStudentInvoiceSubscription).
+        // This handles cases where fees load *after* the invoice.
+        if (this.enrolment && this.selectedBills.length > 0) {
+          this.populateFormAndToBillFromSelectedBills(this.selectedBills);
+        }
+      })
+    );
 
-    // 3. Subscribe to selected student invoice from Ngrx store.
+    // Subscribe to selected student invoice from Ngrx store.
     // This should ideally trigger populating the form and `toBill` with existing invoice data.
-    this.selectedStudentInvoiceSubscription = this.store
-      .select(selectedStudentInvoice)
-      .subscribe((invoice) => {
+    this.subscriptions.push(
+      this.store.select(selectedStudentInvoice).subscribe((invoice) => {
         this.selectedBills =
           invoice && Array.isArray(invoice.bills) ? [...invoice.bills] : [];
         // Only populate if fees are already loaded, otherwise feesSubscription will handle it.
         if (this.fees.length > 0) {
           this.populateFormAndToBillFromSelectedBills(this.selectedBills);
         }
-      });
-    this.subscriptions.push(this.selectedStudentInvoiceSubscription);
+      })
+    );
+  }
 
-    // 4. --- Dynamic Form Logic: Control O Level / A Level specific fields ---
-    this.selectedAcademicLevelSubscription =
+  private setupFormControlListeners(): void {
+    // Dynamic Form Logic: Control O Level / A Level specific fields
+    this.subscriptions.push(
       this.selectedAcademicLevel.valueChanges
-        .pipe(
-          startWith(this.selectedAcademicLevel.value) // Emit initial value to set up controls on load
-        )
+        .pipe(startWith(this.selectedAcademicLevel.value)) // Emit initial value to set up controls on load
         .subscribe((level: 'O Level' | 'A Level') => {
           this.academicLevel = level;
-
-          // Disable/Enable form controls based on the selected academic level
-          if (level === 'O Level') {
-            this.oLevelNewComer.enable({ emitEvent: false });
-            this.oLevelAccommodationType.enable({ emitEvent: false });
-            this.aLevelNewComer.disable({ emitEvent: false });
-            this.aLevelScienceLevy.disable({ emitEvent: false });
-            this.aLevelAccommodationType.disable({ emitEvent: false });
-          } else {
-            // 'A Level'
-            this.aLevelNewComer.enable({ emitEvent: false });
-            this.aLevelScienceLevy.enable({ emitEvent: false });
-            this.aLevelAccommodationType.enable({ emitEvent: false });
-            this.oLevelNewComer.disable({ emitEvent: false });
-            this.oLevelAccommodationType.disable({ emitEvent: false });
-          }
-
-          // Reset values of disabled controls to avoid carrying over incorrect state
+          this.toggleAcademicLevelControls(level);
           this.resetDisabledControls(level);
-          // Trigger the accommodation logic after academic level change
-          this.accommodationTypeTrigger$.next();
-        });
-    this.subscriptions.push(this.selectedAcademicLevelSubscription);
+          this.accommodationTypeTrigger$.next(); // Trigger the accommodation logic after academic level change
+        })
+    );
 
-    // 5. --- Dynamic Form Logic: Control visibility of Transport & Food based on Accommodation Type ---
-    // Create an observable that emits when any relevant form control changes OR when manually triggered
+    // Dynamic Form Logic: Control visibility of Transport & Food based on Accommodation Type
     const combinedAccommodationObservable$ = combineLatest([
       this.oLevelAccommodationType.valueChanges.pipe(
         startWith(this.oLevelAccommodationType.value)
@@ -209,11 +185,10 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       }))
     );
 
-    const accommodationCombinedSubscription =
+    this.subscriptions.push(
       combinedAccommodationObservable$.subscribe(
         ({ oLevelAcc, aLevelAcc, academicLevel }) => {
           let shouldShow = false;
-
           if (academicLevel === 'O Level' && oLevelAcc === Residence.Day) {
             shouldShow = true;
           } else if (
@@ -222,163 +197,171 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
           ) {
             shouldShow = true;
           }
-
           this.showTransportFoodOptions = shouldShow;
-
-          if (!shouldShow) {
-            this.foodOption.disable({ emitEvent: false });
-            this.foodOption.setValue(false, { emitEvent: false });
-            // Ensure fee is found before attempting to remove it
-            this.removeFeeFromToBill(
-              this.fees.find((f) => f.name.includes('foodFee'))!
-            );
-
-            this.transportOption.disable({ emitEvent: false });
-            this.transportOption.setValue(false, { emitEvent: false });
-            this.removeFeeFromToBill(
-              this.fees.find((f) => f.name.includes('transportFee'))!
-            );
-          } else {
-            this.foodOption.enable({ emitEvent: false });
-            this.transportOption.enable({ emitEvent: false });
-          }
+          this.toggleTransportFoodControls(shouldShow);
         }
-      );
-    this.subscriptions.push(accommodationCombinedSubscription);
-
-    // 6. --- Individual Form Control Change Listeners (Modify `toBill` locally) ---
-    // These listeners update the `toBill` array based on user selections.
-    // They are placed after the dynamic form logic to ensure controls are enabled/disabled correctly.
-
-    this.oLevelNewComerSubscription =
-      this.oLevelNewComer.valueChanges.subscribe((value) => {
-        const deskFee = this.fees.find((fee) => fee.name.includes('deskFee'));
-        const oLevelAppFee = this.fees.find((fee) =>
-          fee.name.includes('oLevelApplicationFee')
-        );
-
-        if (value) {
-          if (deskFee) this.addFeeToToBill(deskFee);
-          if (oLevelAppFee) this.addFeeToToBill(oLevelAppFee);
-        } else {
-          if (deskFee) this.removeFeeFromToBill(deskFee);
-          if (oLevelAppFee) this.removeFeeFromToBill(oLevelAppFee);
-        }
-      });
-    this.subscriptions.push(this.oLevelNewComerSubscription);
-
-    this.aLevelNewComerSubscription =
-      this.aLevelNewComer.valueChanges.subscribe((value) => {
-        const deskFee = this.fees.find((fee) => fee.name.includes('deskFee'));
-        const aLevelAppFee = this.fees.find((fee) =>
-          fee.name.includes('aLevelApplicationFee')
-        );
-
-        if (value) {
-          if (deskFee) this.addFeeToToBill(deskFee);
-          if (aLevelAppFee) this.addFeeToToBill(aLevelAppFee);
-        } else {
-          if (deskFee) this.removeFeeFromToBill(deskFee);
-          if (aLevelAppFee) this.removeFeeFromToBill(aLevelAppFee);
-        }
-      });
-    this.subscriptions.push(this.aLevelNewComerSubscription);
-
-    this.aLevelScienceLevySubscription =
-      this.aLevelScienceLevy.valueChanges.subscribe((value) => {
-        const alevelScienceFee = this.fees.find((fee) =>
-          fee.name.includes('alevelScienceFee')
-        );
-        if (value) {
-          if (alevelScienceFee) this.addFeeToToBill(alevelScienceFee);
-        } else {
-          if (alevelScienceFee) this.removeFeeFromToBill(alevelScienceFee);
-        }
-      });
-    this.subscriptions.push(this.aLevelScienceLevySubscription);
-
-    this.foodOptionSubscription = this.foodOption.valueChanges.subscribe(
-      (value) => {
-        const foodFee = this.fees.find((fee) => fee.name.includes('foodFee'));
-        if (value) {
-          if (foodFee) this.addFeeToToBill(foodFee);
-        } else {
-          if (foodFee) this.removeFeeFromToBill(foodFee);
-        }
-      }
+      )
     );
-    this.subscriptions.push(this.foodOptionSubscription);
 
-    this.transportOptionSubscription =
-      this.transportOption.valueChanges.subscribe((value) => {
-        const transportFee = this.fees.find((fee) =>
-          fee.name.includes('transportFee')
-        );
+    // Individual Form Control Change Listeners (Modify `toBill` locally)
+    this.subscriptions.push(
+      this.oLevelNewComer.valueChanges.subscribe((value) => {
+        const deskFee = this.findFee('deskFee');
+        const oLevelApplicationFee = this.findFee('oLevelApplicationFee');
+
         if (value) {
-          if (transportFee) this.addFeeToToBill(transportFee);
+          this.addFeeToToBill(deskFee);
+          this.addFeeToToBill(oLevelApplicationFee);
         } else {
-          if (transportFee) this.removeFeeFromToBill(transportFee);
+          // Only remove deskFee if ALevelNewComer is also false
+          if (!this.aLevelNewComer.value) {
+            this.removeFeeFromToBill(deskFee);
+          }
+          this.removeFeeFromToBill(oLevelApplicationFee);
         }
-      });
-    this.subscriptions.push(this.transportOptionSubscription);
+      })
+    );
 
-    this.oLevelAccommodationSubscription =
+    this.subscriptions.push(
+      this.aLevelNewComer.valueChanges.subscribe((value) => {
+        const deskFee = this.findFee('deskFee');
+        const aLevelApplicationFee = this.findFee('aLevelApplicationFee');
+
+        if (value) {
+          this.addFeeToToBill(deskFee);
+          this.addFeeToToBill(aLevelApplicationFee);
+        } else {
+          // Only remove deskFee if OLevelNewComer is also false
+          if (!this.oLevelNewComer.value) {
+            this.removeFeeFromToBill(deskFee);
+          }
+          this.removeFeeFromToBill(aLevelApplicationFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.aLevelScienceLevy.valueChanges.subscribe((value) => {
+        const alevelScienceFee = this.findFee('alevelScienceFee');
+        if (value) {
+          this.addFeeToToBill(alevelScienceFee);
+        } else {
+          this.removeFeeFromToBill(alevelScienceFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.foodOption.valueChanges.subscribe((value) => {
+        const foodFee = this.findFee('foodFee');
+        if (value) {
+          this.addFeeToToBill(foodFee);
+        } else {
+          this.removeFeeFromToBill(foodFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.transportOption.valueChanges.subscribe((value) => {
+        const transportFee = this.findFee('transportFee');
+        if (value) {
+          this.addFeeToToBill(transportFee);
+        } else {
+          this.removeFeeFromToBill(transportFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
       this.oLevelAccommodationType.valueChanges
         .pipe(distinctUntilChanged())
         .subscribe((value: Residence | null) => {
-          // 1. Remove the previously added accommodation fee, if any, for O-Level
-          if (this.currentOLevelAccommodationFee) {
-            this.removeFeeFromToBill(this.currentOLevelAccommodationFee);
-            this.currentOLevelAccommodationFee = undefined;
-          }
+          this.removeFeeFromToBill(this.currentOLevelAccommodationFee);
+          this.currentOLevelAccommodationFee = undefined;
 
-          // 2. Add the new accommodation fee based on the current selection
           let newFeeToAdd: FeesModel | undefined;
           if (value === Residence.Day) {
-            newFeeToAdd = this.fees.find((fee) =>
-              fee.name.includes('oLevelTuitionDay')
-            );
+            newFeeToAdd = this.findFee('oLevelTuitionDay');
           } else if (value === Residence.Boarder) {
-            newFeeToAdd = this.fees.find((fee) =>
-              fee.name.includes('oLevelTuitionBoarder')
-            );
+            newFeeToAdd = this.findFee('oLevelTuitionBoarder');
           }
 
           if (newFeeToAdd) {
             this.addFeeToToBill(newFeeToAdd);
             this.currentOLevelAccommodationFee = newFeeToAdd;
           }
-        });
-    this.subscriptions.push(this.oLevelAccommodationSubscription);
 
-    this.aLevelAccommodationSubscription =
+          // Add O Level Science Fee if student is identified as science student AND academic level is O Level
+          // This ensures the fee is only added when relevant accommodation is selected
+          const oLevelScienceFee = this.findFee('oLevelScienceFee');
+          if (this.academicLevel === 'O Level' && this.isScienceStudent) {
+            this.addFeeToToBill(oLevelScienceFee);
+          } else {
+            this.removeFeeFromToBill(oLevelScienceFee);
+          }
+        })
+    );
+
+    this.subscriptions.push(
       this.aLevelAccommodationType.valueChanges
         .pipe(distinctUntilChanged())
         .subscribe((value: Residence | null) => {
-          // 1. Remove the previously added accommodation fee, if any, for A-Level
-          if (this.currentALevelAccommodationFee) {
-            this.removeFeeFromToBill(this.currentALevelAccommodationFee);
-            this.currentALevelAccommodationFee = undefined;
-          }
+          this.removeFeeFromToBill(this.currentALevelAccommodationFee);
+          this.currentALevelAccommodationFee = undefined;
 
-          // 2. Add the new accommodation fee based on the current selection
           let newFeeToAdd: FeesModel | undefined;
           if (value === Residence.Day) {
-            newFeeToAdd = this.fees.find((fee) =>
-              fee.name.includes('aLevelTuitionDay')
-            );
+            newFeeToAdd = this.findFee('aLevelTuitionDay');
           } else if (value === Residence.Boarder) {
-            newFeeToAdd = this.fees.find((fee) =>
-              fee.name.includes('aLevelTuitionBoarder')
-            );
+            newFeeToAdd = this.findFee('aLevelTuitionBoarder');
           }
 
           if (newFeeToAdd) {
             this.addFeeToToBill(newFeeToAdd);
             this.currentALevelAccommodationFee = newFeeToAdd;
           }
-        });
-    this.subscriptions.push(this.aLevelAccommodationSubscription);
+        })
+    );
+  }
+
+  private toggleAcademicLevelControls(level: 'O Level' | 'A Level'): void {
+    const controls = {
+      oLevelNewComer: this.oLevelNewComer,
+      oLevelAccommodationType: this.oLevelAccommodationType,
+      aLevelNewComer: this.aLevelNewComer,
+      aLevelScienceLevy: this.aLevelScienceLevy,
+      aLevelAccommodationType: this.aLevelAccommodationType,
+    };
+
+    for (const key in controls) {
+      if (controls.hasOwnProperty(key)) {
+        const control = controls[key as keyof typeof controls];
+        if (
+          (level === 'O Level' && key.startsWith('oLevel')) ||
+          (level === 'A Level' && key.startsWith('aLevel'))
+        ) {
+          control.enable({ emitEvent: false });
+        } else {
+          control.disable({ emitEvent: false });
+        }
+      }
+    }
+  }
+
+  private toggleTransportFoodControls(enable: boolean): void {
+    if (enable) {
+      this.foodOption.enable({ emitEvent: false });
+      this.transportOption.enable({ emitEvent: false });
+    } else {
+      this.foodOption.disable({ emitEvent: false });
+      this.foodOption.setValue(false, { emitEvent: false });
+      this.removeFeeFromToBill(this.findFee('foodFee'));
+
+      this.transportOption.disable({ emitEvent: false });
+      this.transportOption.setValue(false, { emitEvent: false });
+      this.removeFeeFromToBill(this.findFee('transportFee'));
+    }
   }
 
   /**
@@ -386,12 +369,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
    * It also sets the `current...AccommodationFee` trackers based on the loaded state.
    */
   private populateFormAndToBillFromSelectedBills(bills: BillModel[]): void {
-    if (
-      !this.fees ||
-      this.fees.length === 0 ||
-      !this.enrolment ||
-      !this.enrolment.student
-    ) {
+    if (!this.fees || this.fees.length === 0 || !this.enrolment?.student) {
       return;
     }
 
@@ -402,87 +380,79 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     this.currentOLevelAccommodationFee = undefined;
     this.currentALevelAccommodationFee = undefined;
 
-    // Helper to find fee by name pattern in fees array
     const findFee = (namePart: string) =>
       this.fees.find((fee) => fee.name.includes(namePart));
     const findBillByFeeName = (billsArray: BillModel[], namePart: string) =>
       billsArray.find((bill) => bill.fees.name.includes(namePart));
 
-    // Populate form and initial `toBill` based on `selectedBills`
-    // It's important to set initialToBill with bills that are actually in `selectedBills`
-    // but using the `FeesModel` from `this.fees` to ensure consistency.
-
-    // New Comer
-    const oLevelAppBill = findBillByFeeName(bills, 'oLevelApplicationFee');
-    const aLevelAppBill = findBillByFeeName(bills, 'aLevelApplicationFee');
-    const deskBill = findBillByFeeName(bills, 'deskFee');
-
-    if (oLevelAppBill) {
-      formUpdates['oLevelNewComer'] = true;
-      const fee = findFee('oLevelApplicationFee');
-      // Reconstruct BillModel ensuring student/enrol are correct from current enrolment
-      if (fee && this.enrolment && this.enrolment.student)
+    const addBillToInitial = (
+      bill: BillModel | undefined,
+      fee: FeesModel | undefined
+    ) => {
+      if (bill && fee && this.enrolment?.student) {
         initialToBill.push({
-          ...oLevelAppBill,
+          ...bill,
           fees: fee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
-      if (
-        deskBill &&
-        findFee('deskFee') &&
-        this.enrolment &&
-        this.enrolment.student
-      )
-        initialToBill.push({
-          ...deskBill,
-          fees: findFee('deskFee')!,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
-    }
-    if (aLevelAppBill) {
-      formUpdates['aLevelNewComer'] = true;
-      const fee = findFee('aLevelApplicationFee');
-      if (fee && this.enrolment && this.enrolment.student)
-        initialToBill.push({
-          ...aLevelAppBill,
-          fees: fee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
-      // Desk fee might be added by either. Only add if not already added by OLevel Newcomer
-      if (
-        deskBill &&
-        findFee('deskFee') &&
-        !oLevelAppBill &&
-        this.enrolment &&
-        this.enrolment.student
-      ) {
-        initialToBill.push({
-          ...deskBill,
-          fees: findFee('deskFee')!,
           student: this.enrolment.student,
           enrol: this.enrolment,
         });
       }
+    };
+
+    // New Comer (O Level)
+    const oLevelApplicationBill = findBillByFeeName(
+      bills,
+      'oLevelApplicationFee'
+    );
+    const oLevelApplicationFee = findFee('oLevelApplicationFee');
+    const deskFee = findFee('deskFee');
+
+    if (oLevelApplicationBill) {
+      formUpdates['oLevelNewComer'] = true;
+      addBillToInitial(oLevelApplicationBill, oLevelApplicationFee);
+      // Desk fee is only added if not already added by A-Level newcomer
+      if (!findBillByFeeName(bills, 'aLevelApplicationFee')) {
+        addBillToInitial(findBillByFeeName(bills, 'deskFee'), deskFee);
+      }
     }
 
-    // Science Levy
-    const alevelScienceBill = findBillByFeeName(bills, 'alevelScienceFee');
-    if (alevelScienceBill) {
+    // New Comer (A Level)
+    const aLevelApplicationBill = findBillByFeeName(
+      bills,
+      'aLevelApplicationFee'
+    );
+    const aLevelApplicationFee = findFee('aLevelApplicationFee');
+    if (aLevelApplicationBill) {
+      formUpdates['aLevelNewComer'] = true;
+      addBillToInitial(aLevelApplicationBill, aLevelApplicationFee);
+      // Desk fee is only added if not already added by O-Level newcomer
+      if (!findBillByFeeName(bills, 'oLevelApplicationFee')) {
+        addBillToInitial(findBillByFeeName(bills, 'deskFee'), deskFee);
+      }
+    }
+
+    // Science Levy (A Level)
+    const aLevelScienceBill = findBillByFeeName(bills, 'alevelScienceFee');
+    const aLevelScienceFee = findFee('alevelScienceFee');
+    if (aLevelScienceBill) {
       formUpdates['aLevelScienceLevy'] = true;
-      const fee = findFee('alevelScienceFee');
-      if (fee && this.enrolment && this.enrolment.student)
-        initialToBill.push({
-          ...alevelScienceBill,
-          fees: fee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
+      addBillToInitial(aLevelScienceBill, aLevelScienceFee);
     }
 
-    // Accommodation Type (mutually exclusive per level)
+    // Science Levy (O Level) - NEWLY ADDED LOGIC
+    const oLevelScienceBill = findBillByFeeName(bills, 'oLevelScienceFee');
+    const oLevelScienceFee = findFee('oLevelScienceFee');
+    if (oLevelScienceBill) {
+      // Assuming you might have a checkbox or similar for O Level Science Levy
+      // For now, it's tied to isScienceStudent and academic level in the accommodation logic,
+      // but if there's a specific form control for it, you'd set it here.
+      // Example: formUpdates['oLevelScienceLevy'] = true;
+      addBillToInitial(oLevelScienceBill, oLevelScienceFee);
+      // Ensure `isScienceStudent` is true if this bill exists
+      this.isScienceStudent = true;
+    }
+
+    // Accommodation Type (O Level)
     const oLevelTuitionDayBill = findBillByFeeName(bills, 'oLevelTuitionDay');
     const oLevelTuitionBoarderBill = findBillByFeeName(
       bills,
@@ -491,30 +461,19 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     const oLevelDayFee = findFee('oLevelTuitionDay');
     const oLevelBoarderFee = findFee('oLevelTuitionBoarder');
 
-    if (oLevelTuitionDayBill && oLevelDayFee) {
+    if (oLevelTuitionDayBill) {
       formUpdates['oLevelAccommodationType'] = Residence.Day;
-      if (this.enrolment && this.enrolment.student)
-        initialToBill.push({
-          ...oLevelTuitionDayBill,
-          fees: oLevelDayFee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
+      addBillToInitial(oLevelTuitionDayBill, oLevelDayFee);
       this.currentOLevelAccommodationFee = oLevelDayFee;
-    } else if (oLevelTuitionBoarderBill && oLevelBoarderFee) {
+    } else if (oLevelTuitionBoarderBill) {
       formUpdates['oLevelAccommodationType'] = Residence.Boarder;
-      if (this.enrolment && this.enrolment.student)
-        initialToBill.push({
-          ...oLevelTuitionBoarderBill,
-          fees: oLevelBoarderFee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
+      addBillToInitial(oLevelTuitionBoarderBill, oLevelBoarderFee);
       this.currentOLevelAccommodationFee = oLevelBoarderFee;
     } else {
       formUpdates['oLevelAccommodationType'] = null; // No accommodation selected
     }
 
+    // Accommodation Type (A Level)
     const aLevelTuitionDayBill = findBillByFeeName(bills, 'aLevelTuitionDay');
     const aLevelTuitionBoarderBill = findBillByFeeName(
       bills,
@@ -523,25 +482,13 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     const aLevelDayFee = findFee('aLevelTuitionDay');
     const aLevelBoarderFee = findFee('aLevelTuitionBoarder');
 
-    if (aLevelTuitionDayBill && aLevelDayFee) {
+    if (aLevelTuitionDayBill) {
       formUpdates['aLevelAccommodationType'] = Residence.Day;
-      if (this.enrolment && this.enrolment.student)
-        initialToBill.push({
-          ...aLevelTuitionDayBill,
-          fees: aLevelDayFee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
+      addBillToInitial(aLevelTuitionDayBill, aLevelDayFee);
       this.currentALevelAccommodationFee = aLevelDayFee;
-    } else if (aLevelTuitionBoarderBill && aLevelBoarderFee) {
+    } else if (aLevelTuitionBoarderBill) {
       formUpdates['aLevelAccommodationType'] = Residence.Boarder;
-      if (this.enrolment && this.enrolment.student)
-        initialToBill.push({
-          ...aLevelTuitionBoarderBill,
-          fees: aLevelBoarderFee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
+      addBillToInitial(aLevelTuitionBoarderBill, aLevelBoarderFee);
       this.currentALevelAccommodationFee = aLevelBoarderFee;
     } else {
       formUpdates['aLevelAccommodationType'] = null; // No accommodation selected
@@ -550,76 +497,67 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     // Meal & Transport (checkboxes)
     const foodBill = findBillByFeeName(bills, 'foodFee');
     const foodFee = findFee('foodFee');
-    if (foodBill && foodFee) {
+    if (foodBill) {
       formUpdates['foodOption'] = true;
-      if (this.enrolment && this.enrolment.student)
-        initialToBill.push({
-          ...foodBill,
-          fees: foodFee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
+      addBillToInitial(foodBill, foodFee);
     }
     const transportBill = findBillByFeeName(bills, 'transportFee');
     const transportFee = findFee('transportFee');
-    if (transportBill && transportFee) {
+    if (transportBill) {
       formUpdates['transportOption'] = true;
-      if (this.enrolment && this.enrolment.student)
-        initialToBill.push({
-          ...transportBill,
-          fees: transportFee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
+      addBillToInitial(transportBill, transportFee);
     }
 
-    // Patch form values without emitting events to prevent re-triggering subscriptions
     this.academicSettingsForm.patchValue(formUpdates, { emitEvent: false });
     // Filter initialToBill to ensure unique fees (in case deskFee logic caused temporary duplicates)
     this.toBill = Array.from(new Set(initialToBill.map((b) => b.fees.id))).map(
       (id) => initialToBill.find((b) => b.fees.id === id)!
     );
 
-    // Manually trigger the combined accommodation subscription once after populating form
-    // to ensure `showTransportFoodOptions` is correctly set.
-    // This is important because `patchValue({ emitEvent: false })` bypasses `valueChanges`.
     this.accommodationTypeTrigger$.next();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['enrolment'] && changes['enrolment'].currentValue) {
-      if (this.enrolment?.name?.toLowerCase().includes('science')) {
-        this.isScienceStudent = true;
-      }
+      // Check if the enrolment name indicates a science student
+      this.isScienceStudent =
+        this.enrolment?.name?.toLowerCase().includes('science') ?? false;
+
       if (this.enrolment?.student?.studentNumber) {
         const studentNumber = this.enrolment.student.studentNumber;
         this.store.dispatch(
           isNewComerActions.checkIsNewComer({ studentNumber })
         );
       }
+
       // If enrolment changes AND fees/selectedBills are already available, re-populate.
-      // This handles the case where enrolment comes in after initial load.
       if (this.fees.length > 0 && this.selectedBills.length > 0) {
         this.populateFormAndToBillFromSelectedBills(this.selectedBills);
       } else if (this.fees.length > 0) {
         // If fees are loaded but no selected bills for new enrolment, reset form
-        this.academicSettingsForm.reset(
-          {
-            selectedAcademicLevel: 'O Level',
-            oLevelNewComer: false,
-            aLevelNewComer: false,
-            aLevelScienceLevy: false,
-            oLevelAccommodationType: null,
-            aLevelAccommodationType: null,
-            foodOption: false,
-            transportOption: false,
-          },
-          { emitEvent: false }
-        );
-        this.toBill = [];
-        this.accommodationTypeTrigger$.next(); // Trigger to update UI based on reset
+        this.resetFormAndBills();
       }
     }
+  }
+
+  private resetFormAndBills(): void {
+    this.academicSettingsForm.reset(
+      {
+        selectedAcademicLevel: 'O Level',
+        oLevelNewComer: false,
+        aLevelNewComer: false,
+        aLevelScienceLevy: false,
+        oLevelAccommodationType: null,
+        aLevelAccommodationType: null,
+        foodOption: false,
+        transportOption: false,
+      },
+      { emitEvent: false }
+    );
+    this.toBill = [];
+    this.currentOLevelAccommodationFee = undefined;
+    this.currentALevelAccommodationFee = undefined;
+    this.accommodationTypeTrigger$.next(); // Trigger to update UI based on reset
   }
 
   /**
@@ -628,71 +566,73 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
    * @param activeLevel The academic level ('O Level' or 'A Level') that is currently active.
    */
   private resetDisabledControls(activeLevel: 'O Level' | 'A Level'): void {
-    // Only remove specific bills if they are definitely tied to the disabled academic level
-    // and if the related checkbox/radio is currently selected in the form.
+    const removeAndReset = (
+      control: FormControl,
+      feeNamePart: string,
+      currentFeeTracker?: FeesModel | undefined
+    ) => {
+      if (control.value) {
+        control.setValue(null, { emitEvent: false }); // Reset to null for radio or false for checkbox
+      }
+      this.removeFeeFromToBill(this.findFee(feeNamePart));
+      if (currentFeeTracker) {
+        // This is for exclusive fees like accommodation
+        this.removeFeeFromToBill(currentFeeTracker);
+      }
+    };
 
-    // Reset O Level specific fields if A Level is active
     if (activeLevel === 'A Level') {
+      // Reset O Level specific fields
       if (this.oLevelNewComer.value) {
         this.oLevelNewComer.setValue(false, { emitEvent: false });
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('oLevelApplicationFee'))!
-        );
+        this.removeFeeFromToBill(this.findFee('oLevelApplicationFee'));
       }
       // Handle deskFee: remove if OLevelNewComer was true AND ALevelNewComer is false
+      // This is crucial to avoid removing deskFee if ALevelNewComer is still true
       if (
         !this.aLevelNewComer.value &&
-        this.toBill.some((b) => b.fees.name.includes('deskFee')) &&
-        this.oLevelNewComer.value === false
+        this.toBill.some((b) => b.fees.name.includes('deskFee'))
       ) {
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('deskFee'))!
-        );
+        this.removeFeeFromToBill(this.findFee('deskFee'));
       }
 
       if (this.oLevelAccommodationType.value) {
-        this.oLevelAccommodationType.setValue(null, { emitEvent: false });
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('oLevelTuitionDay'))!
+        removeAndReset(
+          this.oLevelAccommodationType,
+          'oLevelTuitionDay',
+          this.currentOLevelAccommodationFee
         );
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('oLevelTuitionBoarder'))!
-        );
+        removeAndReset(this.oLevelAccommodationType, 'oLevelTuitionBoarder');
         this.currentOLevelAccommodationFee = undefined;
       }
-    }
-    // Reset A Level specific fields if O Level is active
-    else if (activeLevel === 'O Level') {
+      // Remove O Level Science Fee if A Level is selected, as it's an O Level specific fee
+      this.removeFeeFromToBill(this.findFee('oLevelScienceFee'));
+    } else if (activeLevel === 'O Level') {
+      // Reset A Level specific fields
       if (this.aLevelNewComer.value) {
         this.aLevelNewComer.setValue(false, { emitEvent: false });
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('aLevelApplicationFee'))!
-        );
+        this.removeFeeFromToBill(this.findFee('aLevelApplicationFee'));
       }
       // Handle deskFee: remove if ALevelNewComer was true AND OLevelNewComer is false
       if (
         !this.oLevelNewComer.value &&
-        this.toBill.some((b) => b.fees.name.includes('deskFee')) &&
-        this.aLevelNewComer.value === false
+        this.toBill.some((b) => b.fees.name.includes('deskFee'))
       ) {
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('deskFee'))!
-        );
+        this.removeFeeFromToBill(this.findFee('deskFee'));
       }
+
       if (this.aLevelScienceLevy.value) {
         this.aLevelScienceLevy.setValue(false, { emitEvent: false });
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('alevelScienceFee'))!
-        );
+        this.removeFeeFromToBill(this.findFee('alevelScienceFee'));
       }
+
       if (this.aLevelAccommodationType.value) {
-        this.aLevelAccommodationType.setValue(null, { emitEvent: false });
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('aLevelTuitionDay'))!
+        removeAndReset(
+          this.aLevelAccommodationType,
+          'aLevelTuitionDay',
+          this.currentALevelAccommodationFee
         );
-        this.removeFeeFromToBill(
-          this.fees.find((f) => f.name.includes('aLevelTuitionBoarder'))!
-        );
+        removeAndReset(this.aLevelAccommodationType, 'aLevelTuitionBoarder');
         this.currentALevelAccommodationFee = undefined;
       }
     }
@@ -700,13 +640,17 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
   // --- Local Bill Management Methods (ONLY modify `toBill` array) ---
 
+  private findFee(namePart: string): FeesModel | undefined {
+    return this.fees.find((fee) => fee.name.includes(namePart));
+  }
+
   /**
    * Adds a FeesModel to the `toBill` array if it's not already present.
    * Creates a new BillModel with student and enrolment data.
    * @param fee The FeesModel to add.
    */
-  addFeeToToBill(fee: FeesModel): void {
-    if (!this.enrolment?.student || !this.enrolment) {
+  addFeeToToBill(fee: FeesModel | undefined): void {
+    if (!fee || !this.enrolment?.student || !this.enrolment) {
       return;
     }
 
@@ -716,14 +660,12 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     if (existingBillIndex === -1) {
-      // Create a new bill object if it doesn't exist
       const newBill: BillModel = {
         student: this.enrolment.student,
         fees: fee,
         enrol: this.enrolment,
       };
       this.toBill.push(newBill);
-    } else {
     }
   }
 
@@ -731,17 +673,16 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
    * Removes a FeesModel from the `toBill` array.
    * @param fee The FeesModel to remove.
    */
-  removeFeeFromToBill(fee: FeesModel): void {
-    // Ensure fee.id exists before trying to find
-    if (fee && fee.id !== undefined) {
-      const billToRemoveIndex = this.toBill.findIndex(
-        (b) => b.fees.id === fee.id
-      );
-      if (billToRemoveIndex !== -1) {
-        this.toBill.splice(billToRemoveIndex, 1);
-      } else {
-      }
-    } else {
+  removeFeeFromToBill(fee: FeesModel | undefined): void {
+    if (!fee?.id) {
+      return; // Early exit if fee or fee.id is undefined
+    }
+
+    const billToRemoveIndex = this.toBill.findIndex(
+      (b) => b.fees.id === fee.id
+    );
+    if (billToRemoveIndex !== -1) {
+      this.toBill.splice(billToRemoveIndex, 1);
     }
   }
 
