@@ -295,7 +295,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
           // Add O Level Science Fee if student is identified as science student AND academic level is O Level
           // This ensures the fee is only added when relevant accommodation is selected
           const oLevelScienceFee = this.findFee('oLevelScienceFee');
-          if (this.academicLevel === 'O Level' && this.isScienceStudent) {
+          if (this.academicLevel === 'O Level') {
             this.addFeeToToBill(oLevelScienceFee);
           } else {
             this.removeFeeFromToBill(oLevelScienceFee);
