@@ -216,6 +216,9 @@ export const financeReducer = createReducer(
 
     const newTotal = Number(newTotalBill) + Number(currentBalanceBfwdAmount);
 
+    const newBalance =
+      newTotal - state.selectedStudentInvoice.amountPaidOnInvoice;
+
     return {
       ...state,
       isLoading: false, // Assuming these are part of your state management for the billing process
@@ -224,6 +227,7 @@ export const financeReducer = createReducer(
         ...state.selectedStudentInvoice,
         bills: [...finalBillsForInvoice], // Use the new, complete array of bills
         totalBill: newTotal, // Update totalBill with the calculated value
+        balance: newBalance,
         // Note: Other invoice fields like 'balance', 'amountPaidOnInvoice', 'status'
         // might also need to be recalculated or updated depending on your business logic
         // and if this action triggers a payment recalculation or status change.
@@ -464,5 +468,18 @@ export const financeReducer = createReducer(
     ...state,
     loadingStudentInvoices: false,
     loadStudentInvoicesErr: error.message,
-  }))
+  })),
+  on(invoiceActions.updateInvoiceEnrolment, (state, { enrol }) => {
+    // Only update if an invoice currently exists
+    if (state.selectedStudentInvoice) {
+      return {
+        ...state,
+        selectedStudentInvoice: {
+          ...state.selectedStudentInvoice,
+          enrol: { ...enrol }, // Create a new enrol object to ensure immutability
+        },
+      };
+    }
+    return state; // If no invoice, do nothing
+  })
 );

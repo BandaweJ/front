@@ -3,7 +3,7 @@ import {
   fetchTerms,
 } from './../../enrolment/store/enrolment.actions';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Store, select } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs'; // For managing subscriptions
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
@@ -48,6 +48,12 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.store.select(selectCurrentEnrolment).subscribe((enrolment) => {
         this.selectedStudentEnrol = enrolment;
+        // NEW: If an invoice is present, update its 'enrol' property
+        if (enrolment && this.invoice) {
+          this.store.dispatch(
+            invoiceActions.updateInvoiceEnrolment({ enrol: enrolment })
+          );
+        }
       })
     );
 

@@ -67,6 +67,9 @@ export const invoiceActions = createActionGroup({
     fetchStudentInvoices: props<{ studentNumber: string }>(),
     fetchStudentInvoicesSuccess: props<{ studentInvoices: InvoiceModel[] }>(),
     fetchStudentInvoicesFail: props<{ error: HttpErrorResponse }>(),
+
+    updateInvoiceEnrolment: props<{ enrol: EnrolsModel }>(),
+    clearInvoice: emptyProps(), // Add a clear action for when selection changes
   },
 });
 
