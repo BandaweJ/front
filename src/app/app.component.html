@@ -172,12 +172,12 @@
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Finance</span>
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <div class="sidenav-container">
+          <!-- <div class="sidenav-container">
             <button mat-button routerLink="/fees" routerLinkActive="active">
               <mat-icon>money</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Fees</span>
             </button>
-          </div>
+          </div> -->
           <div class="sidenav-container" *ngIf="role === 'reception'">
             <button mat-button routerLink="/payments" routerLinkActive="active">
               <mat-icon>payments</mat-icon>
