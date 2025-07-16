@@ -232,6 +232,6 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       window.print();
       this.isPrinting = false; // Revert flag after print dialog is initiated
-    }, 50); // Small delay
+    }, 1000); // Small delay
   }
 }
