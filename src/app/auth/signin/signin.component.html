@@ -5,8 +5,6 @@
     <mat-card-header class="column-container">
       <mat-card-title>
         <h1 class="mat-h1">Sign In</h1>
-
-
       </mat-card-title>
       <mat-card-subtitle class="error mat-h1">
         {{ errorMsg$ | async }}
@@ -34,7 +32,7 @@
           <input [type]="hide ? 'password' : 'text'" matInput formControlName="password" placeholder="Password" />
           <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
             [attr.aria-pressed]="hide">
-            <mat-icon class="transparent">{{ hide ? "visibility_off" : "visibility" }}</mat-icon>
+            <mat-icon class="transparent">{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
           <mat-hint>Password</mat-hint>
 
@@ -58,9 +56,6 @@
         </button>
       </form>
     </mat-card-content>
-    <mat-card class="column-container">
-
-
-    </mat-card>
+    <mat-card class="column-container"></mat-card>
   </mat-card>
 </div>

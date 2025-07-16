@@ -184,9 +184,15 @@ form {
 /* Styling for the Clear Filters button */
 form button {
   /* Using margin-left: auto pushes the button to the far right within its row, if there's space */
-  margin-left: auto;
   /* align-self: flex-end ensures it aligns with the bottom of the last row of filter fields */
-  align-self: flex-end;
+  /* Removed margin-left: auto from here, moved into a wrapper div for print button */
+}
+
+.filter-actions-print {
+  margin-left: auto; /* Pushes buttons to the right */
+  display: flex;
+  gap: 10px;
+  align-items: flex-end; /* Align buttons to the bottom */
 }
 
 /* Responsive adjustments for smaller screens (e.g., mobile) */
@@ -200,6 +206,11 @@ form button {
   form button {
     width: 100%; /* Make the button also take full width */
     margin-left: 0; /* Remove auto margin on small screens */
+  }
+  .filter-actions-print {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between; /* Spread buttons out if they take full width */
   }
 }
 
@@ -227,4 +238,83 @@ th {
   justify-content: center; /* Center the chart */
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+/* --- Print Specific Styles --- */
+@media print {
+  body {
+    font-size: 10pt; /* Adjust base font size for print */
+  }
+
+  .outstanding-fees-card {
+    box-shadow: none; /* Remove shadows for cleaner print */
+    border-radius: 0; /* Remove border-radius */
+    margin: 0; /* No margin on print */
+    padding: 0; /* No padding on print */
+  }
+
+  /* Hide elements that shouldn't be printed */
+  .filter-form-print, /* Hide the entire form containing filters and buttons */
+      .mat-paginator, /* Hide paginators */
+      .chart-container, /* Hide the chart container */
+      mat-divider {
+    /* Optionally hide dividers for a more compact print */
+    display: none !important;
+  }
+
+  /* Ensure tables expand and don't scroll */
+  .table-container,
+  .student-details-table-container {
+    overflow-x: visible !important; /* Allow table content to expand */
+    box-shadow: none !important; /* Remove shadows */
+    background-color: transparent !important; /* Transparent background */
+  }
+
+  .full-width-table {
+    width: 100%; /* Ensure tables take full width */
+  }
+
+  /* Adjust font size for table headers and cells for print */
+  th,
+  td {
+    font-size: 9pt;
+    padding: 4px 6px; /* Adjust padding for compactness */
+  }
+
+  /* Adjust total outstanding display for print */
+  .total-outstanding {
+    font-size: 1.2em; /* Smaller font for print */
+    color: #000; /* Black for better readability on print */
+    border-bottom: 1px solid #ccc; /* Lighter border */
+    padding-bottom: 5px;
+  }
+
+  /* Ensure background colors are printed for headers (optional, depends on browser settings) */
+  .mat-header-cell {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    background-color: #e0e0e0 !important; /* Light grey header */
+  }
+
+  .mat-row:nth-child(even) {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    background-color: #f0f0f0 !important; /* Slightly lighter row background */
+  }
+
+  h4 {
+    border-bottom: 1px solid #ccc; /* Lighter border for print */
+    font-size: 1.1em; /* Smaller font for headers */
+  }
+
+  /* Optional: Force breaks for better page flow */
+  .total-outstanding,
+  h4 {
+    page-break-after: avoid;
+  }
+
+  .table-container,
+  .student-details-table-container {
+    page-break-inside: auto; /* Allow tables to break across pages */
+  }
 }

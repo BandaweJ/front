@@ -33,6 +33,9 @@ import { EnrolStudentComponent } from './enrol-student/enrol-student.component';
 import { Title } from '@angular/platform-browser';
 import { Residence } from '../models/residence.enum';
 import { SharedService } from 'src/app/shared.service'; // Ensure this path is correct
+import { CurrentEnrolmentComponent } from '../../finance/student-finance/current-enrolment/current-enrolment.component';
+import { selectUser } from 'src/app/auth/store/auth.selectors';
+import { User } from 'src/app/auth/models/user.model';
 
 @Component({
   selector: 'app-terms-classes',
@@ -48,6 +51,7 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
   public dataSource = new MatTableDataSource<EnrolsModel>();
   enrolForm!: FormGroup;
   residences = [...Object.values(Residence)];
+  role$!: Observable<User | null>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -71,6 +75,7 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
     this.enrols$ = this.store.select(selectEnrols);
+    this.role$ = this.store.select(selectUser);
     this.errorMsg$ = this.store.select(selectEnrolErrorMsg); // Initialize errorMsg$
 
     this.enrols$
@@ -89,19 +94,6 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
         })
       )
       .subscribe();
-
-    // Subscribe to error messages
-    // this.errorMsg$.pipe(takeUntil(this.destroy$)).subscribe((msg) => {
-    //   if (msg) {
-    //     this.snackBar.open(msg, 'Dismiss', {
-    //       duration: 5000,
-    //       verticalPosition: 'top',
-    //       panelClass: ['error-snackbar'],
-    //     });
-    //     // Dispatch action to clear error message if needed
-    //     // this.store.dispatch(clearEnrolErrorMsg());
-    //   }
-    // });
 
     this.enrolForm = new FormGroup({
       clas: new FormControl('', [Validators.required]),
@@ -234,4 +226,13 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     return combinedString.includes(searchString);
   };
+
+  showCurrentEnrol(enrol: EnrolsModel) {
+    const studentNumber = enrol.student.studentNumber;
+    let dialogRef = this.dialog.open(CurrentEnrolmentComponent, {
+      // height: '400px',
+      // width: '600px',
+      data: { enrol },
+    });
+  }
 }

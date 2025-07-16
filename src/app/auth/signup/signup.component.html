@@ -16,8 +16,9 @@
           <mat-label>Select Role</mat-label>
           <mat-select formControlName="role">
             <mat-option value="">Select Role</mat-option>
-            <mat-option *ngFor="let role of roles" [value]="role">{{ role.toUpperCase() }}
-            </mat-option>
+            <mat-option *ngFor="let role of roles" [value]="role">{{
+              role.toUpperCase()
+              }}</mat-option>
           </mat-select>
           <mat-hint>What are you to the school?</mat-hint>
           <mat-error *ngIf="role!.hasError('required')">
@@ -25,16 +26,33 @@
           </mat-error>
         </mat-form-field>
         <mat-form-field>
-          <mat-label>{{ role?.value === 'teacher' ? 'I.D' : role?.value == 'student' ? 'Student Number' : 'Email'
+          <mat-label>{{
+            role?.value === 'teacher'
+            ? 'I.D'
+            : role?.value == 'student'
+            ? 'Student Number'
+            : 'Email'
             }}</mat-label>
           <input type="text" matInput formControlName="id" placeholder="02086980F12" />
           <mat-icon matSuffix>perm_identity</mat-icon>
-          <mat-hint>Format: {{ role?.value == 'teacher' ? '03123456F98' : role?.value == 'student' ? 'S2405234' :
-            'parent@example.com' }}</mat-hint>
+          <mat-hint>Format:
+            {{
+            role?.value == 'teacher'
+            ? '03123456F98'
+            : role?.value == 'student'
+            ? 'S2405234'
+            : 'parent@example.com'
+            }}</mat-hint>
 
           <mat-error *ngIf="id!.hasError('required')">
-            {{ role?.value == 'teacher' ? 'I.D Number' : role?.value == 'student' ? 'Student Number' : 'Email ' }} is
-            <strong>required</strong>
+            {{
+            role?.value == 'teacher'
+            ? 'I.D Number'
+            : role?.value == 'student'
+            ? 'Student Number'
+            : 'Email '
+            }}
+            is <strong>required</strong>
           </mat-error>
         </mat-form-field>
         <mat-form-field>
@@ -57,7 +75,7 @@
             placeholder="Example Placeholder" />
           <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
             [attr.aria-pressed]="hide">
-            <mat-icon>{{ hide ? "visibility_off" : "visibility" }}</mat-icon>
+            <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
           <mat-hint>Enter Password</mat-hint>
 

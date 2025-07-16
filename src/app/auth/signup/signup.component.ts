@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { SignupInterface } from '../models/signup.model';
-import { resetErrorMessage, signup } from '../store/auth.actions';
+import { resetErrorMessage, signupActions } from '../store/auth.actions'; // Import grouped action
 import { Observable } from 'rxjs';
 import { isLoading, selectErrorMsg } from '../store/auth.selectors';
 import { ROLES } from 'src/app/registration/models/roles.enum';
@@ -25,7 +25,7 @@ export class SignupComponent implements OnInit {
     this.signupForm = new FormGroup({
       id: new FormControl('', [
         Validators.required,
-        // Validators.minLength(10),
+        // Add more specific validators based on role here if needed
       ]),
       role: new FormControl('', Validators.required),
       username: new FormControl('', [
@@ -47,7 +47,7 @@ export class SignupComponent implements OnInit {
 
   signup() {
     const signupData: SignupInterface = this.signupForm.value;
-    this.store.dispatch(signup({ signupData }));
+    this.store.dispatch(signupActions.signup({ signupData })); // Use grouped action
   }
 
   switchToSignIn() {

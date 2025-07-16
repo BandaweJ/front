@@ -19,16 +19,6 @@ export const selectTotalEnroment = createSelector(
   (state: fromEnrolmentReducer.State) => state.totalEnrolment
 );
 
-// export const selectDeleteSuccess = createSelector(
-//   enrolmentState,
-//   (state: fromEnrolmentReducer.State) => state.deleteSuccess
-// );
-
-// export const selectAddSuccess = createSelector(
-//   enrolmentState,
-//   (state: fromEnrolmentReducer.State) => state.addSuccess
-// );
-
 export const selectTerms = createSelector(
   enrolmentState,
   (state: fromEnrolmentReducer.State) => state.terms

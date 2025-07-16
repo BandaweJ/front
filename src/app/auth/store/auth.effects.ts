@@ -2,10 +2,17 @@ import { Injectable } from '@angular/core';
 import { Actions, ofType, createEffect } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, exhaustMap, map, tap } from 'rxjs/operators';
-import * as fromAuthActions from './auth.actions';
+import {
+  signinActions,
+  signupActions,
+  accountStatsActions,
+  userDetailsActions,
+  logout,
+  checkAuthStatus,
+  // No need to import signinFailure directly now, it's part of signinActions
+} from './auth.actions';
 import { SigninInterface } from '../models/signin.model';
 import { AuthService } from '../auth.service';
-import { signinFailure } from './auth.actions';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
@@ -23,14 +30,13 @@ export class AuthEffects {
 
   signinEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fromAuthActions.signin),
+      ofType(signinActions.signin), // Use grouped action
       exhaustMap((credentials) =>
         this.authService.signin(credentials.signinData).pipe(
           map((resp) => {
             const user: User = jwt_decode(resp.accessToken);
 
             localStorage.setItem('token', resp.accessToken);
-            // localStorage.setItem('user', JSON.stringify(user));
 
             const payload = {
               ...resp,
@@ -38,10 +44,11 @@ export class AuthEffects {
             };
 
             this.router.navigateByUrl('/dashboard');
-            return fromAuthActions.signinSuccess(payload);
+            return signinActions.signinSuccess(payload); // Use grouped action
           }),
-          catchError((error: HttpErrorResponse) =>
-            of(signinFailure({ ...error }))
+          catchError(
+            (error: HttpErrorResponse) =>
+              of(signinActions.signinFailure({ ...error })) // Use grouped action
           )
         )
       )
@@ -50,7 +57,7 @@ export class AuthEffects {
 
   signupEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fromAuthActions.signup),
+      ofType(signupActions.signup), // Use grouped action
       exhaustMap((credentials) =>
         this.authService.signup(credentials.signupData).pipe(
           tap(() =>
@@ -59,10 +66,11 @@ export class AuthEffects {
             })
           ),
           map((resp) => {
-            return fromAuthActions.signupSuccess(resp);
+            return signupActions.signupSuccess(resp); // Use grouped action
           }),
-          catchError((error: HttpErrorResponse) =>
-            of(fromAuthActions.signupFailure({ ...error }))
+          catchError(
+            (error: HttpErrorResponse) =>
+              of(signupActions.signupFailure({ ...error })) // Use grouped action
           )
         )
       )
@@ -71,14 +79,15 @@ export class AuthEffects {
 
   fetchAccountsStatsEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fromAuthActions.fetchAccountStats),
+      ofType(accountStatsActions.fetchAccountStats), // Use grouped action
       exhaustMap(() =>
         this.authService.getAccountsStats().pipe(
           map((stats) => {
-            return fromAuthActions.fetchAccountStatsSuccess({ stats });
+            return accountStatsActions.fetchAccountStatsSuccess({ stats }); // Use grouped action
           }),
-          catchError((error: HttpErrorResponse) =>
-            of(fromAuthActions.fetchAccountStatsFail({ ...error }))
+          catchError(
+            (error: HttpErrorResponse) =>
+              of(accountStatsActions.fetchAccountStatsFailure({ ...error })) // Use grouped action
           )
         )
       )
@@ -87,20 +96,21 @@ export class AuthEffects {
 
   fetchUserDetails$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fromAuthActions.fetchUserDetailsActions.fetchUser),
+      ofType(userDetailsActions.fetchUser), // Use grouped action
       exhaustMap((data) =>
         this.authService.fetchUserDetails(data.id).pipe(
           map((user) => {
-            return fromAuthActions.fetchUserDetailsActions.fetchUserSuccess({
+            return userDetailsActions.fetchUserSuccess({
               user,
-            });
+            }); // Use grouped action
           }),
-          catchError((error: HttpErrorResponse) =>
-            of(
-              fromAuthActions.fetchUserDetailsActions.fetchUserFail({
-                ...error,
-              })
-            )
+          catchError(
+            (error: HttpErrorResponse) =>
+              of(
+                userDetailsActions.fetchUserFail({
+                  ...error,
+                })
+              ) // Use grouped action
           )
         )
       )
@@ -110,53 +120,46 @@ export class AuthEffects {
   logout$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(fromAuthActions.logout), // Listen specifically for the 'logout' action
+        ofType(logout), // Still an individual action
         tap(() => {
-          // Side effect 1: Clear the token from localStorage
           localStorage.removeItem('token');
-
-          // Side effect 2: Navigate to the sign-in page
           this.router.navigateByUrl('/signin');
         })
       ),
-    { dispatch: false } // Important: This effect does NOT dispatch a new action
-    // after it's done. It only performs side effects.
+    { dispatch: false }
   );
 
   checkAuthStatus$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(fromAuthActions.checkAuthStatus), // Listens for the new action triggered on app startup
+        ofType(checkAuthStatus), // Still an individual action
         map(() => {
-          const authStatus = this.authService.getAuthStatus(); // Get current auth status from service
+          const authStatus = this.authService.getAuthStatus();
 
           if (
             authStatus.isLoggedIn &&
             authStatus.user &&
             authStatus.accessToken
           ) {
-            // If a valid token was found and decoded
             console.log(
               'AuthEffects: Valid token found. User is logged in. Navigating to /dashboard.'
             );
-            this.router.navigateByUrl('/dashboard'); // Navigate to dashboard
-            return fromAuthActions.signinSuccess({
-              // Dispatch success to update NGRX state
+            this.router.navigateByUrl('/dashboard');
+            return signinActions.signinSuccess({
+              // Use grouped action for dispatch
               user: authStatus.user,
               accessToken: authStatus.accessToken,
             });
           } else {
-            // No valid token found (expired or not present)
             console.log(
               'AuthEffects: No valid token found. Navigating to /signin.'
             );
-            // Ensure any expired token is cleared if it wasn't already by getAuthStatus itself
             localStorage.removeItem('token');
-            this.router.navigateByUrl('/signin'); // Navigate to signin page
-            return fromAuthActions.logout(); // Dispatch logout to ensure state is clean
+            this.router.navigateByUrl('/signin');
+            return logout(); // Still an individual action
           }
         })
       )
-    // No `dispatch: false` because this effect explicitly dispatches `loginSuccess` or `logout`.
+    // No `dispatch: false` because this effect explicitly dispatches `signinSuccess` or `logout`.
   );
 }

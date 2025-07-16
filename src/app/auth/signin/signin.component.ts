@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { signin } from '../store/auth.actions';
+import { signinActions } from '../store/auth.actions'; // Import grouped action
 import { SigninInterface } from '../models/signin.model';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import * as fromAuthSelectors from '../store/auth.selectors';
 import { Title } from '@angular/platform-browser';
+import { resetErrorMessage } from '../store/auth.actions'; // Import resetErrorMessage
 
 @Component({
   selector: 'app-signin',
@@ -31,7 +32,7 @@ export class SigninComponent implements OnInit {
   ngOnInit(): void {
     this.errorMsg$ = this.store.select(fromAuthSelectors.selectErrorMsg);
     this.isLoading$ = this.store.select(fromAuthSelectors.isLoading);
-    // this.store.dispatch(resetErrorMessage());
+    this.store.dispatch(resetErrorMessage()); // Dispatch to clear error message on init
 
     this.signinForm = new FormGroup({
       username: new FormControl('', [
@@ -56,8 +57,7 @@ export class SigninComponent implements OnInit {
 
   signin() {
     const signinData: SigninInterface = this.signinForm.value;
-    this.store.dispatch(signin({ signinData }));
-    // console.log(this.signinForm.value);
+    this.store.dispatch(signinActions.signin({ signinData })); // Use grouped action
   }
 
   switchToSignUp() {

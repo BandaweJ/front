@@ -304,6 +304,9 @@ export const enrolmentReducer = createReducer(
       return {
         ...state,
         isLoading: false,
+        enrols: [
+          ...state.enrols.map((enr) => (enr.id === enrol.id ? enrol : enr)),
+        ],
         currentEnrolment: {
           ...enrol, // Ensure enrol is an object or safely spread
         },

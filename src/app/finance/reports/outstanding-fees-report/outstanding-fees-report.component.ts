@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -11,8 +11,6 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 // Import Ngrx actions for data loading
 import { invoiceActions } from '../../store/finance.actions';
@@ -75,32 +73,8 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
   // This will hold the subset of students for the current page
   paginatedStudentDetails: OutstandingStudentDetail[] = [];
 
-  @ViewChild(BaseChartDirective) chart: BaseChartDirective | undefined;
-  public enrolmentOutstandingPieChartData!: ChartData<
-    'pie',
-    number[],
-    string | string[]
-  >;
-  public enrolmentOutstandingPieChartType: ChartType = 'pie';
-  public pieChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top',
-        labels: { font: { size: 10 } },
-      },
-      tooltip: {
-        callbacks: {
-          label: (context: any) => {
-            const label = context.label || '';
-            const value = context.parsed || 0;
-            return `${label}: $${value.toFixed(2)}`;
-          },
-        },
-      },
-    },
-  };
+  // Flag to control which dataSource is used for the student details table
+  isPrinting: boolean = false;
 
   enrolmentSummaryDisplayedColumns: string[] = [
     'enrolName',
@@ -136,7 +110,7 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
       classFilter: new FormControl<ClassesModel | null>(null),
       residenceFilter: new FormControl<string | null>(null),
       termFilter: new FormControl<TermsModel | null>(null),
-      searchQuery: new FormControl<string | null>(null), // <-- ADD THIS NEW FORM CONTROL
+      searchQuery: new FormControl<string | null>(null),
     });
 
     this.reportData$ = this.filters$$.pipe(
@@ -156,8 +130,6 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
           this.studentDetailsTableData = data.studentDetails; // Store the full filtered list
           this.totalStudents = data.studentDetails.length; // Update total count
           this.applyPagination(); // Apply pagination to get the current page's data
-
-          this.updateEnrolmentOutstandingChart(data.summaryByEnrolment);
         }
       })
     );
@@ -190,10 +162,9 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
             enrolmentName: formValue.classFilter?.name || null,
             residence: formValue.residenceFilter || null,
             termId: termId,
-            searchQuery: formValue.searchQuery || null, // <-- PASS THE SEARCH QUERY
+            searchQuery: formValue.searchQuery || null,
           } as OutstandingFeesReportFilters;
         })
-        // No distinctUntilChanged here, as it's already in the formChanges.pipe above
       )
       .subscribe((filters) => {
         this.pageIndex = 0; // Reset pageIndex when any filter (including search) changes
@@ -214,7 +185,7 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
       classFilter: null,
       residenceFilter: null,
       termFilter: null,
-      searchQuery: null, // <-- RESET SEARCH QUERY TOO
+      searchQuery: null,
     });
   }
 
@@ -253,62 +224,14 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
     }));
   }
 
-  private updateEnrolmentOutstandingChart(
-    summaryMap: Map<string, number>
-  ): void {
-    const labels = Array.from(summaryMap.keys());
-    const data = Array.from(summaryMap.values());
+  // --- Print Functionality ---
+  printReport(): void {
+    this.isPrinting = true; // Set flag to use full data source
 
-    this.enrolmentOutstandingPieChartData = {
-      labels: labels,
-      datasets: [
-        {
-          data: data,
-          backgroundColor: this.generateColors(labels.length),
-        },
-      ],
-    };
-    this.chart?.update();
-  }
-
-  private generateColors(count: number): string[] {
-    const colors = [
-      '#FF6384',
-      '#36A2EB',
-      '#FFCE56',
-      '#4BC0C0',
-      '#9966FF',
-      '#FF9933',
-      '#C9CBCE',
-      '#A1B56E',
-      '#FF3D67',
-      '#62B6CB',
-      '#FFC0CB',
-      '#ADD8E6',
-      '#90EE90',
-      '#FFD700',
-      '#DDA0DD',
-      '#FFA07A',
-      '#F08080',
-      '#20B2AA',
-      '#778899',
-      '#BDB76B',
-    ];
-    return Array.from({ length: count }, (_, i) => colors[i % colors.length]);
-  }
-
-  get showPieChart(): boolean {
-    if (
-      !this.enrolmentOutstandingPieChartData ||
-      !this.enrolmentOutstandingPieChartData.datasets ||
-      this.enrolmentOutstandingPieChartData.datasets.length === 0
-    ) {
-      return false;
-    }
-    const firstDataset = this.enrolmentOutstandingPieChartData.datasets[0];
-    if (!firstDataset.data || firstDataset.data.length === 0) {
-      return false;
-    }
-    return firstDataset.data.some((val) => val > 0);
+    // A small timeout to allow Angular to re-render the table with all rows
+    setTimeout(() => {
+      window.print();
+      this.isPrinting = false; // Revert flag after print dialog is initiated
+    }, 50); // Small delay
   }
 }

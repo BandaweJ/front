@@ -1,10 +1,17 @@
 import { createReducer, on } from '@ngrx/store';
-import * as authActions from './auth.actions';
+import {
+  signinActions,
+  signupActions,
+  accountStatsActions,
+  userDetailsActions,
+  resetErrorMessage,
+  logout,
+} from './auth.actions'; // Import grouped actions
 import { User } from '../models/user.model';
 import { AccountStats } from '../models/account-stats.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { TeachersModel } from 'src/app/registration/models/teachers.model';
-import { fetchUserDetailsActions } from './auth.actions';
+import { ParentsModel } from 'src/app/registration/models/parents.model'; // Import ParentsModel
 
 export interface State {
   accessToken: string;
@@ -13,7 +20,7 @@ export interface State {
   user: User | null;
   accStats: AccountStats | null;
   isLoading: boolean;
-  userDetails: StudentsModel | TeachersModel | null;
+  userDetails: StudentsModel | TeachersModel | ParentsModel | null; // Added ParentsModel
 }
 
 export const initialState: State = {
@@ -28,7 +35,8 @@ export const initialState: State = {
 
 export const authReducer = createReducer(
   initialState,
-  on(authActions.signin, (state, { signinData }) => ({
+  on(signinActions.signin, (state) => ({
+    // Use grouped action
     ...state,
     isLoading: true,
     accessToken: '',
@@ -36,16 +44,18 @@ export const authReducer = createReducer(
     isLoggedin: false,
     accStats: null,
   })),
-  on(authActions.signinSuccess, (state, { accessToken, user }) => ({
+  on(signinActions.signinSuccess, (state, { accessToken, user }) => ({
+    // Use grouped action
     ...state,
     accessToken,
     isLoggedin: true,
     errorMessage: '',
     user: user,
-    accStats: null,
+    accStats: null, // Clear stats on new signin
     isLoading: false,
   })),
-  on(authActions.signinFailure, (state, { error }) => ({
+  on(signinActions.signinFailure, (state, { error }) => ({
+    // Use grouped action
     ...state,
     errorMessage: error.message,
     isLoggedin: false,
@@ -54,7 +64,8 @@ export const authReducer = createReducer(
     accStats: null,
     isLoading: false,
   })),
-  on(authActions.signup, (state) => ({
+  on(signupActions.signup, (state) => ({
+    // Use grouped action
     ...state,
     errorMessage: '',
     isLoggedin: false,
@@ -63,7 +74,8 @@ export const authReducer = createReducer(
     accStats: null,
     isLoading: true,
   })),
-  on(authActions.signupSuccess, (state, { response }) => ({
+  on(signupActions.signupSuccess, (state, { response }) => ({
+    // Use grouped action
     ...state,
     errorMessage: '',
     accessToken: '',
@@ -72,7 +84,8 @@ export const authReducer = createReducer(
     accStats: null,
     isLoading: false,
   })),
-  on(authActions.signupFailure, (state, { error }) => ({
+  on(signupActions.signupFailure, (state, { error }) => ({
+    // Use grouped action
     ...state,
     errorMessage: error.message,
     isLoggedin: false,
@@ -81,42 +94,53 @@ export const authReducer = createReducer(
     accStats: null,
     isLoading: false,
   })),
-  on(authActions.resetErrorMessage, (state) => ({
+  on(resetErrorMessage, (state) => ({
+    // Individual action
     ...state,
     errorMessage: '',
   })),
-  on(authActions.logout, (state) => ({
+  on(logout, (state) => ({
+    // Individual action
     ...state,
     isLoggedin: false,
     accessToken: '',
     errorMessage: '',
+    user: null, // Clear user on logout
+    accStats: null, // Clear account stats on logout
+    userDetails: null, // Clear user details on logout
   })),
-  on(authActions.fetchAccountStats, (state) => ({
+  on(accountStatsActions.fetchAccountStats, (state) => ({
+    // Use grouped action
     ...state,
     isLoading: true,
   })),
-  on(authActions.fetchAccountStatsSuccess, (state, { stats }) => ({
+  on(accountStatsActions.fetchAccountStatsSuccess, (state, { stats }) => ({
+    // Use grouped action
     ...state,
     isLoading: false,
     accStats: { ...stats },
   })),
-  on(authActions.fetchAccountStatsFail, (state, { error }) => ({
+  on(accountStatsActions.fetchAccountStatsFailure, (state, { error }) => ({
+    // Use grouped action
     ...state,
     isLoading: false,
     errorMessage: error.message,
   })),
-  on(fetchUserDetailsActions.fetchUser, (state) => ({
+  on(userDetailsActions.fetchUser, (state) => ({
+    // Use grouped action
     ...state,
     isLoading: true,
     errorMessage: '',
   })),
-  on(fetchUserDetailsActions.fetchUserSuccess, (state, { user }) => ({
+  on(userDetailsActions.fetchUserSuccess, (state, { user }) => ({
+    // Use grouped action
     ...state,
     isLoading: false,
     errorMessage: '',
     userDetails: user,
   })),
-  on(fetchUserDetailsActions.fetchUserFail, (state, { error }) => ({
+  on(userDetailsActions.fetchUserFail, (state, { error }) => ({
+    // Use grouped action
     ...state,
     isLoading: false,
     errorMessage: error.message,

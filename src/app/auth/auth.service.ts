@@ -8,8 +8,6 @@ import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
 import { User } from './models/user.model';
-import { Store } from '@ngrx/store';
-import { signinSuccess } from './store/auth.actions';
 import { StudentsModel } from '../registration/models/students.model';
 import { TeachersModel } from '../registration/models/teachers.model';
 
@@ -18,9 +16,8 @@ import { TeachersModel } from '../registration/models/teachers.model';
 })
 export class AuthService {
   constructor(
-    private http: HttpClient // private router: Router,
-  ) // private store: Store
-  {}
+    private http: HttpClient // private router: Router, // private store: Store
+  ) {}
 
   private baseUrl = `${environment.apiUrl}auth/`;
 

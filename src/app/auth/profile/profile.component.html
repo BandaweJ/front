@@ -1,66 +1,165 @@
-<div class="profile-container">
+<mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
 
+<div class="profile-container">
   <div class="profile-content">
     <h1>User Profile</h1>
-    <div class="isactive">
-      <!-- <h3 [ngClass]="(userDetails$ | async)?.active ? 'active' : 'inactive">ACTIVE</h3> -->
+
+    <div *ngIf="errorMsg$ | async as errorMessage" class="error-message">
+      <p>{{ errorMessage }}</p>
     </div>
 
-    <div class="profile-section">
-      <h2>Personal Details</h2>
-      <div class="profile-field">
-        <label>Title:</label>
-        <span>Mr</span>
-      </div>
-      <div class="profile-field">
-        <label>I. D:</label>
-        <span>02-086980F12</span>
-      </div>
-      <div class="profile-field">
-        <label>Full Name:</label>
-        <span>John Doe</span>
-      </div>
-      <div class="profile-field">
-        <label>Date of Birth:</label>
-        <span>1990-01-15</span>
-      </div>
-    </div>
-
-    <div class="profile-section">
-      <h2>Contact Details</h2>
-      <div class="profile-field">
-        <label>Email:</label>
-        <span>john.doe@example.com</span>
-      </div>
-      <div class="profile-field">
-        <label>Phone Number:</label>
-        <span>+1-555-123-4567</span>
-      </div>
-      <div class="profile-field">
-        <label>Address:</label>
-        <span>House No 2821 Povo, Chesvingo</span>
-      </div>
-    </div>
-
-    <div class="profile-section">
-      <h2>Academic Details</h2>
-      <div class="profile-field">
-        <label>Qualifications:</label>
-        <span>Bachelor of Science</span>
+    <ng-container *ngIf="userDetails$ | async">
+      <div class="isactive" *ngIf="isTeacher() && teacher">
+        <h3 [ngClass]="teacher.active ? 'active' : 'inactive'">
+          {{ teacher.active ? 'ACTIVE' : 'INACTIVE' }}
+        </h3>
       </div>
 
-    </div>
+      <div class="profile-section">
+        <h2>Personal Details</h2>
+        <div class="profile-field">
+          <label>ID Number:</label>
+          <span>{{
+            isTeacher()
+            ? teacher.id
+            : isStudent()
+            ? student.idnumber
+            : parent.idnumber
+            }}</span>
+        </div>
 
-    <div class="profile-section">
-      <h2>Account Information</h2>
-      <div class="profile-field">
-        <label>Username:</label>
-        <span>johndoe123</span>
-      </div>
-      <div class="change-password-link">
-        <a href="#">Change Password</a>
-      </div>
-    </div>
+        <div class="profile-field">
+          <label>Full Name:</label>
+          <span>
+            {{
+            isTeacher()
+            ? teacher.name + ' ' + teacher.surname
+            : isStudent()
+            ? student.name + ' ' + student.surname
+            : parent.surname
+            }}
+          </span>
+        </div>
 
+        <div class="profile-field" *ngIf="isTeacher() && teacher">
+          <label>Title:</label>
+          <span>{{ teacher.title }}</span>
+        </div>
+        <div class="profile-field" *ngIf="isParent() && parent">
+          <label>Title:</label>
+          <span>{{ parent.title }}</span>
+        </div>
+
+        <div class="profile-field" *ngIf="isStudent() && student">
+          <label>Date of Birth:</label>
+          <span>{{ student.dob | date }}</span>
+        </div>
+        <div class="profile-field" *ngIf="isTeacher() && teacher">
+          <label>Date of Birth:</label>
+          <span>{{ teacher.dob | date }}</span>
+        </div>
+
+        <div class="profile-field" *ngIf="isStudent() && student">
+          <label>Gender:</label>
+          <span>{{ student.gender }}</span>
+        </div>
+        <div class="profile-field" *ngIf="isTeacher() && teacher">
+          <label>Gender:</label>
+          <span>{{ teacher.gender }}</span>
+        </div>
+        <div class="profile-field" *ngIf="isParent() && parent">
+          <label>Gender:</label>
+          <span>{{ parent.sex }}</span>
+        </div>
+
+        <div class="profile-field" *ngIf="isTeacher() && teacher">
+          <label>Date of Joining:</label>
+          <span>{{ teacher.dateOfJoining | date }}</span>
+        </div>
+        <div class="profile-field" *ngIf="isStudent() && student">
+          <label>Date of Joining:</label>
+          <span>{{ student.dateOfJoining | date }}</span>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h2>Contact Details</h2>
+        <div class="profile-field">
+          <label>Email:</label>
+          <span>{{
+            isTeacher()
+            ? teacher.email
+            : isStudent()
+            ? student.email
+            : parent.email
+            }}</span>
+        </div>
+        <div class="profile-field">
+          <label>Phone Number:</label>
+          <span>{{
+            isTeacher()
+            ? teacher.cell
+            : isStudent()
+            ? student.cell
+            : parent.cell
+            }}</span>
+        </div>
+        <div class="profile-field">
+          <label>Address:</label>
+          <span>{{
+            isTeacher()
+            ? teacher.address
+            : isStudent()
+            ? student.address
+            : parent.address
+            }}</span>
+        </div>
+      </div>
+
+      <ng-container *ngIf="isTeacher() && teacher">
+        <div class="profile-section">
+          <h2>Teacher Details</h2>
+          <div class="profile-field">
+            <label>Qualifications:</label>
+            <span>{{ teacher.qualifications.join(', ') }}</span>
+          </div>
+          <div class="profile-field">
+            <label>Date of Leaving:</label>
+            <span>{{ teacher.dateOfLeaving | date }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="isStudent() && student">
+        <div class="profile-section">
+          <h2>Student Details</h2>
+          <div class="profile-field">
+            <label>Student Number:</label>
+            <span>{{ student.studentNumber }}</span>
+          </div>
+          <div class="profile-field">
+            <label>Previous School:</label>
+            <span>{{ student.prevSchool }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="isParent() && parent">
+        <div class="profile-section">
+          <h2>Parent Details</h2>
+        </div>
+      </ng-container>
+
+      <div class="profile-section">
+        <h2>Account Information</h2>
+        <div class="profile-field">
+          <label>Username:</label>
+          <span>{{ (user$ | async)?.username }}</span>
+        </div>
+        <div class="change-password-link">
+          <a href="#">Change Password</a>
+        </div>
+      </div>
+    </ng-container>
   </div>
 </div>
