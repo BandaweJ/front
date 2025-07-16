@@ -98,33 +98,39 @@
     </mat-paginator>
 
     <div class="student-details-table-container">
-      <table mat-table [dataSource]="isPrinting ? studentDetailsTableData : paginatedStudentDetails"
-        class="full-width-table">
-        <ng-container matColumnDef="studentName">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-cell">Student Name</th>
-          <td mat-cell *matCellDef="let element">{{ element.studentName }}</td>
-        </ng-container>
-        <ng-container matColumnDef="enrolName">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-cell">Class/Enrolment</th>
-          <td mat-cell *matCellDef="let element">{{ element.enrolName }}</td>
-        </ng-container>
-        <ng-container matColumnDef="residence">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-cell">Residence</th>
-          <td mat-cell *matCellDef="let element">{{ element.residence }}</td>
-        </ng-container>
-        <ng-container matColumnDef="totalOutstanding">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-cell">Outstanding Balance</th>
-          <td mat-cell *matCellDef="let element">{{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</td>
-        </ng-container>
+      <table class="full-width-table">
+        <thead>
+          <tr>
+            <th class="table-header-cell">Student Name</th>
+            <th class="table-header-cell">Class/Enrolment</th>
+            <th class="table-header-cell">Residence</th>
+            <th class="table-header-cell">Outstanding Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="isPrinting; else paginatedRows">
+            <tr class="table-row" *ngFor="let element of studentDetailsTableData">
+              <td class="table-cell">{{ element.studentName }}</td>
+              <td class="table-cell">{{ element.enrolName }}</td>
+              <td class="table-cell">{{ element.residence }}</td>
+              <td class="table-cell">{{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </ng-container>
+          <ng-template #paginatedRows>
+            <tr class="table-row" *ngFor="let element of paginatedStudentDetails">
+              <td class="table-cell">{{ element.studentName }}</td>
+              <td class="table-cell">{{ element.enrolName }}</td>
+              <td class="table-cell">{{ element.residence }}</td>
+              <td class="table-cell">{{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </ng-template>
 
-        <tr mat-header-row *matHeaderRowDef="studentDetailsDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: studentDetailsDisplayedColumns"></tr>
-
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell no-data-state" colspan="4">
-            No students found with outstanding balances for the selected criteria.
-          </td>
-        </tr>
+          <tr class="table-row" *ngIf="totalStudents === 0">
+            <td class="table-cell no-data-state" colspan="4">
+              No students found with outstanding balances for the selected criteria.
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
 

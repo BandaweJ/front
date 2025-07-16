@@ -101,20 +101,47 @@ h4 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+/* General table styling (for both mat-table and plain HTML table) */
 .full-width-table {
   width: 100%; /* Table inside container takes full width */
   border-collapse: collapse; /* For cleaner table borders */
 }
 
-.mat-header-cell {
+/* Common header cell styling (for both mat-header-cell and plain th) */
+.mat-header-cell,
+.table-header-cell {
   background-color: #f5f5f5;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.87);
+  padding: 12px 18px; /* Standard Material padding for cells */
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12); /* Mimic Material header border */
 }
 
-.mat-row:nth-child(even) {
+/* Common row and cell styling (for both mat-row/mat-cell and plain tr/td) */
+.mat-row,
+.table-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12); /* Mimic Material row border */
+}
+
+.mat-cell,
+.table-cell {
+  padding: 12px 18px; /* Standard Material padding for cells */
+  text-align: left;
+  /* Optional: border-right for vertical lines between cells if desired */
+  /* border-right: 1px solid rgba(0, 0, 0, 0.12); */
+}
+
+.mat-row:nth-child(even),
+.table-row:nth-child(even) {
   background-color: #f9f9f9;
 }
+
+/* Remove border-right from the last cell in a row */
+/* .mat-cell:last-child,
+.table-cell:last-child {
+  border-right: none;
+} */
 
 /* Common states for feedback */
 .loading-state,
@@ -215,13 +242,14 @@ form {
 }
 
 /* Optional: Basic styling for your tables for better readability */
+/* These rules are for any generic table, including the converted one */
 table {
   width: 100%;
   margin-top: 20px;
   border-collapse: collapse;
 }
 
-th,
+/* th,
 td {
   border: 1px solid #ddd;
   padding: 8px;
@@ -230,7 +258,7 @@ td {
 
 th {
   background-color: #f2f2f2;
-}
+} */ /* These basic table styles are replaced by the more specific ones above */
 
 /* Style for the chart container if you have it */
 .chart-container {
@@ -255,55 +283,133 @@ th {
 
   /* Hide elements that shouldn't be printed */
   .filter-form-print, /* Hide the entire form containing filters and buttons */
-      .mat-paginator, /* Hide paginators */
-      .chart-container, /* Hide the chart container */
-      mat-divider {
+  .mat-paginator, /* Hide paginators */
+  .chart-container, /* Hide the chart container */
+  mat-divider {
     /* Optionally hide dividers for a more compact print */
     display: none !important;
   }
 
-  /* CRITICAL CHANGE: Ensure table containers allow content to spill */
+  /* CRITICAL CHANGES FOR TABLE SPILLOVER AND SCROLLBAR REMOVAL */
+  /* Target the component's root container */
+  app-outstanding-fees-report {
+    /* Add your component's selector here */
+    display: block; /* Ensure it's a block element */
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Target the specific table containers */
   .table-container,
   .student-details-table-container {
-    overflow-x: visible !important; /* Allow table content to expand horizontally */
-    overflow-y: visible !important; /* Allow table content to expand vertically (prevents scrollbars if height was limited) */
+    overflow: visible !important; /* Allow table content to expand horizontally */
     height: auto !important; /* Remove any fixed height that might cause truncation */
     max-height: none !important; /* Remove any max height */
     box-shadow: none !important; /* Remove shadows */
     background-color: transparent !important; /* Transparent background */
+    padding: 0 !important;
+    display: block !important;
+    width: 100% !important;
   }
 
+  /* Target Angular Material's internal table container if it exists (for summary tables) */
+  .mat-mdc-table,
+  .mat-table {
+    /* For older and newer Angular Material versions */
+    overflow: visible !important; /* Ensure the table itself doesn't scroll */
+    height: auto !important;
+    max-height: none !important;
+    display: table !important; /* Ensure it behaves like a table */
+    width: 100% !important;
+  }
+
+  /* If your mat-table is inside a wrapper div created by Angular Material (e.g., .mat-mdc-table-wrapper or .mat-elevation-z8) */
+  .mat-mdc-table-wrapper, /* For MDC-based components */
+  .mat-elevation-z8 {
+    /* Common wrapper class */
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+  }
+
+  /* NEW CRITICAL RULE: Target the MDC data table content body (for summary tables) */
+  .mdc-data-table__content {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* --- Styles for the plain HTML table (Students with Outstanding Balances) --- */
   .full-width-table {
-    width: 100%; /* Ensure tables take full width */
-    /* Add rules to control table breaking across pages */
-    page-break-inside: auto; /* Allow the table to break */
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important; /* Allow column widths to adjust to content */
+    page-break-inside: auto !important; /* Allow the table to break */
   }
 
-  .mat-row {
-    page-break-inside: avoid; /* Try to keep rows from breaking across pages */
-    page-break-after: auto; /* Allow page break after a row */
+  .full-width-table thead {
+    page-break-after: avoid; /* Keep header with first row */
   }
 
-  /* Adjust font size for table headers and cells for print */
-  th,
-  td {
-    font-size: 9pt;
-    padding: 4px 6px; /* Adjust padding for compactness */
+  .full-width-table tbody {
+    page-break-inside: auto; /* Allow body to break across pages */
   }
 
-  /* Adjust total outstanding display for print */
-  .total-outstanding {
-    font-size: 1.2em; /* Smaller font for print */
-    color: #000; /* Black for better readability on print */
-    border-bottom: 1px solid #ccc; /* Lighter border */
-    padding-bottom: 5px;
+  .table-row {
+    page-break-inside: avoid !important; /* Try to keep rows from breaking across pages */
+    page-break-after: auto !important; /* Allow page break after a row */
   }
 
-  /* Ensure background colors are printed for headers (optional, depends on browser settings) */
-  .mat-header-cell {
+  .table-header-cell {
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
     background-color: #e0e0e0 !important; /* Light grey header */
+    font-weight: bold !important;
+    color: #000 !important;
+    font-size: 9pt !important;
+    padding: 4px 6px !important;
+    text-align: left !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+
+  .table-cell {
+    font-size: 9pt !important;
+    padding: 4px 6px !important;
+    vertical-align: top !important; /* Ensure content aligns at the top if cells vary in height */
+    white-space: normal !important; /* Allow text to wrap within cells */
+    border: 1px solid #eee !important; /* Lighter border for print */
+    text-align: left !important;
+  }
+
+  .table-row:nth-child(even) {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    background-color: #f0f0f0 !important; /* Slightly lighter row background */
+  }
+
+  /* --- End Styles for plain HTML table --- */
+
+  /* Styles for the mat-table based summary tables */
+  .mat-header-cell {
+    /* Applies to mat-table headers */
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    background-color: #e0e0e0 !important; /* Light grey header */
+    font-weight: bold !important;
+    color: #000 !important;
+    font-size: 9pt !important;
+    padding: 4px 6px !important;
+    text-align: left !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+
+  .mat-row {
+    /* Applies to mat-table rows */
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
   }
 
   .mat-row:nth-child(even) {
@@ -312,14 +418,46 @@ th {
     background-color: #f0f0f0 !important; /* Slightly lighter row background */
   }
 
-  h4 {
-    border-bottom: 1px solid #ccc; /* Lighter border for print */
-    font-size: 1.1em; /* Smaller font for headers */
+  .mat-cell {
+    /* Applies to mat-table cells */
+    font-size: 9pt !important;
+    padding: 4px 6px !important;
+    vertical-align: top !important;
+    white-space: normal !important;
+    border: 1px solid #eee !important; /* Lighter border for print */
+    text-align: left !important;
+  }
+  /* End Styles for mat-table based summary tables */
+
+  /* General print adjustments for other elements */
+  .total-outstanding {
+    font-size: 1.2em !important; /* Smaller font for print */
+    color: #000 !important; /* Black for better readability on print */
+    border-bottom: 1px solid #ccc !important; /* Lighter border */
+    padding-bottom: 5px !important;
   }
 
-  /* Optional: Force breaks for better page flow */
-  .total-outstanding,
   h4 {
-    page-break-after: avoid;
+    border-bottom: 1px solid #ccc !important; /* Lighter border for print */
+    font-size: 1.1em !important; /* Smaller font for headers */
+    margin-bottom: 10px !important; /* Adjust margin */
+    padding-bottom: 5px !important;
+  }
+
+  div,
+  h2,
+  h4,
+  table {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  *,
+  *:before,
+  *:after {
+    box-sizing: border-box !important;
+    -webkit-box-sizing: border-box !important;
   }
 }
