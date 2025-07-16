@@ -5,8 +5,11 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #ffffff;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
 }
-
 .filter-form {
   display: flex;
   flex-wrap: wrap;
@@ -88,9 +91,10 @@ h4 {
   overflow-x: auto;
 }
 
+/* This is the key container for the student details table */
 .student-details-table-container {
   width: 100%; /* Ensures it takes full width of parent */
-  overflow-x: auto;
+  overflow-x: auto; /* Enables horizontal scroll for narrow screens (on screen) */
   margin-top: 20px;
   background-color: #fcfcfc;
   border-radius: 8px;
@@ -182,11 +186,7 @@ form {
 }
 
 /* Styling for the Clear Filters button */
-form button {
-  /* Using margin-left: auto pushes the button to the far right within its row, if there's space */
-  /* align-self: flex-end ensures it aligns with the bottom of the last row of filter fields */
-  /* Removed margin-left: auto from here, moved into a wrapper div for print button */
-}
+/* Moved into .filter-actions-print */
 
 .filter-actions-print {
   margin-left: auto; /* Pushes buttons to the right */
@@ -262,16 +262,26 @@ th {
     display: none !important;
   }
 
-  /* Ensure tables expand and don't scroll */
+  /* CRITICAL CHANGE: Ensure table containers allow content to spill */
   .table-container,
   .student-details-table-container {
-    overflow-x: visible !important; /* Allow table content to expand */
+    overflow-x: visible !important; /* Allow table content to expand horizontally */
+    overflow-y: visible !important; /* Allow table content to expand vertically (prevents scrollbars if height was limited) */
+    height: auto !important; /* Remove any fixed height that might cause truncation */
+    max-height: none !important; /* Remove any max height */
     box-shadow: none !important; /* Remove shadows */
     background-color: transparent !important; /* Transparent background */
   }
 
   .full-width-table {
     width: 100%; /* Ensure tables take full width */
+    /* Add rules to control table breaking across pages */
+    page-break-inside: auto; /* Allow the table to break */
+  }
+
+  .mat-row {
+    page-break-inside: avoid; /* Try to keep rows from breaking across pages */
+    page-break-after: auto; /* Allow page break after a row */
   }
 
   /* Adjust font size for table headers and cells for print */
@@ -311,10 +321,5 @@ th {
   .total-outstanding,
   h4 {
     page-break-after: avoid;
-  }
-
-  .table-container,
-  .student-details-table-container {
-    page-break-inside: auto; /* Allow tables to break across pages */
   }
 }
