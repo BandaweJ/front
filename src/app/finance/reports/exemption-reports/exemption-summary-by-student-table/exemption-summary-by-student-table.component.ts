@@ -15,7 +15,7 @@ import { ExemptionReportSummaryByStudent } from 'src/app/finance/store/exemption
 @Component({
   selector: 'app-exemption-summary-by-student-table',
   templateUrl: './exemption-summary-by-student-table.component.html',
-  styleUrls: ['./exemption-summary-by-student-table.component.scss'],
+  styleUrls: ['./exemption-summary-by-student-table.component.css'],
 })
 export class ExemptionSummaryByStudentTableComponent
   implements OnInit, OnChanges, AfterViewInit

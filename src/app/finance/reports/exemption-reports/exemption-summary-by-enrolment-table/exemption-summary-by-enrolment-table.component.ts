@@ -15,7 +15,7 @@ import { ExemptionReportSummaryByEnrolment } from 'src/app/finance/store/exempti
 @Component({
   selector: 'app-exemption-summary-by-enrolment-table',
   templateUrl: './exemption-summary-by-enrolment-table.component.html',
-  styleUrls: ['./exemption-summary-by-enrolment-table.component.scss'],
+  styleUrls: ['./exemption-summary-by-enrolment-table.component.css'],
 })
 export class ExemptionSummaryByEnrolmentTableComponent
   implements OnInit, OnChanges, AfterViewInit

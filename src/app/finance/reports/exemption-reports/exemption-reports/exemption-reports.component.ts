@@ -13,7 +13,7 @@ import {
 @Component({
   selector: 'app-exemption-reports',
   templateUrl: './exemption-reports.component.html',
-  styleUrls: ['./exemption-reports.component.scss'],
+  styleUrls: ['./exemption-reports.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush, // Use OnPush for performance
 })
 export class ExemptionReportsComponent implements OnInit {

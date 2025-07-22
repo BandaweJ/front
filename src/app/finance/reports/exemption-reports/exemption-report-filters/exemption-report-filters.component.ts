@@ -9,7 +9,7 @@ import { ExemptionType } from 'src/app/finance/enums/exemption-type.enum';
 @Component({
   selector: 'app-exemption-report-filters',
   templateUrl: './exemption-report-filters.component.html',
-  styleUrls: ['./exemption-report-filters.component.scss'],
+  styleUrls: ['./exemption-report-filters.component.css'],
 })
 export class ExemptionReportFiltersComponent implements OnInit {
   @Input() currentFilters!: ExemptionReportFilters;
