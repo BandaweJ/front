@@ -72,11 +72,10 @@ app-report {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  /* Remove the flex-direction: column rule */
   .form-row {
-    flex-direction: column;
-  }
-
-  .form-row mat-form-field {
-    width: 100%;
+    flex-direction: row;
+    /* You can also adjust gap for smaller screens if you want less vertical space */
+    gap: 10px;
   }
 }

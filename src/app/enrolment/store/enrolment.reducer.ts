@@ -21,7 +21,12 @@ export interface State {
   enrolStats: EnrolStats | null;
   migrateClassResult: boolean;
   totalEnrolment: StudentsSummary | null;
+
   currentEnrolment: EnrolsModel | null;
+  currentEnrolmentLoading: boolean;
+  currentEnrolmentLoaded: boolean;
+  currentEnrolmentLoadError: string;
+
   currentTerm: TermsModel;
   allEnrols: EnrolsModel[];
   termEnrols: EnrolsModel[];
@@ -39,7 +44,12 @@ export const initialState: State = {
   enrolStats: null,
   migrateClassResult: false,
   totalEnrolment: null,
+
   currentEnrolment: null,
+  currentEnrolmentLoading: false,
+  currentEnrolmentLoaded: false,
+  currentEnrolmentLoadError: '',
+
   currentTerm: {} as TermsModel,
   allEnrols: [],
   termEnrols: [],
@@ -272,14 +282,18 @@ export const enrolmentReducer = createReducer(
     enrolmentActions.currentEnrolementActions.fetchCurrentEnrolment,
     (state) => ({
       ...state,
-      isLoading: true,
+      currentEnrolmentLoading: true,
+      currentEnrolmentLoaded: false,
+      currentEnrolmentLoadError: '',
     })
   ),
   on(
     enrolmentActions.currentEnrolementActions.fetchCurrentEnrolmentSuccess,
     (state, { enrols }) => ({
       ...state,
-      isLoading: false,
+      currentEnrolmentLoaded: true,
+      currentEnrolmentLoading: false,
+      currentEnrolmentLoadError: '',
       currentEnrolment: enrols,
     })
   ),
@@ -287,8 +301,9 @@ export const enrolmentReducer = createReducer(
     enrolmentActions.currentEnrolementActions.fetchCurrentEnrolmentFail,
     (state, { error }) => ({
       ...state,
-      isLoading: false,
-      errorMessage: error.message,
+      currentEnrolmentLoading: false,
+      currentEnrolmentLoaded: false,
+      currentEnrolmentLoadError: error.message,
     })
   ),
   on(

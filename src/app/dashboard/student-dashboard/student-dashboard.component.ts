@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Component, OnInit, OnDestroy } from '@angular/core'; // Add OnDestroy
+import { Store, select } from '@ngrx/store';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import {
   combineLatest,
@@ -25,17 +25,36 @@ import {
 import { studentDashboardActions } from '../store/dashboard.actions';
 import { User } from 'src/app/auth/models/user.model';
 
+// --- NEW IMPORTS FOR ENROLMENT AND STUDENT DETAILS ---
+import { EnrolsModel } from 'src/app/enrolment/models/enrols.model'; // Adjust path as needed
+import {
+  selectCurrentEnrolment,
+  selectCurrentEnrolmentLoaded, // Assuming these selectors exist in your enrolment store
+  selectCurrentEnrolmentLoading, // Assuming these selectors exist in your enrolment store
+} from 'src/app/enrolment/store/enrolment.selectors'; // Adjust path
+import { currentEnrolementActions } from 'src/app/enrolment/store/enrolment.actions';
+import { StudentsModel } from 'src/app/registration/models/students.model';
+// --- END NEW IMPORTS ---
+
 @Component({
   selector: 'app-student-dashboard',
   templateUrl: './student-dashboard.component.html',
   styleUrls: ['./student-dashboard.component.css'],
 })
-export class StudentDashboardComponent {
+export class StudentDashboardComponent implements OnInit, OnDestroy {
+  // Implement OnInit and OnDestroy
   // Observables for the new dashboard summary data
   public dashboardSummary$: Observable<StudentDashboardSummary | null>;
   public summaryLoading$: Observable<boolean>;
   public summaryLoaded$: Observable<boolean>;
-  // studentNumber will be derived from the store, no longer an @Input
+
+  // --- NEW Observables for Student Details and Current Enrolment ---
+  public studentDetails$: Observable<StudentsModel | null>;
+  public currentEnrolment$: Observable<EnrolsModel | null>;
+  public enrolmentLoading$: Observable<boolean>;
+  public enrolmentLoaded$: Observable<boolean>;
+  // --- END NEW Observables ---
+
   public lineChartData: ChartConfiguration<'line'>['data'] = {
     datasets: [],
     labels: [],
@@ -80,7 +99,6 @@ export class StudentDashboardComponent {
       },
     },
   };
-  // public lineChartType: ChartType = 'line';
   public lineChartType: 'line' = 'line';
 
   private subscriptions: Subscription = new Subscription(); // Use a single Subscription for all
@@ -90,6 +108,17 @@ export class StudentDashboardComponent {
     this.dashboardSummary$ = this.store.select(selectStudentDashboardSummary);
     this.summaryLoading$ = this.store.select(selectStudentDashboardLoading);
     this.summaryLoaded$ = this.store.select(selectStudentDashboardLoaded);
+
+    // --- Initialize NEW Observables ---
+    this.currentEnrolment$ = this.store.select(selectCurrentEnrolment);
+    this.enrolmentLoading$ = this.store.select(selectCurrentEnrolmentLoading);
+    this.enrolmentLoaded$ = this.store.select(selectCurrentEnrolmentLoaded);
+
+    // Derive student details from currentEnrolment$ for convenience in template
+    this.studentDetails$ = this.currentEnrolment$.pipe(
+      map((enrolment) => (enrolment ? enrolment.student : null))
+    );
+    // --- END Initialize NEW Observables ---
   }
 
   ngOnInit(): void {
@@ -100,19 +129,14 @@ export class StudentDashboardComponent {
         this.store.select(selectStudentMarks), // Get the student marks from the store
       ])
         .pipe(
-          // Filter: Ensure user exists and has a studentNumber
+          // Filter: Ensure user exists and has a studentNumber (which is user.id)
           filter(([user, marks]) => {
-            // If the user hasn't loaded yet or doesn't have a studentNumber, don't proceed
             return !!user && !!user.id;
           }),
           // Tap: Dispatch fetchMarks if user and studentNumber are available and marks haven't been fetched
           tap(([user, marks]) => {
-            // You might need a more sophisticated check here if marks are already fetched
-            // For simplicity, we assume marks are fetched when studentNumber becomes available.
-            // In a real app, you'd check if 'marks' is empty or if you have a 'marksLoading' flag.
-
+            // Check if marks array is empty or null, then dispatch
             if (user!.id && (!marks || marks.length === 0)) {
-              // Check if marks array is empty or null
               this.store.dispatch(
                 studentMarksActions.fetchStudentMarks({
                   studentNumber: user!.id,
@@ -130,7 +154,6 @@ export class StudentDashboardComponent {
     );
 
     // --- REVISED Dashboard Summary Data Fetching ---
-    // --- REFACTORED Dashboard Summary Data Fetching ---
     this.subscriptions.add(
       (this.store.select(selectUser) as Observable<User | null>)
         .pipe(
@@ -140,28 +163,54 @@ export class StudentDashboardComponent {
           distinctUntilChanged(), // Only proceed if the user ID actually changes
 
           // 2. Use switchMap to handle the fetch logic for each distinct user ID
-          // switchMap will cancel any previous ongoing fetch if a new studentId comes in
           switchMap((studentId) =>
             combineLatest([
               this.store.select(selectStudentDashboardLoaded),
               this.store.select(selectStudentDashboardLoading),
+              // --- ADD ENROLMENT LOADED/LOADING SELECTORS TO THIS COMBINELATEST ---
+              this.store.select(selectCurrentEnrolmentLoaded),
+              this.store.select(selectCurrentEnrolmentLoading),
+              // --- END ADD ---
             ]).pipe(
               // Filter to ensure data is not already loaded or currently loading for THIS studentId
-              filter(([loaded, loading]) => !loaded && !loading),
+              filter(
+                ([
+                  summaryLoaded,
+                  summaryLoading,
+                  enrolmentLoaded,
+                  enrolmentLoading,
+                ]) =>
+                  (!summaryLoaded && !summaryLoading) ||
+                  (!enrolmentLoaded && !enrolmentLoading) // Trigger if either summary or enrolment needs fetching
+              ),
               // Take only one emission that satisfies the condition for this studentId
-              // This ensures the dispatch happens only once per distinct studentId
               take(1),
-              tap(([loaded, loading]) => {
-                // 'studentId' is still in scope here
-                // console.log(
-                //   `Dispatching fetchStudentDashboardSummary for student: ${studentId}`
-                // );
-                this.store.dispatch(
-                  studentDashboardActions.fetchStudentDashboardSummary({
-                    studentNumber: studentId,
-                  })
-                );
-              })
+              tap(
+                ([
+                  summaryLoaded,
+                  summaryLoading,
+                  enrolmentLoaded,
+                  enrolmentLoading,
+                ]) => {
+                  // Dispatch summary fetch if not loaded/loading
+                  if (!summaryLoaded && !summaryLoading) {
+                    this.store.dispatch(
+                      studentDashboardActions.fetchStudentDashboardSummary({
+                        studentNumber: studentId,
+                      })
+                    );
+                  }
+                  // --- DISPATCH ENROLMENT FETCH IF NOT LOADED/LOADING ---
+                  if (!enrolmentLoaded && !enrolmentLoading) {
+                    this.store.dispatch(
+                      currentEnrolementActions.fetchCurrentEnrolment({
+                        studentNumber: studentId,
+                      })
+                    );
+                  }
+                  // --- END DISPATCH ---
+                }
+              )
             )
           )
         )

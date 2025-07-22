@@ -99,6 +99,14 @@ canvas {
   max-width: 45%; /* Max width to ensure two columns on larger screens */
 }
 
+/* Specific styles for the new cards */
+.student-details-card,
+.enrolment-details-card {
+  /* Inherit general summary-card styles */
+  /* You can add specific colors or emphasis if desired */
+  background-color: #f8f9fa; /* A slightly different background for distinction */
+}
+
 .summary-card h4 {
   text-align: center;
   color: #5c6bc0; /* A slightly different Material Design color */

@@ -1,8 +1,87 @@
 <div class="student-dashboard-main-container">
   <div class="summary-cards-container">
-    <ng-container *ngIf="summaryLoading$ | async">
-      <div class="loading-spinner">Loading student summary...</div>
+    <ng-container *ngIf="(summaryLoading$ | async) || (enrolmentLoading$ | async)">
+      <div class="loading-spinner">Loading student data...</div>
     </ng-container>
+
+    <ng-container *ngIf="studentDetails$ | async as student; else noStudentData">
+      <div class="summary-card student-details-card">
+        <h4>Student Details</h4>
+        <div class="data-item">
+          <label>Name:</label>
+          <span>{{ student.name }} {{ student.surname }}</span>
+        </div>
+        <div class="data-item">
+          <label>Student Number:</label>
+          <span>{{ student.studentNumber }}</span>
+        </div>
+        <!-- <div class="data-item">
+          <label>Date of Birth:</label>
+          <span>{{ student.dob | date:'mediumDate' }}</span>
+        </div> -->
+        <div class="data-item">
+          <label>Gender:</label>
+          <span>{{ student.gender }}</span>
+        </div>
+        <!-- <div class="data-item">
+          <label>ID Number:</label>
+          <span>{{ student.idnumber }}</span>
+        </div> -->
+        <!-- <div class="data-item">
+          <label>Date of Joining:</label>
+          <span>{{ student.dateOfJoining | date:'mediumDate' }}</span>
+        </div> -->
+        <div class="data-item">
+          <label>Cell:</label>
+          <span>{{ student.cell }}</span>
+        </div>
+        <div class="data-item">
+          <label>Email:</label>
+          <span>{{ student.email }}</span>
+        </div>
+        <div class="data-item">
+          <label>Address:</label>
+          <span>{{ student.address }}</span>
+        </div>
+        <!-- <div class="data-item">
+          <label>Previous School:</label>
+          <span>{{ student.prevSchool || 'N/A' }}</span>
+        </div> -->
+      </div>
+    </ng-container>
+    <ng-template #noStudentData>
+      <div *ngIf="!(enrolmentLoading$ | async) && !(studentDetails$ | async)" class="no-data-message">
+        No student details available.
+      </div>
+    </ng-template>
+
+    <ng-container *ngIf="currentEnrolment$ | async as enrolment; else noEnrolmentData">
+      <div class="summary-card enrolment-details-card">
+        <h4>Current Enrolment</h4>
+        <div class="data-item">
+          <label>Class:</label>
+          <span>{{ enrolment.name }}</span>
+        </div>
+        <div class="data-item">
+          <label>Term Number:</label>
+          <span>{{ enrolment.num }}</span>
+        </div>
+        <div class="data-item">
+          <label>Term Year:</label>
+          <span>{{ enrolment.year }}</span>
+        </div>
+        <div class="data-item">
+          <label>Residence Type:</label>
+          <span>{{ enrolment.residence }}</span>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noEnrolmentData>
+      <div *ngIf="!(enrolmentLoading$ | async) && !(currentEnrolment$ | async)" class="no-data-message">
+        No current enrolment data available.
+      </div>
+    </ng-template>
+
 
     <ng-container *ngIf="dashboardSummary$ | async as summary; else noSummaryData">
       <div class="summary-card financial-card">
@@ -51,7 +130,7 @@
 
     <ng-template #noSummaryData>
       <div *ngIf="!(summaryLoading$ | async)" class="no-data-message">
-        No summary data available for this student.
+        No academic or financial summary data available for this student.
       </div>
     </ng-template>
   </div>
