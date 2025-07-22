@@ -1,5 +1,5 @@
 import { Residence } from 'src/app/enrolment/models/residence.enum';
-import { FeesNames } from './fees-names.enum';
+import { FeesNames } from '../enums/fees-names.enum';
 
 export interface FeesModel {
   id?: number;

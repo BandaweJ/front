@@ -1,5 +1,5 @@
 import { StudentsModel } from 'src/app/registration/models/students.model';
-import { PaymentMethods } from './payment-methods.enum';
+import { PaymentMethods } from '../enums/payment-methods.enum';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { ReceiptInvoiceAllocationsModel } from './receipt-invoice-allocations.model';
 

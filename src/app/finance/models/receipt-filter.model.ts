@@ -1,4 +1,4 @@
-import { PaymentMethods } from './payment-methods.enum'; // Assuming you have this enum
+import { PaymentMethods } from '../enums/payment-methods.enum'; // Assuming you have this enum
 
 export interface ReceiptFilter {
   startDate?: Date | null;

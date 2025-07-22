@@ -141,9 +141,6 @@ export class AuthEffects {
             authStatus.user &&
             authStatus.accessToken
           ) {
-            console.log(
-              'AuthEffects: Valid token found. User is logged in. Navigating to /dashboard.'
-            );
             this.router.navigateByUrl('/dashboard');
             return signinActions.signinSuccess({
               // Use grouped action for dispatch
@@ -151,9 +148,6 @@ export class AuthEffects {
               accessToken: authStatus.accessToken,
             });
           } else {
-            console.log(
-              'AuthEffects: No valid token found. Navigating to /signin.'
-            );
             localStorage.removeItem('token');
             this.router.navigateByUrl('/signin');
             return logout(); // Still an individual action

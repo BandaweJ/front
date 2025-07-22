@@ -5,7 +5,7 @@ import { InvoiceModel } from '../models/invoice.model';
 import { environment } from 'src/environments/environment';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
-import { PaymentMethods } from '../models/payment-methods.enum';
+import { PaymentMethods } from '../enums/payment-methods.enum';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsService {

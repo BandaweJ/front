@@ -10,7 +10,8 @@ import { BalancesModel } from '../models/balances.model';
 import { BillModel } from '../models/bill.model';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
-import { PaymentMethods } from '../models/payment-methods.enum';
+import { PaymentMethods } from '../enums/payment-methods.enum';
+import { ExemptionModel } from '../models/exemption.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -137,5 +138,16 @@ export const receiptActions = createActionGroup({
     fetchStudentReceipts: props<{ studentNumber: string }>(),
     fetchStudentReceiptsSuccess: props<{ studentReceipts: ReceiptModel[] }>(),
     fetchStudentReceiptsFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+
+// Actions for Exemption Management
+export const exemptionActions = createActionGroup({
+  source: 'Exemption',
+  events: {
+    'Create Exemption': props<{ exemption: ExemptionModel }>(),
+    'Create Exemption Success': props<{ exemption: ExemptionModel }>(),
+    'Create Exemption Failure': props<{ error: string }>(),
+    // You might add actions for Fetching, Updating, Deleting exemptions here later
   },
 });

@@ -4,6 +4,7 @@ import {
   balancesActions,
   billingActions,
   billStudentActions,
+  exemptionActions,
   feesActions,
   invoiceActions,
   isNewComerActions,
@@ -14,6 +15,9 @@ import { InvoiceModel } from '../models/invoice.model';
 import { BalancesModel } from '../models/balances.model';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
+import { ExemptionModel } from '../models/exemption.model';
+import { ExemptionType } from '../enums/exemption-type.enum';
+import { FeesNames } from '../enums/fees-names.enum';
 
 export interface State {
   fees: FeesModel[];
@@ -39,6 +43,10 @@ export interface State {
   studentReceipts: ReceiptModel[];
   loadingStudentReceipts: boolean;
   loadStudentInvoicesErr: string;
+
+  exemption: ExemptionModel | null;
+  exemptionLoading: boolean;
+  exemptionError: string | null;
 }
 
 export const initialState: State = {
@@ -65,6 +73,10 @@ export const initialState: State = {
   studentReceipts: [],
   loadingStudentReceipts: false,
   loadStudentReceiptsErr: '',
+
+  exemption: null,
+  exemptionLoading: false,
+  exemptionError: null,
 };
 
 export const financeReducer = createReducer(
@@ -199,39 +211,75 @@ export const financeReducer = createReducer(
     errorMessage: error.message,
   })),
   on(billStudentActions.billStudent, (state, { bills }) => {
-    // The 'bills' array coming from the action (which is your component's 'toBill')
-    // should already contain the *final, desired set* of bills for the invoice.
-    // So, we replace the existing bills with these new ones.
     const finalBillsForInvoice = bills;
 
-    // Calculate the new totalBill from this final set of bills
-    const newTotalBill = finalBillsForInvoice.reduce(
-      (sum, bill) => sum + +bill.fees.amount,
+    // 1. Calculate the gross total bill (sum of all bills before any exemption)
+    const grossTotalBill = finalBillsForInvoice.reduce(
+      (sum, bill) => sum + Number(bill.fees.amount || 0), // Ensure bill.fees.amount is treated as a number
       0
     );
 
-    // Include balanceBfwd in totalBill
-    const currentBalanceBfwdAmount =
-      +state.selectedStudentInvoice?.balanceBfwd?.amount || 0;
+    // 2. Get the exemption from the current selected invoice
+    // Safely access exemption, it might be null or undefined if no exemption is applied
+    const studentExemption: ExemptionModel | undefined =
+      state.selectedStudentInvoice?.exemption;
 
-    const newTotal = Number(newTotalBill) + Number(currentBalanceBfwdAmount);
+    // 3. Calculate the net total bill after applying exemption
+    let netTotalBillFromBills = grossTotalBill; // This will be the value for invoice.totalBill
 
+    if (studentExemption && studentExemption.isActive) {
+      if (
+        studentExemption.type === ExemptionType.FIXED_AMOUNT //||
+        //studentExemption.type === ExemptionType.STAFF_SIBLING
+      ) {
+        // Apply fixed amount exemption, ensuring result doesn't go below zero
+        netTotalBillFromBills = Math.max(
+          0,
+          netTotalBillFromBills - (Number(studentExemption.fixedAmount) || 0)
+        );
+      } else if (studentExemption.type === ExemptionType.PERCENTAGE) {
+        // Apply percentage exemption
+        const percentage =
+          (Number(studentExemption.percentageAmount) || 0) / 100;
+        netTotalBillFromBills = Math.max(
+          0,
+          netTotalBillFromBills * (1 - percentage)
+        );
+      } else if (studentExemption.type === ExemptionType.STAFF_SIBLING) {
+        netTotalBillFromBills = 0;
+        bills.map((bill) => {
+          if (bill.fees.name === FeesNames.foodFee) {
+            netTotalBillFromBills += 100;
+          }
+        });
+      }
+      // Round the net total bill to two decimal places for currency
+      netTotalBillFromBills = parseFloat(netTotalBillFromBills.toFixed(2));
+    }
+
+    // 4. Get other necessary amounts, ensuring they are numbers
+    const currentBalanceBfwdAmount = Number(
+      state.selectedStudentInvoice?.balanceBfwd?.amount || 0
+    );
+    const amountPaid = Number(
+      state.selectedStudentInvoice?.amountPaidOnInvoice || 0
+    );
+
+    // 5. Calculate new balance based on the net total bill, balance brought forward, and payments
     const newBalance =
-      newTotal - state.selectedStudentInvoice.amountPaidOnInvoice;
+      netTotalBillFromBills + currentBalanceBfwdAmount - amountPaid;
+    // Round the new balance to two decimal places for consistency
+    const roundedNewBalance = parseFloat(newBalance.toFixed(2));
 
     return {
       ...state,
-      isLoading: false, // Assuming these are part of your state management for the billing process
-      errorMessage: '', // Assuming these are part of your state management for the billing process
+      isLoading: false,
+      errorMessage: '',
       selectedStudentInvoice: {
         ...state.selectedStudentInvoice,
         bills: [...finalBillsForInvoice], // Use the new, complete array of bills
-        totalBill: newTotal, // Update totalBill with the calculated value
-        balance: newBalance,
-        // Note: Other invoice fields like 'balance', 'amountPaidOnInvoice', 'status'
-        // might also need to be recalculated or updated depending on your business logic
-        // and if this action triggers a payment recalculation or status change.
-        // For now, only 'bills' and 'totalBill' are directly addressed as per your request.
+        totalBill: netTotalBillFromBills, // This now reflects the net sum of current bills after exemption
+        balance: roundedNewBalance, // This is the final calculated balance
       },
     };
   }),
@@ -481,5 +529,27 @@ export const financeReducer = createReducer(
       };
     }
     return state; // If no invoice, do nothing
-  })
+  }),
+  // Handle Create Exemption action (start loading)
+  on(exemptionActions.createExemption, (state) => ({
+    ...state,
+    exemptionLoading: true,
+    exemptionError: null, // Clear any previous errors
+  })),
+
+  // Handle Create Exemption Success action (store exemption, stop loading)
+  on(exemptionActions.createExemptionSuccess, (state, { exemption }) => ({
+    ...state,
+    exemption: exemption, // Store the newly created exemption
+    exemptionLoading: false,
+    exemptionError: null,
+  })),
+
+  // Handle Create Exemption Failure action (store error, stop loading)
+  on(exemptionActions.createExemptionFailure, (state, { error }) => ({
+    ...state,
+    exemptionLoading: false,
+    exemptionError: error,
+    exemption: null, // Clear exemption on error
+  }))
 );

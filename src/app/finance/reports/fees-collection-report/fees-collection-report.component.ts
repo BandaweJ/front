@@ -21,7 +21,7 @@ import {
 } from '../../store/finance.selector';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { PaymentMethods } from '../../models/payment-methods.enum';
+import { PaymentMethods } from '../../enums/payment-methods.enum';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
 

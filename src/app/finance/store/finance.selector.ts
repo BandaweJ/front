@@ -3,7 +3,7 @@ import * as fromFinanceReducer from './finance.reducer';
 import { InvoiceModel } from '../models/invoice.model';
 import { ReceiptModel } from '../models/payment.model';
 import { PaymentHistoryItem } from '../models/payment-history.model';
-import { PaymentMethods } from '../models/payment-methods.enum';
+import { PaymentMethods } from '../enums/payment-methods.enum';
 import {
   selectClasses,
   selectTermEnrols,
@@ -38,6 +38,21 @@ import {
 } from '../models/enrollment-billing-reconciliation-report.model';
 export const financeState =
   createFeatureSelector<fromFinanceReducer.State>('finance');
+
+export const selectCurrentExemption = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.exemption
+);
+
+export const selectExemptionsLoading = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.exemptionLoading
+);
+
+export const selectExemptionsError = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.exemptionError
+);
 
 export const selectFees = createSelector(
   financeState,
@@ -853,213 +868,6 @@ export const getOutstandingFeesReport = (
       };
     }
   );
-
-// // === UPDATED: Outstanding Fees Report Selector Factory ===
-// export const getOutstandingFeesReport = (
-//   filters: OutstandingFeesReportFilters
-// ) =>
-//   createSelector(
-//     selectAllInvoices,
-//     selectStudents,
-//     selectTerms,
-//     (
-//       allInvoices: InvoiceModel[] | null,
-//       allStudents: StudentsModel[] | null,
-//       allTerms: TermsModel[] | null
-//     ): OutstandingFeesReportData => {
-//       const studentsMap = new Map<string, StudentsModel>();
-//       (allStudents || []).forEach((s) => studentsMap.set(s.studentNumber, s));
-
-//       let totalOverallOutstanding = 0;
-//       const outstandingByClass = new Map<string, number>();
-//       const outstandingByResidence = new Map<string, number>();
-
-//       // Updated type for aggregated data to store the correct residence
-//       const allStudentBalancesAggregated: {
-//         [studentNumber: string]: {
-//           outstanding: number;
-//           student: StudentsModel | undefined;
-//           enrolName: string | undefined;
-//           residence: string | undefined;
-//         };
-//       } = {};
-
-//       (allInvoices || []).forEach((invoice) => {
-//         const currentBalance = +invoice.balance;
-
-//         if (!isNaN(currentBalance) && currentBalance > 0) {
-//           const student = studentsMap.get(invoice.student.studentNumber);
-//           const className = invoice.enrol?.name;
-//           // --- START OF CRITICAL CHANGE: Get residence from invoice.enrol ---
-//           const residenceFromEnrol = invoice.enrol?.residence;
-//           // --- END OF CRITICAL CHANGE ---
-
-//           // Ensure we have all necessary pieces of data from the invoice and its linked student
-//           if (student && className && residenceFromEnrol) {
-//             // Now explicitly check for residenceFromEnrol
-//             const studentNumber = student.studentNumber;
-
-//             totalOverallOutstanding += currentBalance;
-
-//             // Aggregate by Class Name (remains unchanged)
-//             const currentClassTotal = outstandingByClass.get(className) || 0;
-//             outstandingByClass.set(
-//               className,
-//               +currentClassTotal + currentBalance
-//             );
-
-//             // Aggregate by Residence (using the new source: invoice.enrol.residence)
-//             // Ensure residenceFromEnrol is a non-empty string after trim
-//             if (residenceFromEnrol.trim() !== '') {
-//               const currentResidenceTotal =
-//                 outstandingByResidence.get(residenceFromEnrol) || 0;
-//               outstandingByResidence.set(
-//                 residenceFromEnrol,
-//                 +currentResidenceTotal + +currentBalance
-//               );
-//             } else {
-//             }
-
-//             // Aggregate individual student balances for the studentDetails list
-//             if (!allStudentBalancesAggregated[studentNumber]) {
-//               allStudentBalancesAggregated[studentNumber] = {
-//                 outstanding: 0,
-//                 student: student,
-//                 enrolName: className,
-//                 residence: residenceFromEnrol,
-//               }; // Store residence here
-//             }
-//             allStudentBalancesAggregated[studentNumber].outstanding +=
-//               +currentBalance;
-//             // If the same student appears with invoices from different enrolments/residences,
-//             // the 'residence' stored here for the studentDetails will be from the last invoice processed.
-//             // For report consistency, it's usually expected that a student's residence for an enrolment period is stable.
-//           } else {
-//           }
-//         }
-//       });
-
-//       let reportStartDate: Date | null = null;
-//       let reportEndDate: Date | null = null;
-
-//       if (
-//         filters.termId !== undefined &&
-//         filters.termId !== null &&
-//         allTerms &&
-//         allTerms.length > 0
-//       ) {
-//         const [filterNumStr, filterYearStr] = filters.termId.split('-');
-//         const filterNum = parseInt(filterNumStr, 10);
-//         const filterYear = parseInt(filterYearStr, 10);
-
-//         const selectedTerm = allTerms.find(
-//           (t) => t.num === filterNum && t.year === filterYear
-//         );
-
-//         if (selectedTerm) {
-//           reportStartDate = selectedTerm.startDate
-//             ? new Date(selectedTerm.startDate)
-//             : null;
-//           reportEndDate = selectedTerm.endDate
-//             ? new Date(selectedTerm.endDate)
-//             : null;
-//           // Set time to cover the whole day
-//           if (reportStartDate) reportStartDate.setHours(0, 0, 0, 0);
-//           if (reportEndDate) reportEndDate.setHours(23, 59, 59, 999);
-//         } else {
-//         }
-//       }
-
-//       let studentDetails: OutstandingStudentDetail[] = [];
-
-//       // Logic for populating studentDetails, ensuring residence comes from the correct source
-//       if (reportStartDate && reportEndDate) {
-//         const termFilteredStudentBalances: { [studentNumber: string]: number } =
-//           {};
-//         const studentsInTermSet = new Set<string>();
-
-//         (allInvoices || []).forEach((invoice) => {
-//           const invoiceBalance = parseFloat(invoice.balance as any);
-//           if (!isNaN(invoiceBalance) && invoiceBalance > 0) {
-//             const invoiceDate = new Date(invoice.invoiceDate); // Already a Date object from the correct InvoiceModel
-//             if (
-//               !isNaN(invoiceDate.getTime()) &&
-//               reportStartDate &&
-//               reportEndDate &&
-//               invoiceDate.getTime() >= reportStartDate.getTime() &&
-//               invoiceDate.getTime() <= reportEndDate.getTime()
-//             ) {
-//               if (!termFilteredStudentBalances[invoice.student.studentNumber]) {
-//                 termFilteredStudentBalances[invoice.student.studentNumber] = 0;
-//               }
-//               termFilteredStudentBalances[invoice.student.studentNumber] +=
-//                 invoiceBalance;
-//               studentsInTermSet.add(invoice.student.studentNumber);
-//             }
-//           }
-//         });
-
-//         studentDetails = Array.from(studentsInTermSet)
-//           .map((studentNumber) => {
-//             const studentData = allStudentBalancesAggregated[studentNumber];
-//             // Ensure studentData.residence is used, which was populated from invoice.enrol.residence
-//             return {
-//               studentNumber: studentData?.student?.studentNumber || '',
-//               studentName: `${studentData?.student?.name || ''} ${
-//                 studentData?.student?.surname || ''
-//               }`.trim(),
-//               enrolName: studentData?.enrolName || '',
-//               residence: studentData?.residence || '', // <-- Use the residence from aggregated data
-//               totalOutstanding: termFilteredStudentBalances[studentNumber] || 0,
-//             };
-//           })
-//           .filter((s) => s.totalOutstanding > 0);
-//       } else {
-//         studentDetails = Object.values(allStudentBalancesAggregated).map(
-//           (data) => ({
-//             studentNumber: data.student?.studentNumber || '',
-//             studentName: `${data.student?.name || ''} ${
-//               data.student?.surname || ''
-//             }`.trim(),
-//             enrolName: data.enrolName || '',
-//             residence: data.residence || '', // <-- Use the residence from aggregated data
-//             totalOutstanding: data.outstanding,
-//           })
-//         );
-//       }
-
-//       // Apply filters for student details
-//       if (filters.enrolmentName) {
-//         studentDetails = studentDetails.filter(
-//           (s) => s.enrolName === filters.enrolmentName
-//         );
-//       }
-//       if (filters.residence) {
-//         // This filter will now correctly use the enrol.residence
-//         studentDetails = studentDetails.filter(
-//           (s) => s.residence === filters.residence
-//         );
-//       }
-//       // --- NEW: Apply Search Filter ---
-//       if (filters.searchQuery && filters.searchQuery.trim() !== '') {
-//         const searchTerm = filters.searchQuery.toLowerCase().trim();
-//         studentDetails = studentDetails.filter(
-//           (student) =>
-//             student.studentName.toLowerCase().includes(searchTerm) ||
-//             student.studentNumber.toLowerCase().includes(searchTerm) // Allows searching by student number too
-//         );
-//       }
-//       // --- END NEW: Apply Search Filter ---
-//       studentDetails.sort((a, b) => a.studentName.localeCompare(b.studentName));
-
-//       return {
-//         totalOverallOutstanding,
-//         summaryByEnrolment: outstandingByClass,
-//         summaryByResidence: outstandingByResidence,
-//         studentDetails,
-//       };
-//     }
-//   );
 
 // -----------Aged debts report selector -------------------------//
 // Helper function to get the difference in days between two dates

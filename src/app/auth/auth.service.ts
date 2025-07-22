@@ -28,7 +28,6 @@ export class AuthService {
   getAuthStatus(): { isLoggedIn: boolean; user?: User; accessToken?: string } {
     const token = this.getToken();
     if (!token) {
-      console.log('AuthService.getAuthStatus: No token found. Not logged in.');
       return { isLoggedIn: false };
     }
 
@@ -37,72 +36,19 @@ export class AuthService {
       const expiryTimeSeconds = user.exp; // 'exp' claim is in seconds
 
       if (!expiryTimeSeconds) {
-        console.log(
-          'AuthService.getAuthStatus: Token has no expiry. Considering invalid.'
-        );
         return { isLoggedIn: false };
       }
 
       const expiryDate = new Date(expiryTimeSeconds * 1000); // Convert seconds to milliseconds
       if (expiryDate >= new Date()) {
-        console.log('AuthService.getAuthStatus: Token found and is valid.');
         return { isLoggedIn: true, user: user, accessToken: token };
       } else {
-        console.log('AuthService.getAuthStatus: Token found but expired.');
         return { isLoggedIn: false };
       }
     } catch (error) {
-      console.error(
-        'AuthService.getAuthStatus: Error decoding token, considering invalid:',
-        error
-      );
       return { isLoggedIn: false }; // Error decoding, consider token invalid/expired
     }
   }
-
-  // isTokenExpired(): boolean {
-  //   const token = this.getToken();
-  //   let user: User;
-  //   if (!token) {
-  //     console.log('no token found');
-  //     return true; // Token not found, consider it expired
-  //   }
-  //   try {
-  //     user = jwt_decode(token);
-  //     const expiryTimeSeconds = user.exp; // 'exp' claim is in seconds
-
-  //     if (!expiryTimeSeconds) {
-  //       return true; // No expiry claim, consider expired (or handle as needed)
-  //     }
-
-  //     const expiryDate = new Date(expiryTimeSeconds * 1000); // Convert seconds to milliseconds
-  //     if (expiryDate >= new Date()) {
-  //       const payload = {
-  //         user,
-  //         accessToken: token,
-  //       };
-  //       this.store.dispatch(signinSuccess(payload));
-  //       // console.log('dispatched signin success');
-  //       return false;
-  //     }
-  //     return true;
-  //     // return expiryDate <= new Date(); // Check if expiry date is in the past
-  //   } catch (error) {
-  //     // console.error('Error decoding token:', error);
-  //     return true; // Error decoding, consider token invalid/expired
-  //   }
-  // }
-
-  // checkTokenAndNavigate(): void {
-  //   // console.log('here lies one whose name was writ in water');
-  //   if (this.isTokenExpired()) {
-  //     console.log('token expired navigating to signnin');
-  //     this.router.navigate(['/signin']);
-  //   } else {
-  //     console.log('token ok. navigating to dashboard');
-  //     this.router.navigateByUrl('/dashboard');
-  //   }
-  // }
 
   signin(signinData: SigninInterface): Observable<{ accessToken: string }> {
     return this.http.post<{ accessToken: string }>(

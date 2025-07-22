@@ -1,6 +1,6 @@
 // src/app/finance/models/payment-history.model.ts
 
-import { PaymentMethods } from './payment-methods.enum'; // Or wherever PaymentMethods is defined
+import { PaymentMethods } from '../enums/payment-methods.enum'; // Or wherever PaymentMethods is defined
 
 export interface PaymentHistoryItem {
   id: string; // Unique ID for the history item (receipt ID, or invoice ID, or allocation ID)

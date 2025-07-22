@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { PaymentMethods } from '../../models/payment-methods.enum';
+import { PaymentMethods } from '../../enums/payment-methods.enum';
 import { map, Observable, of, startWith } from 'rxjs';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { select, Store } from '@ngrx/store';

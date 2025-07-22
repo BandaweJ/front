@@ -37,6 +37,8 @@ import { AgedDebtorsReportComponent } from './finance/reports/aged-debtors-repor
 import { RevenueRecognitionReportComponent } from './finance/reports/revenue-recognition-report/revenue-recognition-report.component';
 import { EnrollmentBillingReconciliationReportComponent } from './finance/reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component';
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
+import { CreateExemptionComponent } from './finance/create-exemption/create-exemption.component';
+import { ExemptionReportsComponent } from './finance/reports/exemption-reports/exemption-reports/exemption-reports.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -199,6 +201,12 @@ const routes: Routes = [
     title: 'Receipting',
   },
   {
+    path: 'exemptions',
+    component: CreateExemptionComponent,
+    canActivate: [AuthGuardService],
+    title: 'Create Exemption',
+  },
+  {
     canActivate: [AuthGuardService],
     path: 'student-ledger',
     component: StudentLedgerReportComponent,
@@ -215,6 +223,12 @@ const routes: Routes = [
     path: 'outstanding-fees',
     component: OutstandingFeesReportComponent,
     title: 'Outstanding Fees Report',
+  },
+  {
+    canActivate: [AuthGuardService],
+    path: 'exemption-reports',
+    component: ExemptionReportsComponent,
+    title: 'Exemption Reports',
   },
   {
     canActivate: [AuthGuardService],

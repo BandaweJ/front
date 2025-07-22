@@ -1,5 +1,5 @@
 // src/app/models/finance-filter.model.ts
-import { PaymentMethods } from './payment-methods.enum';
+import { PaymentMethods } from '../enums/payment-methods.enum';
 
 export interface FinanceFilter {
   startDate?: string; // Filters by transactionDate

@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FeesComponent } from './fees/fees.component';
 import { MaterialModule } from '../material/material.module';
 import { RouterModule } from '@angular/router';
@@ -39,6 +39,15 @@ import { OutstandingFeesReportComponent } from './reports/outstanding-fees-repor
 import { AgedDebtorsReportComponent } from './reports/aged-debtors-report/aged-debtors-report.component';
 import { RevenueRecognitionReportComponent } from './reports/revenue-recognition-report/revenue-recognition-report.component';
 import { EnrollmentBillingReconciliationReportComponent } from './reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component';
+import { CreateExemptionComponent } from './create-exemption/create-exemption.component';
+import { ExemptionReportsComponent } from './reports/exemption-reports/exemption-reports/exemption-reports.component';
+import { ExemptionReportFiltersComponent } from './reports/exemption-reports/exemption-report-filters/exemption-report-filters.component';
+import { TotalExemptionAmountCardComponent } from './reports/exemption-reports/total-exemption-amount-card/total-exemption-amount-card.component';
+import { ExemptionSummaryByTypeTableComponent } from './reports/exemption-reports/exemption-summary-by-type-table.component/exemption-summary-by-type-table.component.component';
+import { ExemptionDetailedListTableComponent } from './reports/exemption-reports/exemption-detailed-list-table/exemption-detailed-list-table.component';
+import { GetUniqueTermNumbersPipe } from '../shared/pipes/get-unique-term-numbers.pipe';
+import { ExemptionSummaryByStudentTableComponent } from './reports/exemption-reports/exemption-summary-by-student-table/exemption-summary-by-student-table.component';
+import { ExemptionSummaryByEnrolmentTableComponent } from './reports/exemption-reports/exemption-summary-by-enrolment-table/exemption-summary-by-enrolment-table.component';
 
 @NgModule({
   declarations: [
@@ -71,6 +80,14 @@ import { EnrollmentBillingReconciliationReportComponent } from './reports/enroll
     AgedDebtorsReportComponent,
     RevenueRecognitionReportComponent,
     EnrollmentBillingReconciliationReportComponent,
+    CreateExemptionComponent,
+    ExemptionReportsComponent,
+    ExemptionReportFiltersComponent,
+    TotalExemptionAmountCardComponent,
+    ExemptionSummaryByTypeTableComponent,
+    ExemptionSummaryByStudentTableComponent,
+    ExemptionSummaryByEnrolmentTableComponent,
+    ExemptionDetailedListTableComponent,
   ],
   imports: [
     CommonModule,
@@ -83,6 +100,7 @@ import { EnrollmentBillingReconciliationReportComponent } from './reports/enroll
     StoreModule.forFeature('finance', financeReducer),
     EffectsModule.forFeature([FinanceEffects]),
     NgChartsModule,
+    DecimalPipe,
   ],
   exports: [CurrentEnrolmentComponent, StudentEnrolmentDetailsComponent],
 })

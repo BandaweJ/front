@@ -1,6 +1,6 @@
 // src/app/models/finance-data.model.ts
 
-import { PaymentMethods } from './payment-methods.enum'; // Assuming this is your PaymentMethods enum
+import { PaymentMethods } from '../enums/payment-methods.enum'; // Assuming this is your PaymentMethods enum
 
 export interface FinanceDataModel {
   // --- Core / Common Fields (from our previous definition) ---

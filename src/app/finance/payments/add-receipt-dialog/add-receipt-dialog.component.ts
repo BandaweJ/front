@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StudentsModel } from 'src/app/registration/models/students.model';
-import { PaymentMethods } from '../../models/payment-methods.enum';
+import { PaymentMethods } from '../../enums/payment-methods.enum';
 import { Store } from '@ngrx/store';
 import {
   // Good: You're now explicitly using selectAmountDue

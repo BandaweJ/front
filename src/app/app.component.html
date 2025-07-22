@@ -64,7 +64,8 @@
               <mat-icon>date_range</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Terms</span>
             </button>
-            <button mat-button *ngIf="role === 'admin'" routerLink="/enrol" routerLinkActive="active">
+            <button mat-button *ngIf="role === 'admin' || role === 'reception'" routerLink="/enrol"
+              routerLinkActive="active">
               <mat-icon>add_task</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Enrol</span>
             </button>
@@ -203,6 +204,12 @@
             </button>
           </div>
           <div class="sidenav-container" *ngIf="role === 'reception'">
+            <button mat-button routerLink="/exemptions" routerLinkActive="active">
+              <mat-icon>money_off</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Exemptions</span>
+            </button>
+          </div>
+          <div class="sidenav-container" *ngIf="role === 'reception'">
             <button mat-button routerLink="/balances" routerLinkActive="active">
               <mat-icon>account_balance_wallet</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Balances</span>
@@ -233,6 +240,12 @@
               <mat-icon>money_off</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Outstanding
                 Fees</span>
+            </button>
+          </div>
+          <div class="sidenav-container">
+            <button mat-button routerLink="/exemption-reports" routerLinkActive="active">
+              <mat-icon>assignment_turned_in</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Exemptions</span>
             </button>
           </div>
           <div class="sidenav-container">

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { FinanceDataModel } from '../../finance/models/finance-data.model';
-import { PaymentMethods } from 'src/app/finance/models/payment-methods.enum';
+import { PaymentMethods } from 'src/app/finance/enums/payment-methods.enum';
 import { StudentDashboardSummary } from '../models/student-dashboard-summary';
 
 @Injectable({

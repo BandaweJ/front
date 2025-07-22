@@ -8,6 +8,7 @@ import {
   balancesActions,
   billingActions,
   billStudentActions,
+  exemptionActions,
   feesActions,
   invoiceActions,
   isNewComerActions,
@@ -15,6 +16,7 @@ import {
 } from './finance.actions';
 import { PaymentsService } from '../services/payments.service';
 import { EnrolService } from 'src/app/enrolment/services/enrol.service';
+import { ExemptionService } from '../services/exemption.service';
 @Injectable()
 export class FinanceEffects {
   constructor(
@@ -22,6 +24,7 @@ export class FinanceEffects {
     private financeService: FinanceService,
     private paymentsService: PaymentsService,
     private enrolService: EnrolService,
+    private exemptionService: ExemptionService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -588,6 +591,44 @@ export class FinanceEffects {
               }
             );
             return of(receiptActions.downloadReceiptPdfFail({ ...error }));
+          })
+        )
+      )
+    )
+  );
+
+  createExemption$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(exemptionActions.createExemption), // Listen for the createExemption action
+      switchMap(({ exemption }) =>
+        this.exemptionService.createExemption(exemption).pipe(
+          map((createdExemption) => {
+            // Show success message
+            this.snackBar.open('Exemption created successfully!', 'Close', {
+              duration: 3000,
+              panelClass: ['success-snackbar'], // Optional: for custom styling
+            });
+            // Dispatch success action with the created exemption
+            return exemptionActions.createExemptionSuccess({
+              exemption: createdExemption,
+            });
+          }),
+          catchError((error: HttpErrorResponse) => {
+            let errorMessage = 'An unknown error occurred.';
+            if (error.error && error.error.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            // Show error message
+            this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+              duration: 5000,
+              panelClass: ['error-snackbar'], // Optional: for custom styling
+            });
+            // Dispatch failure action with the error message
+            return of(
+              exemptionActions.createExemptionFailure({ error: errorMessage })
+            );
           })
         )
       )

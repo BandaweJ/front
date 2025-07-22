@@ -2,8 +2,9 @@ import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { BillModel } from './bill.model';
 import { BalancesModel } from './balances.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
-import { InvoiceStatus } from './invoice-status.enum';
+import { InvoiceStatus } from '../enums/invoice-status.enum';
 import { ReceiptInvoiceAllocationsModel } from './receipt-invoice-allocations.model';
+import { ExemptionModel } from './exemption.model';
 
 export interface InvoiceModel {
   id: number;
@@ -20,4 +21,8 @@ export interface InvoiceModel {
   // NEW: Fields for tracking payments and status specific to THIS invoice
   amountPaidOnInvoice: number; // Tracks how much has been paid directly towards THIS invoice
   status: InvoiceStatus; // The current status of THIS invoice
+  exemptedAmount?: number;
+
+  // NEW: Exemption property
+  exemption?: ExemptionModel; // An invoice might have an associated exemption, make it optional
 }

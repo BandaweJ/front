@@ -6,7 +6,7 @@ import { FeesModel } from '../../models/fees.model';
 import { feesActions } from '../../store/finance.actions';
 import { Title } from '@angular/platform-browser';
 import { SharedService } from 'src/app/shared.service';
-import { FeesNames } from '../../models/fees-names.enum';
+import { FeesNames } from '../../enums/fees-names.enum';
 
 @Component({
   selector: 'app-add-edit-fees',

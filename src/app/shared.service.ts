@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Residence } from './enrolment/models/residence.enum';
-import { FeesNames } from './finance/models/fees-names.enum';
+import { FeesNames } from './finance/enums/fees-names.enum';
 
 @Injectable({
   providedIn: 'root',
