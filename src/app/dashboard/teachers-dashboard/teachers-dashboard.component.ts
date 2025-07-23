@@ -15,7 +15,7 @@ import {
   selectClasses,
   selectCurrentTerm,
   selectEnrolsStats,
-  selectTotalEnroment,
+  selectTermEnrols,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { InvoiceModel } from 'src/app/finance/models/invoice.model';
 import { selectedStudentInvoice } from 'src/app/finance/store/finance.selector';
@@ -32,6 +32,8 @@ import {
 } from 'src/app/registration/store/registration.selectors';
 import { ReportsModel } from 'src/app/reports/models/reports.model';
 import { selectStudentReports } from 'src/app/reports/store/reports.selectors';
+import { termEnrolsActions } from '../../enrolment/store/enrolment.actions';
+import { Residence } from 'src/app/enrolment/models/residence.enum';
 
 @Component({
   selector: 'app-teachers-dashboard',
@@ -42,14 +44,11 @@ export class TeachersDashboardComponent {
   private destroy$ = new Subject<void>(); // Used for unsubscribing from observables
 
   teachers$ = this.store.select(selectTeachers);
-  invoice$ = this.store.select(selectedStudentInvoice);
-  studentReports$ = this.store.select(selectStudentReports);
   students$ = this.store.select(selectStudents);
   classes$ = this.store.select(selectClasses);
   subjects$ = this.store.select(selectSubjects);
-  enrolsSummary$ = this.store.select(selectTotalEnroment);
-  selectedReport: ReportsModel | null = null;
   user$ = this.store.select(selectUser);
+  termEnrols$ = this.store.select(selectTermEnrols);
 
   currentTerm$ = this.store.select(selectCurrentTerm);
 
@@ -63,8 +62,10 @@ export class TeachersDashboardComponent {
   maleTeachers!: number;
   femaleTeachers!: number;
 
-  dayScholars!: number; // These are calculated from enrolsSummary$, so consider deriving them reactively
-  boarders!: number; // These are calculated from enrolsSummary$, so consider deriving them reactively
+  dayScholars!: number;
+  boarders!: number;
+  maleStudents!: number;
+  femaleStudents!: number;
 
   today = new Date();
 
@@ -95,6 +96,7 @@ export class TeachersDashboardComponent {
             this.store.dispatch(fetchStudents());
             this.store.dispatch(fetchClasses());
             this.store.dispatch(fetchSubjects());
+            this.store.dispatch(currentTermActions.fetchCurrentTerm());
           }
         }),
         takeUntil(this.destroy$) // Unsubscribe when component is destroyed
@@ -103,6 +105,26 @@ export class TeachersDashboardComponent {
 
     // Always fetch terms regardless of role
     this.store.dispatch(fetchTerms());
+
+    this.termEnrols$
+      .pipe(
+        filter((termEnrols) => !!termEnrols),
+        tap((termEnrols) => {
+          this.dayScholars = termEnrols.filter(
+            (enrol) => enrol.residence === Residence.Day
+          ).length;
+          this.boarders = termEnrols.filter(
+            (enrol) => enrol.residence === Residence.Boarder
+          ).length;
+          this.maleStudents = termEnrols.filter(
+            (enrol) => enrol.student.gender === 'Male'
+          ).length;
+          this.femaleStudents = termEnrols.filter(
+            (enrol) => enrol.student.gender === 'Female'
+          ).length;
+        })
+      )
+      .subscribe();
   }
 
   ngOnInit(): void {
@@ -141,7 +163,7 @@ export class TeachersDashboardComponent {
 
           const num = this.currentTermNum;
           const year = this.currentTermYear;
-          this.store.dispatch(fetchTotalEnrols({ num, year }));
+          this.store.dispatch(termEnrolsActions.fetchTermEnrols({ num, year }));
         }),
         takeUntil(this.destroy$)
       )
@@ -175,9 +197,9 @@ export class TeachersDashboardComponent {
     this._navigateToRoleBased('/subjects');
   }
 
-  changeSelectedReport(report: ReportsModel): void {
-    this.selectedReport = report;
-  }
+  // changeSelectedReport(report: ReportsModel): void {
+  //   this.selectedReport = report;
+  // }
 
   ngOnDestroy(): void {
     this.destroy$.next(); // Emit a value to complete all subscriptions

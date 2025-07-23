@@ -25,14 +25,14 @@
 
       <div class="total">
 
-        <span class="big-total"> {{ (enrolsSummary$ |
-          async)?.total }}</span>
+        <span class="big-total"> {{ (termEnrols$ |
+          async)?.length }}</span>
       </div>
       <div class="breakdown">
-        <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ (enrolsSummary$ | async)?.boys }}</mat-chip>
-        <mat-chip color="warn">Female <mat-icon>female</mat-icon> : {{ (enrolsSummary$ | async)?.girls }}</mat-chip>
-        <mat-chip color="warn">Day <mat-icon>home</mat-icon> : {{ (enrolsSummary$ | async)?.dayScholars }}</mat-chip>
-        <mat-chip color="warn">Boarders <mat-icon>hotel</mat-icon> : {{ (enrolsSummary$ | async)?.boarders }}</mat-chip>
+        <mat-chip color="accent">Male <mat-icon>male</mat-icon> : {{ maleStudents }}</mat-chip>
+        <mat-chip color="warn">Female <mat-icon>female</mat-icon> : {{ femaleStudents }}</mat-chip>
+        <mat-chip color="warn">Day <mat-icon>home</mat-icon> : {{ dayScholars }}</mat-chip>
+        <mat-chip color="warn">Boarders <mat-icon>hotel</mat-icon> : {{ boarders }}</mat-chip>
 
 
       </div>
