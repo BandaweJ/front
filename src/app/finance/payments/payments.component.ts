@@ -1,27 +1,28 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, map, Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators'; // Only need takeUntil from here now
+import { takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 
 // Import your models and actions
-import { ReceiptModel } from '../models/payment.model'; // Assuming payment.model.ts defines ReceiptModel
+import { ReceiptModel } from '../models/payment.model';
 import { ReceiptFilter } from '../models/receipt-filter.model';
 import { FilterReceiptsDialogComponent } from './filter-receipts-dialog/filter-receipts-dialog.component';
 
 // Import your NgRx selectors and actions
-import { receiptActions } from '../store/finance.actions'; // Assuming receiptActions.fetchReceipts() is correct
+import { receiptActions } from '../store/finance.actions';
 import { AddReceiptDialogComponent } from './add-receipt-dialog/add-receipt-dialog.component';
 import { selectAllReceipts } from '../store/finance.selector';
+
 @Component({
-  selector: 'app-payments', // Assuming this is your ReceiptsPageComponent
+  selector: 'app-payments',
   templateUrl: './payments.component.html',
   styleUrls: ['./payments.component.css'],
 })
 export class PaymentsComponent implements OnInit, OnDestroy {
   // UI State
   isSearchBarVisible: boolean = false;
-  selectedReceipt: ReceiptModel | null = null; // To display the selected receipt in the main component
+  selectedReceipt: ReceiptModel | null = null;
 
   // Sorting Options
   sortOptions = [
@@ -34,10 +35,10 @@ export class PaymentsComponent implements OnInit, OnDestroy {
 
   // Reactive Streams for Filtering and Sorting
   private currentFiltersSubject = new BehaviorSubject<ReceiptFilter>({});
-  currentFilters$ = this.currentFiltersSubject.asObservable(); // Expose as Observable for template/debug
+  currentFilters$ = this.currentFiltersSubject.asObservable();
 
   private currentSortSubject = new BehaviorSubject<string>('paymentDateDesc');
-  currentSort$ = this.currentSortSubject.asObservable(); // Expose as Observable for template/debug (e.g. for 'done' icon)
+  currentSort$ = this.currentSortSubject.asObservable();
 
   // Stream of all receipts from the NgRx store
   allReceipts$: Observable<ReceiptModel[]> = this.store.pipe(
@@ -47,19 +48,19 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   // The final observable that combines all receipts, current filters, and current sort
   filteredAndSortedReceipts$: Observable<ReceiptModel[]>;
 
-  private ngUnsubscribe = new Subject<void>(); // For cleaning up subscriptions
+  private ngUnsubscribe = new Subject<void>();
+
+  // Define the limit for the number of displayed receipts
+  private readonly DISPLAY_LIMIT = 50; // You can make this configurable if needed
 
   constructor(private dialog: MatDialog, private store: Store) {
-    // This is where the magic happens: combine streams to reactively update the list
     this.filteredAndSortedReceipts$ = combineLatest([
       this.allReceipts$,
       this.currentFilters$,
       this.currentSort$,
     ]).pipe(
-      // Optional: Add a debounceTime here if filtering/sorting is heavy and you want to prevent UI jank
-      // debounceTime(50),
       map(([receipts, filters, sort]) => {
-        let processedReceipts = [...receipts]; // Create a copy to avoid mutating store state
+        let processedReceipts = [...receipts];
 
         // 1. Apply Filters
         processedReceipts = this.applyFilters(processedReceipts, filters);
@@ -67,27 +68,23 @@ export class PaymentsComponent implements OnInit, OnDestroy {
         // 2. Apply Sorting
         processedReceipts = this.applySorting(processedReceipts, sort);
 
+        // 3. Apply the display limit after filtering and sorting
+        processedReceipts = processedReceipts.slice(0, this.DISPLAY_LIMIT);
+
         return processedReceipts;
       })
     );
   }
 
   ngOnInit(): void {
-    // Dispatch action to fetch receipts from backend when component initializes
-    // This populates the 'allReceipts$' observable from the store.
     this.store.dispatch(receiptActions.fetchAllReceipts());
   }
 
   ngOnDestroy(): void {
-    // Ensure all subscriptions are unsubscribed to prevent memory leaks
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }
 
-  /**
-   * Toggles the visibility of the search bar.
-   * Clears the selected receipt if hiding the search bar.
-   */
   toggleSearchBar(): void {
     this.isSearchBarVisible = !this.isSearchBarVisible;
     if (!this.isSearchBarVisible) {
@@ -95,13 +92,9 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Opens the filter dialog and updates the current filters based on dialog result.
-   */
   onFilter(): void {
     const dialogRef = this.dialog.open(FilterReceiptsDialogComponent, {
       width: '400px',
-      // Pass the current filters' value to the dialog so it can pre-fill
       data: { currentFilters: { ...this.currentFiltersSubject.value } },
     });
 
@@ -109,9 +102,8 @@ export class PaymentsComponent implements OnInit, OnDestroy {
       .afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
-        // If result is not undefined (dialog wasn't simply dismissed without action)
         if (result !== undefined) {
-          this.currentFiltersSubject.next(result); // Update the filter subject
+          this.currentFiltersSubject.next(result);
           console.log('Filters applied:', result);
         } else {
           console.log('Filter dialog closed without applying changes.');
@@ -119,42 +111,21 @@ export class PaymentsComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Updates the current sort order.
-   * @param sortValue The selected sort option value.
-   */
   onSortChange(sortValue: string): void {
-    this.currentSortSubject.next(sortValue); // Update the sort subject
+    this.currentSortSubject.next(sortValue);
     console.log('Sort changed to:', sortValue);
   }
 
   onViewReceiptDetails(receipt: ReceiptModel): void {
     console.log('Viewing details for receipt:', receipt);
     this.selectedReceipt = receipt;
-    // TODO: Implement navigation to a detailed receipt view page,
-    // or open a MatDialog with full receipt details.
-    // Example: this.router.navigate(['/receipts', receipt.id]);
   }
 
-  /**
-   * Handler for when a receipt is selected from the SearchReceiptComponent.
-   * @param receipt The selected ReceiptModel.
-   */
   onReceiptSelectedFromSearch(receipt: ReceiptModel): void {
     this.selectedReceipt = receipt;
-    this.isSearchBarVisible = false; // Hide search bar after selection
-    // TODO: You might want to navigate to the Receipt Details Page here,
-    // or display the details prominently on the current page.
-    // Example: this.router.navigate(['/receipts', receipt.receiptId]);
+    this.isSearchBarVisible = false;
   }
 
-  /**
-   * Applies filter logic to the given array of receipts.
-   * This is a pure function that does not modify the original array.
-   * @param receipts The receipts to filter.
-   * @param filters The filter criteria.
-   * @returns The filtered array of receipts.
-   */
   private applyFilters(
     receipts: ReceiptModel[],
     filters: ReceiptFilter
@@ -172,7 +143,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
       )
         return false;
 
-      // Student ID (Assuming studentId is the unique identifier for a student)
+      // Student ID
       if (
         filters.studentNumber &&
         receipt.student.studentNumber !== filters.studentNumber
@@ -218,19 +189,12 @@ export class PaymentsComponent implements OnInit, OnDestroy {
       )
         return false;
 
-      return true; // Keep the receipt if all filters pass
+      return true;
     });
   }
 
-  /**
-   * Applies sorting logic to the given array of receipts.
-   * This is a pure function that does not modify the original array.
-   * @param receipts The receipts to sort.
-   * @param sort The sorting criteria.
-   * @returns The sorted array of receipts.
-   */
   private applySorting(receipts: ReceiptModel[], sort: string): ReceiptModel[] {
-    const sortedReceipts = [...receipts]; // Work on a copy to avoid mutating original store data
+    const sortedReceipts = [...receipts];
 
     switch (sort) {
       case 'paymentDateDesc':
@@ -256,33 +220,26 @@ export class PaymentsComponent implements OnInit, OnDestroy {
           return nameA.localeCompare(nameB);
         });
       default:
-        return sortedReceipts; // Default to no specific sort if unrecognized
+        return sortedReceipts;
     }
   }
 
-  /**
-   * Opens the "Add New Receipt" dialog.
-   */
   onAddReceipt(): void {
     console.log('FAB clicked: Opening Add New Receipt dialog');
     const dialogRef = this.dialog.open(AddReceiptDialogComponent, {
-      width: '600px', // Adjust width as needed for your form
-      disableClose: true, // Optional: Prevent closing by clicking outside or pressing Escape
-      // You can pass data to the dialog here if needed, e.g., default values
-      // data: { someInitialValue: '...' }
+      width: '600px',
+      disableClose: true,
     });
 
     dialogRef
       .afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((newReceipt: ReceiptModel | undefined) => {
-        // Type the result
         if (newReceipt) {
           console.log(
             'New receipt created and received from dialog:',
             newReceipt
           );
-
           this.selectedReceipt = newReceipt;
         } else {
           console.log(
