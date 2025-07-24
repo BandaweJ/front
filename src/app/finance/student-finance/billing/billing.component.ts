@@ -112,7 +112,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
   private initializeForm(): void {
     this.academicSettingsForm = this.fb.group({
-      selectedAcademicLevel: [Validators.required],
+      selectedAcademicLevel: ['O Level', Validators.required],
       oLevelNewComer: [false],
       aLevelNewComer: [false],
       aLevelScienceLevy: [false],
