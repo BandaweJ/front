@@ -278,7 +278,7 @@ export const financeReducer = createReducer(
       selectedStudentInvoice: {
         ...state.selectedStudentInvoice,
         bills: [...finalBillsForInvoice], // Use the new, complete array of bills
-        totalBill: netTotalBillFromBills, // This now reflects the net sum of current bills after exemption
+        totalBill: netTotalBillFromBills + currentBalanceBfwdAmount, // This now reflects the net sum of current bills after exemption
         balance: roundedNewBalance, // This is the final calculated balance
       },
     };

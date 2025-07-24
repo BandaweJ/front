@@ -112,7 +112,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
   private initializeForm(): void {
     this.academicSettingsForm = this.fb.group({
-      selectedAcademicLevel: ['O Level', Validators.required],
+      selectedAcademicLevel: [Validators.required],
       oLevelNewComer: [false],
       aLevelNewComer: [false],
       aLevelScienceLevy: [false],
@@ -242,9 +242,10 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
     this.subscriptions.push(
       this.aLevelScienceLevy.valueChanges.subscribe((value) => {
-        const alevelScienceFee = this.findFee('alevelScienceFee');
+        const alevelScienceFee = this.findFee('aLevelScienceFee');
         if (value) {
           this.addFeeToToBill(alevelScienceFee);
+          console.log('added science fee', alevelScienceFee);
         } else {
           this.removeFeeFromToBill(alevelScienceFee);
         }
