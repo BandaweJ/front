@@ -245,7 +245,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         const alevelScienceFee = this.findFee('aLevelScienceFee');
         if (value) {
           this.addFeeToToBill(alevelScienceFee);
-          console.log('added science fee', alevelScienceFee);
+          // console.log('added science fee', alevelScienceFee);
         } else {
           this.removeFeeFromToBill(alevelScienceFee);
         }

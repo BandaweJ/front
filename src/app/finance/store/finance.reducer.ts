@@ -284,38 +284,6 @@ export const financeReducer = createReducer(
     };
   }),
 
-  // on(billStudentActions.removeBillSuccess, (state) => ({
-  //   ...state,
-  //   isLoading: true,
-  //   errorMessage: '',
-  // })),
-  // on(billStudentActions.removeBill, (state, { bill }) => {
-  //   const updatedTotalBill =
-  //     +state.selectedStudentInvoice.totalBill - +bill.fees.amount;
-  //   const currentBalanceBfwdAmount = Number(
-  //     +state.selectedStudentInvoice?.balanceBfwd?.amount || 0
-  //   );
-
-  //   const updatedTotal = +updatedTotalBill + +currentBalanceBfwdAmount;
-
-  //   return {
-  //     ...state,
-  //     isLoading: false,
-  //     errorMessage: '',
-  //     selectedStudentInvoice: {
-  //       ...state.selectedStudentInvoice,
-  //       bills: state.selectedStudentInvoice.bills.filter(
-  //         (b) => b.id !== bill.id
-  //       ),
-  //       totalBill: updatedTotal, // Use the updated totalBill
-  //     },
-  //   };
-  // }),
-  // on(billStudentActions.removeBillFail, (state, { error }) => ({
-  //   ...state,
-  //   isLoading: false,
-  //   errorMessage: error.message,
-  // })),
   on(invoiceActions.downloadInvoice, (state) => ({
     ...state,
     isLoading: true,
@@ -337,12 +305,32 @@ export const financeReducer = createReducer(
     isLoading: true,
     errorMessage: '',
   })),
-  on(invoiceActions.saveInvoiceSuccess, (state, { invoice }) => ({
-    ...state,
-    selectedStudentInvoice: invoice,
-    isLoading: false,
-    errorMessage: '',
-  })),
+  on(invoiceActions.saveInvoiceSuccess, (state, { invoice }) => {
+    // Check if the invoice already exists in the array
+    const existingInvoice = state.allInvoices.find(
+      (inv) => inv.invoiceNumber === invoice.invoiceNumber
+    );
+
+    let updatedAllInvoices;
+
+    if (existingInvoice) {
+      // If the invoice exists, map over the array to replace the old one
+      updatedAllInvoices = state.allInvoices.map((inv) =>
+        inv.invoiceNumber === invoice.invoiceNumber ? invoice : inv
+      );
+    } else {
+      // If the invoice is new, add it to the end of the array
+      updatedAllInvoices = [...state.allInvoices, invoice];
+    }
+
+    return {
+      ...state,
+      selectedStudentInvoice: invoice,
+      allInvoices: updatedAllInvoices,
+      isLoading: false,
+      errorMessage: '',
+    };
+  }),
   on(invoiceActions.saveInvoiceFail, (state, { error }) => ({
     ...state,
     isLoading: false,
@@ -425,7 +413,13 @@ export const financeReducer = createReducer(
     isLoading: false,
     errorMessage: '',
     createdReceipt: receipt,
-    allReceipts: [...state.allReceipts, receipt],
+    // Filter out the old receipt (if it exists) and add the new one
+    allReceipts: [
+      ...state.allReceipts.filter(
+        (r) => r.receiptNumber !== receipt.receiptNumber
+      ),
+      receipt,
+    ],
   })),
   on(receiptActions.saveReceiptFail, (state, { error }) => ({
     ...state,
