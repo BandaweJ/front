@@ -138,6 +138,11 @@ export const receiptActions = createActionGroup({
     fetchStudentReceipts: props<{ studentNumber: string }>(),
     fetchStudentReceiptsSuccess: props<{ studentReceipts: ReceiptModel[] }>(),
     fetchStudentReceiptsFail: props<{ error: HttpErrorResponse }>(),
+
+    // --- NEW ACTIONS FOR VOIDING ---
+    'Void Receipt': props<{ receiptId: number }>(), // Request to void a receipt
+    'Void Receipt Success': props<{ receipt: ReceiptModel }>(), // Voiding successful, provide updated receipt
+    'Void Receipt Failure': props<{ error: HttpErrorResponse }>(), // Voiding failed
   },
 });
 

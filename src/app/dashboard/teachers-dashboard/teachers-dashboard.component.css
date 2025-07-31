@@ -136,7 +136,7 @@ mat-chip mat-icon {
   padding-bottom: 1rem;
 }
 .enrolment-graph app-enrolment-chart {
-  max-width: 100%; /* Important: Ensure the chart doesn't exceed its parent's width */
+  width: 100%; /* Important: Ensure the chart doesn't exceed its parent's width */
   /* max-height: 60vh; */
   height: auto;
   /* flex: 1; /* Allow the chart component to fill available space */

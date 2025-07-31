@@ -545,5 +545,23 @@ export const financeReducer = createReducer(
     exemptionLoading: false,
     exemptionError: error,
     exemption: null, // Clear exemption on error
+  })),
+  on(receiptActions.voidReceipt, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(receiptActions.voidReceiptSuccess, (state, { receipt }) => ({
+    ...state,
+    isLoading: false,
+    // Find the receipt in the list and replace it with the updated (voided) version
+    allReceipts: state.allReceipts.map((r) =>
+      r.id === receipt.id ? receipt : r
+    ),
+  })),
+  on(receiptActions.voidReceiptFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
   }))
 );

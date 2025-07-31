@@ -15,5 +15,9 @@ export interface ReceiptModel {
   approved: boolean;
   servedBy: string;
   enrol: EnrolsModel;
-  allocations: ReceiptInvoiceAllocationsModel[]; // Array of invoice numbers this receipt was allocated to
+  allocations: ReceiptInvoiceAllocationsModel[];
+  // --- NEW PROPERTIES FOR VOIDING ---
+  isVoided: boolean; // Indicates if the receipt has been voided
+  voidedBy?: string; // Email of the user who voided the receipt
+  voidedAt?: Date; // Timestamp when the receipt was voided
 }

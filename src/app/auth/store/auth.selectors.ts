@@ -28,6 +28,11 @@ export const selectUser = createSelector(
   (state: fromAuthReducer.State) => state.user
 );
 
+export const selectAuthUserRole = createSelector(
+  authState,
+  (state: fromAuthReducer.State) => state.user?.role
+);
+
 export const selectUserDetails = createSelector(
   authState,
   (state: fromAuthReducer.State) => state.userDetails

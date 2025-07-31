@@ -1,10 +1,15 @@
-<div class="receipt-container" *ngIf="receipt">
+<div class="receipt-container" *ngIf="receipt" [class.voided-receipt]="receipt.isVoided">
   <div class="receipt-download">
     <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()">
       <span class="material-icons">download</span>
     </button>
     <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="printReceipt()">
       <span class="material-icons">print</span>
+    </button>
+
+    <button *ngIf="!receipt.isVoided && (userRole$ | async) === 'reception'" type="button" mat-mini-fab color="warn"
+      class="void-btn" (click)="voidReceipt()" title="Void Receipt">
+      <span class="material-icons">cancel</span>
     </button>
   </div>
   <div class="header">
@@ -30,6 +35,12 @@
   </div>
 
   <div class="receipt-body-content">
+    <div *ngIf="receipt.isVoided" class="void-overlay">
+      <span class="void-text">VOIDED</span>
+      <span class="void-reason" *ngIf="receipt.voidedBy">By: {{ receipt.voidedBy }}</span>
+      <span class="void-date" *ngIf="receipt.voidedAt">On: {{ receipt.voidedAt | date:'short' }}</span>
+    </div>
+
     <div class="section from-to-section">
       <div class="party-block">
         <p class="section-heading">From:</p>
@@ -49,12 +60,8 @@
       </div>
     </div>
 
-
     <div class="section summary-section">
-
       <div class="summary-totals">
-
-
         <div class="total-row total-due">
           <span>Invoice Paid:</span>
           <span *ngFor="let allocation of receipt.allocations">{{ allocation?.invoice?.invoiceNumber }}</span>
@@ -74,8 +81,6 @@
       <p class="section-heading">Remarks:</p>
       <p>{{ receipt.description || 'Thank You For Your Prompt Payment, We Appreciate Your Business' }}</p>
     </div>
-
-
   </div>
   <div class="footer">
     <p class="powered-by">served by : {{ receipt.servedBy }}</p>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { FinanceService } from '../services/finance.service';
-import { catchError, map, of, switchMap, tap } from 'rxjs';
+import { catchError, map, mergeMap, of, switchMap, tap } from 'rxjs';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import {
   balancesActions,
@@ -629,6 +629,30 @@ export class FinanceEffects {
             return of(
               exemptionActions.createExemptionFailure({ error: errorMessage })
             );
+          })
+        )
+      )
+    )
+  );
+
+  voidReceipt$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(receiptActions.voidReceipt),
+      mergeMap(({ receiptId }) =>
+        this.paymentsService.voidReceipt(receiptId).pipe(
+          // Call the new voidReceipt method in your service
+          map((receipt) => {
+            this.snackBar.open('Receipt voided successfully!', 'Close', {
+              duration: 3000,
+            });
+            return receiptActions.voidReceiptSuccess({ receipt });
+          }),
+          catchError((error) => {
+            console.error('Error voiding receipt:', error);
+            const errorMessage =
+              error.error?.message || 'Failed to void receipt.';
+            this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+            return of(receiptActions.voidReceiptFailure({ error }));
           })
         )
       )

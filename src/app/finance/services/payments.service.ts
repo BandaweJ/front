@@ -117,4 +117,11 @@ export class PaymentsService {
       `${this.baseURL}receipt/student/${studentNumber}`
     );
   }
+
+  voidReceipt(receiptId: number): Observable<ReceiptModel> {
+    return this.httpClient.patch<ReceiptModel>(
+      `${this.baseURL}receipt/void/${receiptId}`,
+      {}
+    );
+  }
 }

@@ -343,3 +343,72 @@
   /* Optional: page breaks if receipt is long and you want parts on new page */
   /* page-break-after: always; */
 }
+
+/* Existing styles... */
+
+.receipt-download {
+  /* Ensure positioning context for void button */
+  position: relative;
+}
+
+.void-btn {
+  /* Basic styling for the void button */
+  margin-left: 10px; /* Space from other buttons */
+  background-color: #f44336; /* Red color for warning */
+  color: white;
+}
+
+/* Style for the receipt container when it's voided */
+.voided-receipt {
+  opacity: 0.7; /* Slightly dim the receipt */
+  pointer-events: none; /* Disable interactions if desired */
+  position: relative; /* For the overlay */
+  overflow: hidden; /* To contain the rotated overlay */
+}
+
+/* Overlay for VOIDED text */
+.void-overlay {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%) rotate(-25deg); /* Rotate the text */
+  background-color: rgba(255, 0, 0, 0.1); /* Light red background */
+  color: red;
+  font-size: 4em; /* Large text */
+  font-weight: bold;
+  text-align: center;
+  padding: 20px 0;
+  border: 4px dashed red;
+  z-index: 1; /* Above other content but below the receipt-download buttons */
+  pointer-events: none; /* Ensure it doesn't block clicks */
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.void-overlay .void-text {
+  font-size: 1.2em; /* Main "VOIDED" text */
+  line-height: 1;
+}
+
+.void-overlay .void-reason,
+.void-overlay .void-date {
+  font-size: 0.3em; /* Smaller text for reason/date */
+  line-height: 1;
+  margin-top: 5px;
+}
+
+/* Adjust print styles for voided receipt if necessary */
+@media print {
+  .voided-receipt .void-overlay {
+    background-color: transparent !important; /* No background color on print */
+    border-color: #000 !important; /* Black dashed border on print */
+    color: #000 !important; /* Black text on print */
+    /* Ensure it prints clearly */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

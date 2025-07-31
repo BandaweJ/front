@@ -6,6 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ReplaceUnderscoresPipe } from './pipes/replace-underscores.pipe';
 import { GetUniqueTermNumbersPipe } from './pipes/get-unique-term-numbers.pipe';
 import { GetUniqueTermYearsPipe } from './pipes/get-unique-term-years.pipe';
+import { ConfirmationDialogComponent } from './confirmation-dialo/confirmation-dialo.component';
 
 @NgModule({
   declarations: [
@@ -13,6 +14,7 @@ import { GetUniqueTermYearsPipe } from './pipes/get-unique-term-years.pipe';
     ReplaceUnderscoresPipe,
     GetUniqueTermNumbersPipe,
     GetUniqueTermYearsPipe,
+    ConfirmationDialogComponent,
   ],
   exports: [
     StudentSearchComponent,
