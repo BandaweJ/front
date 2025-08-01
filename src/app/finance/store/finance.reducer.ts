@@ -40,6 +40,7 @@ export interface State {
   studentInvoices: InvoiceModel[];
   loadingStudentInvoices: boolean;
   loadStudentReceiptsErr: string;
+
   studentReceipts: ReceiptModel[];
   loadingStudentReceipts: boolean;
   loadStudentInvoicesErr: string;

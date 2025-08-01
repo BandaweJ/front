@@ -8,7 +8,9 @@ export interface State {
   studentReports: ReportsModel[];
   selectedReport: ReportsModel | null;
   isLoading: boolean;
+  isLoaded: boolean;
   errorMessage: string;
+  viewReportsError: string;
 }
 
 export const initialState: State = {
@@ -16,7 +18,9 @@ export const initialState: State = {
   studentReports: [],
   selectedReport: null,
   isLoading: false,
+  isLoaded: false,
   errorMessage: '',
+  viewReportsError: '',
 };
 
 export const reportsReducer = createReducer(
@@ -56,6 +60,7 @@ export const reportsReducer = createReducer(
   on(reportsActions.viewReportsActions.viewReports, (state) => ({
     ...state,
     isLoading: true,
+    isLoaded: false,
     reports: [],
   })),
   on(
@@ -63,12 +68,14 @@ export const reportsReducer = createReducer(
     (state, { reports }) => ({
       ...state,
       isLoading: false,
+      isLoaded: true,
       reports: [...reports],
     })
   ),
   on(reportsActions.viewReportsActions.viewReportsFail, (state, { error }) => ({
     ...state,
     isLoading: false,
+    isLoaded: false,
     errorMessage: error.message,
     reports: [],
   })),
@@ -112,6 +119,7 @@ export const reportsReducer = createReducer(
   on(reportsActions.viewReportsActions.fetchStudentReports, (state) => ({
     ...state,
     isLoading: true,
+    isLoaded: false,
     errorMessage: '',
     reports: [],
     selectedReport: null,
@@ -121,6 +129,7 @@ export const reportsReducer = createReducer(
     (state, { reports }) => ({
       ...state,
       isLoading: false,
+      isLoaded: true,
       errorMessage: '',
       reports: [],
       studentReports: [...reports],
@@ -132,6 +141,7 @@ export const reportsReducer = createReducer(
     (state, { error }) => ({
       ...state,
       isLoading: false,
+      isLoaded: false,
       errorMessage: error.message,
       reports: [],
       studentReports: [],
@@ -149,10 +159,19 @@ export const reportsReducer = createReducer(
   on(reportsActions.viewReportsActions.clearSelectedReport, (state) => ({
     ...state,
     selectedReport: null, // Clear the currently displayed report
+    errorMessage: '', // Clear any previous error
   })),
   on(reportsActions.viewReportsActions.resetReports, (state) => ({
     ...state,
     reports: [],
-  }))
+  })),
+  // --- YOUR NEW REDUCER HANDLER IS HERE ---
+  on(
+    reportsActions.viewReportsActions.setReportsErrorMsg,
+    (state, { errorMsg }) => ({
+      ...state,
+      errorMessage: errorMsg,
+    })
+  )
   // on(reportsActions.saveHeadCommentActions.saveHeadCommentSuccess, (state))
 );

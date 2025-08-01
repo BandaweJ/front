@@ -66,22 +66,6 @@ export class AddEditStudentComponent {
 
     this.addStudentForm.patchValue(this.data);
 
-    // this.store.dispatch(resetErrorMessage()),
-    //   this.store.select(selectAddSuccess).subscribe((result) => {
-    //     if (result === true) {
-    //       this.snackBar.open('Student Added Successfully', '', {
-    //         duration: 3500,
-    //         verticalPosition: 'top',
-    //       });
-    //       this.dialogRef.close();
-    //     } else if (result === false) {
-    //       this.snackBar.open('Faied to add Student. Check errors shown', '', {
-    //         duration: 3500,
-    //         verticalPosition: 'top',
-    //       });
-    //     }
-    //   });
-
     this.errorMsg$ = this.store.select(selectRegErrorMsg);
   }
 

@@ -36,7 +36,7 @@
       <button mat-flat-button color="primary" [disabled]="reportsForm.invalid" (click)="generate()">
         Generate
       </button>
-      <button mat-flat-button color="accent" (click)="saveReports()"
+      <button mat-flat-button color="accent" (click)="saveReports()" *ngIf="role === 'admin'"
         [disabled]="reportsForm.invalid || (reports$ | async)?.length === 0">Save</button>
       <button mat-flat-button color="primary" (click)="viewReports()" [disabled]="reportsForm.invalid">View</button>
     </div>

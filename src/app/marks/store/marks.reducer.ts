@@ -20,7 +20,11 @@ export interface State {
   };
   lineChartData: ChartConfiguration<'line'>['data'];
   marksProgress: MarksProgressModel[];
+
   studentMarks: MarksModel[];
+  studentMarksLoading: boolean;
+  studentMarksLoaded: boolean;
+  studentMarksError: string;
 }
 
 export const initialState: State = {
@@ -40,7 +44,11 @@ export const initialState: State = {
     datasets: [],
   },
   marksProgress: [],
+
   studentMarks: [],
+  studentMarksLoading: false,
+  studentMarksLoaded: false,
+  studentMarksError: '',
 };
 
 export const marksReducer = createReducer(
@@ -281,23 +289,27 @@ export const marksReducer = createReducer(
   ),
   on(marksActions.studentMarksActions.fetchStudentMarks, (state) => ({
     ...state,
-    isLoading: true,
-    errorMessage: '',
+    studentMarksLoading: true,
+    studentMarksLoaded: false,
+    studentMarksError: '',
   })),
   on(
     marksActions.studentMarksActions.fetchStudentMarksSuccess,
     (state, { marks }) => ({
       ...state,
-      isLoading: false,
       studentMarks: marks,
+      studentMarksLoading: false,
+      studentMarksLoaded: true,
+      studentMarksError: '',
     })
   ),
   on(
     marksActions.studentMarksActions.fetchStudentMarksFail,
     (state, { error }) => ({
       ...state,
-      isLoading: false,
-      errorMessage: error.message,
+      studentMarksLoading: false,
+      studentMarksLoaded: false,
+      studentMarksError: error.message,
     })
   )
 );

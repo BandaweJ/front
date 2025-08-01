@@ -59,6 +59,8 @@ export const viewReportsActions = createActionGroup({
     // --- NEW ACTION TO CLEAR DISPLAYED REPORT ---
     clearSelectedReport: emptyProps(),
     resetReports: emptyProps(),
+
+    'Set Reports Error Msg': props<{ errorMsg: string }>(),
   },
 });
 

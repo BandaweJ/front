@@ -16,9 +16,7 @@ import {
 import { AddEditStudentComponent } from './add-edit-student/add-edit-student.component';
 import {
   deleteStudentAction,
-  editStudentAction,
   fetchStudents,
-  resetAddSuccess,
 } from '../store/registration.actions';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -50,7 +48,6 @@ export class StudentsListComponent implements OnInit, AfterViewInit {
     'surname',
     'name',
     'gender',
-    'residence',
     'cell',
 
     'action',

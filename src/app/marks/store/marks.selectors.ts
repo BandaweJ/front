@@ -48,3 +48,21 @@ export const selectStudentMarks = createSelector(
   marksState,
   (state: fromMarksReducer.State) => state.studentMarks
 );
+
+export const selectStudentMarksLoading = createSelector(
+  // Add this
+  marksState,
+  (state) => state.studentMarksLoading
+);
+
+export const selectStudentMarksLoaded = createSelector(
+  // Add this
+  marksState,
+  (state) => state.studentMarksLoaded
+);
+
+export const selectStudentMarksError = createSelector(
+  // Add this
+  marksState,
+  (state) => state.studentMarksError
+);
