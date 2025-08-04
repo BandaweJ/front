@@ -172,3 +172,28 @@ canvas {
   /* ... (existing styles for the graph container) ... */
   margin: 0 auto; /* Adjust margin if needed to align with new layout */
 }
+
+.outstanding-container {
+  margin-top: 15px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 15px;
+}
+
+.outstanding-label {
+  font-weight: bold;
+  color: #5c6bc0; /* A color to make the label stand out */
+  margin-bottom: 10px;
+  display: block;
+}
+
+.outstanding-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.95em;
+  color: #d32f2f; /* Red to indicate an owed amount */
+}
+
+.outstanding-item span {
+  /* You can add specific styles for the amount if needed */
+}

@@ -15,22 +15,12 @@
           <label>Student Number:</label>
           <span>{{ student.studentNumber }}</span>
         </div>
-        <!-- <div class="data-item">
-          <label>Date of Birth:</label>
-          <span>{{ student.dob | date:'mediumDate' }}</span>
-        </div> -->
+
         <div class="data-item">
           <label>Gender:</label>
           <span>{{ student.gender }}</span>
         </div>
-        <!-- <div class="data-item">
-          <label>ID Number:</label>
-          <span>{{ student.idnumber }}</span>
-        </div> -->
-        <!-- <div class="data-item">
-          <label>Date of Joining:</label>
-          <span>{{ student.dateOfJoining | date:'mediumDate' }}</span>
-        </div> -->
+
         <div class="data-item">
           <label>Cell:</label>
           <span>{{ student.cell }}</span>
@@ -43,10 +33,7 @@
           <label>Address:</label>
           <span>{{ student.address }}</span>
         </div>
-        <!-- <div class="data-item">
-          <label>Previous School:</label>
-          <span>{{ student.prevSchool || 'N/A' }}</span>
-        </div> -->
+
       </div>
     </ng-container>
     <ng-template #noStudentData>
@@ -86,21 +73,40 @@
     <ng-container *ngIf="dashboardSummary$ | async as summary; else noSummaryData">
       <div class="summary-card financial-card">
         <h4>Financial Overview</h4>
-        <div class="data-item">
-          <label>Total Billed:</label>
-          <span>{{ summary.financialSummary.totalBilled | currency:'USD':'symbol':'1.2-2' }}</span>
-        </div>
-        <div class="data-item">
-          <label>Total Paid:</label>
-          <span>{{ summary.financialSummary.totalPaid | currency:'USD':'symbol':'1.2-2' }}</span>
-        </div>
-        <div class="data-item amount-owed">
-          <label>Amount Owed:</label>
-          <span [class.positive]="summary.financialSummary.amountOwed <= 0"
-            [class.negative]="summary.financialSummary.amountOwed > 0">
-            {{ summary.financialSummary.amountOwed | currency:'USD':'symbol':'1.2-2' }}
-          </span>
-        </div>
+
+        <ng-container *ngIf="summary.financialSummary as financialSummary">
+          <div class="data-item">
+            <label>Total Billed:</label>
+            <span>{{ financialSummary.totalBilled | currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="data-item">
+            <label>Total Paid:</label>
+            <span>{{ financialSummary.totalPaid | currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="data-item amount-owed">
+            <label>Total Amount Owed:</label>
+            <span [class.positive]="financialSummary.amountOwed <= 0"
+              [class.negative]="financialSummary.amountOwed > 0">
+              {{ financialSummary.amountOwed | currency:'USD':'symbol':'1.2-2' }}
+            </span>
+          </div>
+
+          <div
+            *ngIf="financialSummary && financialSummary.outstandingBalances && financialSummary.outstandingBalances.length > 0"
+            class="outstanding-container">
+            <label class="outstanding-label">Outstanding Balances by Term:</label>
+            <div *ngFor="let balance of financialSummary.outstandingBalances" class="outstanding-item">
+              <span>{{ balance.term }} {{ balance.year }}:</span>
+              <span class="outstanding-amount">{{ balance.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+          <div *ngIf="financialSummary.outstandingBalances?.length === 0 && financialSummary.amountOwed > 0"
+            class="outstanding-container">
+            <label class="outstanding-label">Amount owed is not yet allocated to a term.</label>
+          </div>
+        </ng-container>
+
       </div>
 
       <div class="summary-card academic-card">
