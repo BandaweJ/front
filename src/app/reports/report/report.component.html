@@ -1,6 +1,6 @@
 <mat-card class="report" id="{{ report.studentNumber }}" #content>
-  <button *ngIf="role === 'student' || role ==='parent' || role === 'reception'" type="button" mat-mini-fab
-    color="accent" class="download-btn" (click)="download()">
+  <button *ngIf="role === 'student' || role ==='parent' || role === 'reception' || role === 'admin'" type="button"
+    mat-mini-fab color="accent" class="download-btn" (click)="download()">
     <span class="material-icons">file_download</span>
   </button>
 
