@@ -12,6 +12,7 @@ import { AccountStats } from '../models/account-stats.model';
 import { TeachersModel } from 'src/app/registration/models/teachers.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { ParentsModel } from 'src/app/registration/models/parents.model';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 
 // Grouping Sign-in Actions
 export const signinActions = createActionGroup({
@@ -57,7 +58,7 @@ export const userDetailsActions = createActionGroup({
   source: 'Auth/Profile Component', // Changed source for consistency
   events: {
     // Action to fetch a specific user's details
-    'fetch user': props<{ id: string }>(),
+    'fetch user': props<{ id: string; role: ROLES }>(),
     // Action for successful fetching of user details
     'fetch user success': props<{
       user: TeachersModel | StudentsModel | ParentsModel | null; // Added ParentsModel as it's a possibility

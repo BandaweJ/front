@@ -70,7 +70,12 @@ export class AuthService {
     return this.http.get<AccountStats>(this.baseUrl);
   }
 
-  fetchUserDetails(id: string): Observable<StudentsModel | TeachersModel> {
-    return this.http.get<StudentsModel | TeachersModel>(this.baseUrl + id);
+  fetchUserDetails(
+    id: string,
+    role: string
+  ): Observable<StudentsModel | TeachersModel> {
+    return this.http.get<StudentsModel | TeachersModel>(
+      `${this.baseUrl}${id}/${role}`
+    );
   }
 }

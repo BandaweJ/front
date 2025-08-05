@@ -2,14 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
-  selectUser,
   selectUserDetails,
   isLoading,
   selectErrorMsg,
 } from '../store/auth.selectors';
+import { selectAuthUserId, selectAuthUserRole } from '../store/auth.selectors';
 import { userDetailsActions } from '../store/auth.actions';
-import { filter, take } from 'rxjs/operators'; // Import withLatestFrom
-import { User } from '../models/user.model';
+import { filter, withLatestFrom, take } from 'rxjs/operators';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { TeachersModel } from 'src/app/registration/models/teachers.model';
 import { ParentsModel } from 'src/app/registration/models/parents.model';
@@ -22,7 +21,10 @@ import { ROLES } from 'src/app/registration/models/roles.enum';
   styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent implements OnInit {
-  user$: Observable<User | null> = this.store.select(selectUser);
+  // Use new selectors to get ID and role
+  private userId$ = this.store.select(selectAuthUserId);
+  private userRole$ = this.store.select(selectAuthUserRole);
+
   userDetails$: Observable<
     TeachersModel | StudentsModel | ParentsModel | null
   > = this.store.select(selectUserDetails);
@@ -31,24 +33,30 @@ export class ProfileComponent implements OnInit {
   teacher!: TeachersModel;
   student!: StudentsModel;
   parent!: ParentsModel;
-
-  // Store the user's role from the JWT payload for convenience in template
   currentUserRole: ROLES | null = null;
 
   constructor(private router: Router, private store: Store) {}
 
   ngOnInit(): void {
-    // Subscribe to user$ to get the role and dispatch the fetch action
-    this.user$
+    this.userId$
       .pipe(
-        filter((user): user is User => user !== null), // Only proceed if user is not null
-        take(1) // Take only the first emission where user is not null
+        filter((id): id is string => !!id), // Only proceed if a valid ID exists
+        withLatestFrom(this.userRole$), // Get the latest role from its selector
+        take(1) // Take only the first emission to prevent re-dispatching
       )
-      .subscribe((user) => {
-        this.currentUserRole = user.role; // Store the role
-        const id = user.id;
-        console.log('Dispatching fetch user details for ID:', id);
-        this.store.dispatch(userDetailsActions.fetchUser({ id }));
+      .subscribe(([id, role]) => {
+        if (id && role) {
+          // Store the role for the helper functions
+          this.currentUserRole = role;
+          console.log(
+            'Dispatching fetch user details for ID:',
+            id,
+            'and role:',
+            role
+          );
+          // Dispatch the new action that includes the role
+          this.store.dispatch(userDetailsActions.fetchUser({ id, role }));
+        }
       });
 
     this.userDetails$.subscribe((details) => {
@@ -62,20 +70,15 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // Helper function to check if the current user is a teacher
-  // Now relies on currentUserRole, which comes from the User (JWT payload)
+  // Helper functions remain the same as they now rely on currentUserRole
   isTeacher(): boolean {
     return this.currentUserRole === ROLES.teacher;
   }
 
-  // Helper function to check if the current user is a student
-  // Now relies on currentUserRole
   isStudent(): boolean {
     return this.currentUserRole === ROLES.student;
   }
 
-  // Helper function to check if the current user is a parent
-  // Now relies on currentUserRole
   isParent(): boolean {
     return this.currentUserRole === ROLES.parent;
   }

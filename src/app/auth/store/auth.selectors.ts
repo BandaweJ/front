@@ -33,6 +33,11 @@ export const selectAuthUserRole = createSelector(
   (state: fromAuthReducer.State) => state.user?.role
 );
 
+export const selectAuthUserId = createSelector(
+  authState,
+  (state: fromAuthReducer.State) => state.user?.id
+);
+
 export const selectUserDetails = createSelector(
   authState,
   (state: fromAuthReducer.State) => state.userDetails

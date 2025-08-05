@@ -11,7 +11,6 @@ import {
   checkAuthStatus,
   // No need to import signinFailure directly now, it's part of signinActions
 } from './auth.actions';
-import { SigninInterface } from '../models/signin.model';
 import { AuthService } from '../auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -98,7 +97,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(userDetailsActions.fetchUser), // Use grouped action
       exhaustMap((data) =>
-        this.authService.fetchUserDetails(data.id).pipe(
+        this.authService.fetchUserDetails(data.id, data.role).pipe(
           map((user) => {
             return userDetailsActions.fetchUserSuccess({
               user,
