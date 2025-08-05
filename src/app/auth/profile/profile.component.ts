@@ -57,13 +57,10 @@ export class ProfileComponent implements OnInit {
     this.userDetails$.subscribe((details) => {
       if (this.currentUserRole === ROLES.teacher) {
         this.teacher = details as TeachersModel;
-        console.log('Teacher details:', this.teacher);
       } else if (this.currentUserRole === ROLES.student) {
         this.student = details as StudentsModel;
-        console.log('Student details:', this.student);
       } else if (this.currentUserRole === ROLES.parent) {
         this.parent = details as ParentsModel;
-        console.log('Parent details:', this.parent);
       }
     });
   }

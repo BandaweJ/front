@@ -20,9 +20,7 @@ export class SigninComponent implements OnInit {
     private store: Store,
     private router: Router,
     private title: Title
-  ) {
-    console.log('signin component initialized');
-  }
+  ) {}
 
   signinForm!: FormGroup;
   hide = true;
@@ -44,7 +42,6 @@ export class SigninComponent implements OnInit {
         Validators.minLength(8),
       ]),
     });
-    console.log('SigninComponent ngOnInit called!');
   }
 
   get username() {
