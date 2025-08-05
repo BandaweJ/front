@@ -124,55 +124,49 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       (this.store.select(selectUser) as Observable<User | null>)
         .pipe(
+          // Filter for a valid user with an ID
           filter((user): user is User => !!user && !!user.id),
-          map((user: User) => user.id),
-          distinctUntilChanged(), // Ensure dispatch only if studentId changes
-          switchMap((studentId) =>
-            combineLatest([
-              this.store.select(selectStudentMarksLoaded), // Use new selector
-              this.store.select(selectStudentMarksLoading), // Use new selector
-            ]).pipe(
-              filter(
-                ([marksLoaded, marksLoading]) => !marksLoaded && !marksLoading
-              ), // Only dispatch if not loaded and not loading
-              take(1), // Take only one emission that satisfies the condition
-              tap(() => {
-                // The studentId is available here. Add all dispatches.
-                this.store.dispatch(
-                  studentMarksActions.fetchStudentMarks({
-                    studentNumber: studentId,
-                  })
-                );
-                // ADDED: Dispatch for outstanding balances
-                this.store.dispatch(
-                  receiptActions.fetchStudentOutstandingBalance({
-                    studentNumber: studentId,
-                  })
-                );
-                // ADDED: Dispatch for student invoices
-                this.store.dispatch(
-                  invoiceActions.fetchStudentInvoices({
-                    studentNumber: studentId,
-                  })
-                );
-                // ADDED: Dispatch for student receipts
-                this.store.dispatch(
-                  receiptActions.fetchStudentReceipts({
-                    studentNumber: studentId,
-                  })
-                );
-                this.store.dispatch(
-                  currentEnrolementActions.fetchCurrentEnrolment({
-                    studentNumber: studentId,
-                  })
-                );
+          // Take only the first emission to prevent multiple dispatches
+          take(1),
+          // Use a tap operator to perform side-effects (dispatching actions)
+          // This runs as soon as a valid user is found
+          tap((user) => {
+            const studentNumber = user.id;
+
+            this.store.dispatch(
+              studentMarksActions.fetchStudentMarks({
+                studentNumber,
               })
-            )
-          )
+            );
+            this.store.dispatch(
+              receiptActions.fetchStudentOutstandingBalance({
+                studentNumber,
+              })
+            );
+            this.store.dispatch(
+              studentDashboardActions.fetchStudentDashboardSummary({
+                studentNumber,
+              })
+            );
+            this.store.dispatch(
+              invoiceActions.fetchStudentInvoices({
+                studentNumber,
+              })
+            );
+            this.store.dispatch(
+              receiptActions.fetchStudentReceipts({
+                studentNumber,
+              })
+            );
+            this.store.dispatch(
+              currentEnrolementActions.fetchCurrentEnrolment({
+                studentNumber,
+              })
+            );
+          })
         )
         .subscribe()
     );
-
     // Subscription for processing marks and updating the chart (reacts to state changes)
     this.subscriptions.add(
       this.store
