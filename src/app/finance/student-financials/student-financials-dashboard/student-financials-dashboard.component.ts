@@ -50,22 +50,22 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.user$
-      .pipe(
-        filter((user) => !!user),
-        tap((user) => {
-          if (user) this.studentNumber = user.id;
-          if (this.studentNumber) {
-            // Dispatch action to fetch outstanding balance
-            this.store.dispatch(
-              receiptActions.fetchStudentOutstandingBalance({
-                studentNumber: this.studentNumber,
-              })
-            );
-          }
-        })
-      )
-      .subscribe();
+    // this.user$
+    //   .pipe(
+    //     filter((user) => !!user),
+    //     tap((user) => {
+    //       if (user) this.studentNumber = user.id;
+    //       if (this.studentNumber) {
+    //         // Dispatch action to fetch outstanding balance
+    //         this.store.dispatch(
+    //           receiptActions.fetchStudentOutstandingBalance({
+    //             studentNumber: this.studentNumber,
+    //           })
+    //         );
+    //       }
+    //     })
+    //   )
+    //   .subscribe();
 
     // Navigate to default tab if no child route is active
     // Navigate to default tab if no specific child route is active

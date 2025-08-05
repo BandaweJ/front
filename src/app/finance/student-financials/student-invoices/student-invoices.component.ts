@@ -30,21 +30,21 @@ export class StudentInvoicesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.userSubscription = this.store
-      .select(selectUser)
-      .pipe(
-        filter((user) => !!user && !!user.id), // Ensure user and user.id exist
-        take(1), // <<< THIS IS THE KEY CHANGE: Ensures the tap/dispatch runs only once
-        tap((user) => {
-          console.log('student number from store for invoice fetch:', user!.id); // Use user!.id directly
-          this.store.dispatch(
-            invoiceActions.fetchStudentInvoices({
-              studentNumber: user!.id, // Use user.id directly from the tap callback
-            })
-          );
-        })
-      )
-      .subscribe();
+    // this.userSubscription = this.store
+    //   .select(selectUser)
+    //   .pipe(
+    //     filter((user) => !!user && !!user.id), // Ensure user and user.id exist
+    //     take(1), // <<< THIS IS THE KEY CHANGE: Ensures the tap/dispatch runs only once
+    //     tap((user) => {
+    //       console.log('student number from store for invoice fetch:', user!.id); // Use user!.id directly
+    //       this.store.dispatch(
+    //         invoiceActions.fetchStudentInvoices({
+    //           studentNumber: user!.id, // Use user.id directly from the tap callback
+    //         })
+    //       );
+    //     })
+    //   )
+    //   .subscribe();
   }
 
   ngOnDestroy(): void {

@@ -32,20 +32,20 @@ export class StudentReceiptsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Fetch studentNumber from the store and dispatch action to load receipts
-    this.userSubscription = this.store
-      .select(selectUser)
-      .pipe(
-        filter((user): user is User => !!user && !!user.id),
-        take(1), // Take only the first emitted studentNumber
-        tap((user) => {
-          this.store.dispatch(
-            receiptActions.fetchStudentReceipts({
-              studentNumber: user.id,
-            })
-          );
-        })
-      )
-      .subscribe();
+    // this.userSubscription = this.store
+    //   .select(selectUser)
+    //   .pipe(
+    //     filter((user): user is User => !!user && !!user.id),
+    //     take(1), // Take only the first emitted studentNumber
+    //     tap((user) => {
+    //       this.store.dispatch(
+    //         receiptActions.fetchStudentReceipts({
+    //           studentNumber: user.id,
+    //         })
+    //       );
+    //     })
+    //   )
+    //   .subscribe();
   }
 
   ngOnDestroy(): void {

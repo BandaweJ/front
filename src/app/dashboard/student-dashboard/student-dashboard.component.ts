@@ -37,6 +37,10 @@ import {
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { currentEnrolementActions } from 'src/app/enrolment/store/enrolment.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import {
+  invoiceActions,
+  receiptActions,
+} from 'src/app/finance/store/finance.actions';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -133,8 +137,27 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               ), // Only dispatch if not loaded and not loading
               take(1), // Take only one emission that satisfies the condition
               tap(() => {
+                // The studentId is available here. Add all dispatches.
                 this.store.dispatch(
                   studentMarksActions.fetchStudentMarks({
+                    studentNumber: studentId,
+                  })
+                );
+                // ADDED: Dispatch for outstanding balances
+                this.store.dispatch(
+                  receiptActions.fetchStudentOutstandingBalance({
+                    studentNumber: studentId,
+                  })
+                );
+                // ADDED: Dispatch for student invoices
+                this.store.dispatch(
+                  invoiceActions.fetchStudentInvoices({
+                    studentNumber: studentId,
+                  })
+                );
+                // ADDED: Dispatch for student receipts
+                this.store.dispatch(
+                  receiptActions.fetchStudentReceipts({
                     studentNumber: studentId,
                   })
                 );
