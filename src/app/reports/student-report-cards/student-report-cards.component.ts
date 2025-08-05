@@ -241,6 +241,10 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
         invoice.enrol.num === report.num && invoice.enrol.year === report.year
     );
 
+    if (!matchingInvoice) {
+      return true;
+    }
+
     if (matchingInvoice) {
       // Check if the balance on the found invoice is zero
 
