@@ -161,6 +161,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                     studentNumber: studentId,
                   })
                 );
+                this.store.dispatch(
+                  currentEnrolementActions.fetchCurrentEnrolment({
+                    studentNumber: studentId,
+                  })
+                );
               })
             )
           )
