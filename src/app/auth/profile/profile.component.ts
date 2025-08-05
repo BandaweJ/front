@@ -48,12 +48,7 @@ export class ProfileComponent implements OnInit {
         if (id && role) {
           // Store the role for the helper functions
           this.currentUserRole = role;
-          console.log(
-            'Dispatching fetch user details for ID:',
-            id,
-            'and role:',
-            role
-          );
+
           // Dispatch the new action that includes the role
           this.store.dispatch(userDetailsActions.fetchUser({ id, role }));
         }
@@ -62,10 +57,13 @@ export class ProfileComponent implements OnInit {
     this.userDetails$.subscribe((details) => {
       if (this.currentUserRole === ROLES.teacher) {
         this.teacher = details as TeachersModel;
+        console.log('Teacher details:', this.teacher);
       } else if (this.currentUserRole === ROLES.student) {
         this.student = details as StudentsModel;
+        console.log('Student details:', this.student);
       } else if (this.currentUserRole === ROLES.parent) {
         this.parent = details as ParentsModel;
+        console.log('Parent details:', this.parent);
       }
     });
   }

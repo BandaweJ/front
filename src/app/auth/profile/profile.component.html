@@ -20,11 +20,7 @@
         <div class="profile-field">
           <label>ID Number:</label>
           <span>{{
-            isTeacher()
-            ? teacher.id
-            : isStudent()
-            ? student.idnumber
-            : parent.idnumber
+            teacher ? teacher.id : student ? student.studentNumber : parent.email
             }}</span>
         </div>
 
