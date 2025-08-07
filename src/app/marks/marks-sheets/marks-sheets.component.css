@@ -41,7 +41,7 @@ form {
 
 .report {
   width: 21cm;
-  height: 29.7cm; /* A4 Portrait */
+  height: 29.7cm;
   background-color: white;
   margin: 2rem auto;
   box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
@@ -62,61 +62,58 @@ form {
 }
 
 /* --- Screen View Styles for the PDF Report Container --- */
-/* This is what users see on screen before printing */
 .pdf-report-container {
-  /* A4 Landscape ratio in pixels for a good screen representation */
-  width: 1122px; /* ~29.7cm at 96 DPI */
+  max-width: 95vw;
   margin: 2rem auto;
-  padding: 1cm; /* Padding for the entire printable area on screen */
+  padding: 1cm;
   box-sizing: border-box;
   background-color: white;
   box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.2);
+  overflow-x: auto;
 }
 
-/* Screen View Header Styles */
 .pdf-header {
   text-align: center;
-  margin-bottom: 0.5cm; /* Space between header and table */
+  margin-bottom: 0.5cm;
   padding-bottom: 0.2cm;
   border-bottom: 1px solid #eee;
   font-family: "Arial", sans-serif;
   line-height: 1.1;
-  overflow: hidden; /* Prevent content from breaking out */
+  overflow: hidden;
 }
 
 .logo-title-wrapper {
   display: flex;
-  align-items: center; /* Vertically centers logo and title */
-  justify-content: center; /* Horizontally centers the combined block */
-  gap: 0.8cm; /* Space between the logo and the title */
+  align-items: center;
+  justify-content: center;
+  gap: 0.8cm;
   margin-bottom: 0.3cm;
   width: 100%;
   flex-shrink: 0;
 }
 
 .pdf-logo-wrapper {
-  width: 3cm; /* Wrapper provides the fixed space */
+  width: 3cm;
   height: 3cm;
   flex-shrink: 0;
-  display: flex; /* Use flex to center the img inside */
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* NEW: Style the img inside the wrapper */
 .pdf-logo-wrapper img {
-  max-width: 100%; /* Ensure image doesn't overflow its wrapper */
+  max-width: 100%;
   max-height: 100%;
-  object-fit: contain; /* Scales the image to fit its content box while maintaining its aspect ratio */
-  display: block; /* Remove any extra space below the image */
+  object-fit: contain;
+  display: block;
 }
 
 .pdf-title {
-  font-size: 16pt; /* Slightly larger for screen legibility */
+  font-size: 16pt;
   font-weight: bold;
   margin: 0;
   line-height: 1.1;
-  flex-grow: 1; /* Allow title to take remaining space */
+  flex-grow: 1;
   text-align: left;
 }
 
@@ -124,7 +121,7 @@ form {
   display: flex;
   justify-content: center;
   gap: 1.5cm;
-  font-size: 10pt; /* Slightly larger for screen legibility */
+  font-size: 10pt;
   margin-top: 0.2cm;
   white-space: nowrap;
   overflow: hidden;
@@ -138,24 +135,23 @@ form {
   text-align: center;
 }
 
-/* Screen View Mark Sheet Table Styles */
 .marksheet-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 9pt; /* Base font size for table cells on screen */
+  font-size: 9pt;
   background-color: white;
-  line-height: 1.4; /* Slightly more space for readability */
+  line-height: 1.4;
+  table-layout: fixed;
 }
 
 .marksheet-table th,
 .marksheet-table td {
   border: 1px solid #96d4d4;
-  padding: 4px 6px; /* Good padding for screen view */
+  padding: 4px 4px;
   text-align: center;
-  white-space: normal; /* Allow text to wrap by default */
-  word-wrap: break-word; /* Ensure long words break */
+  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Still useful for screen, if overflow hidden */
+  text-overflow: ellipsis;
 }
 
 .marksheet-table th {
@@ -168,9 +164,54 @@ form {
 }
 
 .marksheet-table .st-name {
-  width: 3cm; /* Consistent width for student name */
+  width: 15%;
   text-align: left;
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.marksheet-table th:nth-child(1),
+.marksheet-table td:nth-child(1) {
+  width: 3%;
+}
+
+.marksheet-table th:nth-child(2),
+.marksheet-table td:nth-child(2) {
+  width: 20%;
+}
+
+.marksheet-table th:nth-child(n + 3):nth-child(-n + 12),
+.marksheet-table td:nth-child(n + 3):nth-child(-n + 12) {
+  width: 6%;
+}
+
+.marksheet-table th:nth-child(13),
+.marksheet-table td:nth-child(13) {
+  width: 5%;
+}
+
+.marksheet-table th:nth-child(14),
+.marksheet-table td:nth-child(14),
+.marksheet-table th:nth-child(15),
+.marksheet-table td:nth-child(15),
+.marksheet-table th:nth-child(16),
+.marksheet-table td:nth-child(16),
+.marksheet-table th:nth-child(17),
+.marksheet-table td:nth-child(17),
+.marksheet-table th:nth-child(18),
+.marksheet-table td:nth-child(18) {
+  width: 4%;
+}
+
+.marksheet-table th:nth-child(19),
+.marksheet-table td:nth-child(19) {
+  width: 6%;
+}
+
+.marksheet-table th:last-child,
+.marksheet-table td:last-child {
+  width: 4%;
 }
 
 .red-text {
@@ -182,83 +223,74 @@ form {
 }
 
 /* --- @media print BLOCK: CRITICAL FOR NATIVE PRINTING --- */
-/* --- @media print BLOCK: CRITICAL FOR NATIVE PRINTING --- */
 @media print {
-  /* Force landscape orientation for the print job */
   @page {
-    size: A4 landscape; /* Specifies A4 and landscape */
-    margin: 1cm; /* Set consistent margins for the entire page */
+    size: A4 landscape;
+    margin: 1cm;
   }
 
-  /* Aggressive reset for print: Ensure content can flow */
   html,
   body {
     height: auto !important;
     overflow: visible !important;
   }
 
-  /* Hide everything not part of the report */
   body > *:not(.pdf-report-container) {
     display: none !important;
   }
 
-  /* Make the pdf-report-container the sole visible element for printing */
   .pdf-report-container {
-    width: 100%; /* Take full available width within the @page margins */
-    height: auto !important; /* CRITICAL: Ensure height is auto */
-    margin: 0; /* Remove any screen-specific margins */
-    padding: 0; /* Remove any screen-specific padding on the container */
-    box-shadow: none; /* No shadow in print */
-    background-color: white; /* Ensure white background */
-    overflow: visible !important; /* CRITICAL: Allow content to flow out */
-    /* IMPORTANT: Make sure 'page-break-after: always;' is NOT active here! */
-    /* Temporary debug borders */
-    border: 2px solid red !important; /* Retain for debugging */
+    width: 100%;
+    height: auto !important;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    background-color: white;
+    overflow: visible !important;
+    border: none !important;
   }
 
-  /* Print Header Styles - Optimized for space */
   .pdf-header {
     text-align: center;
-    margin-bottom: 0.5cm; /* Space between header and table */
-    padding: 0.2cm 0.5cm; /* Reduced padding for print */
-    border-bottom: 1px solid #ccc; /* Lighter border for print */
-    font-size: 8pt; /* Smaller overall font for header info */
+    margin-bottom: 0.5cm;
+    padding: 0.2cm 0.5cm;
+    border-bottom: 1px solid #ccc;
+    font-size: 8pt;
     line-height: 1.1;
-    page-break-after: avoid; /* Ensure header doesn't break from first row of table */
-    page-break-inside: avoid; /* Keep header content together */
-    /* Temporary debug borders */
-    border: 2px solid blue !important; /* Retain for debugging */
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    border: none !important;
   }
 
   .logo-title-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5cm; /* Reduced gap for print */
+    gap: 0.5cm;
     margin-bottom: 0.2cm;
     flex-shrink: 0;
-    height: 3cm; /* Explicit height for the logo/title wrapper */
-    overflow: hidden; /* Keep this for the logo wrapper if it's strictly a container */
+    height: auto;
+    overflow: hidden;
   }
 
   .pdf-logo-wrapper {
-    width: 3cm; /* Force 3cm width */
-    height: 3cm; /* Force 3cm height */
+    width: 2cm;
+    height: 2cm;
     flex-shrink: 0;
-    display: flex; /* Ensure img is centered for print too */
+    display: flex;
     justify-content: center;
     align-items: center;
   }
 
   .pdf-logo-wrapper img {
-    max-width: 100%; /* Ensure image fits within its wrapper */
+    max-width: 100%;
     max-height: 100%;
-    object-fit: contain; /* Maintain aspect ratio and fit inside */
+    object-fit: contain;
     display: block;
   }
 
   .pdf-title {
-    font-size: 14pt; /* Adjusted title font size for print */
+    font-size: 12pt;
     font-weight: bold;
     margin: 0;
     line-height: 1.1;
@@ -269,100 +301,108 @@ form {
   .report-info {
     display: flex;
     justify-content: center;
-    gap: 1cm; /* Reduced gap for info line in print */
-    font-size: 8pt; /* Smaller font for info line in print */
+    gap: 1cm;
+    font-size: 7pt;
     margin-top: 0.1cm;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* Print Table Styles - Optimized for many rows and legibility */
   .marksheet-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 8pt; /* Main table text size for print */
-    line-height: 1.2; /* Tighter line spacing for more rows */
-    table-layout: auto; /* Changed to auto for testing, allows natural column width */
-    height: auto !important; /* CRITICAL: Ensure table height is auto */
-    /* IMPORTANT: Remove any 'overflow' property from the table itself! */
-    overflow: visible !important; /* CRITICAL: Allow table to paginate */
-    /* Temporary debug borders */
-    border: 2px solid green !important; /* Retain for debugging */
+    font-size: 7pt;
+    line-height: 1.2;
+    table-layout: fixed;
+    height: auto !important;
+    overflow: visible !important;
+    border: 1px solid #ccc;
   }
 
   .marksheet-table thead {
-    display: table-header-group; /* CRITICAL: Repeat table header on each new page */
+    display: table-header-group;
     page-break-inside: avoid;
   }
 
   .marksheet-table tbody {
-    display: table-row-group; /* Treat tbody as a group of rows */
+    display: table-row-group;
   }
 
   .marksheet-table tbody tr {
-    page-break-inside: avoid !important; /* CRITICAL: Prevent rows from splitting across pages */
-    page-break-after: auto !important; /* Allow page breaks between rows */
-    height: auto !important; /* Ensure row height is dynamic */
-    /* Temporary debug borders */
-    /* border: 1px solid purple !important; */ /* You can add this back if needed to debug individual rows */
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+    height: auto !important;
   }
 
   .marksheet-table th,
   .marksheet-table td {
-    border: 1px solid #96d4d4;
-    padding: 2px 4px; /* Tighten cell padding for more rows per page */
+    border: 1px solid #ccc;
+    padding: 2px 3px;
     text-align: center;
-    word-wrap: break-word; /* Allow long words to break within cells */
-    white-space: normal; /* Allow text to wrap in cells generally */
-    /* IMPORTANT: Ensure no overflow properties on cells */
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .marksheet-table th {
     font-weight: bold;
-    background-color: #f8f8f8; /* Very light background for print headers */
+    background-color: #eee;
   }
 
   .marksheet-table tr:nth-child(even) {
-    background-color: #f2fafa; /* Very light alternate row color for print */
+    background-color: #f9f9f9;
   }
 
   .marksheet-table .st-name {
-    width: 20%; /* Give ample space for student names */
+    width: 20%;
     text-align: left;
     white-space: normal;
   }
 
-  /* Explicit column widths for print (adjust based on your subject count) */
-  .marksheet-table th:nth-child(1) {
+  .marksheet-table th:nth-child(1),
+  .marksheet-table td:nth-child(1) {
     width: 3%;
-  } /* # */
-  .marksheet-table th:nth-child(2) {
+  }
+
+  .marksheet-table th:nth-child(2),
+  .marksheet-table td:nth-child(2) {
     width: 18%;
-  } /* Name (st-name) */
-  .marksheet-table th:nth-child(n + 3):nth-child(-n + 12) {
-    width: 4.5%;
-  } /* Subject columns (adjust range and width as needed) */
-  .marksheet-table th:nth-child(13) {
-    width: 6%;
-  } /* Passed */
-  .marksheet-table th:nth-child(14),
-  .marksheet-table th:nth-child(15) {
-    width: 4%;
-  } /* A*s, As */
-  .marksheet-table th:nth-child(16),
-  .marksheet-table th:nth-child(17) {
-    width: 4%;
-  } /* Bs, Cs */
-  .marksheet-table th:nth-child(18) {
-    width: 4%;
-  } /* Ds */
-  .marksheet-table th:nth-child(19) {
-    width: 7%;
-  } /* Av Mark */
-  .marksheet-table th:last-child {
+  }
+
+  .marksheet-table th:nth-child(n + 3):nth-child(-n + 12),
+  .marksheet-table td:nth-child(n + 3):nth-child(-n + 12) {
     width: 5%;
-  } /* Pstn */
+  }
+
+  .marksheet-table th:nth-child(13),
+  .marksheet-table td:nth-child(13) {
+    width: 4%;
+  }
+
+  .marksheet-table th:nth-child(14),
+  .marksheet-table td:nth-child(14),
+  .marksheet-table th:nth-child(15),
+  .marksheet-table td:nth-child(15),
+  .marksheet-table th:nth-child(16),
+  .marksheet-table td:nth-child(16),
+  .marksheet-table th:nth-child(17),
+  .marksheet-table td:nth-child(17),
+  .marksheet-table th:nth-child(18),
+  .marksheet-table td:nth-child(18) {
+    width: 3%;
+  }
+
+  .marksheet-table th:nth-child(19),
+  .marksheet-table td:nth-child(19) {
+    width: 6%;
+  }
+
+  .marksheet-table th:last-child,
+  .marksheet-table td:last-child {
+    width: 4%;
+  }
 
   .select-marksheet-form {
     display: none;
