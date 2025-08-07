@@ -19,9 +19,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { SubjectsModel } from '../models/subjects.model';
 import { SubjectInfoModel } from 'src/app/reports/models/subject-info.model';
-// REMOVED: import * as jspdf from 'jspdf';
-// REMOVED: import html2canvas from 'html2canvas';
 import { ExamType } from '../models/examtype.enum';
+
+// ADDED: Import jsPDF and html2canvas
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-marks-sheets',
@@ -29,8 +31,6 @@ import { ExamType } from '../models/examtype.enum';
   styleUrls: ['./marks-sheets.component.css'],
 })
 export class MarksSheetsComponent implements OnInit {
-  // These ViewChild elements are still useful if you need to access them for other non-PDF-generation reasons,
-  // otherwise, you could remove them if they are exclusively for html2canvas/jsPDF
   @ViewChild('pdfReportContainer') pdfReportContainer!: ElementRef;
   @ViewChild('pdfHeader') pdfHeader!: ElementRef;
   @ViewChild('marksheetTable') marksheetTable!: ElementRef;
@@ -133,10 +133,56 @@ export class MarksSheetsComponent implements OnInit {
     );
   }
 
-  // RENAMED from download() to printDocument()
-  // REMOVED all html2canvas and jsPDF logic
+  // You can keep the printDocument() as a fallback for users who prefer it.
   printDocument(): void {
     console.log('Print button clicked. Triggering browser print dialog.');
-    window.print(); // This is the only line needed now!
+    window.print();
+  }
+
+  // ADDED: The new downloadPDF method
+  downloadPDF(): void {
+    if (!this.pdfReportContainer || !this.reports.length) {
+      console.error('Report container or data not available.');
+      return;
+    }
+
+    const data = this.pdfReportContainer.nativeElement;
+    const originalWidth = data.offsetWidth;
+    const originalHeight = data.offsetHeight;
+
+    // Use html2canvas to convert the HTML div to a canvas image
+    html2canvas(data, {
+      scale: 2, // Increase scale for better resolution
+      useCORS: true,
+      allowTaint: true,
+    }).then((canvas) => {
+      const contentDataURL = canvas.toDataURL('image/jpeg');
+
+      // Create a new jsPDF instance (A4 landscape)
+      const pdf = new jsPDF('l', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let position = 0;
+
+      pdf.addImage(contentDataURL, 'JPEG', 0, position, imgWidth, imgHeight);
+
+      // Check if the content is longer than one page and add more pages if needed
+      let heightLeft = imgHeight;
+      heightLeft -= pdfHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(contentDataURL, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      // Generate a file name based on the report data
+      const fileName = `${this.reports[0].name}_Marksheet_${this.reports[0].num}_${this.reports[0].year}.pdf`;
+      pdf.save(fileName);
+    });
   }
 }

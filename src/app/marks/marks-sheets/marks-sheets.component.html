@@ -30,14 +30,15 @@
       </div>
     </form>
 
-
     <div class="btns">
       <button mat-flat-button color="primary" [disabled]="markSheetForm.invalid" (click)="fetchMarkSheet()">
         Create
       </button>
-      <button mat-mini-fab aria-label="Click to print marksheet" *ngIf="reports.length" (click)="printDocument()">
-        <mat-icon>print</mat-icon>
+
+      <button mat-mini-fab aria-label="Click to download marksheet" *ngIf="reports.length" (click)="downloadPDF()">
+        <mat-icon>download</mat-icon>
       </button>
+
     </div>
   </div>
   <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
