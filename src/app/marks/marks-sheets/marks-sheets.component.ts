@@ -59,9 +59,12 @@ export class MarksSheetsComponent implements OnInit {
     this.terms$ = this.store.select(selectTerms);
     this.isLoading$ = this.store.select(selectIsLoading);
 
+    // Your existing code to process reports
     this.store.select(selectMarkSheet).subscribe((reps) => {
       const modifiedReports: ReportsModel[] = [];
       const subjectsArr: SubjectsModel[] = [];
+
+      // First, find all unique subjects across all reports
       reps.forEach((rep) => {
         rep.report.subjectsTable.forEach((subj) => {
           const code = subj.subjectCode;
@@ -76,21 +79,24 @@ export class MarksSheetsComponent implements OnInit {
       subjectsArr.sort((a, b) => +a.code - +b.code);
       this.subjects = [...subjectsArr];
 
+      // Second, pad the subjectsTable for each report to a consistent length
       reps.map((rep) => {
-        const newSubjectsTable = Array<SubjectInfoModel>(this.subjects.length);
+        const newSubjectsTable = Array<SubjectInfoModel>(this.subjects.length); // Initialize with a fixed length
         rep.report.subjectsTable.map((subjInfo) => {
           const code = subjInfo.subjectCode;
           const name = subjInfo.subjectName;
           const subjPosInSubjsArr = this.subjects.findIndex(
             (sbj) => sbj.code === code && sbj.name === name
           );
+          // Place subject info at its correct, fixed position
           newSubjectsTable[subjPosInSubjsArr] = subjInfo;
         });
+
         const newReport: ReportsModel = {
           ...rep,
           report: {
             ...rep.report,
-            subjectsTable: newSubjectsTable,
+            subjectsTable: newSubjectsTable, // All tables now have the same length
           },
         };
         modifiedReports.push(newReport);

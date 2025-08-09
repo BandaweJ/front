@@ -408,3 +408,9 @@ form {
     display: none;
   }
 }
+
+/* In your marks-sheets.component.css */
+.marksheet-table td {
+  /* ... other styles ... */
+  empty-cells: show; /* This forces empty cells to display */
+}
