@@ -93,9 +93,9 @@
         </td>
         <td>{{ rep.report.subjectsPassed }}</td>
         <td *ngFor="let gradeNum of rep.report.symbols">
-          {{ gradeNum }}
+          {{ gradeNum ? gradeNum : '-' }}
         </td>
-        <td>{{ rep.report.percentageAverge ? rep.report.percentageAverge.toFixed(1) : '' }}</td>
+        <td>{{ rep.report.percentageAverge ? rep.report.percentageAverge.toFixed(1) : '-' }}</td>
         <td>{{ rep.report.classPosition }}</td>
       </tr>
     </tbody>
