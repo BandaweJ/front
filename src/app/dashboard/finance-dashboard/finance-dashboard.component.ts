@@ -1,10 +1,4 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  ViewChild,
-  AfterViewInit,
-} from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -27,7 +21,6 @@ import {
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 
-// Import the Ng2-charts types and directive
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -36,9 +29,7 @@ import { BaseChartDirective } from 'ng2-charts';
   templateUrl: './finance-dashboard.component.html',
   styleUrls: ['./finance-dashboard.component.css'],
 })
-export class FinanceDashboardComponent
-  implements OnInit, OnDestroy, AfterViewInit
-{
+export class FinanceDashboardComponent implements OnInit, OnDestroy {
   isSearchBarVisible = false;
   private ngUnsubscribe = new Subject<void>();
 
@@ -51,7 +42,6 @@ export class FinanceDashboardComponent
   @ViewChild('invoicesPaginator') invoicesPaginator!: MatPaginator;
   @ViewChild('paymentsPaginator') paymentsPaginator!: MatPaginator;
 
-  // ViewChild to get a reference to the chart component
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 
   totalInvoices$!: Observable<number>;
@@ -177,6 +167,14 @@ export class FinanceDashboardComponent
         this.paymentsDataSource.data = data.filter(
           (item) => item.type === 'Payment'
         );
+
+        // Correctly set the paginator here, after the data is available
+        if (this.invoicesPaginator) {
+          this.invoicesDataSource.paginator = this.invoicesPaginator;
+        }
+        if (this.paymentsPaginator) {
+          this.paymentsDataSource.paginator = this.paymentsPaginator;
+        }
       }),
       takeUntil(this.ngUnsubscribe)
     );
@@ -203,16 +201,11 @@ export class FinanceDashboardComponent
     ]).pipe(map(([invoices, payments]) => invoices - payments));
   }
 
-  ngAfterViewInit(): void {
-    // Connect the paginator to the data sources after the view is initialized
-    this.invoicesDataSource.paginator = this.invoicesPaginator;
-    this.paymentsDataSource.paginator = this.paymentsPaginator;
-
-    // Explicitly update the chart to ensure it renders correctly
-    if (this.chart) {
-      this.chart.update();
-    }
-  }
+  // The ngAfterViewInit hook is no longer needed for paginator logic
+  // You can still use it for the chart update if necessary, but the subscription
+  // might already handle it. I will remove the empty method for clarity.
+  // ngAfterViewInit(): void {
+  // }
 
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
