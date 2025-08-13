@@ -528,7 +528,7 @@ export const getFeesCollectionReport = (filters: FeesCollectionReportFilters) =>
 // === NEW: Selector to combine Invoices and Receipts into FinanceDataModel[] ===
 export const selectAllCombinedFinanceData = createSelector(
   selectAllInvoices,
-  selectAllNonVoidedReceipts, // --- MODIFICATION: Use selectAllNonVoidedReceipts ---
+  selectAllNonVoidedReceipts,
   (invoices: InvoiceModel[], receipts: ReceiptModel[]): FinanceDataModel[] => {
     const combined: FinanceDataModel[] = [];
 
@@ -558,11 +558,9 @@ export const selectAllCombinedFinanceData = createSelector(
       });
     }
 
-    // Map Receipts to FinanceDataModel
+    // Map Receipts to FinanceDataModel (now including all non-voided receipts)
     if (receipts) {
-      // These are already non-voided
       receipts.forEach((receipt) => {
-        // Removed the explicit `if (receipt.approved)` check here
         combined.push({
           id: receipt.receiptNumber,
           transactionDate: receipt.paymentDate,
@@ -576,7 +574,7 @@ export const selectAllCombinedFinanceData = createSelector(
           receiptNumber: receipt.receiptNumber,
           paymentMethod: receipt.paymentMethod,
           receiptAmountPaid: receipt.amountPaid,
-          receiptApproved: receipt.approved, // Still include this property in the model, even if always true
+          receiptApproved: receipt.approved,
           receiptServedBy: receipt.servedBy,
         });
       });

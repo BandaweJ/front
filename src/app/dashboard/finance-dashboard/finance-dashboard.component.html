@@ -37,7 +37,7 @@
         <mat-icon class="card-icon">receipt_long</mat-icon>
         <div class="summary-text">
           <div class="card-label">Total Invoices</div>
-          <div class="card-value">{{ totalInvoices$ | async | currency:'ZWL' }}</div>
+          <div class="card-value">{{ totalInvoices$ | async | currency:'USD' }}</div>
         </div>
       </div>
     </mat-card>
@@ -47,7 +47,7 @@
         <mat-icon class="card-icon">payments</mat-icon>
         <div class="summary-text">
           <div class="card-label">Total Payments</div>
-          <div class="card-value">{{ totalPayments$ | async | currency:'ZWL' }}</div>
+          <div class="card-value">{{ totalPayments$ | async | currency:'USD' }}</div>
         </div>
       </div>
     </mat-card>
@@ -57,7 +57,7 @@
         <mat-icon class="card-icon">account_balance_wallet</mat-icon>
         <div class="summary-text">
           <div class="card-label">Outstanding Balance</div>
-          <div class="card-value">{{ totalBalance$ | async | currency:'ZWL' }}</div>
+          <div class="card-value">{{ totalBalance$ | async | currency:'USD' }}</div>
         </div>
       </div>
     </mat-card>
@@ -99,7 +99,7 @@
             <ng-container matColumnDef="amount">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
               <td mat-cell *matCellDef="let element" class="amount-cell amount-invoice">
-                {{ element.amount | currency:'ZWL' }}
+                {{ element.amount | currency:'USD' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="status">
