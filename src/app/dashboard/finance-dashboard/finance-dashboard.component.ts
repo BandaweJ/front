@@ -1,6 +1,13 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, map, Observable, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  map,
+  Observable,
+  Subject,
+  tap,
+} from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { FinanceDataModel } from '../../finance/models/finance-data.model';
@@ -22,24 +29,17 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
   isSearchBarVisible = false;
   private ngUnsubscribe = new Subject<void>();
 
-  // Use a BehaviorSubject for the filters so it always has a value
   private filterSubject = new BehaviorSubject<FinanceFilter>({});
   private sortSubject = new BehaviorSubject<string>('dateDesc');
 
-  // Combined observable for filtered and sorted data
-  filteredAndSortedFinancialData$!: Observable<FinanceDataModel[]>;
-  currentSort$ = this.sortSubject.asObservable();
-
-  // Data sources for the separate tables
   invoicesDataSource = new MatTableDataSource<FinanceDataModel>([]);
   paymentsDataSource = new MatTableDataSource<FinanceDataModel>([]);
 
-  // Summary data observables
   totalInvoices$!: Observable<number>;
   totalPayments$!: Observable<number>;
   totalBalance$!: Observable<number>;
 
-  // Define your sorting options
+  currentSort$ = this.sortSubject.asObservable();
   sortOptions = [
     { label: 'Date (Newest)', value: 'dateDesc' },
     { label: 'Date (Oldest)', value: 'dateAsc' },
@@ -56,7 +56,7 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
 
     const allData$ = this.store.pipe(select(selectAllCombinedFinanceData));
 
-    this.filteredAndSortedFinancialData$ = combineLatest([
+    const filteredAndSortedData$ = combineLatest([
       allData$,
       this.filterSubject.asObservable(),
       this.sortSubject.asObservable(),
@@ -65,21 +65,22 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
         let filteredData = this.applyFilters(data, filters);
         return this.applySorting(filteredData, sort);
       }),
+      // Use tap to update the MatTableDataSource instances
+      tap((data) => {
+        this.invoicesDataSource.data = data.filter(
+          (item) => item.type === 'Invoice'
+        );
+        this.paymentsDataSource.data = data.filter(
+          (item) => item.type === 'Payment'
+        );
+      }),
       takeUntil(this.ngUnsubscribe)
     );
 
-    // Subscribe to the filtered data stream to update summary cards and tables
-    this.filteredAndSortedFinancialData$.subscribe((data) => {
-      // Update data sources for separate tables
-      this.invoicesDataSource.data = data.filter(
-        (item) => item.type === 'Invoice'
-      );
-      this.paymentsDataSource.data = data.filter(
-        (item) => item.type === 'Payment'
-      );
-    });
+    // This subscription is now necessary to trigger the observable stream
+    filteredAndSortedData$.subscribe();
 
-    // Calculate summary data from the main data stream
+    // Summary calculations remain the same
     this.totalInvoices$ = allData$.pipe(
       map((data) =>
         data
@@ -143,21 +144,17 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
       return data;
     }
     return data.filter((item) => {
-      if (filters.transactionType && item.type !== filters.transactionType) {
+      if (filters.transactionType && item.type !== filters.transactionType)
         return false;
-      }
       if (
         filters.startDate &&
         new Date(item.date) < new Date(filters.startDate)
-      ) {
+      )
         return false;
-      }
-      if (filters.endDate && new Date(item.date) > new Date(filters.endDate)) {
+      if (filters.endDate && new Date(item.date) > new Date(filters.endDate))
         return false;
-      }
       if (filters.minAmount && item.amount < filters.minAmount) return false;
       if (filters.maxAmount && item.amount > filters.maxAmount) return false;
-
       return true;
     });
   }
