@@ -21,9 +21,9 @@ import { SubjectsModel } from '../models/subjects.model';
 import { SubjectInfoModel } from 'src/app/reports/models/subject-info.model';
 import { ExamType } from '../models/examtype.enum';
 
-// ADDED: Import jsPDF and html2canvas
-import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-marks-sheets',
@@ -147,48 +147,86 @@ export class MarksSheetsComponent implements OnInit {
 
   // ADDED: The new downloadPDF method
   downloadPDF(): void {
-    if (!this.pdfReportContainer || !this.reports.length) {
-      console.error('Report container or data not available.');
+    if (!this.marksheetTable || !this.reports.length) {
+      console.error('Marksheet table or data not available.');
       return;
     }
 
-    const data = this.pdfReportContainer.nativeElement;
-    const originalWidth = data.offsetWidth;
-    const originalHeight = data.offsetHeight;
+    const doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape mode
+    const header = this.pdfHeader.nativeElement;
+    const table = this.marksheetTable.nativeElement;
 
-    // Use html2canvas to convert the HTML div to a canvas image
-    html2canvas(data, {
-      scale: 2, // Increase scale for better resolution
-      useCORS: true,
-      allowTaint: true,
-    }).then((canvas) => {
-      const contentDataURL = canvas.toDataURL('image/jpeg');
+    // First, add the header content using html2canvas
+    html2canvas(header, { scale: 2 }).then((canvas) => {
+      const headerImgData = canvas.toDataURL('image/png');
+      const headerHeight =
+        (canvas.height * doc.internal.pageSize.getWidth()) / canvas.width;
+      doc.addImage(
+        headerImgData,
+        'PNG',
+        0,
+        0,
+        doc.internal.pageSize.getWidth(),
+        headerHeight
+      );
 
-      // Create a new jsPDF instance (A4 landscape)
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      // Then, add the table using jspdf-autotable
+      (doc as any).autoTable({
+        html: table,
+        startY: headerHeight + 5, // Start table below the header with some padding
+        theme: 'grid',
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          halign: 'center',
+          valign: 'middle',
+          overflow: 'linebreak',
+        },
+        headStyles: {
+          fillColor: [240, 240, 240],
+          textColor: 50,
+          fontStyle: 'bold',
+        },
+        bodyStyles: {
+          textColor: 50,
+        },
+        rowPageBreak: 'avoid', // This is the key setting to prevent splitting rows
+        didDrawPage: (data: any) => {
+          // If you need to add the header to every page, you can do it here
+          // This ensures the header is on the first page and all subsequent pages if the table is long
+          if (data.pageNumber > 1) {
+            doc.addImage(
+              headerImgData,
+              'PNG',
+              0,
+              0,
+              doc.internal.pageSize.getWidth(),
+              headerHeight
+            );
+            (doc as any).autoTable({
+              head: data.head,
+              startY: headerHeight + 5, // Repeat the header on the new page
+              theme: 'grid',
+              styles: {
+                fontSize: 7,
+                cellPadding: 2,
+                halign: 'center',
+                valign: 'middle',
+                overflow: 'linebreak',
+              },
+              headStyles: {
+                fillColor: [240, 240, 240],
+                textColor: 50,
+                fontStyle: 'bold',
+              },
+            });
+          }
+        },
+      });
 
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let position = 0;
-
-      pdf.addImage(contentDataURL, 'JPEG', 0, position, imgWidth, imgHeight);
-
-      // Check if the content is longer than one page and add more pages if needed
-      let heightLeft = imgHeight;
-      heightLeft -= pdfHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(contentDataURL, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
-      }
-
-      // Generate a file name based on the report data
+      // Save the PDF
       const fileName = `${this.reports[0].name}_Marksheet_${this.reports[0].num}_${this.reports[0].year}.pdf`;
-      pdf.save(fileName);
+      doc.save(fileName);
     });
   }
 }
