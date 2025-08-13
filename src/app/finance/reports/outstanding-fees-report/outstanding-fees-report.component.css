@@ -1,0 +1,258 @@
+.outstanding-fees-card {
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #ffffff;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  align-items: flex-end; /* Align items to the bottom */
+}
+
+.filter-form mat-form-field {
+  flex: 1 1 250px; /* Allows fields to grow/shrink but maintain a base width */
+  min-width: 180px; /* Minimum width for responsiveness */
+}
+
+.filter-actions {
+  margin-left: auto; /* Pushes buttons to the right */
+  display: flex;
+  gap: 10px;
+}
+
+.total-outstanding {
+  text-align: center;
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #d32f2f; /* A strong red for outstanding amounts */
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f2f2f2;
+}
+
+mat-divider {
+  margin: 30px 0;
+  border-color: #e0e0e0;
+}
+
+h4 {
+  color: #555;
+  margin-bottom: 15px;
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 5px;
+  font-size: 1.3em;
+}
+
+.report-section {
+  display: flex;
+  flex-wrap: wrap; /* Allows items to wrap to the next line */
+  gap: 20px; /* Space between flex items */
+  margin-bottom: 30px;
+  justify-content: space-around; /* Distributes space evenly */
+  align-items: flex-start; /* Align items to the top of the container */
+}
+
+.chart-container {
+  flex: 1 1 45%; /* Allows chart to take ~45% width, can grow/shrink */
+  min-width: 350px; /* Minimum width to prevent squishing */
+  height: 350px; /* Fixed height for consistency */
+  display: flex; /* For centering content within */
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background-color: #fcfcfc;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle inner shadow */
+}
+
+.table-container {
+  flex: 1 1 45%; /* Allows table to take ~45% width */
+  min-width: 350px; /* Minimum width */
+  overflow-x: auto; /* Enables horizontal scroll for narrow screens */
+  background-color: #fcfcfc;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.full-width-table-container {
+  flex: 1 1 100%; /* For tables that should span the full width of the report-section */
+  overflow-x: auto;
+}
+
+/* This is the key container for the student details table */
+.student-details-table-container {
+  width: 100%; /* Ensures it takes full width of parent */
+  overflow-x: auto; /* Enables horizontal scroll for narrow screens (on screen) */
+  margin-top: 20px;
+  background-color: #fcfcfc;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* General table styling (for both mat-table and plain HTML table) */
+.full-width-table {
+  width: 100%; /* Table inside container takes full width */
+  border-collapse: collapse; /* For cleaner table borders */
+}
+
+/* Common header cell styling (for both mat-header-cell and plain th) */
+.mat-header-cell,
+.table-header-cell {
+  background-color: #f5f5f5;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.87);
+  padding: 12px 18px; /* Standard Material padding for cells */
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12); /* Mimic Material header border */
+}
+
+/* Common row and cell styling (for both mat-row/mat-cell and plain tr/td) */
+.mat-row,
+.table-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12); /* Mimic Material row border */
+}
+
+.mat-cell,
+.table-cell {
+  padding: 12px 18px; /* Standard Material padding for cells */
+  text-align: left;
+  /* Optional: border-right for vertical lines between cells if desired */
+  /* border-right: 1px solid rgba(0, 0, 0, 0.12); */
+}
+
+.mat-row:nth-child(even),
+.table-row:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Remove border-right from the last cell in a row */
+/* .mat-cell:last-child,
+.table-cell:last-child {
+  border-right: none;
+} */
+
+/* Common states for feedback */
+.loading-state,
+.error-state,
+.no-data-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.error-state {
+  color: #f44336; /* Red for error messages */
+}
+
+.error-details {
+  font-size: 0.8em;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: pre-wrap; /* Preserve whitespace and line breaks */
+  word-break: break-all; /* Break long words */
+  max-width: 80%; /* Limit width to prevent overflow */
+}
+
+.loading-state mat-spinner,
+.error-state mat-icon,
+.no-data-state mat-icon {
+  margin-bottom: 15px;
+  font-size: 48px; /* Larger icons */
+  width: 48px;
+  height: 48px;
+}
+
+.no-data-state.small-text {
+  font-size: 0.9em;
+  padding: 10px 0;
+  margin-top: 10px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Container for the filters form */
+form {
+  display: flex; /* Enables Flexbox for the form's children */
+  flex-wrap: wrap; /* Allows items to wrap to the next line if space is limited */
+  gap: 16px; /* Provides consistent spacing between filter fields and the button */
+  margin-bottom: 20px; /* Space below the filter section */
+  padding: 16px; /* Padding inside the filter box */
+  border: 1px solid #e0e0e0; /* Subtle border for visual separation */
+  border-radius: 8px; /* Rounded corners for the filter box */
+  background-color: #f9f9f9; /* Light background for the filter section */
+  align-items: flex-end; /* Aligns items to the bottom, useful if input fields have different label heights */
+}
+
+/* Specific styling for the search query mat-form-field */
+/* This targets the first mat-form-field (which is your search box) */
+.filter-field:first-of-type {
+  flex-grow: 2; /* Allows the search box to take up more horizontal space than other filters */
+  min-width: 250px; /* Ensures the search box has a reasonable minimum width */
+  /* On larger screens, this will make it span wider. On smaller, it will wrap. */
+}
+
+/* General styling for all filter fields (mat-form-field) */
+.filter-field {
+  flex-grow: 1; /* Allows other filter fields to grow and share available space */
+  max-width: 280px; /* Prevents individual filter fields from becoming excessively wide */
+  min-width: 180px; /* Ensures they don't become too narrow on intermediate screen sizes */
+}
+
+/* Styling for the Clear Filters button */
+/* Moved into .filter-actions-print */
+
+.filter-actions-print {
+  margin-left: auto; /* Pushes buttons to the right */
+  display: flex;
+  gap: 10px;
+  align-items: flex-end; /* Align buttons to the bottom */
+}
+
+/* Responsive adjustments for smaller screens (e.g., mobile) */
+@media (max-width: 768px) {
+  .filter-field {
+    min-width: unset; /* Remove the minimum width constraint */
+    width: 100%; /* Make each filter field take full width */
+    max-width: 100%; /* Ensure it doesn't exceed full width */
+  }
+
+  form button {
+    width: 100%; /* Make the button also take full width */
+    margin-left: 0; /* Remove auto margin on small screens */
+  }
+  .filter-actions-print {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between; /* Spread buttons out if they take full width */
+  }
+}
+
+/* Optional: Basic styling for your tables for better readability */
+/* These rules are for any generic table, including the converted one */
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+/* Style for the chart container if you have it */
+.chart-container {
+  display: flex;
+  justify-content: center; /* Center the chart */
+  margin-top: 20px;
+  margin-bottom: 20px;
+}

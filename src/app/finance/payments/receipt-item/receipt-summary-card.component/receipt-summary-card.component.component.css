@@ -1,0 +1,119 @@
+/* src/app/receipt-summary-card/receipt-summary-card.component.css */
+.receipt-summary-card {
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease-in-out, opacity 0.3s ease-in-out; /* Add opacity transition */
+  display: flex;
+  flex-direction: column;
+  position: relative; /* Needed for absolute positioning of void-overlay */
+  overflow: hidden; /* To clip the rotated overlay */
+}
+
+.receipt-summary-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* NEW: Styles for voided cards */
+.voided-card {
+  opacity: 0.6; /* Dim the card */
+  cursor: not-allowed; /* Change cursor to indicate it's not clickable */
+  box-shadow: none; /* Remove shadow on hover for voided cards */
+}
+
+.voided-card:hover {
+  box-shadow: none; /* Ensure no shadow on hover */
+}
+
+/* NEW: Strikethrough style */
+.strikethrough {
+  text-decoration: line-through;
+  color: #888; /* Slightly gray out struck-through text */
+}
+
+/* NEW: Void overlay text */
+.void-overlay {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%) rotate(-25deg); /* Angle the text */
+  color: #f44336; /* Red color */
+  font-size: 1.5em; /* Large text */
+  font-weight: bold;
+  text-align: center;
+  padding: 5px 0;
+  border: 2px dashed #f44336;
+  z-index: 1; /* Above other content */
+  pointer-events: none; /* Crucial: allows clicks on elements underneath if enabled */
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.7
+  ); /* Slightly transparent white background */
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* NEW: Specific style for the voided status icon */
+.status-voided {
+  color: #f44336; /* Red for voided */
+}
+
+/* Existing styles below */
+.receipt-summary-card mat-card-header {
+  padding-bottom: 0;
+  align-items: flex-start;
+}
+
+.receipt-summary-card .amount-display {
+  font-size: 1.8em;
+  font-weight: 600;
+  color: var(--mdc-theme-primary);
+  line-height: 1;
+}
+
+.receipt-summary-card mat-card-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8em;
+  margin-top: 4px;
+}
+
+.receipt-summary-card mat-card-content {
+  padding-top: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.receipt-summary-card mat-card-content > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+}
+
+.receipt-summary-card mat-card-content mat-icon {
+  font-size: 1.1em;
+  height: 1.1em;
+  width: 1.1em;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.status-icon {
+  font-size: 1.2em !important;
+  height: 1.2em !important;
+  width: 1.2em !important;
+  vertical-align: middle;
+}
+
+.status-pending {
+  color: var(--mdc-theme-warn);
+}
+
+.status-approved {
+  color: var(--mdc-theme-primary);
+}

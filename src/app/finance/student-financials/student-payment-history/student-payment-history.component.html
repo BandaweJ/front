@@ -1,0 +1,56 @@
+<div class="payment-history-container">
+  <mat-card class="payment-history-card">
+    <mat-card-header>
+      <mat-card-title>Payment History</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="loadingPaymentHistory$ | async" class="loading-state">
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Loading payment history...</p>
+      </div>
+
+      <div *ngIf="errorPaymentHistory$ | async" class="error-state">
+        <mat-icon color="warn">error</mat-icon>
+        <p>Error loading payment history. Please try again later.</p>
+        <p class="error-details">{{ errorPaymentHistory$ | async | json }}</p>
+      </div>
+
+      <div *ngIf="(paymentHistory$ | async) as historyItems; else noPaymentHistoryFound">
+        <div *ngIf="historyItems.length > 0; else noPaymentHistoryFound">
+          <mat-list class="payment-history-list">
+            <h4 mat-subheader>Recent Transactions</h4>
+            <mat-list-item *ngFor="let item of historyItems">
+              <mat-icon matListItemIcon [color]="item.direction === 'in' ? 'primary' : 'warn'">
+                {{ getTransactionIcon(item.type) }}
+              </mat-icon>
+              <div matListItemTitle>
+                <ng-container *ngIf="item.type === 'Allocation'">
+                  Payment of {{ item.amount | currency:'USD':'symbol':'1.2-2' }} {{ item.description }}
+                </ng-container>
+                <ng-container *ngIf="item.type !== 'Allocation'">
+                  {{ item.type }} - {{ item.description }}
+                </ng-container>
+                <span *ngIf="item.relatedDocNumber"> (Doc: {{ item.relatedDocNumber }})</span>
+              </div>
+              <div matListItemLine>
+                Date: {{ item.date | date:'mediumDate' }}
+                <span *ngIf="item.paymentMethod"> | Method: {{ item.paymentMethod }}</span>
+                <span *ngIf="item.status"> | Status: {{ item.status }}</span>
+              </div>
+              <div matListItemLine class="payment-amount" [class]="getTransactionDirectionClass(item.direction)">
+                {{ item.amount | currency:'USD':'symbol':'1.2-2' }}
+              </div>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+          </mat-list>
+        </div>
+      </div>
+      <ng-template #noPaymentHistoryFound>
+        <div class="no-data-state">
+          <mat-icon>info</mat-icon>
+          <p>No payment history found for this student.</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</div>

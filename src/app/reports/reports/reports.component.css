@@ -1,0 +1,95 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates&family=Tektur&display=swap");
+
+.reports-main-card {
+  margin: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-btns {
+  display: flex; /* Makes the container a flex container */
+  flex-wrap: wrap; /* Allows items to wrap to the next line on smaller screens */
+  gap: 20px; /* Adjust this value to your desired spacing */
+  align-items: flex-end; /* Vertically aligns items to the bottom, useful if field heights vary */
+  /* Add any other styling for this container as needed */
+}
+
+.top-btns mat-form-field {
+  flex-grow: 1; /* Allows each form field to grow and take available space */
+  min-width: 150px; /* Prevents fields from becoming too narrow */
+}
+
+.select-reports-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 20px;
+  gap: 15px; /* This applies to direct children of select-reports-form */
+}
+
+.select-reports-form form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; /* This applies to direct children of the form */
+  flex-grow: 1;
+  align-items: flex-end; /* Aligns items at the bottom if they have different heights */
+}
+
+.select-reports-form mat-form-field {
+  flex-grow: 1; /* Allows fields to grow and take available space */
+  min-width: 150px; /* Ensures fields don't get too small */
+  /* No need for explicit margin-right if gap is working */
+}
+
+.fetch-list-btn {
+  margin-left: 10px; /* Keep a bit of space from the last input field */
+  flex-shrink: 0; /* Prevent the button from shrinking too much */
+}
+
+.btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.btns button {
+  white-space: nowrap;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically (if height allows) */
+  min-height: 150px; /* Give it some space to center in */
+  width: 100%; /* Take full width */
+  margin: 20px 0; /* Add some margin around it */
+}
+
+.spinner {
+  /* mat-spinner itself is a block element, but centering needs its parent or specific margins */
+  margin: 0; /* Remove default margins to allow flexbox centering to work */
+}
+
+/* New: Container for all individual report cards */
+.report-cards-container {
+  display: flex;
+  flex-direction: column; /* Stack reports vertically */
+  align-items: center; /* Center reports horizontally */
+  gap: 30px; /* Space between individual report cards */
+  padding: 20px 0; /* Add some vertical padding */
+}
+
+.no-reports-message {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+  font-style: italic;
+  border: 1px dashed #ccc;
+  margin: 20px;
+}

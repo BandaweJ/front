@@ -1,0 +1,179 @@
+/* src/app/finance/components/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component.css */
+
+.report-container {
+  padding: 20px;
+  max-width: 1400px; /* Wider for more columns */
+  margin: 0 auto;
+}
+
+h1 {
+  color: #3f51b5;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fcfcfc;
+  align-items: flex-end;
+}
+
+.filter-field {
+  flex-grow: 1;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+/* Summary Section */
+.summary-section {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.summary-section h2 {
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.summary-card {
+  width: fit-content; /* Adjust width to content */
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #e8eaf6; /* Light blue background for summary */
+  border-left: 5px solid #3f51b5; /* Accent border */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card p {
+  margin: 8px 0;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.summary-card .discrepancy-count {
+  color: #d32f2f; /* Red for discrepancy count */
+  font-weight: bold;
+}
+
+/* Table Styling */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mat-header-cell {
+  background-color: #f5f5f5;
+  color: #333;
+  font-weight: bold;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+
+.mat-cell {
+  color: #444;
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.mat-row:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.mat-row:hover {
+  background-color: #eef;
+}
+
+/* Specific cell styling for statuses and discrepancy */
+.status-invoiced {
+  color: #4caf50; /* Green */
+  font-weight: bold;
+}
+
+.status-not-invoiced {
+  color: #f44336; /* Red */
+  font-weight: bold;
+}
+
+.discrepancy-flag {
+  color: #f44336; /* Red for discrepancies */
+  font-weight: bold;
+}
+
+.discrepancy-row {
+  background-color: #ffebee; /* Light red background for rows with discrepancies */
+}
+
+/* Loading and No Data Messages */
+.loading-spinner,
+.no-data-message {
+  text-align: center;
+  padding: 40px;
+  color: #777;
+  font-style: italic;
+}
+
+.loading-spinner mat-spinner {
+  margin: 0 auto 10px auto;
+}
+
+/* Optional: Column specific alignment */
+.mat-column-balance {
+  text-align: right;
+}
+.mat-column-studentNumber,
+.mat-column-enrolledStatus,
+.mat-column-invoicedStatus {
+  text-align: center;
+}
+
+/* New styles for icons */
+.icon-cell {
+  text-align: center; /* Center the icon within its cell */
+}
+
+.status-icon {
+  font-size: 20px; /* Adjust size as needed */
+  width: 20px;
+  height: 20px;
+  vertical-align: middle; /* Align icon vertically */
+  display: inline-flex; /* Allows for centering and proper sizing */
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon {
+  color: #4caf50; /* Green for success/no discrepancy */
+}
+
+.error-icon {
+  color: #f44336; /* Red for error/discrepancy */
+}
+
+/* Keep previous status styling if you prefer text fallback,
+   but these might not be needed if you're fully transitioning to icons. */
+/* .status-invoiced { color: #4caf50; font-weight: bold; } */
+/* .status-not-invoiced { color: #f44336; font-weight: bold; } */
+/* .discrepancy-flag { color: #f44336; font-weight: bold; } */
+/* .discrepancy-row { background-color: #ffebee; } */
+
+/* Optional: Column specific alignment (adjust based on new icon-cell) */
+.mat-column-studentNumber,
+.mat-column-enrolledStatus,
+.mat-column-invoicedStatus,
+.mat-column-discrepancyMessage {
+  text-align: center;
+}
+.mat-column-balance {
+  text-align: right;
+}

@@ -1,0 +1,103 @@
+<mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
+
+<div class="container">
+  <mat-card class="content full-width-mobile mat-elevation-z24">
+    <mat-card-header class="column-container">
+      <mat-card-title>
+        <h1 class="mat-h1">Sign Up</h1>
+      </mat-card-title>
+      <mat-card-subtitle class="error mat-h1">
+        {{ errorMsg$ | async }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="column-container" [formGroup]="signupForm">
+        <mat-form-field appearance="fill">
+          <mat-label>Select Role</mat-label>
+          <mat-select formControlName="role">
+            <mat-option value="">Select Role</mat-option>
+            <mat-option *ngFor="let role of roles" [value]="role">{{
+              role.toUpperCase()
+              }}</mat-option>
+          </mat-select>
+          <mat-hint>What are you to the school?</mat-hint>
+          <mat-error *ngIf="role!.hasError('required')">
+            Role is <strong>required</strong>
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{
+            role?.value === 'teacher'
+            ? 'I.D'
+            : role?.value == 'student'
+            ? 'Student Number'
+            : 'Email'
+            }}</mat-label>
+          <input type="text" matInput formControlName="id" placeholder="02086980F12" />
+          <mat-icon matSuffix>perm_identity</mat-icon>
+          <mat-hint>Format:
+            {{
+            role?.value == 'teacher'
+            ? '03123456F98'
+            : role?.value == 'student'
+            ? 'S2405234'
+            : 'parent@example.com'
+            }}</mat-hint>
+
+          <mat-error *ngIf="id!.hasError('required')">
+            {{
+            role?.value == 'teacher'
+            ? 'I.D Number'
+            : role?.value == 'student'
+            ? 'Student Number'
+            : 'Email '
+            }}
+            is <strong>required</strong>
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Username</mat-label>
+          <input type="text" matInput formControlName="username" placeholder="Example Username" />
+          <mat-icon matSuffix>perm_identity</mat-icon>
+          <mat-hint>Single word username</mat-hint>
+
+          <mat-error>
+            <span *ngIf="username?.hasError('required')">
+              Username is <strong>required</strong>
+            </span>
+            <span *ngIf="username!.hasError('minlength')">{{ username?.value.length }} / min 2</span>
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input [type]="hide ? 'password' : 'text'" matInput formControlName="password"
+            placeholder="Example Placeholder" />
+          <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="hide">
+            <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-hint>Enter Password</mat-hint>
+
+          <mat-error>
+            <span *ngIf="password?.hasError('required')">
+              Password is <strong>required</strong>
+            </span>
+            <span *ngIf="password!.hasError('minlength')">{{ password?.value.length }} / min 8</span>
+          </mat-error>
+        </mat-form-field>
+        <button [disabled]="signupForm.invalid" mat-raised-button color="primary" type="submit" (click)="signup()">
+          Signup
+        </button>
+        <span class="or">
+          <hr />
+          OR
+          <hr />
+        </span>
+        <button mat-raised-button color="accent" (click)="switchToSignIn()">
+          Signin
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,89 @@
+<div class="receipt-container" *ngIf="receipt" [class.voided-receipt]="receipt.isVoided">
+  <div class="receipt-download">
+    <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()">
+      <span class="material-icons">download</span>
+    </button>
+    <button type="button" mat-mini-fab color="accent" class="download-btn" (click)="printReceipt()">
+      <span class="material-icons">print</span>
+    </button>
+
+    <button *ngIf="!receipt.isVoided && (userRole$ | async) === 'reception'" type="button" mat-mini-fab color="warn"
+      class="void-btn" (click)="voidReceipt()" title="Void Receipt">
+      <span class="material-icons">cancel</span>
+    </button>
+  </div>
+  <div class="header">
+    <div class="header-bar">
+      <img src="../../../assets/jhs_logo.jpg" alt="School logo" class="header-logo" />
+      <h1 class="receipt-title header-title">RECEIPT</h1>
+      <div class="header-spacer"></div>
+    </div>
+  </div>
+  <div class="receipt-details">
+    <div class="detail-item">
+      <span>Receipt #:</span>
+      <span>{{ receipt.receiptNumber }}</span>
+    </div>
+    <div class="detail-item">
+      <span>Payment Date:</span>
+      <span>{{ receipt.paymentDate | date:'shortDate' }}</span>
+    </div>
+    <div class="detail-item">
+      <span>Payment Method:</span>
+      <span>{{ receipt.paymentMethod }}</span>
+    </div>
+  </div>
+
+  <div class="receipt-body-content">
+    <div *ngIf="receipt.isVoided" class="void-overlay">
+      <span class="void-text">VOIDED</span>
+      <span class="void-reason" *ngIf="receipt.voidedBy">By: {{ receipt.voidedBy }}</span>
+      <span class="void-date" *ngIf="receipt.voidedAt">On: {{ receipt.voidedAt | date:'short' }}</span>
+    </div>
+
+    <div class="section from-to-section">
+      <div class="party-block">
+        <p class="section-heading">From:</p>
+        <p>Junior High School</p>
+        <p>30588 Lundi Drive, Rhodene, Masvingo</p>
+        <p>+263 392 263 293</p>
+        <p>+263 78 223 8026</p>
+        <p>info@juniorhighschool.ac.zw</p>
+      </div>
+      <div class="party-block">
+        <p class="section-heading">To:</p>
+        <p>{{ receipt.student.name + ' ' + receipt.student.surname + ' (' + receipt.student.studentNumber + ')' }}</p>
+        <p>Enrolled in {{ receipt.enrol.name }} Term {{ receipt.enrol.num }}, {{ receipt.enrol.year }}</p>
+        <p>{{ receipt.student.address }}</p>
+        <p>{{ receipt.student.cell }}</p>
+        <p>{{ receipt.student.email }}</p>
+      </div>
+    </div>
+
+    <div class="section summary-section">
+      <div class="summary-totals">
+        <div class="total-row total-due">
+          <span>Invoice Paid:</span>
+          <span *ngFor="let allocation of receipt.allocations">{{ allocation?.invoice?.invoiceNumber }}</span>
+        </div>
+        <div class="total-row amount-paid">
+          <span>Amount Paid:</span>
+          <span>{{ receipt.amountPaid | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="total-row amount-outstanding">
+          <span>Amount Outstanding:</span>
+          <span class="outstanding">{{ (balance ? balance : 0) | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-remarks">
+      <p class="section-heading">Remarks:</p>
+      <p>{{ receipt.description || 'Thank You For Your Prompt Payment, We Appreciate Your Business' }}</p>
+    </div>
+  </div>
+  <div class="footer">
+    <p class="powered-by">served by : {{ receipt.servedBy }}</p>
+    <p class="thank-you">Thank you for your business!</p>
+  </div>
+</div>

@@ -1,0 +1,194 @@
+.reminders {
+  color: red;
+  font-size: xx-small;
+}
+
+/* new ui logic */
+/* src/app/academic-settings/academic-settings.component.css */
+
+.settings-page-container {
+  padding: 0 20px;
+  max-width: 900px; /* Constrain overall width */
+  margin: 0 auto; /* Center the container */
+  font-family: "Inter", sans-serif; /* Recommended font */
+}
+
+.header-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  color: #3f51b5; /* Angular Material primary blue */
+}
+
+.header-icon {
+  font-size: 30px;
+  width: 40px;
+  height: 40px;
+  margin-right: 5px;
+}
+
+.header-section h1 {
+  font-size: 1.8em;
+  margin: 0;
+  font-weight: 500;
+}
+
+.settings-card {
+  border-radius: 12px; /* Rounded corners for the card */
+  padding: 25px;
+}
+
+.enrollment-preferences-section h2 {
+  font-size: 1.6em;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 0.95em;
+  margin-bottom: 20px;
+}
+
+.academic-level-selection {
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.academic-level-selection p {
+  margin: 0;
+  font-size: 1.05em;
+  color: #333;
+}
+
+.academic-level-radio-group mat-radio-button {
+  margin-right: 20px;
+}
+
+.section-divider {
+  margin: 25px 0;
+  border-color: #eee;
+}
+
+/* Grid layout for Options, O Level, A Level columns */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr; /* Option column wider, others equal */
+  gap: 15px 20px; /* Row gap and column gap */
+  align-items: center;
+}
+
+.grid-header {
+  display: contents; /* Makes children participate in parent grid */
+}
+
+.header-cell {
+  font-weight: bold;
+  color: #3f51b5;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+}
+
+.grid-row {
+  display: contents; /* Makes children participate in parent grid */
+}
+
+.label-cell {
+  font-weight: 500;
+  color: #444;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee; /* Light separator for rows */
+}
+
+.control-cell {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee; /* Light separator for rows */
+}
+
+.control-cell mat-checkbox,
+.control-cell mat-radio-group {
+  margin-bottom: 5px; /* Spacing between radio buttons/checkboxes if stacked */
+  display: flex; /* Ensure they take full cell width and can stack */
+  flex-direction: column; /* Stack radio buttons/checkboxes */
+}
+
+.control-cell mat-radio-button {
+  margin-bottom: 8px; /* Space between radio buttons */
+}
+.control-cell mat-radio-button:last-child {
+  margin-bottom: 0;
+}
+
+/* Action buttons at the bottom of the card */
+.card-actions {
+  padding: 20px 25px 15px 25px; /* Match card padding */
+  border-top: 1px solid #eee; /* Separator for actions */
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end; /* Push buttons to the right */
+  gap: 10px; /* Space between buttons */
+}
+
+.card-actions button {
+  border-radius: 8px; /* Rounded buttons */
+  padding: 8px 20px;
+  font-size: 1em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .options-grid {
+    grid-template-columns: 1fr; /* Stack all columns on small screens */
+    gap: 20px; /* Increase gap for clarity when stacked */
+  }
+
+  .grid-header,
+  .grid-row {
+    display: block; /* Change back to block for stacking */
+  }
+
+  .header-cell,
+  .label-cell,
+  .control-cell {
+    padding: 8px 0;
+    border-bottom: none; /* Remove horizontal borders when stacked */
+  }
+
+  .header-cell {
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd; /* Keep a separator for the section header */
+    margin-bottom: 10px;
+  }
+
+  .label-cell {
+    font-weight: bold; /* Make labels stand out more when stacked */
+    margin-top: 15px;
+    border-bottom: 1px dashed #eee; /* Dotted line below each section's label */
+    padding-bottom: 5px;
+  }
+
+  .control-cell {
+    margin-bottom: 10px;
+  }
+
+  .academic-level-selection {
+    flex-direction: column; /* Stack header and radio group */
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-page-container {
+    padding: 15px;
+  }
+
+  .header-section h1 {
+    font-size: 1.8em;
+  }
+
+  .settings-card {
+    padding: 15px;
+  }
+}

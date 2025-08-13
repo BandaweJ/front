@@ -1,0 +1,105 @@
+.container {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* min-height: 100vh; */
+}
+
+.teacher-details-container {
+  width: 80%;
+  max-width: 600px;
+  /*padding: 20px;
+  */
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: grid;
+  grid-template-areas: "role role role" "desig surname name" "id age gender" "cell email address" "qual qual qual" "doj nil dol";
+  gap: 0.3rem;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+
+.grid-cell {
+  padding: 0.4rem;
+}
+
+.role {
+  grid-area: role;
+  text-align: center;
+}
+
+.desig {
+  grid-area: desig;
+}
+
+.surname {
+  grid-area: surname;
+}
+
+.name {
+  grid-area: name;
+}
+
+.id {
+  grid-area: id;
+}
+
+.age {
+  grid-area: age;
+}
+
+.gender {
+  grid-area: gender;
+}
+
+.cell {
+  grid-area: cell;
+}
+
+.email {
+  grid-area: email;
+}
+
+.address {
+  grid-area: address;
+}
+
+.qual {
+  grid-area: qual;
+}
+
+.doj {
+  grid-area: doj;
+}
+
+.dol {
+  grid-area: dol;
+}
+
+.detail-label {
+  font-weight: bold;
+  width: 150px;
+}
+
+.detail-value {
+  flex-grow: 1;
+}
+
+.detail-value ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.inactive {
+  background-color: red;
+  color: white;
+}

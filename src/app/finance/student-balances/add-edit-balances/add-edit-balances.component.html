@@ -1,0 +1,27 @@
+<mat-card *ngIf="student">
+  <div class="student-deatils-container">
+    <div class="student-deatils">
+      <label>Student Number: </label>
+      <span>{{ student.studentNumber }}</span>
+    </div>
+    <div class="student-deatils">
+      <label>Surname: </label>
+      <span>{{ student.surname }}</span>
+    </div>
+    <div class="student-deatils">
+      <label>Name: </label>
+      <span>{{ student.name }}</span>
+    </div>
+  </div>
+  <form (ngSubmit)="saveBalance()">
+    <mat-form-field class="example-full-width" [formGroup]="balancesForm">
+      <mat-label>Amount</mat-label>
+      <input type="number" matInput formControlName="amount" placeholder="Amount">
+      <mat-hint>Enter the amount</mat-hint>
+      <mat-error *ngIf="amount?.invalid">Enter a valid number</mat-error>
+
+
+    </mat-form-field>
+    <button class="btn" mat-raised-button type="submit">Save Balance</button>
+  </form>
+</mat-card>

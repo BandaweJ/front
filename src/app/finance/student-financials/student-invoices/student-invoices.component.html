@@ -1,0 +1,90 @@
+<div class="invoices-container">
+  <mat-card class="invoices-card">
+    <mat-card-header>
+      <mat-card-title>Student Invoices</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="loadingInvoices$ | async" class="loading-spinner">
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Loading invoices...</p>
+      </div>
+
+      <div *ngIf="errorInvoices$ | async" class="error-message">
+        <mat-icon color="warn">error</mat-icon>
+        <p>Error loading invoices. Please try again later.</p>
+        <p>{{ errorInvoices$ | async }}</p>
+      </div>
+
+      <div *ngIf="(invoices$ | async) as invoices; else noInvoices">
+        <div *ngIf="invoices.length > 0; else noInvoices">
+          <mat-accordion multi="true">
+            <mat-expansion-panel *ngFor="let invoice of invoices" class="invoice-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <strong>Invoice #{{ invoice.invoiceNumber }}</strong> -
+                  <span [class]="getInvoiceStatusClass(invoice.status)">{{ invoice.status }}</span>
+                </mat-panel-title>
+
+                <mat-panel-description>
+                  <div class="invoice-summary">
+                    <span>Date: {{ invoice.invoiceDate | date:'mediumDate' }}</span>
+                    <span>Due: {{ invoice.invoiceDueDate | date:'mediumDate' }}</span>
+                    <span>Total: {{ invoice.totalBill | currency:'USD':'symbol':'1.2-2' }}</span>
+                    <span>Paid: {{ invoice.amountPaidOnInvoice | currency:'USD':'symbol':'1.2-2' }}</span>
+                    <span>Balance: {{ invoice.balance | currency:'USD':'symbol':'1.2-2' }}</span>
+                    <span>Class: {{ invoice.enrol.name }}</span>
+                    <span>Term: {{ invoice.enrol.num }} {{ invoice.enrol.year }}</span>
+                    <span>Residence: {{ invoice.enrol.residence }}</span>
+                  </div>
+                </mat-panel-description>
+
+                <button mat-icon-button (click)="downloadInvoice(invoice.invoiceNumber); $event.stopPropagation()"
+                  matTooltip="Download Invoice" aria-label="Download invoice PDF">
+                  <mat-icon>file_download</mat-icon>
+                </button>
+              </mat-expansion-panel-header>
+
+              <div class="invoice-details">
+                <h4>Invoice Line Items (Bills)</h4>
+                <mat-list>
+                  <mat-list-item *ngFor="let bill of invoice.bills">
+                    <mat-icon matListItemAvatar>receipt</mat-icon>
+                    <div matListItemTitle>{{ bill.fees.description }}</div>
+                    <div matListItemLine>Amount: {{ bill.fees.amount | currency:'USD':'symbol':'1.2-2' }}</div>
+                    <mat-divider></mat-divider>
+                  </mat-list-item>
+                </mat-list>
+
+                <div *ngIf="invoice.allocations && invoice.allocations.length > 0" class="allocations-section">
+                  <h4>Payments Applied to this Invoice</h4>
+                  <mat-list>
+                    <mat-list-item *ngFor="let allocation of invoice.allocations">
+                      <mat-icon matListItemAvatar>payments</mat-icon>
+                      <div matListItemTitle>Allocated from Receipt {{ allocation.receiptId }}</div>
+                      <div matListItemLine>Amount: {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
+                      </div>
+                      <div matListItemLine>Date: {{ allocation.allocationDate | date:'shortDate' }}</div>
+                      <mat-divider></mat-divider>
+                    </mat-list-item>
+                  </mat-list>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+        <ng-template #noInvoices>
+          <div class="no-data-message">
+            <mat-icon>info</mat-icon>
+            <p>No invoices found for this student.</p>
+          </div>
+        </ng-template>
+      </div>
+      <ng-template #noInvoices>
+        <div class="no-data-message">
+          <mat-icon>info</mat-icon>
+          <p>No invoices found for this student.</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</div>

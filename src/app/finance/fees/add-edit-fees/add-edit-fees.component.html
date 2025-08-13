@@ -1,0 +1,41 @@
+<!-- <mat-toolbar class="title">
+  {{ title.getTitle() }}
+</mat-toolbar> -->
+<form [formGroup]="feesForm" (submit)="addFees()">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="card-title"> {{ data ? 'Edit Fees' : 'Add New Fees' }} </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+
+      <mat-form-field class="name">
+        <mat-label>Fees Name</mat-label>
+        <mat-select formControlName="name">
+          <mat-option *ngFor="let name of feesNames" [value]="name">
+            {{ sharedService.feesNamesToString(name) }}
+          </mat-option>
+
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="amount">
+        <mat-label>Amount</mat-label>
+        <input matInput formControlName="amount">
+      </mat-form-field>
+
+      <mat-form-field class="des">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+      </mat-form-field>
+
+
+    </mat-card-content>
+    <mat-card-footer>
+      <mat-card-actions class="actions">
+        <button class="submit-btn" type="submit" color="primary" mat-raised-button>
+          {{ data ? 'Edit Fees' : 'Add Fees' }}
+        </button>
+      </mat-card-actions>
+    </mat-card-footer>
+  </mat-card>
+</form>

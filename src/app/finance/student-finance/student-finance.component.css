@@ -1,0 +1,38 @@
+.search {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.container {
+  display: grid;
+  width: fit-content; /* Ensures the grid takes the full width of its parent */
+  grid-template-columns: auto 1fr auto;
+  gap: 16px; /* Add some spacing between grid items */
+  align-items: stretch; /* Makes grid items stretch vertically to the height of the tallest item in their row */
+  justify-content: center;
+}
+.billing-container {
+  max-width: 650px;
+}
+.top-panel {
+  display: flex; /* 1. Enable Flexbox */
+  justify-content: space-between; /* 2. Distribute space between items */
+  align-items: center; /* 3. Vertically align items in the center */
+  /* Add other desired styles for top-panel, e.g., padding, background */
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+}
+
+.search {
+  flex-grow: 1; /* 4. Allow the search component to grow */
+  text-align: center; /* 5. Center its content horizontally */
+}
+
+.enrolment {
+  /* 6. This element will automatically go to the end due to space-between */
+}
+
+.no-invoice {
+  padding: 1rem;
+  text-align: center;
+}

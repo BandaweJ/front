@@ -1,0 +1,10 @@
+<mat-toolbar class="title">{{ title.getTitle() }}</mat-toolbar>
+<div class="top-panel">
+  <app-student-search (studentSelected)="getSelectedStudent($event)">
+
+  </app-student-search>
+</div>
+
+<div class="mat-elevation-z8 table-container">
+  <app-add-edit-balances [student]="selectedStudent"></app-add-edit-balances>
+</div>

@@ -1,0 +1,107 @@
+.payment-history-container {
+  padding: 20px;
+  max-width: 1000px; /* Adjust as needed */
+  margin: 20px auto;
+}
+
+.payment-history-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+/* State messages (Loading, Error, No Data) - Reusing common styles */
+.loading-state,
+.error-state,
+.no-data-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.error-state {
+  color: #f44336; /* Red for errors */
+}
+
+.error-details {
+  font-size: 0.8em;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.loading-state mat-spinner,
+.error-state mat-icon,
+.no-data-state mat-icon {
+  margin-bottom: 15px;
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+}
+
+/* Payment History List Styling */
+.payment-history-list {
+  margin-top: 15px;
+}
+
+.payment-history-list h4 {
+  margin-bottom: 10px;
+  color: #3f51b5; /* Primary color */
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 5px;
+}
+
+mat-list-item {
+  min-height: 56px; /* Default for mat-list-item */
+  height: auto !important; /* Allow content to expand */
+  padding-top: 8px;
+  padding-bottom: 8px;
+  box-sizing: border-box;
+}
+
+mat-list-item mat-icon[matListItemIcon] {
+  margin-right: 16px;
+  align-self: center; /* Align icon vertically */
+}
+
+mat-list-item .mat-list-item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  flex-grow: 1; /* Allow content to take available space */
+}
+
+mat-list-item [matListItemTitle] {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+mat-list-item [matListItemLine] {
+  font-size: 0.8em;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.payment-amount {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-left: auto; /* Push to the right */
+  white-space: nowrap;
+}
+
+.amount-in {
+  color: #4caf50; /* Green for positive transactions (payments) */
+}
+
+.amount-out {
+  color: #f44336; /* Red for negative transactions (refunds, adjustments that reduce balance) */
+}
+
+mat-divider {
+  border-top-color: #eee;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}

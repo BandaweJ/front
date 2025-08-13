@@ -1,0 +1,187 @@
+/* Ensure the body or a main container allows scrolling */
+body,
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  width: 95vw;
+  padding: 2rem;
+  margin: 0 auto;
+  box-sizing: border-box; /* Ensures padding is included in the width */
+}
+
+.top-btns {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  gap: 16px; /* Space between elements */
+  align-items: flex-start; /* Align bottoms of form fields and button */
+  width: 100%; /* Take full width of parent */
+  margin-bottom: 1.5rem;
+}
+
+.top-btns mat-form-field {
+  flex: 1 1 200px; /* Allow items to grow/shrink, with a base width of 200px */
+  min-width: 180px; /* Minimum width for form fields */
+  margin-bottom: 0; /* Ensures no extra vertical margin */
+}
+
+/* Make the button align nicely with the form fields */
+.top-btns button {
+  flex-shrink: 0; /* Prevent button from shrinking */
+  /* Remove margin-left: auto; if you want it aligned with the last form field */
+  /* If you want it to wrap *after* the fields, keep it as is, or adjust flex-grow */
+  /* For 'as much as possible on the same line', we'll rely on flex-wrap */
+  margin-left: 0; /* Resetting this to ensure it sits closer to the last field */
+}
+
+.sticky-progress-bar {
+  position: sticky;
+  top: 0; /* Stick to the very top of the viewport */
+  z-index: 1000;
+  width: 100%;
+  padding-bottom: 8px;
+  background-color: var(--mdc-theme-surface, #fff);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for elevation */
+}
+
+.progress-bar-container {
+  position: relative;
+  height: 24px; /* Slightly taller for better visibility and text positioning */
+  display: flex;
+  align-items: center;
+  background-color: var(
+    --mdc-theme-background,
+    #f5f5f5
+  ); /* More subtle background */
+  border-radius: 4px;
+  overflow: hidden; /* To keep progress bar inside bounds */
+}
+
+.progress-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(0, 0, 0, 0.7); /* Darker text for contrast on subtle background */
+  font-size: 13px;
+  font-weight: 500; /* Medium weight */
+  pointer-events: none;
+  text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.5); /* Subtle text shadow for readability */
+}
+
+mat-progress-bar {
+  --mdc-linear-progress-track-height: 100%;
+  --mdc-linear-progress-active-indicator-height: 100%;
+}
+
+.table-container {
+  overflow-x: auto; /* Enable horizontal scrolling for the table */
+  padding: 16px; /* Add padding to the table container itself */
+  background-color: var(
+    --mdc-theme-surface,
+    #fff
+  ); /* Background for consistency */
+  border-radius: 8px; /* Rounded corners */
+}
+
+.top-panel {
+  display: flex;
+  /* Removed justify-content: flex-end; as it's no longer needed for full width */
+  padding: 0 0 16px 0; /* Padding inside the table-container, only bottom for separation */
+}
+
+.top-panel mat-form-field {
+  width: 100%; /* Make filter input full width */
+}
+
+/* Table styles */
+table {
+  width: 100%;
+}
+
+.mat-column-studentNumber,
+.mat-column-surname,
+.mat-column-name,
+.mat-column-gender {
+  min-width: 120px; /* Ensure these columns have enough space */
+  padding-right: 16px;
+}
+
+.mat-column-markComment {
+  min-width: 350px; /* Enough space for two form fields and errors */
+  padding: 8px 16px;
+}
+
+.mark-comment-group {
+  display: flex;
+  gap: 10px; /* Space between mark and comment inputs */
+  align-items: flex-end; /* Align bottoms of inputs */
+  width: 100%;
+}
+
+.mark-input {
+  flex: 0 0 100px; /* Fixed width for mark */
+}
+
+.comment-input {
+  flex: 1 1 auto; /* Fill remaining space for comment */
+}
+
+.mat-column-action {
+  min-width: 100px;
+  text-align: center;
+  padding-right: 8px;
+}
+
+.action-btns {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.mat-header-cell {
+  font-weight: bold;
+  background-color: #f0f0f0; /* Light grey header */
+}
+
+.mat-row:hover {
+  background-color: #f5f5f5; /* Subtle hover effect */
+}
+
+.no-data-message {
+  padding: 20px;
+  text-align: center;
+  color: #757575;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .top-btns {
+    flex-direction: column;
+    align-items: stretch; /* Stretch items to full width */
+  }
+
+  .top-btns mat-form-field {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: unset;
+  }
+
+  .top-btns button {
+    align-self: flex-end; /* Keep button to the right when stacked */
+    margin-top: 10px; /* Space between last field and button */
+  }
+
+  /* No need to set .top-panel mat-form-field to 100% here, it's already done globally */
+}
+
+@media (max-width: 500px) {
+  .mat-header-cell,
+  .mat-cell {
+    padding: 8px 8px; /* Reduce padding on very small screens */
+  }
+}

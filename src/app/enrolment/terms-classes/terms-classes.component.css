@@ -1,0 +1,147 @@
+/* Container for the entire card content */
+mat-card {
+  padding: 16px; /* Standard padding for mat-card content */
+  box-sizing: border-box;
+}
+
+/* Top buttons container (Term, Class dropdowns and List button) */
+.top-btns {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  gap: 16px; /* Space between elements */
+  align-items: flex-start; /* Vertically align items in the center */
+  width: 100%; /* Take full width of parent */
+  margin-bottom: 20px; /* Space below this row */
+}
+
+.top-btns mat-form-field {
+  flex: 1 1 200px; /* Grow, shrink, base width 200px */
+  min-width: 180px; /* Minimum width for form fields */
+  max-width: calc(
+    50% - 8px
+  ); /* Allow two fields per row on larger screens, considering gap */
+}
+
+/* Push the list button to the far right */
+.top-btns button {
+  flex-shrink: 0; /* Prevent button from shrinking */
+  margin-left: auto; /* Pushes the button to the far right */
+}
+
+/* Filter panel styles */
+.top-panel {
+  display: flex;
+  /* justify-content: flex-end; Align filter field to the right */
+  padding-bottom: 10px; /* Space below the filter field */
+}
+
+.enrol-container > button {
+  /* Directly target the button inside enrol-container */
+  align-self: center; /* Changed from flex-end to center */
+  margin-bottom: 15px; /* Space between button and table */
+}
+
+.top-panel mat-form-field.filter {
+  /* Target the filter form field specifically */
+  width: 100%; /* Fixed width for filter input */
+}
+
+/* Main container for the enrol button and table */
+.enrol-container {
+  display: flex;
+  flex-direction: column; /* Stack button and table vertically */
+  margin-top: 10px; /* Space from the filter section */
+  padding: 16px; /* Padding inside this container */
+  border-radius: 8px; /* Rounded corners */
+  background-color: #ffffff; /* White background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  height: auto; /* Let content define height */
+  overflow: hidden; /* Hide overflow of this container, table handles its own scroll */
+}
+
+/* Style for the "Add Person" button */
+.enrol-container > button {
+  /* Directly target the button inside enrol-container */
+  align-self: flex-end; /* Align button to the right within its flex container */
+  margin-bottom: 15px; /* Space between button and table */
+}
+
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: collapse; /* Clean table lines */
+}
+
+.mat-header-cell {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.87);
+  padding: 12px 16px; /* Adjust padding */
+  text-align: left; /* Align headers to left */
+}
+
+.mat-cell {
+  padding: 8px 16px; /* Adjust cell padding */
+  vertical-align: middle;
+}
+
+.mat-row:hover {
+  background-color: #e0e0e0;
+}
+
+.mat-column-action {
+  width: 80px; /* Fixed width for action column */
+  text-align: center; /* Center the action button */
+}
+
+.btns {
+  display: flex;
+  justify-content: center; /* Center buttons horizontally */
+  align-items: center; /* Center buttons vertically */
+}
+
+.mat-paginator {
+  border-top: 1px solid #e0e0e0;
+  flex-shrink: 0; /* Prevent paginator from shrinking */
+}
+
+/* Row shown when no data matches filter */
+.mat-row.mat-no-data-row {
+  td {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #757575;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .top-btns {
+    flex-direction: column; /* Stack form fields vertically */
+    align-items: stretch; /*Stretch items to full width*/
+  }
+
+  .top-btns mat-form-field {
+    flex: 1 1 auto; /* Grow, shrink, base width 200px */
+    max-width: 100%; /* Take full width on smaller screens */
+    margin-bottom: 10px; /* Space between stacked fields */
+  }
+
+  .top-btns button {
+    margin-left: 0; /* Remove auto margin when stacked */
+    align-self: flex-end; /* Keep button to the right if desired, or center with align-self: center */
+    margin-top: 10px; /* Space between last field and button */
+  }
+
+  .top-panel mat-form-field.filter {
+    width: 100%; /* Filter takes full width */
+  }
+}
+
+@media (max-width: 500px) {
+  .mat-header-cell,
+  .mat-cell {
+    padding: 8px 8px; /* Reduce padding on very small screens */
+  }
+}

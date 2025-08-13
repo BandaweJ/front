@@ -1,0 +1,63 @@
+/* Fix the container typo, ensure it takes up appropriate width and centers */
+.container {
+  max-width: 1200px; /* Or a max-width, e.g., max-width: 1200px; */
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+.top-btns {
+  display: flex;
+  /* flex-wrap: wrap; /* Keep this if you want wrapping on VERY small screens, but adjust min-width */
+  /* For prioritizing a single line, you might temporarily remove flex-wrap during development to see behavior */
+  flex-wrap: wrap; /* Keep for general responsiveness, but the other rules will prioritize single line */
+  gap: 16px; /* Space between elements */
+  align-items: flex-start; /* Vertically align all items to their centers */
+  width: 100%; /* Take full width of parent */
+  margin: 0.5rem 0; /* Adjust vertical margin as needed */
+}
+
+/* Style for the mat-form-fields within top-btns */
+.top-btns mat-form-field {
+  /* Allow form fields to grow and shrink, but give them a flexible base */
+  flex: 1 1 200px; /* flex-grow, flex-shrink, flex-basis.
+                      This means they will grow, shrink, and their preferred width is 200px.
+                      Adjust 200px based on your desired minimum size before they wrap. */
+  min-width: 180px; /* Ensure a sensible minimum width for usability before wrapping */
+  /* Remove max-width here if you want them to take up more space on large screens */
+  /* If you still want a max, make sure it's large enough, e.g., max-width: 400px; */
+}
+
+/* Style for the button within top-btns */
+.top-btns button {
+  flex-shrink: 0; /* Prevent the button from shrinking when space is constrained */
+  margin-left: auto; /* Pushes the button to the far right */
+  /* Potentially add some margin-top if the button looks slightly off-center
+     due to the mat-form-field's internal structure (label, errors etc.) */
+  /* margin-top: 5px; */ /* Experiment with this if needed */
+}
+
+/* General improvements for filter field */
+mat-form-field {
+  width: 100%; /* Make filter field take full width of its parent */
+  margin-bottom: 16px; /* Space below the filter field */
+}
+
+/* Ensures the table can scroll horizontally if its content is too wide */
+.mat-elevation-z8 {
+  overflow-x: auto;
+}
+
+/* Optional: Media query for extremely small screens if you want specific wrapping behavior */
+@media (max-width: 480px) {
+  .top-btns mat-form-field {
+    flex-basis: 100%; /* Force form fields to take full width and stack */
+    max-width: 100%;
+  }
+  .top-btns button {
+    margin-left: 0; /* Remove auto-margin if button also wraps to its own line and should be left-aligned */
+    width: auto; /* Make button full width if it wraps */
+    height: auto;
+    padding: 5px;
+    justify-self: flex-end;
+  }
+}

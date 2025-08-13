@@ -1,0 +1,389 @@
+/* General Form and Button Layouts (Likely for Screen View) */
+.select-marksheet-form {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+form {
+  display: flex;
+}
+
+.input-controls {
+  display: flex;
+  width: 30vw;
+  justify-content: space-between;
+}
+
+.top-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0.5rem auto;
+  width: 65vw;
+}
+
+.btns {
+  display: flex;
+  justify-content: space-around;
+  width: 35vw;
+}
+
+/* Report Cards (If you have other report display functionality) */
+.report-container {
+  width: 25cm;
+  margin: auto;
+  background-color: #587586;
+  position: relative;
+}
+
+.report {
+  width: 21cm;
+  height: 29.7cm;
+  background-color: white;
+  margin: 2rem auto;
+  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+  background-image: url("../../../assets/report bg.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  position: relative;
+}
+
+.letter-head {
+  width: 100%;
+  margin-bottom: 1rem;
+  height: auto;
+  display: block;
+}
+
+/* --- Screen View Styles for the PDF Report Container --- */
+.pdf-report-container {
+  max-width: 95vw;
+  margin: 2rem auto;
+  padding: 1cm;
+  box-sizing: border-box;
+  background-color: white;
+  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.2);
+  overflow-x: auto;
+}
+
+.pdf-header {
+  text-align: center;
+  margin-bottom: 0.5cm;
+  padding-bottom: 0.2cm;
+  border-bottom: 1px solid #eee;
+  font-family: "Arial", sans-serif;
+  line-height: 1.1;
+  overflow: hidden;
+}
+
+.logo-title-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8cm;
+  margin-bottom: 0.3cm;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.pdf-logo-wrapper {
+  width: 3cm;
+  height: 3cm;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pdf-logo-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.pdf-title {
+  font-size: 16pt;
+  font-weight: bold;
+  margin: 0;
+  line-height: 1.1;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.report-info {
+  display: flex;
+  justify-content: center;
+  gap: 1.5cm;
+  font-size: 10pt;
+  margin-top: 0.2cm;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.report-info span {
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+  text-align: center;
+}
+
+.marksheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9pt;
+  background-color: white;
+  line-height: 1.4;
+  table-layout: fixed;
+}
+
+.marksheet-table th,
+.marksheet-table td {
+  border: 1px solid #96d4d4;
+  padding: 4px 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.marksheet-table th {
+  font-weight: bold;
+  background-color: #f0f0f0;
+}
+
+.marksheet-table tr:nth-child(even) {
+  background-color: #e6f7f7;
+}
+
+.marksheet-table .st-name {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Specific column widths using classes */
+.col-num {
+  width: 3%;
+}
+
+.col-name {
+  width: 18%; /* Adjusted width for a better fit */
+  text-align: left;
+}
+
+.col-subject {
+  width: 6%;
+}
+
+.col-passed {
+  width: 5%;
+}
+
+.col-symbol {
+  width: 4%;
+}
+
+.col-average {
+  width: 6%;
+}
+
+.col-position {
+  width: 4%;
+}
+
+.red-text {
+  color: red;
+}
+
+.blue-text {
+  color: blue;
+}
+
+/* --- @media print BLOCK: CRITICAL FOR NATIVE PRINTING --- */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 1cm;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body > *:not(.pdf-report-container) {
+    display: none !important;
+  }
+
+  .pdf-report-container {
+    width: 100%;
+    height: auto !important;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    background-color: white;
+    overflow: visible !important;
+    border: none !important;
+  }
+
+  .pdf-header {
+    text-align: center;
+    margin-bottom: 0.5cm;
+    padding: 0.2cm 0.5cm;
+    border-bottom: 1px solid #ccc;
+    font-size: 8pt;
+    line-height: 1.1;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    border: none !important;
+  }
+
+  .logo-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5cm;
+    margin-bottom: 0.2cm;
+    flex-shrink: 0;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .pdf-logo-wrapper {
+    width: 2cm;
+    height: 2cm;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .pdf-logo-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .pdf-title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.1;
+    flex-grow: 1;
+    text-align: left;
+  }
+
+  .report-info {
+    display: flex;
+    justify-content: center;
+    gap: 1cm;
+    font-size: 7pt;
+    margin-top: 0.1cm;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .marksheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7pt;
+    line-height: 1.2;
+    table-layout: fixed;
+    height: auto !important;
+    overflow: visible !important;
+    border: 1px solid #ccc;
+  }
+
+  .marksheet-table thead {
+    display: table-header-group;
+    page-break-inside: avoid;
+  }
+
+  .marksheet-table tbody {
+    display: table-row-group;
+  }
+
+  .marksheet-table tbody tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+    height: auto !important;
+  }
+
+  .marksheet-table th,
+  .marksheet-table td {
+    border: 1px solid #ccc;
+    padding: 2px 3px;
+    text-align: center;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .marksheet-table th {
+    font-weight: bold;
+    background-color: #eee;
+  }
+
+  .marksheet-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .marksheet-table .st-name {
+    width: 20%;
+    text-align: left;
+    white-space: normal;
+  }
+
+  /* Print-specific column widths using classes */
+  .col-num {
+    width: 3%;
+  }
+
+  .col-name {
+    width: 18%;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .col-subject {
+    width: 5%;
+  }
+
+  .col-passed {
+    width: 4%;
+  }
+
+  .col-symbol {
+    width: 3%;
+  }
+
+  .col-average {
+    width: 6%;
+  }
+
+  .col-position {
+    width: 4%;
+  }
+
+  .select-marksheet-form {
+    display: none;
+  }
+}
+
+/* In your marks-sheets.component.css */
+.marksheet-table td {
+  empty-cells: show;
+}

@@ -1,0 +1,199 @@
+/* student-dashboard.component.css */
+
+.marks-graph-container {
+  /* Layout and Spacing */
+  width: 100%; /* Take full width of its parent container */
+  max-width: 900px; /* Limit maximum width for readability on large screens */
+  margin: 20px auto; /* Center the container horizontally with vertical spacing */
+  padding: 20px; /* Internal padding */
+
+  /* Visuals */
+  background-color: #ffffff; /* White background */
+  border: 1px solid #e0e0e0; /* Subtle border */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+
+  /* Text inside the container */
+  color: #333; /* Dark gray for text */
+  font-family: "Roboto", sans-serif; /* Example font, adjust to your project's font */
+}
+
+.marks-graph-container h3 {
+  text-align: center;
+  color: #3f51b5; /* A primary color, e.g., Material Design indigo */
+  margin-bottom: 25px; /* Space below the heading */
+  font-size: 1.6em; /* Larger heading */
+  font-weight: 500;
+}
+
+/* Styles for the chart canvas itself */
+canvas {
+  display: block; /* Ensure the canvas behaves as a block element */
+  width: 100% !important; /* Important to override Chart.js inline styles if needed */
+  height: 400px !important; /* Set a fixed height for the graph area */
+  /* You can adjust height as needed. Use a responsive height if preferred (e.g., 50vh) */
+}
+
+/* Styles for the "No marks data available" message */
+.marks-graph-container p {
+  text-align: center;
+  color: #757575; /* Lighter gray for informational text */
+  font-style: italic;
+  margin-top: 30px;
+  padding: 15px;
+  border: 1px dashed #bdbdbd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .marks-graph-container {
+    margin: 15px 10px; /* Reduce side margins on smaller screens */
+    padding: 15px;
+  }
+
+  .marks-graph-container h3 {
+    font-size: 1.4em;
+    margin-bottom: 20px;
+  }
+
+  canvas {
+    height: 300px !important; /* Adjust height for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .marks-graph-container {
+    margin: 10px 5px;
+    padding: 10px;
+  }
+
+  canvas {
+    height: 250px !important; /* Further adjust height for very small screens */
+  }
+}
+
+.student-dashboard-main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between the summary and graph sections */
+  padding: 20px;
+}
+
+.summary-cards-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow cards to wrap on smaller screens */
+  gap: 20px; /* Space between cards */
+  justify-content: center; /* Center cards horizontally */
+}
+
+.summary-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  min-width: 280px; /* Minimum width for cards */
+  flex: 1; /* Allow cards to grow and shrink */
+  max-width: 45%; /* Max width to ensure two columns on larger screens */
+}
+
+/* Specific styles for the new cards */
+.student-details-card,
+.enrolment-details-card {
+  /* Inherit general summary-card styles */
+  /* You can add specific colors or emphasis if desired */
+  background-color: #f8f9fa; /* A slightly different background for distinction */
+}
+
+.summary-card h4 {
+  text-align: center;
+  color: #5c6bc0; /* A slightly different Material Design color */
+  margin-bottom: 20px;
+  font-size: 1.4em;
+  font-weight: 500;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.data-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+}
+
+.data-item label {
+  font-weight: bold;
+  color: #424242;
+}
+
+.data-item span {
+  color: #616161;
+}
+
+.amount-owed span.negative {
+  color: #d32f2f; /* Red for amount owed (if positive) */
+  font-weight: bold;
+}
+
+.amount-owed span.positive {
+  color: #388e3c; /* Green for if they owe 0 or negative (overpaid) */
+  font-weight: bold;
+}
+
+.no-data-message,
+.loading-spinner {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #757575;
+}
+
+.loading-spinner {
+  font-weight: bold;
+  color: #3f51b5; /* Primary color for loading message */
+}
+
+/* Responsive adjustments for summary cards */
+@media (max-width: 768px) {
+  .summary-cards-container {
+    flex-direction: column; /* Stack cards vertically on smaller screens */
+    align-items: center; /* Center stacked cards */
+  }
+  .summary-card {
+    max-width: 90%; /* Allow cards to take more width when stacked */
+  }
+}
+
+/* Inherited from previous answers for the graph container */
+.marks-graph-container {
+  /* ... (existing styles for the graph container) ... */
+  margin: 0 auto; /* Adjust margin if needed to align with new layout */
+}
+
+.outstanding-container {
+  margin-top: 15px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 15px;
+}
+
+.outstanding-label {
+  font-weight: bold;
+  color: #5c6bc0; /* A color to make the label stand out */
+  margin-bottom: 10px;
+  display: block;
+}
+
+.outstanding-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.95em;
+  color: #d32f2f; /* Red to indicate an owed amount */
+}
+
+.outstanding-item span {
+  /* You can add specific styles for the amount if needed */
+}

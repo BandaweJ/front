@@ -1,0 +1,63 @@
+<mat-card *ngIf="role !== 'student'" class="reports-main-card">
+  <div class="select-reports-form">
+    <form [formGroup]="reportsForm" (ngSubmit)="fetchReportsBasedOnForm()">
+      <div class="top-btns">
+        <mat-form-field>
+          <mat-label>Choose Term</mat-label>
+          <mat-select formControlName="term">
+            <mat-option *ngFor="let term of terms$ | async" [value]="term">
+              {{ term.num + " " + term.year }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Choose Class</mat-label>
+          <mat-select formControlName="clas">
+            <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+              {{ clas.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Exam Type</mat-label>
+          <mat-select formControlName="examType">
+            <mat-option *ngFor="let type of examtype" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+      </div>
+    </form>
+
+
+    <div class="btns">
+      <button mat-flat-button color="primary" [disabled]="reportsForm.invalid" (click)="generate()"
+        *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
+        Generate
+      </button>
+      <button mat-flat-button color="accent" (click)="saveReports()" *ngIf="role === 'admin'"
+        [disabled]="reportsForm.invalid || (reports$ | async)?.length === 0">Save</button>
+      <button mat-flat-button color="primary" (click)="viewReports()" [disabled]="reportsForm.invalid">View</button>
+    </div>
+  </div>
+
+  <div class="spinner-container" *ngIf="(isLoading$ | async)">
+    <mat-spinner class="spinner"></mat-spinner>
+  </div>
+
+
+  <div class="reports-display-area">
+    <div class="no-reports-message" *ngIf="!(isLoading$ | async) && (reports$ | async)?.length === 0">
+      <p>No reports found for the selected criteria. Please generate or view reports.</p>
+    </div>
+
+    <div class="report-cards-container" *ngIf="(reports$ | async)!.length > 0 && !(isLoading$ | async)">
+      <app-report *ngFor="let report of reports$ | async" [report]="report"></app-report>
+    </div>
+  </div>
+
+</mat-card>
+
+<app-student-report-cards *ngIf="role === 'student'"></app-student-report-cards>

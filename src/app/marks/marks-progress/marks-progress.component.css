@@ -1,0 +1,216 @@
+/* Ensure the body or a main container allows scrolling */
+body,
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fix typo: conatiner -> container */
+.container {
+  width: 95vw;
+  padding: 16px; /* Standardize padding to match Material card */
+  margin: 20px auto; /* Add margin for spacing from toolbar/progress bar */
+  box-sizing: border-box; /* Ensures padding is included in the width */
+  border-radius: 8px; /* Consistent border-radius */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for the card */
+}
+
+.top-btns {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  gap: 16px; /* Space between elements */
+  align-items: flex-end; /* Align bottoms of form fields and button */
+  width: 100%; /* Take full width of parent */
+  margin-bottom: 20px; /* Space below this row */
+}
+
+.top-btns mat-form-field {
+  flex: 1 1 200px; /* Allow items to grow/shrink, with a base width of 200px */
+  min-width: 180px; /* Minimum width for form fields */
+  margin-bottom: 0; /* Remove default bottom margin from mat-form-field */
+}
+
+.top-btns button {
+  flex-shrink: 0; /* Prevent button from shrinking */
+  margin-left: 0; /* Align button closer to the last form field */
+  margin-top: 5px; /* Small top margin to align better if fields wrap slightly */
+}
+
+/* Optional: If you decide to keep the sticky progress bar, ensure its styling is clean */
+.sticky-progress-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  padding: 8px 16px; /* Padding for the container */
+  background-color: var(--mdc-theme-surface, #fff); /* Consistent background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box; /* Include padding in width */
+}
+
+.progress-bar-container {
+  position: relative;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  background-color: var(--mdc-theme-background, #f5f5f5);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.5);
+}
+
+mat-progress-bar {
+  --mdc-linear-progress-track-height: 100%;
+  --mdc-linear-progress-active-indicator-height: 100%;
+}
+
+/* Container for the table for elevation and consistent padding/background */
+.table-container {
+  padding: 16px; /* Padding inside the elevated container */
+  background-color: var(--mdc-theme-surface, #fff); /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+  overflow: hidden; /* Hide overflow, use inner wrapper for horizontal scroll */
+}
+
+.table-wrapper {
+  /* New wrapper for table to handle horizontal scroll */
+  overflow-x: auto; /* Enable horizontal scrolling if table content overflows */
+  margin: 0 -16px; /* Counteract table-container padding for full width table */
+  padding: 0 16px; /* Re-apply horizontal padding to table content */
+}
+
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: collapse; /* Ensure clean table lines */
+  min-width: 600px; /* Ensure table doesn't get too squished on smaller screens before overflow-x kicks in */
+}
+
+th.mat-header-cell,
+td.mat-cell {
+  padding: 12px 16px; /* Standardized cell padding */
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12); /* Subtle row dividers */
+}
+
+th.mat-header-cell {
+  font-weight: bold;
+  background-color: #f0f0f0; /* Light grey header background */
+  color: rgba(0, 0, 0, 0.87); /* Darker text for headers */
+}
+
+/* Specific column widths/alignment */
+.mat-column-code {
+  min-width: 80px;
+}
+.mat-column-subject {
+  min-width: 150px;
+}
+.mat-column-totalStudents,
+.mat-column-marksEntered {
+  min-width: 120px;
+  text-align: center; /* Center numbers */
+}
+.mat-column-progress {
+  min-width: 250px;
+}
+
+.progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between text and progress bar */
+  height: 48px; /* Ensure enough height for the cell */
+}
+
+.progress-cell mat-progress-bar {
+  flex-grow: 1; /* Allow progress bar to take available space */
+  height: 8px; /* Default progress bar height */
+  border-radius: 4px; /* Rounded corners for the bar */
+}
+
+.mat-row:hover {
+  background-color: #f5f5f5; /* Subtle hover effect */
+}
+
+.no-data-message {
+  padding: 20px;
+  text-align: center;
+  color: #757575;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    width: 100vw; /* Take full width on smaller screens */
+    padding: 10px; /* Reduce padding */
+    margin: 10px auto; /* Adjust margin */
+  }
+
+  .top-btns {
+    flex-direction: column; /* Stack form fields and button vertically */
+    align-items: stretch; /* Stretch items to full width */
+    gap: 10px; /* Reduce gap when stacked */
+  }
+
+  .top-btns mat-form-field {
+    flex: auto;
+    width: 100%;
+    min-width: unset; /* Remove min-width to allow full flexibility */
+  }
+
+  .top-btns button {
+    align-self: flex-end; /* Align button to the right when stacked */
+    margin-top: 10px; /* Space between last field and button */
+  }
+
+  .table-container {
+    padding: 10px; /* Reduce table container padding */
+  }
+
+  .table-wrapper {
+    margin: 0 -10px; /* Adjust wrapper margins */
+    padding: 0 10px; /* Adjust wrapper padding */
+  }
+
+  th.mat-header-cell,
+  td.mat-cell {
+    padding: 8px 12px; /* Further reduce cell padding */
+  }
+}
+
+@media (max-width: 500px) {
+  th.mat-header-cell,
+  td.mat-cell {
+    padding: 6px 8px; /* Even smaller padding on very small screens */
+    font-size: 0.8rem; /* Smaller font size for cells */
+  }
+
+  /* Adjust min-widths for columns to prevent excessive squeezing */
+  .mat-column-code {
+    min-width: 60px;
+  }
+  .mat-column-subject {
+    min-width: 100px;
+  }
+  .mat-column-totalStudents,
+  .mat-column-marksEntered {
+    min-width: 80px;
+  }
+  .mat-column-progress {
+    min-width: 180px;
+  }
+}

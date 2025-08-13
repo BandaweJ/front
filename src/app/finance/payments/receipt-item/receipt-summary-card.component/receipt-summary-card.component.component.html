@@ -1,0 +1,34 @@
+<mat-card class="receipt-summary-card" [ngClass]="{ 'voided-card': receipt.isVoided }"
+  (click)="!receipt.isVoided && viewDetails.emit(receipt)">
+  <div *ngIf="receipt.isVoided" class="void-overlay">VOIDED</div> <mat-card-header>
+    <mat-card-title class="amount-display">
+      <span [class.strikethrough]="receipt.isVoided"> {{ receipt.amountPaid | currency : 'USD' : 'symbol' : '1.2-2' }}
+      </span>
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{ receipt.paymentDate | date : 'shortDate' }}
+      <span *ngIf="!receipt.approved && !receipt.isVoided" class="status-pending"> <mat-icon class="status-icon"
+          color="warn">pending_actions</mat-icon>
+      </span>
+      <span *ngIf="receipt.approved && !receipt.isVoided" class="status-approved"> <mat-icon class="status-icon"
+          color="primary">check_circle</mat-icon>
+      </span>
+      <span *ngIf="receipt.isVoided" class="status-voided"> <mat-icon class="status-icon" color="warn">cancel</mat-icon>
+      </span>
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="student-info">
+      <mat-icon>person</mat-icon>
+      <span>{{ receipt.student.name }} {{ receipt.student.surname }}</span>
+    </div>
+    <div class="payment-info">
+      <mat-icon>credit_card</mat-icon>
+      <span>{{ receipt.paymentMethod }}</span>
+    </div>
+    <div class="receipt-id">
+      <mat-icon>receipt</mat-icon>
+      <span>#{{ receipt.receiptNumber }}</span>
+    </div>
+  </mat-card-content>
+</mat-card>

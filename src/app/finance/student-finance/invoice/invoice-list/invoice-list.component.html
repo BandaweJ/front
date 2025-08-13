@@ -1,0 +1,4 @@
+<mat-list role="list" *ngIf="invoices$ | async as invoices">
+  <mat-list-item (click)="selectInvoice(invoice)" role="listitem" *ngFor="let invoice of invoices">{{
+    invoice.invoiceNumber + ' ' + invoice.student.surname + ' ' + invoice.student.name }}</mat-list-item>
+</mat-list>

@@ -1,0 +1,50 @@
+mat-list-item {
+  /* Make it behave like a block-level button */
+  display: block; /* Ensure it takes full width for click area */
+  width: 100%; /* Take full available width within its parent */
+  text-align: left; /* Align text to the left, like a typical list item/button */
+  padding: 12px 16px; /* Adjust padding to give it button-like height */
+  margin-bottom: 4px; /* Add space between "buttons" */
+
+  /* Button appearance */
+  background-color: #f5f5f5; /* Light grey background */
+  color: #333; /* Darker text color */
+  border: 1px solid #ddd; /* Subtle border */
+  border-radius: 4px; /* Slightly rounded corners */
+  cursor: pointer; /* Indicate it's clickable */
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease; /* Smooth transitions for hover/active */
+
+  /* Optional: Adjust font for button readability */
+  font-family: "Roboto", sans-serif; /* Use Material's font */
+  font-size: 16px;
+  line-height: 1.2; /* Tighter line height for button text */
+  white-space: nowrap; /* Prevent text from wrapping prematurely */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+}
+
+/* Hover state */
+mat-list-item:hover {
+  background-color: #e0e0e0; /* Darker grey on hover */
+  border-color: #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
+}
+
+/* Active/Clicked state (mimicking button press) */
+mat-list-item:active {
+  background-color: #d0d0d0; /* Even darker grey when pressed */
+  border-color: #bbb;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); /* Inset shadow for pressed effect */
+}
+
+/* Focus state (important for accessibility) */
+mat-list-item:focus {
+  outline: none; /* Remove default outline (Angular Material handles focus usually) */
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3); /* Blue focus ring, adjust color to match your theme */
+}
+
+/* For better visual separation if you have many items in a list */
+mat-list {
+  padding: 0; /* Remove default list padding */
+}

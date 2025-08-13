@@ -1,0 +1,54 @@
+<div class="student-reports-dashboard">
+  <h2>My Report Cards</h2>
+
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>Select a Report</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="form-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Term Number</mat-label>
+          <mat-select [(ngModel)]="selectedTerm" (selectionChange)="onReportSelect()">
+            <mat-option *ngFor="let term of availableTerms" [value]="term">Term {{ term }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Year</mat-label>
+          <mat-select [(ngModel)]="selectedYear" (selectionChange)="onReportSelect()">
+            <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Exam Type</mat-label>
+          <mat-select [(ngModel)]="selectedExamType" (selectionChange)="onReportSelect()">
+            <mat-option *ngFor="let type of availableExamTypes" [value]="type">{{ type }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <button mat-stroked-button color="warn" (click)="clearSelection()" [disabled]="!(selectedReport$ | async)">
+        Clear Selection
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-spinner *ngIf="isLoading$ | async"></mat-spinner>
+  <div *ngIf="errorMessage$ | async" class="error-message">
+    {{ errorMessage$ | async }}
+  </div>
+
+  <div *ngIf="selectedReport$ | async as currentReport; else noReportSelected">
+    <app-report [report]="currentReport"></app-report>
+  </div>
+
+  <ng-template #noReportSelected>
+    <div *ngIf="!(isLoading$ | async) && !(errorMessage$ | async)" class="info-message">
+      <p>Select a Term, Year, and Exam Type above to view your report card.</p>
+      <p *ngIf="(studentReports$ | async)?.length === 0">No report cards available for you yet.</p>
+      <p *ngIf="(studentReports$ | async)?.length">You have {{ (studentReports$ | async)?.length }} available reports.
+      </p>
+    </div>
+  </ng-template>
+</div>

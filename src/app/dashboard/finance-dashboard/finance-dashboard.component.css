@@ -1,0 +1,169 @@
+/* Styles for the main finance dashboard container */
+.finance-dashboard-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 20px auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Styles for the toolbar itself */
+.finance-dashboard-toolbar {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  height: 64px;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.toolbar-left-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.toolbar-title {
+  font-size: 20px;
+  font-weight: 500;
+  margin-right: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.3s ease-in-out, margin-right 0.3s ease-in-out;
+}
+
+.toolbar-search-container {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-search-container.visible {
+  opacity: 1;
+  width: 300px;
+  margin-left: 10px;
+}
+
+.toolbar-search-component {
+  flex-grow: 1;
+}
+
+.toolbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Styling for no data found message */
+.no-data-found {
+  text-align: center;
+  padding: 40px;
+  color: #757575;
+  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.no-data-found mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  color: #b0b0b0;
+}
+
+/* --- New Styles for the Data Table --- */
+.finance-data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.finance-data-table th,
+.finance-data-table td {
+  padding: 12px 18px;
+}
+
+.finance-data-table .mat-header-row {
+  height: 56px;
+  background-color: #f5f5f5;
+}
+
+.finance-data-table .mat-row {
+  height: 48px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.finance-data-table .mat-row:hover {
+  background-color: #e0e0e0;
+}
+
+.icon-cell {
+  width: 40px; /* Fixed width for icon column */
+  padding: 0 8px;
+}
+
+.icon-invoice {
+  color: #3f51b5; /* Primary color */
+}
+
+.icon-payment {
+  color: #4caf50; /* Green for payments */
+}
+
+.amount-cell {
+  text-align: right;
+  font-weight: 500;
+}
+
+.amount-invoice {
+  color: #f44336; /* Red for invoices */
+}
+
+.amount-payment {
+  color: #4caf50; /* Green for payments */
+}
+
+.status-paid {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.status-overdue {
+  color: #f44336;
+  font-weight: 500;
+}
+
+.actions-cell {
+  width: 50px;
+  text-align: center;
+}
+
+/* Basic responsiveness */
+@media (max-width: 768px) {
+  .finance-dashboard-toolbar {
+    height: 56px;
+    padding: 0 8px;
+  }
+
+  .toolbar-title {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+
+  .toolbar-search-container.visible {
+    width: calc(100% - 100px);
+    margin-left: 5px;
+  }
+}

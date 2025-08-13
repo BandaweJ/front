@@ -1,0 +1,83 @@
+<mat-toolbar class="title">
+  {{ title.getTitle() }}
+
+</mat-toolbar>
+<div class="container">
+  <div class="teacher-details-container">
+
+    <div class="grid-cell role" [ngClass]="teacher?.active ? 'active' : 'inactive'">
+      <span class="detail-label">Role:</span>
+      <span class="detail-value" id="teacher-role">{{teacher?.role}}</span>
+    </div>
+
+    <div class="grid-cell desig">
+      <span class="detail-label">Title:</span>
+      <span class="detail-value" id="teacher-title">{{ teacher?.title }}</span>
+    </div>
+
+    <div class="grid-cell surname">
+      <span class="detail-label">Surname:</span>
+      <span class="detail-value" id="teacher-surname">{{teacher?.surname}}</span>
+    </div>
+
+    <div class="grid-cell name">
+      <span class="detail-label">Name:</span>
+      <span class="detail-value" id="teacher-name">{{ teacher?.name }}</span>
+    </div>
+
+    <div class="grid-cell id">
+      <span class="detail-label">ID:</span>
+      <span class="detail-value" id="teacher-id"> {{ teacher?.id }}</span>
+    </div>
+    <div class="grid-cell age">
+      <span class="detail-label">Age:</span>
+      <span class="detail-value" id="teacher-dob">{{ sharedService.calculateAge(teacher?.dob) }}</span>
+    </div>
+
+    <div class="grid-cell gender">
+      <span class="detail-label">Gender:</span>
+      <span class="detail-value" id="teacher-gender">{{ teacher?.gender }}</span>
+    </div>
+
+    <div class="grid-cell cell">
+      <span class="detail-label">Cell:</span>
+      <span class="detail-value" id="teacher-cell">{{ teacher?.cell }}</span>
+    </div>
+
+    <div class="grid-cell email">
+      <span class="detail-label">Email:</span>
+      <span class="detail-value" id="teacher-email">{{ teacher?.email }}</span>
+    </div>
+    <div class="grid-cell address">
+      <span class="detail-label">Address:</span>
+      <span class="detail-value" id="teacher-address">{{ teacher?.address }}</span>
+    </div>
+    <div class="grid-cell qual">
+      <span class="detail-label">Qualifications:</span>
+      <ul class="detail-value" id="teacher-qualifications">{{ teacher?.qualifications?.toString()?.trim() }}</ul>
+    </div>
+
+
+
+
+
+
+
+    <div class="grid-cell doj">
+      <span class="detail-label">Date of Joining:</span>
+      <span class="detail-value" id="teacher-doj">{{ teacher?.dateOfJoining | date}}</span>
+    </div>
+
+
+
+
+
+    <div class="grid-cell dol" *ngIf="teacher?.dateOfLeaving">
+      <span class="detail-label">Date of Leaving:</span>
+      <span class="detail-value" id="teacher-dol">{{ teacher?.active ? '' : teacher?.dateOfLeaving}}</span>
+    </div>
+
+
+
+  </div>
+</div>

@@ -1,0 +1,70 @@
+.top-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 95vw;
+  margin: auto;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+}
+
+.errormsg {
+  color: red;
+  margin: 0.2rem auto;
+  text-align: center;
+}
+
+table {
+  width: 95vw;
+  margin: auto;
+  padding: 1rem;
+}
+
+.mat-mdc-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+td,
+th {
+  /* width: 10%; */
+}
+button {
+  /* margin: 0 5px; */
+}
+.btns {
+  /* display: grid;
+  grid-template-columns: 1fr 1fr; */
+}
+
+.btns button {
+  /* width: 5px; */
+}
+
+.mat-column-gender {
+  max-width: fit-content;
+}
+
+.mdc-data-table__cell,
+.mdc-data-table__header-cell {
+  padding: 2px;
+}
+
+.inactive {
+  background-color: #d7263d;
+  color: white;
+}
+
+.inactive:hover {
+  background-color: #e48491;
+
+  box-shadow: 10px 10px 5px lightblue;
+}
+
+.active {
+  background-color: #fff;
+}

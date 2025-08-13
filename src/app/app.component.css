@@ -1,0 +1,291 @@
+/* General body/html styles to prevent external scrollbars */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden; /* Prevent horizontal scroll on the entire page */
+  overflow-y: auto; /* Allow vertical scroll on the entire page if content overflows */
+}
+
+/* Toolbar styles */
+mat-toolbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed; /* Keep toolbar fixed at the top */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 64px; /* Explicit height for the toolbar */
+  z-index: 2; /* Ensure it's above other content */
+}
+
+.mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+h1 {
+  margin: 0;
+  padding: 0;
+}
+
+/* Sidenav Container: Flexbox for side-by-side below toolbar */
+mat-sidenav-container {
+  display: flex; /* Make the container a flex container */
+  flex-direction: row; /* Arrange sidenav and content side-by-side */
+  height: calc(100vh - 64px); /* Occupy remaining height below the toolbar */
+  width: 100vw; /* Occupy full viewport width */
+  margin-top: 64px; /* Push container down to start below the fixed toolbar */
+  overflow: hidden; /* Prevent scrollbars on the container itself, let mat-sidenav-content handle it */
+}
+
+/* Sidenav itself */
+mat-sidenav {
+  width: 250px;
+  /*Defaultexpandedwidth*/
+  transition: width 0.3s ease-in-out;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  overflow-x: hidden;
+  /*Hidehorizontalscrollbarinsidesidenav*/
+  flex-shrink: 0;
+  /*Preventsidenavfromshrinkingunnecessarily*/ /*Removeposition: static;
+  andheight: auto;
+  ifmat-sidenav-containerisflex*/ /*Letflexpropertiesmanageitsheight*/ /*Ensureit'snotpositionedfixedonlargescreens*/ /*position: static;
+  -Removeorensureitdoesn'tconflict*/ /*height: auto;
+  -Removeorensureitdoesn'tconflict*/
+  top: auto;
+  left: auto;
+  padding-top: 0;
+  z-index: 1;
+  transform: none;
+  -webkit-transition: width 0.3s ease-in-out;
+  -moz-transition: width 0.3s ease-in-out;
+  -ms-transition: width 0.3s ease-in-out;
+  -o-transition: width 0.3s ease-in-out;
+}
+
+/* When the sidenav is collapsed, apply the narrow width */
+mat-sidenav.collapsed {
+  width: 90px; /*collapsed width*/
+}
+
+/* Sidenav Content inside mat-sidenav */
+.sidenav-container {
+  display: flex;
+  flex-direction: column;
+  padding-top: 1rem;
+}
+
+/* Menu item styles (as before) */
+mat-expansion-panel-header,
+.sidenav-container button.mat-button {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  border-radius: 0;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
+  -webkit-transition: background-color 0.2s ease-in-out,
+    padding 0.3s ease-in-out;
+  -moz-transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
+  -ms-transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
+  -o-transition: background-color 0.2s ease-in-out, padding 0.3s ease-in-out;
+}
+
+mat-sidenav:not(.collapsed) mat-expansion-panel-header {
+  padding: 0 16px;
+  justify-content: flex-start;
+}
+
+mat-sidenav:not(.collapsed) .sidenav-container button.mat-button {
+  padding: 0 16px 0 32px;
+  justify-content: flex-start;
+}
+
+mat-sidenav.collapsed mat-expansion-panel-header,
+mat-sidenav.collapsed .sidenav-container button.mat-button {
+  padding: 0 8px;
+}
+
+mat-expansion-panel.active > mat-expansion-panel-header,
+.sidenav-container button.mat-button.active {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--primary-color-text-on-dark, white);
+}
+
+mat-expansion-panel-header:hover,
+.sidenav-container button.mat-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+mat-sidenav:not(.collapsed) mat-expansion-panel-header .mat-icon,
+mat-sidenav:not(.collapsed) .sidenav-container button.mat-button .mat-icon {
+  flex-shrink: 0;
+  margin-right: 16px;
+}
+
+mat-sidenav.collapsed mat-expansion-panel-header .mat-icon,
+mat-sidenav.collapsed .sidenav-container button.mat-button .mat-icon {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+.menu-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+  min-width: 0;
+}
+
+mat-panel-title,
+.mdc-button__label {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+mat-sidenav.collapsed mat-panel-title,
+mat-sidenav.collapsed .mdc-button__label {
+  justify-content: center;
+}
+
+mat-expansion-panel-header .mat-expansion-indicator {
+  margin-left: auto;
+  padding-right: 0;
+  flex-shrink: 0;
+  transition: transform 0.3s ease-in-out;
+}
+
+mat-sidenav.collapsed mat-expansion-panel-header .mat-expansion-indicator {
+  padding-right: 0px;
+}
+
+.mat-expansion-panel-body {
+  padding: 0 !important;
+}
+
+.mat-button:focus {
+  outline: none;
+}
+
+/* --- Mat Sidenav Content (the main content area) --- */
+mat-sidenav-content {
+  flex-grow: 1; /* Allow content to take remaining space */
+  overflow: auto; /* Allow content to scroll if it overflows its own area */
+  padding: 16px; /* Add some padding around your actual content */
+  box-sizing: border-box; /* Include padding in width/height calculation */
+  min-width: 0; /* CRUCIAL: Allow flex item to shrink below its content's default width */
+  display: flex; /* Make mat-sidenav-content a flex container itself */
+  flex-direction: column; /* Stack content vertically within it */
+  /* margin-left is no longer controlled by JS, flexbox handles it */
+}
+
+/* --- Media Queries --- */
+
+/* Small devices (phones, max-width: 767px) */
+@media only screen and (max-width: 767px) {
+  /* Sidenav Container layout for mobile (still flex, but sidenav overlays) */
+  mat-sidenav-container {
+    flex-direction: row; /* Keep as row */
+  }
+
+  /* Sidenav on mobile (will be in 'over' mode) */
+  mat-sidenav {
+    position: fixed; /* Overlay on mobile */
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    max-width: 250px;
+    padding-top: 64px; /* Pushed down by toolbar */
+    z-index: 3;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  mat-sidenav.mat-sidenav-opened {
+    transform: translateX(0%);
+  }
+
+  /* Content on mobile: no margin-left, allow scroll */
+  mat-sidenav-content {
+    /* No explicit margin-left needed here, it will naturally take 100% width on mobile */
+    flex-grow: 1;
+  }
+
+  /* The toolbar menu icon should be visible on small screens */
+  .toolbar mat-icon {
+    display: block;
+  }
+
+  mat-expansion-panel-header,
+  .sidenav-container button.mat-button {
+    padding: 0 16px;
+    justify-content: flex-start;
+  }
+
+  mat-expansion-panel .sidenav-container button.mat-button {
+    padding: 0 16px 0 32px;
+  }
+
+  mat-expansion-panel-header .mat-icon,
+  .sidenav-container button.mat-button .mat-icon {
+    margin-right: 16px;
+  }
+}
+
+/* Medium and Large devices (tablets, laptops, desktops, 768px and up) */
+@media only screen and (min-width: 768px) {
+  /* On large screens, the sidenav is in 'side' mode */
+  mat-sidenav {
+    position: static; /* Sidenav is part of the normal document flow */
+    height: auto; /* Let flex container manage height */
+    top: auto;
+    left: auto;
+    padding-top: 0;
+    z-index: 1;
+    transform: none;
+    /* Ensure default width for side mode is applied, handled by .collapsed or default 250px */
+  }
+
+  mat-sidenav-content {
+    flex-grow: 1;
+    /* No explicit margin-left needed as flexbox positions it next to the sidenav */
+  }
+
+  /* On larger screens, the toolbar menu icon is not needed */
+  .toolbar mat-icon {
+    display: none;
+  }
+}
+
+@media print {
+  .toolbar {
+    display: none;
+  }
+
+  mat-sidenav {
+    display: none;
+  }
+}
+
+/* Override any default Angular Material inline margin-left on mat-sidenav-content */
+mat-sidenav-content {
+  margin-left: 0px !important; /* This is the key to force it to 0 */
+}
+
+/* Optional: If you want to be extra specific with media queries,
+   though the general rule above should be enough due to !important */
+@media only screen and (min-width: 768px) {
+  mat-sidenav-content {
+    margin-left: 0px !important;
+  }
+}

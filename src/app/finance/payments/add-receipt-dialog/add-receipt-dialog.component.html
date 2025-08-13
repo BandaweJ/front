@@ -1,0 +1,68 @@
+<div>
+  <h2 mat-dialog-title>Add New Receipt</h2>
+
+  <div class="search-student">
+    <app-student-search (studentSelected)="getSelectedStudent($event)"></app-student-search>
+  </div>
+
+  <ng-container *ngIf="student">
+    <div class="student-details">
+      <span class="blue-detail">{{ student.surname }} {{ student.name }} ({{ student.studentNumber }})</span>
+    </div>
+
+    <div class="amount-details">
+      <div *ngIf="isLoadingFinancials$ | async; else amountDueContent" class="loading-indicator">
+        Loading outstanding balance...
+      </div>
+
+      <ng-template #amountDueContent class="amounts">
+        <span *ngIf="amountDue$ | async as amountDue">
+          Amount Due:
+          <span class="amount-due"> {{ amountDue | currency : 'USD' : 'symbol' : '1.2-2' }}</span>
+        </span>
+        <span *ngIf="amountDue$ | async as amountDue">
+          Amount Outstanding:
+          <span class="amount-due"> {{ +amountDue - +amountPaidControl?.value| currency : 'USD' : 'symbol' : '1.2-2'
+            }}</span>
+        </span>
+
+      </ng-template>
+    </div>
+
+    <mat-dialog-content [formGroup]="addReceiptForm">
+      <mat-form-field appearance="fill">
+        <mat-label>Amount Paid</mat-label>
+        <input matInput type="number" formControlName="amountPaid" required />
+        <mat-error *ngIf="amountPaidControl?.invalid && amountPaidControl?.touched">
+          Amount paid must be a positive number.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Payment Method</mat-label>
+        <mat-select formControlName="paymentMethod" required>
+          <mat-option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="paymentMethodControl?.invalid && paymentMethodControl?.touched">
+          Payment method is required.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="description-field">
+        <mat-label>Description (Optional)</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+      </mat-form-field>
+
+
+
+    </mat-dialog-content>
+  </ng-container>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onNoClick()">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="addReceiptForm.invalid" (click)="onSubmit()">
+      <span>Add Receipt</span>
+      <!-- <mat-spinner></mat-spinner> -->
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,105 @@
+<mat-card>
+  <div class="select-marksheet-form">
+    <form [formGroup]="markSheetForm">
+      <div class="top-btns">
+        <mat-form-field>
+          <mat-label>Choose Term</mat-label>
+          <mat-select formControlName="term">
+            <mat-option *ngFor="let term of terms$ | async" [value]="term">
+              {{ term.num + " " + term.year }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Choose Class</mat-label>
+          <mat-select formControlName="clas">
+            <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+              {{ clas.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Exam Type</mat-label>
+          <mat-select formControlName="examType">
+            <mat-option *ngFor="let type of examtype" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </form>
+
+    <div class="btns">
+      <button mat-flat-button color="primary" [disabled]="markSheetForm.invalid" (click)="fetchMarkSheet()">
+        Create
+      </button>
+
+      <button mat-mini-fab aria-label="Click to download marksheet" *ngIf="reports.length" (click)="downloadPDF()">
+        <mat-icon>download</mat-icon>
+      </button>
+
+    </div>
+  </div>
+  <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
+</mat-card>
+<mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
+
+<div class="pdf-report-container" *ngIf="reports.length" #pdfReportContainer>
+
+  <div class="pdf-header" #pdfHeader>
+    <div class="logo-title-wrapper">
+      <div class="pdf-logo-wrapper">
+        <img src="../../../assets/jhs_logo.jpg" alt="School Logo">
+      </div>
+      <h1 class="pdf-title">
+        {{ reports[0].examType }}, {{ reports[0].num }} {{ reports[0].year }}. {{ reports[0].name }} Marksheet
+      </h1>
+    </div>
+
+    <div class="report-info">
+      <span>Term: {{ reports[0].num }} {{ reports[0].year }}</span>
+      <span>Class: {{ reports[0].name }}</span>
+      <span>Exam Type: {{ reports[0].examType }}</span>
+    </div>
+  </div>
+
+
+  <table class="marksheet-table" #marksheetTable>
+    <thead>
+      <tr #tableHeaderRow>
+        <th class="col-num">#</th>
+        <th class="col-name">Name</th>
+        <th class="col-subject" *ngFor="let subj of subjects">
+          {{ subj.name.substring(0, 9) }}
+        </th>
+        <th class="col-passed">Passed</th>
+        <th class="col-symbol">A*s</th>
+        <th class="col-symbol">As</th>
+        <th class="col-symbol">Bs</th>
+        <th class="col-symbol">Cs</th>
+        <th class="col-symbol">Ds</th>
+        <th class="col-average">Av Mark</th>
+        <th class="col-position">Pstn</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let rep of reports; let i = index">
+        <td class="col-num">{{ i + 1 }}</td>
+        <td class="col-name st-name">{{ rep.report.name + ' ' + rep.report.surname }}</td>
+        <td class="col-subject" *ngFor="let subjInfo of rep.report.subjectsTable"
+          [ngClass]="subjInfo ? (subjInfo.mark >= 50 ? 'blue-text' : 'red-text') : ''">
+          {{ subjInfo?.mark ? subjInfo.mark : '' }}
+        </td>
+        <td class="col-passed">{{ rep.report.subjectsPassed }}</td>
+        <td class="col-symbol">{{ rep.report.symbols[0] }}</td>
+        <td class="col-symbol">{{ rep.report.symbols[1] }}</td>
+        <td class="col-symbol">{{ rep.report.symbols[2] }}</td>
+        <td class="col-symbol">{{ rep.report.symbols[3] }}</td>
+        <td class="col-symbol">{{ rep.report.symbols[4] }}</td>
+        <td class="col-average">{{ rep.report.percentageAverge ? rep.report.percentageAverge.toFixed(1) : '' }}</td>
+        <td class="col-position">{{ rep.report.classPosition }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,335 @@
+<mat-toolbar color="primary" class="toolbar">
+  <ng-container *ngIf="isLoggedIn$ | async as isLoggedInState">
+    <mat-icon (click)="sidenav.toggle(); isSidenavCollapsed = false"
+      *ngIf="isLoggedInState && isScreenSmall">menu</mat-icon>
+  </ng-container>
+  <span>
+    <h1>Junior High School</h1>
+  </span>
+
+  <app-profile-buttons [isLoggedIn]="isLoggedIn$ | async"></app-profile-buttons>
+</mat-toolbar>
+
+<mat-sidenav-container>
+  <mat-sidenav role="navigation" #sidenav [mode]="isScreenSmall ? 'over' : 'side'"
+    [opened]="(!isScreenSmall && isLoggedInStatus)" [class.collapsed]="isSidenavCollapsed && !isScreenSmall"
+    (mouseenter)="!isScreenSmall ? isSidenavCollapsed = false : null"
+    (mouseleave)="!isScreenSmall ? isSidenavCollapsed = true : null" (openedChange)="onSidenavOpenedChange($event)">
+
+    <div class="sidenav-container">
+      <mat-accordion>
+
+        <!-- Dashboard -->
+        <button mat-button routerLink="/dashboard" routerLinkActive="active">
+          <mat-icon>dashboard</mat-icon>
+          <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Dashboard</span>
+        </button>
+
+        <!-- Registration -->
+        <mat-expansion-panel *ngIf="role === 'admin'">
+          <!-- Registration Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>app_registration</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Registration</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Registration Content -->
+          <div class="sidenav-container">
+            <!-- Teachers -->
+            <button mat-button routerLink="/teachers" routerLinkActive="active">
+              <mat-icon>people</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Teachers</span>
+            </button>
+            <!-- Students -->
+            <button mat-button routerLink="/students" routerLinkActive="active">
+              <mat-icon>school</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Students</span>
+            </button>
+            <!-- Parents -->
+            <button mat-button routerLink="/parents" routerLinkActive="active">
+              <mat-icon>family_restroom</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Parents</span>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Enrolment -->
+        <mat-expansion-panel *ngIf="role !== 'student' && role !== 'parent'">
+          <!-- Enrolment Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>how_to_reg</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Enrolment</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Enrolment Content -->
+          <div class="sidenav-container">
+            <!-- Classes -->
+            <button mat-button *ngIf="role === 'admin'" routerLink="/classes" routerLinkActive="active">
+              <mat-icon>class</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Classes</span>
+            </button>
+            <!-- Terms -->
+            <button mat-button *ngIf="role === 'admin' || role === 'reception'" routerLink="/terms"
+              routerLinkActive="active">
+              <mat-icon>date_range</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Terms</span>
+            </button>
+            <!-- Enrol Students -->
+            <button mat-button *ngIf="role === 'admin' || role === 'reception'" routerLink="/enrol"
+              routerLinkActive="active">
+              <mat-icon>add_task</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Enrol</span>
+            </button>
+            <!-- Class Lists -->
+            <button mat-button
+              *ngIf="role === 'admin' || role === 'reception' || role === 'teacher' || role === 'hod' || role === 'auditor' || role === 'director'"
+              routerLink="/class-lists" routerLinkActive="active">
+              <mat-icon>list_alt</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Class Lists</span>
+            </button>
+            <!-- Migrate Class -->
+            <button mat-button *ngIf="role === 'admin'" routerLink="/migrate-class" routerLinkActive="active">
+              <mat-icon>redo</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Migrate Class</span>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Attendance -->
+        <mat-expansion-panel *ngIf="role === 'admin' || role === 'teacher' || role === 'hod'">
+          <!-- Attendance Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>event_available</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Attendance</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Attendance Content -->
+          <div class="sidenav-container">
+            <!-- Attendance Register -->
+            <button mat-button routerLink="/registers" routerLinkActive="active">
+              <mat-icon>book</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Registers</span>
+            </button>
+            <!-- Mark Attendance Register -->
+            <button mat-button *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'"
+              routerLink="/mark-register" routerLinkActive="active">
+              <mat-icon>edit_note</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Mark Register</span>
+            </button>
+          </div>
+
+        </mat-expansion-panel>
+
+        <!-- Marks -->
+        <mat-expansion-panel *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
+          <!-- Marks Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>grade</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Marks</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Marks Content -->
+          <div class="sidenav-container">
+            <!-- Subjects -->
+            <button mat-button *ngIf="role === 'admin'" routerLink="/subjects" routerLinkActive="active">
+              <mat-icon>subject</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Subjects</span>
+            </button>
+            <!-- Marks Input -->
+            <button mat-button routerLink="/input" routerLinkActive="active">
+              <mat-icon>input</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Marks Input</span>
+            </button>
+            <!-- Marks Progress -->
+            <button mat-button routerLink="/marks-progress" routerLinkActive="active">
+              <mat-icon>trending_up</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Marks Progress</span>
+            </button>
+            <!-- Teacher's Comments -->
+            <button mat-button routerLink="/teachers-comments" routerLinkActive="active">
+              <mat-icon>comment</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Teacher's Comments</span>
+            </button>
+
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Academic Progress Reports -->
+        <mat-expansion-panel>
+          <!-- Academic Progress Reports Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>receipt_long</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Progress Reports</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Academic Progress Reports Content -->
+          <div class="sidenav-container">
+            <!-- Academic Progress Reports -->
+            <button mat-button routerLink="/reports" routerLinkActive="active">
+              <mat-icon>assignment</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Reports</span>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Results Analysis -->
+        <mat-expansion-panel *ngIf="role === 'admin' || role ==='teacher' || role === 'hod' || role === 'director'">
+          <!-- Results Analysis Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>analytics</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Results Analysis</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Results Analysis Content -->
+          <div class="sidenav-container">
+            <!-- Mark Sheets -->
+            <button mat-button routerLink="/mark-sheets" routerLinkActive="active">
+              <mat-icon>description</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Mark Sheets</span>
+            </button>
+            <!-- Termly Results Analysis -->
+            <button mat-button routerLink="/results-analysis" routerLinkActive="active">
+              <mat-icon>leaderboard</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Termly Results</span>
+            </button>
+
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Finance -->
+        <mat-expansion-panel>
+          <!-- Finance Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>account_balance</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Finance</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Finance Content -->
+          <div class="sidenav-container">
+
+            <!-- Fees Structure -->
+            <button mat-button routerLink="/fees" routerLinkActive="active">
+              <mat-icon>money</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Fees</span>
+            </button>
+
+            <!-- Payments / Receipting -->
+            <button mat-button routerLink="/payments" routerLinkActive="active"
+              *ngIf="role === 'auditor' || role === 'reception'">
+              <mat-icon>payments</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Receipting</span>
+            </button>
+
+            <!-- Student Financials -->
+            <button mat-button routerLink="/student-financials" routerLinkActive="active" *ngIf="role === 'student'">
+              <mat-icon>receipt</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Financials</span>
+            </button>
+
+            <!-- Billing / Invoicing -->
+            <button mat-button routerLink="/student-finance" routerLinkActive="active" *ngIf="role === 'reception'">
+              <mat-icon>request_quote</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Billing</span>
+            </button>
+
+            <!-- Invoices List -->
+            <button mat-button routerLink="/invoice" routerLinkActive="active"
+              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              <mat-icon>receipt</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Invoices</span>
+            </button>
+
+            <!-- Exemptions -->
+            <button mat-button routerLink="/exemptions" routerLinkActive="active"
+              *ngIf="role === 'auditor' || role === 'director'">
+              <mat-icon>money_off</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Exemptions</span>
+            </button>
+
+            <!-- Student Balances -->
+            <!-- <button mat-button routerLink="/balances" routerLinkActive="active" *ngIf="role === 'reception'">
+              <mat-icon>account_balance_wallet</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Balances</span>
+            </button> -->
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Financial Reports -->
+        <mat-expansion-panel *ngIf="role=== 'reception' || role === 'auditor' || role === 'director'">
+          <!-- Financial Reports Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>assessment</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Financial Reports</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Financial Reports Content -->
+          <div class="sidenav-container">
+            <!-- Student Ledgers -->
+            <button mat-button routerLink="/student-ledger" routerLinkActive="active"
+              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              <mat-icon>account_balance_wallet</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Student Ledgers</span>
+            </button>
+
+            <!-- Fees Collection -->
+            <button mat-button routerLink="/fees-collection" routerLinkActive="active"
+              *ngIf="role === 'auditor' || role === 'director'">
+              <mat-icon>payments</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Fees
+                Collection</span>
+            </button>
+
+            <!-- Outstanding Fees -->
+            <button mat-button routerLink="/outstanding-fees" routerLinkActive="active"
+              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              <mat-icon>money_off</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Outstanding
+                Fees</span>
+            </button>
+
+            <!-- Exemptions -->
+            <button mat-button routerLink="/exemption-reports" routerLinkActive="active"
+              *ngIf="role === 'auditor' || role === 'director'">
+              <mat-icon>assignment_turned_in</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Exemptions</span>
+            </button>
+
+            <!-- Aged Debtors -->
+            <button mat-button routerLink="/aged-debtors" routerLinkActive="active"
+              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              <mat-icon>trending_down</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Aged
+                Debtors</span>
+            </button>
+
+            <!-- Enrolment vs Billing Reconciliation -->
+            <button mat-button routerLink="/enrollment-billing-reconciliation" routerLinkActive="active"
+              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              <mat-icon>compare_arrows</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Enrolment
+                vs Billing</span>
+            </button>
+
+            <!-- Revenue Recognition -->
+            <button mat-button routerLink="/revenue-recognition" routerLinkActive="active"
+              *ngIf="role === 'auditor' || role === 'director'">
+              <mat-icon>analytics</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Revenue
+                Recognition</span>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+      </mat-accordion>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content role="main"> <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

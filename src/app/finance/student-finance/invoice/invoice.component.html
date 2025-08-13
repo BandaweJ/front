@@ -1,0 +1,22 @@
+<div class="admin" *ngIf="role === 'reception'">
+  <div class="term-select">
+    <mat-form-field>
+      <mat-label>Select Term</mat-label>
+      <mat-select [(ngModel)]="term" (selectionChange)="onTermChange($event.value)">
+        <mat-option *ngFor="let t of terms$ | async" [value]="t">{{ t.num + ' ' + t.year }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="invoices-container">
+    <div class="invoice-selection" *ngIf="invoices$ | async as invoices">
+      <app-search-invoice class="search-invoice" (invoiceSelected)="onInvoiceSelected($event)"></app-search-invoice>
+      <app-invoice-list (invoiceSelected)="onInvoiceSelected($event)"></app-invoice-list>
+    </div>
+    <div class="invoice-container">
+      <app-invoice-item *ngIf="invoice" [downloadable]="true" [invoice]="invoice"></app-invoice-item>
+
+    </div>
+  </div>
+
+</div>

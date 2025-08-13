@@ -1,0 +1,38 @@
+<div class="top-panel">
+  <mat-form-field>
+    <mat-label>Select Term</mat-label>
+    <mat-select (selectionChange)="termChanged($event.value)" [(ngModel)]="selectedTerm">
+      <mat-option *ngFor="let term of terms$ | async" [value]="term">{{ term.num +
+        " " + term.year }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <app-student-search *ngIf="selectedTerm" class="search"
+    (studentSelected)="selectedStudentChanged($event)"></app-student-search>
+  <app-current-enrolment *ngIf="selectedStudentEnrol" class="enrolment"
+    [studentNumber]="selectedStudentEnrol.student.studentNumber"></app-current-enrolment>
+
+</div>
+
+<div class="container">
+
+  <mat-card>
+
+    <app-invoice-item *ngIf="invoice && invoice.invoiceNumber, else noInvoice" [invoice]="invoice"
+      [downloadable]="false"></app-invoice-item>
+    <ng-template #noInvoice>
+      <div *ngIf="fetchInvoiceError$ | async as error; else loadingOrNoData">
+        <p style="color: red;" class="no-invoice">{{ error }}</p>
+      </div>
+      <ng-template #loadingOrNoData>
+        <p class="no-invoice">Select a student and term to view invoice.</p>
+      </ng-template>
+    </ng-template>
+  </mat-card>
+  <app-billing *ngIf="selectedStudentEnrol && selectedTerm" [enrolment]="selectedStudentEnrol"
+    [enrolment]="selectedStudentEnrol" class="billing-container">
+
+
+  </app-billing>
+
+
+</div>

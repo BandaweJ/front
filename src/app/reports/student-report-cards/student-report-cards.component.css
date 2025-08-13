@@ -1,0 +1,81 @@
+/* src/app/reports/student-report-cards/student-report-cards.component.css */
+.student-reports-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  /* padding: 1rem; */
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #3f51b5; /* Primary color */
+}
+
+.filter-card {
+  margin-bottom: 2rem;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Increased gap for better spacing */
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.form-row mat-form-field {
+  flex: 1 1 200px; /* Adjust min-width as needed */
+  min-width: 180px; /* Ensure fields don't get too small */
+}
+
+button[mat-raised-button] {
+  margin-right: 10px; /* Space between buttons */
+}
+
+.error-message {
+  text-align: center;
+  color: #f44336; /* Material Red */
+  background-color: #ffebee;
+  border: 1px solid #ef9a9a;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.info-message {
+  text-align: center;
+  color: #616161; /* Grey */
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #e3f2fd; /* Light Blue */
+  border: 1px solid #90caf9;
+  border-radius: 4px;
+}
+
+mat-spinner {
+  margin: 40px auto;
+  display: block; /* Centers the spinner */
+}
+
+app-report {
+  display: block;
+  margin-top: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  /* Remove the flex-direction: column rule */
+  .form-row {
+    flex-direction: row;
+    /* You can also adjust gap for smaller screens if you want less vertical space */
+    gap: 10px;
+  }
+}

@@ -1,0 +1,181 @@
+.receipts-container {
+  padding: 20px;
+  max-width: 1000px; /* Adjust as needed */
+  margin: 20px auto;
+}
+
+.receipts-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+/* State messages (Loading, Error, No Data) - Reusing invoice styles */
+.loading-state,
+.error-state,
+.no-data-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.error-state {
+  color: #f44336; /* Red for errors */
+}
+
+.error-details {
+  font-size: 0.8em;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: pre-wrap; /* Preserve whitespace and line breaks for JSON errors */
+  word-break: break-all;
+}
+
+.loading-state mat-spinner,
+.error-state mat-icon,
+.no-data-state mat-icon {
+  margin-bottom: 15px;
+  font-size: 48px; /* For icons */
+  width: 48px;
+  height: 48px;
+}
+
+/* Receipt Panel Styling */
+.receipts-accordion {
+  margin-top: 15px;
+}
+
+.receipt-panel {
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Slightly more prominent shadow */
+}
+
+.receipt-panel:last-child {
+  margin-bottom: 0;
+}
+
+/* Header within expansion panel */
+.mat-expansion-panel-header {
+  height: auto !important; /* Allow header to expand vertically if content wraps */
+  padding: 16px 24px; /* Adjust padding */
+}
+
+.receipt-header-title {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 1.1em;
+}
+
+.receipt-header-title strong {
+  margin-bottom: 4px;
+}
+
+.receipt-status {
+  font-size: 0.9em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.receipt-header-summary {
+  flex: 1 1 50%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  font-size: 0.85em;
+  color: rgba(0, 0, 0, 0.7);
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.receipt-header-summary span {
+  flex-basis: auto;
+  white-space: nowrap;
+}
+
+/* Status specific styling (Approval Status) */
+.receipt-approved {
+  background-color: #e8f5e9; /* Light green background */
+  color: #4caf50; /* Green text */
+}
+
+.receipt-unapproved {
+  background-color: #fff3e0; /* Light orange background */
+  color: #ff9800; /* Orange text (Pending) */
+}
+
+/* Receipt Details (inside expanded panel) */
+.receipt-details {
+  padding: 10px 24px 20px;
+}
+
+.receipt-details h4 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  color: #3f51b5; /* Primary color */
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 5px;
+}
+
+.receipt-details p {
+  font-size: 0.95em;
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 15px;
+}
+
+/* Material List Item specific adjustments */
+mat-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+mat-list-item {
+  min-height: 48px;
+  height: auto !important;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  box-sizing: border-box;
+}
+
+mat-list-item mat-icon[matListItemIcon],
+mat-list-item mat-icon[matListItemAvatar] {
+  /* Include matListItemAvatar for consistency */
+  margin-right: 16px;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+mat-list-item .mat-list-item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+mat-list-item [matListItemTitle] {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+mat-list-item [matListItemLine] {
+  font-size: 0.8em;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+mat-divider {
+  border-top-color: #eee;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.no-allocations {
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.6);
+  padding: 10px 0;
+}

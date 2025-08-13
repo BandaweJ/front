@@ -1,0 +1,76 @@
+mat-card {
+  /* background-color: #84d2f6; */
+  padding: 0.5rem;
+  margin: 0;
+}
+mat-card-content {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px;
+}
+
+mat-card-content:last-child {
+  padding-bottom: 0 !important; /* Or your desired value like 8px */
+}
+
+.label {
+  display: inline-block; /* Helps with vertical alignment */
+}
+
+.value {
+  display: flex; /* Make the span a flex container */
+  align-items: center; /* Vertically align items in the middle */
+  flex-grow: 1; /* Allow the value span to take available space if needed */
+  gap: 5px;
+  /* Remove any fixed height that might prevent alignment */
+}
+
+/* Styles for the display mode (text + icon) */
+.display-mode {
+  display: flex; /* Make this div a flex container */
+  align-items: center; /* Vertically align its contents (text and icon) */
+  gap: 8px; /* Space between the text and the icon */
+}
+
+/* Optional: Adjust the icon size if it doesn't align perfectly */
+.value mat-icon {
+  font-size: 18px; /* Example: make icon slightly smaller or larger to match text height */
+  height: 18px; /* Match height to font-size for consistency */
+  width: 18px; /* Match width to font-size */
+}
+
+.residence-text {
+  /* Basic styling for the displayed text */
+  font-size: 16px; /* Adjust to match the visual size of mat-form-field text */
+  line-height: 1.5; /* Helps with vertical alignment consistency */
+}
+
+/* Styles for the edit mode (mat-form-field) */
+.edit-mode {
+  display: flex; /* Make this div a flex container */
+  align-items: center; /* Vertically align its contents */
+  /* If you add a save icon later, it will align with the form field */
+  gap: 8px; /* Space between form field and save icon if present */
+  flex-grow: 1; /* Allow edit mode to grow */
+}
+
+.edit-mode mat-form-field {
+  /* Important: Material form fields often have their own internal margins/paddings.
+     You might need to adjust their outer margin or padding here to align with other content. */
+  margin-top: 0;
+  margin-bottom: 0;
+  /* Adjust width to control how wide the select box is */
+  width: 100%; /* Take full width of its flex container in edit mode */
+  max-width: 250px; /* Or a specific max width for the dropdown */
+}
+
+/* Specific adjustments for the mat-icon within the display mode */
+.display-mode mat-icon {
+  font-size: 18px; /* Adjust to match the text height visually */
+  height: 18px;
+  width: 18px;
+  cursor: pointer; /* Indicate it's clickable */
+  /* You might need to fine-tune margin-top or padding-top if the icon seems off-center
+     due to its intrinsic SVG/font metrics vs. the text's baseline. */
+  /* margin-top: -2px; */
+}

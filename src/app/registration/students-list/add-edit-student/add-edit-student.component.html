@@ -1,0 +1,159 @@
+<mat-card class="page-container">
+  <form [formGroup]="addStudentForm" (ngSubmit)="addStudent()">
+
+    <mat-card-title>
+      <h2>Add New Student</h2>
+      <mat-card-subtitle class="error">
+        {{ errorMsg$ | async }}
+      </mat-card-subtitle>
+    </mat-card-title>
+
+    <mat-card-content>
+      <div class="personal-deatils-container">
+        <mat-card class="personal">
+          <div>
+            <label>Gender: </label>
+            <mat-radio-group>
+              <mat-radio-group formControlName="gender">
+                <mat-radio-button *ngFor="let gender of genders" [value]="gender">{{ gender }}</mat-radio-button>
+              </mat-radio-group>
+            </mat-radio-group>
+          </div>
+
+          <div class="form-group">
+            <mat-form-field>
+              <mat-label>I.D Number</mat-label>
+              <input formControlName="idnumber" matInput type="text" placeholder="National I.D Number" />
+              <mat-error *ngIf="idnumber?.hasError('required')">
+                ID is required
+              </mat-error>
+              <mat-error *ngIf="idnumber?.hasError('minlength')">
+                At least 10 characters
+              </mat-error>
+              <mat-error *ngIf="idnumber?.hasError('pattern')">
+                Invalid ID
+              </mat-error>
+              <mat-hint>e.g 02086982F22</mat-hint>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Date Of Birth</mat-label>
+              <input formControlName="dob" (dateChange)="changeDatePickerDob()" matInput [matDatepicker]="picker" />
+              <mat-hint>MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="form-group">
+            <mat-form-field>
+              <mat-label>Surname</mat-label>
+              <input formControlName="surname" matInput type="text" placeholder="Surname" />
+              <mat-error *ngIf="surname?.hasError('required')">
+                Required
+              </mat-error>
+              <mat-error *ngIf="surname?.hasError('minlength')">
+                At least 2 characters
+              </mat-error>
+              <mat-hint>e.g Taivako</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Name</mat-label>
+              <input formControlName="name" matInput type="text" placeholder="Your Name" />
+              <mat-error *ngIf="name?.hasError('required')"> Required </mat-error>
+              <mat-error *ngIf="name?.hasError('minlength')">
+                At least 2 characters
+              </mat-error>
+              <mat-hint>e.g Tawanda</mat-hint>
+            </mat-form-field>
+          </div>
+
+
+
+
+
+        </mat-card>
+        <mat-card class="academic">
+          <!-- <div class="form-group">
+            <div>
+              <label>Residence: </label>
+              <mat-radio-group>
+                <mat-radio-group formControlName="residence">
+                  <mat-radio-button *ngFor="let residence of residences" [value]="residence">{{ residence
+                    }}</mat-radio-button>
+                </mat-radio-group>
+              </mat-radio-group>
+            </div>
+
+          </div> -->
+
+          <div class="form-group">
+            <mat-form-field>
+              <mat-label>Date Of Joining</mat-label>
+              <input formControlName="dateOfJoining" (dateChange)="changeDatePickerDoj()" matInput
+                [matDatepicker]="picker1" />
+              <mat-hint>MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+              <mat-datepicker #picker1></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Previous School</mat-label>
+              <input formControlName="prevSchool" matInput type="text" placeholder="Sandon Academy" />
+
+              <mat-hint>e.g Sandon Academy</mat-hint>
+            </mat-form-field>
+          </div>
+          <div class="form-group">
+            <mat-form-field>
+              <mat-label>Cell</mat-label>
+              <input formControlName="cell" matInput type="tel" placeholder="Cell Number" />
+              <mat-error *ngIf="cell?.hasError('required')"> Required </mat-error>
+              <mat-error *ngIf="cell?.hasError('minlength')">
+                At least 10 characters
+              </mat-error>
+              <mat-hint>e.g 263778261057</mat-hint>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Email</mat-label>
+              <input formControlName="email" matInput type="text" placeholder="email@domain.com" />
+              <mat-error *ngIf="email?.hasError('required')"> Required </mat-error>
+              <mat-error *ngIf="email?.hasError('email')">
+                Invalid Email
+              </mat-error>
+              <mat-hint>e.g bands@gmail.com</mat-hint>
+            </mat-form-field>
+          </div>
+        </mat-card>
+        <!-- <mat-card class="avatar">
+        avatar
+      </mat-card> -->
+      </div>
+      <div class="academic-contact-details">
+
+        <mat-card class="contact">
+          <div class="form-group">
+            <mat-form-field>
+              <mat-label>Address</mat-label>
+              <input formControlName="address" matInput type="text" placeholder="Adrress" />
+              <mat-hint>e.g No 2830 Povo Str, Masvingo</mat-hint>
+            </mat-form-field>
+          </div>
+          <div class="form-group">
+
+          </div>
+        </mat-card>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <div class="button-group">
+        <button type="button" color="warn" mat-raised-button class="btn-grp-item" (click)="closeDialog()">
+          <mat-icon>cancel</mat-icon>
+        </button>
+        <button class="btn-grp-item" type="submit" color="primary" mat-raised-button
+          [disabled]="addStudentForm.invalid">
+          <mat-icon>save</mat-icon>
+        </button>
+      </div>
+    </mat-card-actions>
+  </form>
+</mat-card>

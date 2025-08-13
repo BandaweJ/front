@@ -1,0 +1,61 @@
+<mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
+
+<div class="container">
+  <mat-card class="content full-width-mobile mat-elevation-z24">
+    <mat-card-header class="column-container">
+      <mat-card-title>
+        <h1 class="mat-h1">Sign In</h1>
+      </mat-card-title>
+      <mat-card-subtitle class="error mat-h1">
+        {{ errorMsg$ | async }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form class="column-container" [formGroup]="signinForm">
+        <mat-form-field>
+          <mat-label>Username</mat-label>
+          <input type="text" matInput formControlName="username" placeholder="Username" />
+          <mat-icon class="transparent" matSuffix>perm_identity</mat-icon>
+          <mat-hint>Type your username</mat-hint>
+
+          <mat-error>
+            <span *ngIf="username?.hasError('required')">
+              Username is <strong>required</strong>
+            </span>
+            <span *ngIf="username!.hasError('minlength')">{{ username?.value.length }} / min 2</span>
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input [type]="hide ? 'password' : 'text'" matInput formControlName="password" placeholder="Password" />
+          <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="hide">
+            <mat-icon class="transparent">{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-hint>Password</mat-hint>
+
+          <mat-error>
+            <span *ngIf="password?.hasError('required')">
+              Password is <strong>required</strong>
+            </span>
+            <span *ngIf="password!.hasError('minlength')">{{ password?.value.length }} / min 8</span>
+          </mat-error>
+        </mat-form-field>
+        <button [disabled]="signinForm.invalid" mat-raised-button color="primary" type="submit" (click)="signin()">
+          Signin
+        </button>
+        <span class="or">
+          <hr />
+          OR
+          <hr />
+        </span>
+        <button mat-raised-button type="button" color="accent" (click)="switchToSignUp()">
+          Signup
+        </button>
+      </form>
+    </mat-card-content>
+    <mat-card class="column-container"></mat-card>
+  </mat-card>
+</div>

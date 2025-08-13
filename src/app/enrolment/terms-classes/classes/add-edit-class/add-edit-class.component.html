@@ -1,0 +1,71 @@
+<mat-card>
+  <form [formGroup]="addClassForm" (ngSubmit)="addClass()">
+    <mat-card-title>
+      <h2>Add New Class</h2>
+      <mat-card-subtitle class="error">
+        {{ errorMsg$ | async }}
+        {{ addClassForm.errors }}
+      </mat-card-subtitle>
+    </mat-card-title>
+
+    <mat-card-content>
+      <div class="form-group">
+        <mat-form-field>
+          <mat-label>Form</mat-label>
+          <input
+            formControlName="form"
+            matInput
+            type="text"
+            placeholder="Form"
+          />
+          <mat-error *ngIf="form?.hasError('required')">
+            Form is required
+          </mat-error>
+
+          <mat-hint>e.g 3</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input
+            formControlName="name"
+            matInput
+            type="text"
+            placeholder="Name of Class"
+          />
+          <mat-error *ngIf="name?.hasError('required')">
+            ID is required
+          </mat-error>
+          <mat-error *ngIf="name?.hasError('minlength')">
+            At least 2 characters
+          </mat-error>
+
+          <mat-hint>e.g 1A1</mat-hint>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <div class="button-group">
+        <button
+          type="button"
+          color="warn"
+          mat-raised-button
+          class="btn-grp-item"
+          (click)="closeDialog()"
+        >
+          <mat-icon>cancel</mat-icon>
+        </button>
+        <button
+          class="btn-grp-item"
+          type="submit"
+          color="primary"
+          mat-raised-button
+          [disabled]="addClassForm.invalid"
+        >
+          <mat-icon>save</mat-icon>
+        </button>
+      </div>
+    </mat-card-actions>
+  </form>
+</mat-card>

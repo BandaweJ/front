@@ -1,0 +1,74 @@
+<mat-toolbar class="title">
+  {{ title.getTitle() }}
+
+</mat-toolbar>
+<div class="container">
+  <div class="student-details-container">
+
+    <div class="grid-cell stno">
+      <span class="detail-label">Student Number : </span>
+      <span class="detail-value" id="student-no">{{ student?.studentNumber }}</span>
+    </div>
+
+    <div class="grid-cell idno">
+      <span class="detail-label">I.D Number : </span>
+      <span class="detail-value" id="student-id">{{student?.idnumber}}</span>
+    </div>
+
+    <div class="grid-cell age">
+      <span class="detail-label">Age : </span>
+      <span class="detail-value" id="student-age">{{ sharedService.calculateAge(student?.dob) }}</span>
+    </div>
+
+    <div class="grid-cell surname">
+      <span class="detail-label">Surname : </span>
+      <span class="detail-value" id="student-surname"> {{ student?.surname }}</span>
+    </div>
+    <div class="grid-cell name">
+      <span class="detail-label">Name:</span>
+      <span class="detail-value" id="student-name">{{ student?.name }}</span>
+    </div>
+
+    <div class="grid-cell gender">
+      <span class="detail-label">Gender : </span>
+      <span class="detail-value" id="student-gender">{{ student?.gender }}</span>
+    </div>
+
+    <div class="grid-cell cell">
+      <span class="detail-label">Cell : </span>
+      <span class="detail-value" id="student-cell">{{ student?.cell }}</span>
+    </div>
+
+    <div class="grid-cell email">
+      <span class="detail-label">Email : </span>
+      <span class="detail-value" id="student-email">{{ student?.email }}</span>
+    </div>
+    <div class="grid-cell address">
+      <span class="detail-label">Address : </span>
+      <span class="detail-value" id="student-address">{{ student?.address }}</span>
+    </div>
+
+
+
+
+
+
+
+    <div class="grid-cell doj">
+      <span class="detail-label">Date Joined : </span>
+      <span class="detail-value" id="student-doj">{{ student?.dateOfJoining | date}}</span>
+    </div>
+
+
+
+
+
+    <div class="grid-cell prev">
+      <span class="detail-label">Former School:</span>
+      <span class="detail-value" id="student-prev">{{ student?.prevSchool }}</span>
+    </div>
+
+
+
+  </div>
+</div>

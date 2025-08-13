@@ -1,0 +1,153 @@
+<div class="outstanding-fees-card">
+  <form [formGroup]="filterForm" class="filter-form-print">
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Search Student</mat-label>
+      <input matInput formControlName="searchQuery" placeholder="e.g., John Doe or 2023-001">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Select Term</mat-label>
+      <mat-select formControlName="termFilter">
+        <mat-option [value]="null">All Terms</mat-option>
+        <mat-option *ngFor="let term of (terms$ | async)" [value]="term">
+          Term {{ term.num }} ({{ term.year }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Select Class</mat-label>
+      <mat-select formControlName="classFilter">
+        <mat-option [value]="null">All Classes</mat-option>
+        <mat-option *ngFor="let class of (allClasses$ | async)" [value]="class">
+          {{ class.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="filter-field">
+      <mat-label>Select Residence</mat-label>
+      <mat-select formControlName="residenceFilter">
+        <mat-option [value]="null">All Residences</mat-option>
+        <mat-option value="Boarder">Boarder</mat-option>
+        <mat-option value="Day">Day</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="filter-actions-print">
+      <button mat-raised-button color="warn" (click)="onClearFilters()">Clear Filters</button>
+      <button mat-raised-button color="primary" (click)="printReport()">Print Report</button>
+    </div>
+  </form>
+
+  <div *ngIf="reportData$ | async as report">
+    <div class="total-outstanding">
+      <h2>Overall Outstanding Fees: {{ report.totalOverallOutstanding | currency:'USD':'symbol':'1.2-2' }}</h2>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <h4>Summary by Class</h4>
+    <div class="table-container">
+      <table mat-table [dataSource]="enrolmentSummaryTableData" class="full-width-table">
+        <ng-container matColumnDef="enrolName">
+          <th mat-header-cell *matHeaderCellDef class="mat-header-cell">Class Name</th>
+          <td mat-cell *matCellDef="let element">{{ element.enrolName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="totalOutstanding">
+          <th mat-header-cell *matHeaderCellDef class="mat-header-cell">Outstanding Amount</th>
+          <td mat-cell *matCellDef="let element">{{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="enrolmentSummaryDisplayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: enrolmentSummaryDisplayedColumns"></tr>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="2">No class summary data available.</td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <h4>Summary by Residence</h4>
+    <div class="table-container">
+      <table mat-table [dataSource]="residenceSummaryTableData" class="full-width-table">
+        <ng-container matColumnDef="residence">
+          <th mat-header-cell *matHeaderCellDef class="mat-header-cell">Residence</th>
+          <td mat-cell *matCellDef="let element">{{ element.residence }}</td>
+        </ng-container>
+        <ng-container matColumnDef="totalOutstanding">
+          <th mat-header-cell *matHeaderCellDef class="mat-header-cell">Outstanding Amount</th>
+          <td mat-cell *matCellDef="let element">{{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="residenceSummaryDisplayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: residenceSummaryDisplayedColumns"></tr>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="2">No residence summary data available.</td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <h4>Students with Outstanding Balances ({{ totalStudents }} Total)</h4>
+
+    <mat-paginator [length]="totalStudents" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Select page of outstanding students"
+      class="print-hide">
+    </mat-paginator>
+
+    <div class="student-details-table-container">
+      <table class="full-width-table">
+        <thead>
+          <tr>
+            <th class="table-header-cell">Student Name</th>
+            <th class="table-header-cell">Class/Enrolment</th>
+            <th class="table-header-cell">Residence</th>
+            <th class="table-header-cell">Outstanding Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="isPrinting; else paginatedRows">
+            <tr class="table-row" *ngFor="let element of studentDetailsTableData">
+              <td class="table-cell">{{ element.studentName }}</td>
+              <td class="table-cell">{{ element.enrolName }}</td>
+              <td class="table-cell">{{ element.residence }}</td>
+              <td class="table-cell">{{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </ng-container>
+          <ng-template #paginatedRows>
+            <tr class="table-row" *ngFor="let element of paginatedStudentDetails">
+              <td class="table-cell">{{ element.studentName }}</td>
+              <td class="table-cell">{{ element.enrolName }}</td>
+              <td class="table-cell">{{ element.residence }}</td>
+              <td class="table-cell">{{ element.totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </ng-template>
+
+          <tr class="table-row" *ngIf="totalStudents === 0">
+            <td class="table-cell no-data-state" colspan="4">
+              No students found with outstanding balances for the selected criteria.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <mat-paginator [length]="totalStudents" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Select page of outstanding students"
+      class="print-hide">
+    </mat-paginator>
+
+  </div>
+
+  <div *ngIf="isLoading$ | async" class="loading-state">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading report data...</p>
+  </div>
+  <div *ngIf="error$ | async as errorMsg" class="error-state">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p>Error: Could not load data.</p>
+    <pre class="error-details">{{ errorMsg }}</pre>
+  </div>
+</div>

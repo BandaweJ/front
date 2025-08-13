@@ -1,0 +1,190 @@
+/* src/app/dashboard/teachers-dashboard/teachers-dashboard.component.css */
+
+.summaries-row {
+  display: flex;
+  justify-content: stretch;
+  gap: 0.5rem;
+  flex-flow: row wrap; /* CHANGE: Allow items to wrap to the next line */
+  color: white;
+  cursor: pointer;
+}
+
+.summaries-row mat-card {
+  /* Target all mat-cards within summaries-row */
+  flex: 1 1 calc(25% - 0.375rem); /* Make cards flexible, allowing them to shrink and grow */
+  /* flex-basis: 25% adjusted for gap (0.5rem * 3 gaps / 4 cards = 0.375rem) */
+  min-width: 200px; /* NEW: Set a minimum width for cards before they wrap, adjust as needed */
+  box-sizing: border-box; /* Ensure padding/border included in width */
+}
+
+/* Background colors remain the same */
+.summaries-row mat-card:nth-child(1) {
+  background-color: #1d70a2;
+}
+.summaries-row mat-card:nth-child(2) {
+  background-color: #157145;
+}
+.summaries-row mat-card:nth-child(3) {
+  background-color: #d1ac00;
+}
+.summaries-row mat-card:nth-child(4) {
+  background-color: #a11692;
+}
+
+.summaries-container {
+  display: grid;
+  grid-gap: 0.7rem;
+  padding: 0.5rem;
+  align-items: center; /* This aligns items vertically within their grid cells */
+
+  /* NEW GRID TEMPLATE: Define areas or explicit columns/rows */
+  /* This sets up a 2x2 grid. Icon top-left, Total top-right, Heading bottom-left, Breakdown bottom-right */
+  grid-template-columns: auto 1fr; /* Auto for icon column, 1fr for the rest of the content */
+  grid-template-rows: auto 1fr; /* Auto for icon/total row, 1fr for heading/breakdown row */
+
+  box-shadow: 0 4px 8px 2px rgba(0, 0, 0, 0.5);
+  min-width: 0; /* Important for grid items inside flex containers */
+  overflow: hidden; /* Hide any internal overflow in the card if necessary */
+}
+
+.summary-icon {
+  grid-row: 1 / 2; /* Stays in the first row */
+  grid-column: 1 / 2; /* Stays in the first column */
+  display: flex; /* Flexbox for centering icon within its cell */
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icon {
+  font-size: 48px;
+}
+
+.total {
+  grid-row: 1 / 2; /* Same row as icon */
+  grid-column: 2 / 3; /* Second column */
+  display: flex;
+  flex-direction: column; /* Stack total and big-total if needed, though they seem to be one element */
+  justify-content: center;
+  align-items: center;
+  text-align: center; /* Center the text inside */
+}
+
+.breakdown {
+  grid-row: 2 / 3; /* Second row */
+  grid-column: 2 / 3; /* Second column */
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-evenly;
+  gap: 5px; /* Reduced gap for more space */
+  min-width: 0;
+  /* Remove overflow hidden and text-overflow ellipsis from breakdown if chips should wrap.
+     If chips must be on one line, these are fine here, but ensure space. */
+}
+
+.heading {
+  grid-row: 2 / 3; /* Second row */
+  grid-column: 1 / 2; /* First column, below icon */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  white-space: normal; /* CRITICAL: ALLOW TEXT TO WRAP */
+  overflow: visible; /* CRITICAL: ALLOW OVERFLOW, OR USE HIDDEN ONLY IF TEXT WRAPS */
+  text-overflow: clip; /* CRITICAL: NO ELLIPSIS IF TEXT IS ALLOWED TO WRAP */
+  text-align: center; /* Center the wrapped text */
+}
+
+.big-total {
+  font-weight: bold;
+  font-size: 40px;
+}
+
+mat-chip {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0; /* Allow chips to shrink */
+  white-space: nowrap; /* Keep chip content on one line */
+  overflow: hidden; /* Hide text overflow */
+  text-overflow: ellipsis; /* Add ellipsis */
+}
+
+mat-chip mat-icon {
+  margin-right: 4px;
+}
+
+.conatiner {
+  height: 50vh;
+}
+.graphs-container {
+  display: grid;
+  /* We want the graph to be a single column, taking full width */
+  grid-template-columns: 1fr; /* Set to 1 fraction unit, making it responsive */
+  grid-template-rows: auto;
+  margin: 1rem;
+  align-items: center;
+}
+.enrolment-graph {
+  /* This container should also be flexible */
+  width: 100%; /* Ensure it takes the full width of its parent */
+  /*overflow: hidden;  Hide any overflow within this container */
+  display: flex; /* Make it a flex container to manage its child chart */
+  justify-content: center; /* Center the chart */
+  align-items: center;
+  padding-bottom: 1rem;
+}
+.enrolment-graph app-enrolment-chart {
+  width: 100%; /* Important: Ensure the chart doesn't exceed its parent's width */
+  /* max-height: 60vh; */
+  height: auto;
+  /* flex: 1; /* Allow the chart component to fill available space */
+}
+
+.student-widgets {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Allow widgets to wrap */
+}
+
+.balance {
+  background-color: teal;
+  color: white;
+}
+
+.widget {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 250px; /* Example: minimum width for a widget */
+  box-sizing: border-box;
+}
+
+.enrolment {
+  background-color: teal;
+  color: white;
+}
+
+.student-reports {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.reports-pills {
+  display: flex;
+  flex-wrap: wrap; /* Allow pills to wrap if needed */
+}
+
+.pay-up {
+  padding: 1rem;
+  background-color: rgb(153, 51, 88);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+}

@@ -1,0 +1,24 @@
+.card-title {
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 1rem;
+  max-width: 580px;
+}
+
+.row {
+  padding: 1rem;
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 1rem;
+}
+
+.submit-btn {
+  align-self: flex-end;
+}
+.actions {
+  display: flex;
+}

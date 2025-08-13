@@ -1,0 +1,127 @@
+/* src/app/finance/reports/student-ledger-report/student-ledger-report.component.css */
+.ledger-report-card {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.search-section {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.selected-student-info {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #e8f5e9; /* Light green */
+  border-left: 5px solid #4caf50; /* Green border */
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.selected-student-info h3 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: #3f51b5; /* Primary color */
+}
+
+.selected-student-info p {
+  margin-bottom: 0;
+  font-size: 1.1em;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 500;
+}
+
+/* Reusing common state styles */
+.loading-state,
+.error-state,
+.no-data-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.error-state {
+  color: #f44336; /* Red for errors */
+}
+
+.error-details {
+  font-size: 0.8em;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.loading-state mat-spinner,
+.error-state mat-icon,
+.no-data-state mat-icon {
+  margin-bottom: 15px;
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+}
+
+/* Table Styling */
+.ledger-table-container {
+  overflow-x: auto; /* Enable horizontal scrolling on small screens */
+  margin-top: 20px;
+}
+
+.full-width-table {
+  width: 100%;
+  min-width: 700px; /* Ensure table doesn't get too squished */
+}
+
+.mat-header-cell {
+  font-weight: bold;
+  background-color: #f5f5f5; /* Light grey header background */
+  color: rgba(0, 0, 0, 0.87);
+  padding: 12px 16px; /* Adjust padding */
+}
+
+.mat-cell {
+  font-size: 0.9em;
+  color: rgba(0, 0, 0, 0.7);
+  padding: 8px 16px; /* Adjust padding */
+}
+
+/* Amount Direction Colors */
+.amount-in {
+  color: #4caf50; /* Green for payments (money coming IN to the school) */
+  font-weight: 500;
+}
+
+.amount-out {
+  color: #f44336; /* Red for invoices (money going OUT of student's balance, i.e., they owe) */
+  font-weight: 500;
+}
+
+/* Running Balance Colors */
+.balance-debit {
+  color: #f44336; /* Red for positive balance (student owes money) */
+  font-weight: 600;
+}
+
+.balance-credit {
+  color: #4caf50; /* Green for negative balance (school owes student / overpayment) */
+  font-weight: 600;
+}
+
+.balance-zero {
+  color: rgba(0, 0, 0, 0.7); /* Standard color for zero balance */
+  font-weight: 500;
+}
+
+/* Icons within cells */
+td mat-icon {
+  vertical-align: middle;
+  margin-right: 5px;
+  font-size: 18px; /* Slightly smaller icon */
+}

@@ -1,0 +1,173 @@
+<mat-card>
+  <form [formGroup]="addTeacherForm" (ngSubmit)="addTeacher()">
+    <mat-card-title>
+      <h2>Add New Teacher</h2>
+      <mat-card-subtitle class="error">
+        {{ errorMsg$ | async }}
+      </mat-card-subtitle>
+    </mat-card-title>
+
+    <mat-card-content>
+      <div class="form-group">
+        <div>
+          <!-- <label>Gender: </label> -->
+          <mat-radio-group>
+            <mat-radio-group formControlName="gender">
+              <mat-radio-button *ngFor="let gender of genders" [value]="gender">{{ gender }}</mat-radio-button>
+            </mat-radio-group>
+          </mat-radio-group>
+        </div>
+        <div>
+          <mat-form-field>
+            <mat-label>Role</mat-label>
+            <mat-select formControlName="role">
+              <mat-option *ngFor="let role of roles" [value]="role">{{ role }}</mat-option>
+
+
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <!-- <label>Active: </label> -->
+          <mat-radio-group formControlName="active">
+            <mat-radio-button *ngFor="let activeValue of activeValues" [value]="activeValue">
+              {{ activeValue ? 'Active' : 'Inactive' }}
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+      <div class="form-group">
+        <div>
+          <!-- <label>Title: </label> -->
+          <mat-radio-group>
+            <mat-radio-group formControlName="title">
+              <mat-radio-button *ngFor="let title of titles" [value]="title">{{
+                title
+                }}</mat-radio-button>
+            </mat-radio-group>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <mat-form-field>
+          <mat-label>I.D Number</mat-label>
+          <input formControlName="id" matInput type="text" placeholder="National I.D Number" />
+          <mat-error *ngIf="id?.hasError('required')">
+            ID is required
+          </mat-error>
+          <mat-error *ngIf="id?.hasError('minlength')">
+            At least 10 characters
+          </mat-error>
+          <mat-error *ngIf="id?.hasError('pattern')"> Invalid ID </mat-error>
+          <mat-hint>e.g 02086982F22</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input formControlName="name" matInput type="text" placeholder="Your Name" />
+          <mat-error *ngIf="name?.hasError('required')"> Required </mat-error>
+          <mat-error *ngIf="name?.hasError('minlength')">
+            At least 2 characters
+          </mat-error>
+          <mat-hint>e.g Tawanda</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Surname</mat-label>
+          <input formControlName="surname" matInput type="text" placeholder="Surname" />
+          <mat-error *ngIf="surname?.hasError('required')">
+            Required
+          </mat-error>
+          <mat-error *ngIf="surname?.hasError('minlength')">
+            At least 2 characters
+          </mat-error>
+          <mat-hint>e.g Taivako</mat-hint>
+        </mat-form-field>
+      </div>
+      <div class="form-group">
+        <mat-form-field>
+          <mat-label>Date Of Birth</mat-label>
+          <input formControlName="dob" (dateChange)="changeDatePickerDob()" matInput [matDatepicker]="picker" />
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Date Of Joining</mat-label>
+          <input formControlName="dateOfJoining" (dateChange)="changeDatePickerDoj()" matInput
+            [matDatepicker]="picker1" />
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Date Of Leaving</mat-label>
+          <input formControlName="dateOfLeaving" (dateChange)="changeDatePickerDol()" matInput
+            [matDatepicker]="picker2" />
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="form-group">
+        <mat-form-field>
+          <mat-label>Cell</mat-label>
+          <input formControlName="cell" matInput type="tel" placeholder="Cell Number" />
+          <mat-error *ngIf="cell?.hasError('required')"> Required </mat-error>
+          <mat-error *ngIf="cell?.hasError('minlength')">
+            At least 10 characters
+          </mat-error>
+          <mat-hint>e.g 263778261057</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input formControlName="email" matInput type="text" placeholder="email@domain.com" />
+          <mat-error *ngIf="email?.hasError('required')"> Required </mat-error>
+          <mat-error *ngIf="email?.hasError('email')">
+            Invalid Email
+          </mat-error>
+          <mat-hint>e.g bands@gmail.com</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Address</mat-label>
+          <input formControlName="address" matInput type="text" placeholder="Adrress" />
+          <mat-hint>e.g No 2830 Povo Str, Masvingo</mat-hint>
+        </mat-form-field>
+      </div>
+      <fieldset>
+        <legend>Qualifications</legend>
+        <div class="form-group-qual">
+          <button mat-mini-fab (click)="addControl()" class="addbtn" type="button">
+            <mat-icon class="add-qualification-btn">add</mat-icon>
+          </button>
+
+          <ng-container formArrayName="qualifications">
+            <ng-container *ngFor="let qual of qualifications.controls; let i = index">
+              <div class="qual-item">
+                <mat-form-field appearance="fill">
+                  <input matInput formControlName="{{ i }}" placeholder="Qualification" />
+                </mat-form-field>
+
+                <mat-icon class="delete-btn" (click)="delete(i)">
+                  delete_forever</mat-icon>
+              </div>
+            </ng-container>
+          </ng-container>
+        </div>
+      </fieldset>
+    </mat-card-content>
+    <mat-card-actions>
+      <div class="button-group">
+        <button type="button" color="warn" mat-raised-button class="btn-grp-item" (click)="closeDialog()">
+          <mat-icon>cancel</mat-icon>
+        </button>
+        <button class="btn-grp-item" type="submit" color="primary" mat-raised-button
+          [disabled]="addTeacherForm.invalid">
+          <mat-icon>{{ data ? "update" : "save" }}</mat-icon>
+        </button>
+      </div>
+    </mat-card-actions>
+  </form>
+</mat-card>

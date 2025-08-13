@@ -1,0 +1,16 @@
+.student-deatils-container {
+  display: flex;
+  padding: 1rem;
+  justify-content: space-around;
+}
+.example-full-width {
+  display: flex;
+  padding: 1rem;
+  justify-content: center;
+  width: 40%;
+  align-items: center;
+}
+
+.btn {
+  margin: 1rem auto;
+}

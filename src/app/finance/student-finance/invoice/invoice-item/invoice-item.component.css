@@ -1,0 +1,237 @@
+.invoice-item {
+  /* A4 dimensions at 96 DPI (standard for web) */
+  /* 210mm = 794px */
+  /* 297mm = 1123px */
+  width: 794px;
+  height: 1123px;
+
+  /* Optional: Add a border to visualize the A4 area */
+  border: 1px solid #ccc;
+  box-sizing: border-box; /* Ensures padding and border are included in the width/height */
+
+  /* Optional: Add some padding for inner content */
+  padding: 20mm; /* Using mm for consistent spacing on print */
+
+  /* Optional: Center the invoice item on the page if it's the main content */
+  margin: 0 auto; /* 20px top/bottom margin, auto for left/right to center */
+  background-color: #fff; /* White background, typical for invoices */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* --- Media Queries for Responsiveness --- */
+
+/* For screens smaller than A4 width (e.g., typical tablet/phone landscape) */
+@media screen and (max-width: 820px) {
+  .invoice-item {
+    width: 95vw; /* Take up 95% of the viewport width */
+    height: auto; /* Allow height to adjust based on content */
+    margin: 20px auto; /* Add some vertical margin on smaller screens */
+    padding: 20px; /* Use px for screen-based padding */
+    box-shadow: none; /* Remove shadow on smaller screens for a cleaner look */
+    border: none; /* Remove border on smaller screens if desired */
+  }
+}
+
+/* For even smaller screens (e.g., typical phone portrait) */
+@media screen and (max-width: 500px) {
+  .invoice-item {
+    width: 98vw; /* Take up even more of the viewport width */
+    padding: 15px; /* Reduce padding further */
+    margin: 10px auto; /* Reduce vertical margin */
+  }
+}
+
+/* Media query for print styles */
+@media print {
+  .invoice-item {
+    width: 210mm; /* Use actual mm for print */
+    height: 297mm; /* Use actual mm for print */
+    border: none; /* Remove border for clean print */
+    box-shadow: none; /* Remove shadow for clean print */
+    margin: 0; /* Remove margins for full page print */
+    padding: 0; /* Adjust padding as needed for print */
+    /* Ensure no page breaks inside the invoice item if possible */
+    page-break-inside: avoid;
+  }
+
+  /* You might also want to hide other page elements when printing */
+  body > *:not(.invoice-item) {
+    display: none;
+  }
+}
+/* ------------- */
+.school-contact {
+  justify-content: center;
+  display: flex; /* Enables Flexbox for the container */
+  align-items: center; /* Vertically aligns items in the center */
+  gap: 20px; /* Adds space between the logo and the address div */
+  flex-wrap: wrap; /* Allows items to wrap to the next line on smaller screens */
+
+  width: fit-content; /* Or a specific max-width, e.g., max-width: 800px; */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.school-contact .logo {
+  max-width: 100px; /* Set a maximum width for the logo */
+  height: auto; /* Maintains aspect ratio as the width changes */
+  flex-shrink: 0; /* Prevents the logo from shrinking too much on smaller screens */
+}
+
+.school-address {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allows the address div to take up available space */
+}
+
+.address-heading {
+  text-align: center;
+  font-size: 1.3rem;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+/* Optional: Add a media query for smaller screens if you want them to stack */
+@media (max-width: 600px) {
+  .school-contact {
+    flex-direction: column; /* Stacks items vertically on small screens */
+    text-align: center; /* Centers text when stacked */
+  }
+
+  .school-contact .logo {
+    margin-bottom: 10px; /* Add some space below the logo when stacked */
+  }
+
+  .contact-detail {
+    margin: 0 0 5px; /* Change 5px to your desired value */
+  }
+}
+
+.invoice-title {
+  display: flex;
+  margin-top: 3rem;
+  justify-content: space-between;
+}
+
+.invoice-number {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.invoice-label {
+  font-weight: bold;
+}
+
+h1 {
+  font-weight: bold;
+}
+
+.invoice-summary {
+  display: flex;
+  justify-content: space-between;
+}
+
+.bill-to {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px;
+  width: fit-content;
+}
+
+.title {
+  /* font-weight: bold; */
+  font-size: 1.2em;
+  margin-bottom: 0.5rem;
+  color: #3185fc;
+  grid-column: 1 / span 2;
+}
+
+.bill-label,
+.summary-label {
+  text-align: left;
+}
+
+.bill-value,
+.summary-value {
+  text-align: left;
+  /* color: #3185fc; */
+}
+
+.status {
+  color: #3185fc;
+}
+
+.terms {
+  margin: 1rem 0;
+}
+
+.terms-label {
+  font-weight: bold;
+}
+
+h3 {
+  margin: 0.5;
+}
+
+.banking-details {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: auto 1fr;
+}
+
+.footer {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+  text-align: center;
+  font-style: italic;
+}
+
+.download-btn {
+  padding: 5px; /* Adjust this value as needed */
+  min-width: unset; /* Override default min-width for fab buttons */
+  height: auto; /* Ensure height adjusts with padding */
+  width: auto; /* Ensure width adjusts with padding */
+}
+
+.invoice-download {
+  position: absolute; /* Position relative to .invoice-item */
+  top: 10px; /* Adjust distance from the top as needed */
+  left: 50%; /* Move 50% from the left edge of the parent */
+  transform: translateX(
+    -50%
+  ); /* Adjust for the button's own width to truly center it */
+  z-index: 10; /* Ensure it stays on top of other content */
+}
+
+.invoice-table {
+  width: 100%;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-width: 0.2px;
+  border-style: solid;
+  border-collapse: collapse;
+  border-color: #96d4d4;
+}
+
+.invoice-table td {
+  border: 1px solid #96d4d4;
+  border-collapse: collapse;
+}
+
+.invoice-table th {
+  border-width: 0.2px;
+  border-style: solid;
+  border-collapse: collapse;
+  border-color: #96d4d4;
+  background-color: #96d4d4;
+}
+
+.invoice-table th,
+.invoice-table td {
+  padding: 5px;
+  text-align: left;
+}
