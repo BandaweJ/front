@@ -20,6 +20,9 @@ import {
 } from 'src/app/finance/store/finance.actions';
 import { MatTableDataSource } from '@angular/material/table';
 
+// Import the Ng2-charts types
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+
 @Component({
   selector: 'app-finance-dashboard',
   templateUrl: './finance-dashboard.component.html',
@@ -48,6 +51,49 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
     { label: 'Type (A-Z)', value: 'typeAsc' },
   ];
 
+  // =========================================================
+  // Ng2-charts properties
+  // =========================================================
+  public barChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    scales: {
+      x: {},
+      y: {
+        min: 0,
+      },
+    },
+    plugins: {
+      legend: {
+        display: true,
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      },
+    },
+  };
+  public barChartType: ChartType = 'bar';
+  public barChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        label: 'Invoices',
+        backgroundColor: 'rgba(63, 81, 181, 0.7)', // Match Material Primary
+        borderColor: 'rgba(63, 81, 181, 1)',
+        hoverBackgroundColor: 'rgba(63, 81, 181, 0.9)',
+        hoverBorderColor: 'rgba(63, 81, 181, 1)',
+      },
+      {
+        data: [],
+        label: 'Payments',
+        backgroundColor: 'rgba(76, 175, 80, 0.7)', // Match Material Green
+        borderColor: 'rgba(76, 175, 80, 1)',
+        hoverBackgroundColor: 'rgba(76, 175, 80, 0.9)',
+        hoverBorderColor: 'rgba(76, 175, 80, 1)',
+      },
+    ],
+  };
+
   constructor(private store: Store, private dialog: MatDialog) {}
 
   ngOnInit(): void {
@@ -55,6 +101,57 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
     this.store.dispatch(invoiceActions.fetchAllInvoices());
 
     const allData$ = this.store.pipe(select(selectAllCombinedFinanceData));
+
+    // =========================================================
+    // Updated chart data processing for ng2-charts
+    // =========================================================
+    allData$
+      .pipe(
+        map((data) => {
+          const monthlyTotals = new Map<
+            string,
+            { invoices: number; payments: number }
+          >();
+          data.forEach((item) => {
+            const date = new Date(item.transactionDate);
+            const monthYear = date.toLocaleString('default', {
+              month: 'short',
+              year: 'numeric',
+            });
+
+            if (!monthlyTotals.has(monthYear)) {
+              monthlyTotals.set(monthYear, { invoices: 0, payments: 0 });
+            }
+
+            const totals = monthlyTotals.get(monthYear)!;
+            if (item.type === 'Invoice') {
+              totals.invoices += +item.amount;
+            } else {
+              totals.payments += +item.amount;
+            }
+          });
+
+          // Sort keys chronologically
+          const sortedKeys = Array.from(monthlyTotals.keys()).sort((a, b) => {
+            const [monthA, yearA] = a.split(' ');
+            const [monthB, yearB] = b.split(' ');
+            const dateA = new Date(`${monthA} 1, ${yearA}`);
+            const dateB = new Date(`${monthB} 1, ${yearB}`);
+            return dateA.getTime() - dateB.getTime();
+          });
+
+          // Populate ChartData object
+          this.barChartData.labels = sortedKeys;
+          this.barChartData.datasets[0].data = sortedKeys.map(
+            (key) => monthlyTotals.get(key)!.invoices
+          );
+          this.barChartData.datasets[1].data = sortedKeys.map(
+            (key) => monthlyTotals.get(key)!.payments
+          );
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe();
 
     const filteredAndSortedData$ = combineLatest([
       allData$,
@@ -65,7 +162,6 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
         let filteredData = this.applyFilters(data, filters);
         return this.applySorting(filteredData, sort);
       }),
-      // Use tap to update the MatTableDataSource instances
       tap((data) => {
         this.invoicesDataSource.data = data.filter(
           (item) => item.type === 'Invoice'
@@ -77,22 +173,20 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     );
 
-    // This subscription is now necessary to trigger the observable stream
     filteredAndSortedData$.subscribe();
 
-    // Summary calculations remain the same
     this.totalInvoices$ = allData$.pipe(
       map((data) =>
         data
           .filter((item) => item.type === 'Invoice')
-          .reduce((acc, item) => acc + item.amount, 0)
+          .reduce((acc, item) => acc + +item.amount, 0)
       )
     );
     this.totalPayments$ = allData$.pipe(
       map((data) =>
         data
           .filter((item) => item.type === 'Payment')
-          .reduce((acc, item) => acc + item.amount, 0)
+          .reduce((acc, item) => acc + +item.amount, 0)
       )
     );
     this.totalBalance$ = combineLatest([

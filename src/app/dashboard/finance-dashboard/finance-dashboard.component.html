@@ -68,8 +68,9 @@
       <mat-card-title>Monthly Revenue vs Payments</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <div class="chart-placeholder">
-        <p>Your chart component will go here.</p>
+      <div class="chart-container">
+        <canvas baseChart [options]="barChartOptions" [data]="barChartData" [type]="barChartType">
+        </canvas>
       </div>
     </mat-card-content>
   </mat-card>
@@ -81,7 +82,7 @@
       </mat-card-header>
       <mat-card-content>
         <div *ngIf="invoicesDataSource.data.length > 0; else noDataFound">
-          <table mat-table [dataSource]="invoicesDataSource" class="finance-data-table">
+          <table mat-table [dataSource]="invoicesDataSource" class="finance-data-table" matSort #sort1="matSort">
             <ng-container matColumnDef="transactionIcon">
               <th mat-header-cell *matHeaderCellDef></th>
               <td mat-cell *matCellDef="let element" class="icon-cell">
@@ -125,7 +126,7 @@
       </mat-card-header>
       <mat-card-content>
         <div *ngIf="paymentsDataSource.data.length > 0; else noDataFound">
-          <table mat-table [dataSource]="paymentsDataSource" class="finance-data-table">
+          <table mat-table [dataSource]="paymentsDataSource" class="finance-data-table" matSort #sort2="matSort">
             <ng-container matColumnDef="transactionIcon">
               <th mat-header-cell *matHeaderCellDef></th>
               <td mat-cell *matCellDef="let element" class="icon-cell">
@@ -143,7 +144,7 @@
             <ng-container matColumnDef="amount">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
               <td mat-cell *matCellDef="let element" class="amount-cell amount-payment">
-                {{ element.amount | currency:'ZWL' }}
+                {{ element.amount | currency:'USD' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="description">
