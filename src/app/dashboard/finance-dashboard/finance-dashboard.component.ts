@@ -47,11 +47,8 @@ export class FinanceDashboardComponent
   invoicesDataSource = new MatTableDataSource<FinanceDataModel>([]);
   paymentsDataSource = new MatTableDataSource<FinanceDataModel>([]);
 
-  // The 'static: false' option is important because the paginators are inside an *ngIf
-  @ViewChild('invoicesPaginator', { static: false })
-  invoicesPaginator!: MatPaginator;
-  @ViewChild('paymentsPaginator', { static: false })
-  paymentsPaginator!: MatPaginator;
+  @ViewChild('invoicesPaginator') invoicesPaginator!: MatPaginator;
+  @ViewChild('paymentsPaginator') paymentsPaginator!: MatPaginator;
 
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 
@@ -159,7 +156,6 @@ export class FinanceDashboardComponent
           );
         }),
         tap(() => {
-          // Trigger a chart update after the data has been loaded and processed
           if (this.chart) {
             this.chart.update();
           }
@@ -184,6 +180,14 @@ export class FinanceDashboardComponent
         this.paymentsDataSource.data = data.filter(
           (item) => item.type === 'Payment'
         );
+
+        // Reassign the paginator when the data source is updated
+        if (this.invoicesDataSource.paginator === null) {
+          this.invoicesDataSource.paginator = this.invoicesPaginator;
+        }
+        if (this.paymentsDataSource.paginator === null) {
+          this.paymentsDataSource.paginator = this.paymentsPaginator;
+        }
       }),
       takeUntil(this.ngUnsubscribe)
     );
@@ -210,13 +214,10 @@ export class FinanceDashboardComponent
     ]).pipe(map(([invoices, payments]) => invoices - payments));
   }
 
-  // Use AfterViewInit to connect the paginator, ensuring the view is ready
+  // The `ngAfterViewInit` hook will now handle the initial paginator setup.
   ngAfterViewInit(): void {
-    // We need to delay this slightly to ensure the view is fully rendered
-    setTimeout(() => {
-      this.invoicesDataSource.paginator = this.invoicesPaginator;
-      this.paymentsDataSource.paginator = this.paymentsPaginator;
-    }, 0);
+    this.invoicesDataSource.paginator = this.invoicesPaginator;
+    this.paymentsDataSource.paginator = this.paymentsPaginator;
   }
 
   ngOnDestroy(): void {
