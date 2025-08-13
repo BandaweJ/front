@@ -65,25 +65,103 @@
   gap: 5px;
 }
 
-/* Styling for no data found message */
-.no-data-found {
-  text-align: center;
-  padding: 40px;
-  color: #757575;
-  font-style: italic;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-.no-data-found mat-icon {
-  font-size: 48px;
-  height: 48px;
-  width: 48px;
-  color: #b0b0b0;
+/* --- New Styles for Summary Cards --- */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
-/* --- New Styles for the Data Table --- */
+.summary-card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  height: 120px;
+  transition: transform 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+}
+
+.summary-card-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.card-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #fff;
+}
+
+.summary-text {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.card-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.total-invoices-card {
+  background-color: #3f51b5; /* Primary color */
+}
+
+.total-payments-card {
+  background-color: #4caf50; /* Green */
+}
+
+.total-balance-card {
+  background-color: #f44336; /* Red */
+}
+
+/* --- New Styles for Charts and Tables --- */
+.chart-card {
+  padding: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  color: #757575;
+}
+
+.tables-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.table-card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.table-card .mat-card-header {
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 16px;
+}
+
 .finance-data-table {
   width: 100%;
   border-collapse: collapse;
@@ -145,9 +223,23 @@
   font-weight: 500;
 }
 
-.actions-cell {
-  width: 50px;
+/* Styling for no data found message */
+.no-data-found {
   text-align: center;
+  padding: 40px;
+  color: #757575;
+  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.no-data-found mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  color: #b0b0b0;
 }
 
 /* Basic responsiveness */

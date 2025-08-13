@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, map, Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -11,11 +11,7 @@ import {
   invoiceActions,
   receiptActions,
 } from 'src/app/finance/store/finance.actions';
-import {
-  fetchClasses,
-  fetchTerms,
-} from 'src/app/enrolment/store/enrolment.actions';
-import { fetchStudents } from 'src/app/registration/store/registration.actions';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-finance-dashboard',
@@ -34,6 +30,15 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
   filteredAndSortedFinancialData$!: Observable<FinanceDataModel[]>;
   currentSort$ = this.sortSubject.asObservable();
 
+  // Data sources for the separate tables
+  invoicesDataSource = new MatTableDataSource<FinanceDataModel>([]);
+  paymentsDataSource = new MatTableDataSource<FinanceDataModel>([]);
+
+  // Summary data observables
+  totalInvoices$!: Observable<number>;
+  totalPayments$!: Observable<number>;
+  totalBalance$!: Observable<number>;
+
   // Define your sorting options
   sortOptions = [
     { label: 'Date (Newest)', value: 'dateDesc' },
@@ -46,24 +51,53 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
   constructor(private store: Store, private dialog: MatDialog) {}
 
   ngOnInit(): void {
-    // Dispatch actions to fetch all necessary data
     this.store.dispatch(receiptActions.fetchAllReceipts());
     this.store.dispatch(invoiceActions.fetchAllInvoices());
 
-    // Combine the data, filters, and sorting into one stream
+    const allData$ = this.store.pipe(select(selectAllCombinedFinanceData));
+
     this.filteredAndSortedFinancialData$ = combineLatest([
-      this.store.pipe(select(selectAllCombinedFinanceData)),
+      allData$,
       this.filterSubject.asObservable(),
       this.sortSubject.asObservable(),
     ]).pipe(
       map(([data, filters, sort]) => {
-        // Apply filtering first
         let filteredData = this.applyFilters(data, filters);
-        // Then apply sorting
         return this.applySorting(filteredData, sort);
       }),
       takeUntil(this.ngUnsubscribe)
     );
+
+    // Subscribe to the filtered data stream to update summary cards and tables
+    this.filteredAndSortedFinancialData$.subscribe((data) => {
+      // Update data sources for separate tables
+      this.invoicesDataSource.data = data.filter(
+        (item) => item.type === 'Invoice'
+      );
+      this.paymentsDataSource.data = data.filter(
+        (item) => item.type === 'Payment'
+      );
+    });
+
+    // Calculate summary data from the main data stream
+    this.totalInvoices$ = allData$.pipe(
+      map((data) =>
+        data
+          .filter((item) => item.type === 'Invoice')
+          .reduce((acc, item) => acc + item.amount, 0)
+      )
+    );
+    this.totalPayments$ = allData$.pipe(
+      map((data) =>
+        data
+          .filter((item) => item.type === 'Payment')
+          .reduce((acc, item) => acc + item.amount, 0)
+      )
+    );
+    this.totalBalance$ = combineLatest([
+      this.totalInvoices$,
+      this.totalPayments$,
+    ]).pipe(map(([invoices, payments]) => invoices - payments));
   }
 
   ngOnDestroy(): void {
@@ -76,10 +110,6 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   onFinancialEntitySelectedFromSearch(entity: FinanceDataModel): void {
-    // Implement logic for when a user selects an entity from the search bar.
-    // e.g., navigate to a details page or highlight the item.
-    console.log('Selected financial entity:', entity);
-    // For now, we'll just filter the view to show only this item.
     this.filterSubject.next({ studentId: entity.studentId });
   }
 
@@ -91,7 +121,6 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: FinanceFilter) => {
       if (result) {
-        // A new filter was applied, update the subject
         this.filterSubject.next(result);
       }
     });
@@ -114,7 +143,6 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
       return data;
     }
     return data.filter((item) => {
-      // Logic for filtering
       if (filters.transactionType && item.type !== filters.transactionType) {
         return false;
       }
