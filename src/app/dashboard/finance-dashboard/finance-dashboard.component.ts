@@ -27,8 +27,9 @@ import {
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 
-// Import the Ng2-charts types
+// Import the Ng2-charts types and directive
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
   selector: 'app-finance-dashboard',
@@ -47,9 +48,11 @@ export class FinanceDashboardComponent
   invoicesDataSource = new MatTableDataSource<FinanceDataModel>([]);
   paymentsDataSource = new MatTableDataSource<FinanceDataModel>([]);
 
-  // ViewChild decorators to get references to the paginators in the template
   @ViewChild('invoicesPaginator') invoicesPaginator!: MatPaginator;
   @ViewChild('paymentsPaginator') paymentsPaginator!: MatPaginator;
+
+  // ViewChild to get a reference to the chart component
+  @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 
   totalInvoices$!: Observable<number>;
   totalPayments$!: Observable<number>;
@@ -64,9 +67,6 @@ export class FinanceDashboardComponent
     { label: 'Type (A-Z)', value: 'typeAsc' },
   ];
 
-  // =========================================================
-  // Ng2-charts properties
-  // =========================================================
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     scales: {
@@ -110,8 +110,8 @@ export class FinanceDashboardComponent
   constructor(private store: Store, private dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.store.dispatch(receiptActions.fetchAllReceipts());
     this.store.dispatch(invoiceActions.fetchAllInvoices());
+    this.store.dispatch(receiptActions.fetchAllReceipts());
 
     const allData$ = this.store.pipe(select(selectAllCombinedFinanceData));
 
@@ -203,10 +203,15 @@ export class FinanceDashboardComponent
     ]).pipe(map(([invoices, payments]) => invoices - payments));
   }
 
-  // Connect the paginator to the data sources after the view is initialized
   ngAfterViewInit(): void {
+    // Connect the paginator to the data sources after the view is initialized
     this.invoicesDataSource.paginator = this.invoicesPaginator;
     this.paymentsDataSource.paginator = this.paymentsPaginator;
+
+    // Explicitly update the chart to ensure it renders correctly
+    if (this.chart) {
+      this.chart.update();
+    }
   }
 
   ngOnDestroy(): void {

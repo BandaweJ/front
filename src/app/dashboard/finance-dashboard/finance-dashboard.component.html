@@ -69,7 +69,7 @@
     </mat-card-header>
     <mat-card-content>
       <div class="chart-container">
-        <canvas baseChart [options]="barChartOptions" [data]="barChartData" [type]="barChartType">
+        <canvas #chart baseChart [options]="barChartOptions" [data]="barChartData" [type]="barChartType">
         </canvas>
       </div>
     </mat-card-content>
