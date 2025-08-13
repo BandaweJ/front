@@ -208,6 +208,42 @@ form {
   color: blue;
 }
 
+/* Other styles here */
+
+.marks-sheet-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Add this rule to prevent rows from splitting across pages */
+.marks-sheet-table table tr {
+  page-break-inside: avoid !important;
+}
+
+/* Also apply to mat-table's rows for consistency with Angular Material */
+.mat-row,
+.mat-header-row {
+  page-break-inside: avoid !important;
+}
+
+.subject-marks {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.subject-name {
+  font-weight: bold;
+}
+
+.final-mark {
+  padding-top: 5px;
+  border-top: 1px solid black;
+  margin-top: 5px;
+}
+
+/* Other styles here */
+
 /* --- @media print BLOCK: CRITICAL FOR NATIVE PRINTING --- */
 @media print {
   @page {
