@@ -1,4 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  AfterViewInit,
+} from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -19,6 +25,7 @@ import {
   receiptActions,
 } from 'src/app/finance/store/finance.actions';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 
 // Import the Ng2-charts types
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
@@ -28,7 +35,9 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
   templateUrl: './finance-dashboard.component.html',
   styleUrls: ['./finance-dashboard.component.css'],
 })
-export class FinanceDashboardComponent implements OnInit, OnDestroy {
+export class FinanceDashboardComponent
+  implements OnInit, OnDestroy, AfterViewInit
+{
   isSearchBarVisible = false;
   private ngUnsubscribe = new Subject<void>();
 
@@ -37,6 +46,10 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
 
   invoicesDataSource = new MatTableDataSource<FinanceDataModel>([]);
   paymentsDataSource = new MatTableDataSource<FinanceDataModel>([]);
+
+  // ViewChild decorators to get references to the paginators in the template
+  @ViewChild('invoicesPaginator') invoicesPaginator!: MatPaginator;
+  @ViewChild('paymentsPaginator') paymentsPaginator!: MatPaginator;
 
   totalInvoices$!: Observable<number>;
   totalPayments$!: Observable<number>;
@@ -78,7 +91,7 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
       {
         data: [],
         label: 'Invoices',
-        backgroundColor: 'rgba(63, 81, 181, 0.7)', // Match Material Primary
+        backgroundColor: 'rgba(63, 81, 181, 0.7)',
         borderColor: 'rgba(63, 81, 181, 1)',
         hoverBackgroundColor: 'rgba(63, 81, 181, 0.9)',
         hoverBorderColor: 'rgba(63, 81, 181, 1)',
@@ -86,7 +99,7 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
       {
         data: [],
         label: 'Payments',
-        backgroundColor: 'rgba(76, 175, 80, 0.7)', // Match Material Green
+        backgroundColor: 'rgba(76, 175, 80, 0.7)',
         borderColor: 'rgba(76, 175, 80, 1)',
         hoverBackgroundColor: 'rgba(76, 175, 80, 0.9)',
         hoverBorderColor: 'rgba(76, 175, 80, 1)',
@@ -102,9 +115,6 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
 
     const allData$ = this.store.pipe(select(selectAllCombinedFinanceData));
 
-    // =========================================================
-    // Updated chart data processing for ng2-charts
-    // =========================================================
     allData$
       .pipe(
         map((data) => {
@@ -131,7 +141,6 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
             }
           });
 
-          // Sort keys chronologically
           const sortedKeys = Array.from(monthlyTotals.keys()).sort((a, b) => {
             const [monthA, yearA] = a.split(' ');
             const [monthB, yearB] = b.split(' ');
@@ -140,7 +149,6 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
             return dateA.getTime() - dateB.getTime();
           });
 
-          // Populate ChartData object
           this.barChartData.labels = sortedKeys;
           this.barChartData.datasets[0].data = sortedKeys.map(
             (key) => monthlyTotals.get(key)!.invoices
@@ -193,6 +201,12 @@ export class FinanceDashboardComponent implements OnInit, OnDestroy {
       this.totalInvoices$,
       this.totalPayments$,
     ]).pipe(map(([invoices, payments]) => invoices - payments));
+  }
+
+  // Connect the paginator to the data sources after the view is initialized
+  ngAfterViewInit(): void {
+    this.invoicesDataSource.paginator = this.invoicesPaginator;
+    this.paymentsDataSource.paginator = this.paymentsPaginator;
   }
 
   ngOnDestroy(): void {

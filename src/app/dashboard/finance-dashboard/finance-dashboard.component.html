@@ -116,6 +116,7 @@
               *matRowDef="let row; columns: ['transactionIcon', 'transactionDate', 'studentName', 'amount', 'status']">
             </tr>
           </table>
+          <mat-paginator #invoicesPaginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
         </div>
       </mat-card-content>
     </mat-card>
@@ -157,6 +158,7 @@
               *matRowDef="let row; columns: ['transactionIcon', 'transactionDate', 'studentName', 'amount', 'description']">
             </tr>
           </table>
+          <mat-paginator #paymentsPaginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
         </div>
       </mat-card-content>
     </mat-card>
