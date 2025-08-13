@@ -47,8 +47,21 @@ export class FinanceDashboardComponent
   invoicesDataSource = new MatTableDataSource<FinanceDataModel>([]);
   paymentsDataSource = new MatTableDataSource<FinanceDataModel>([]);
 
-  @ViewChild('invoicesPaginator') invoicesPaginator!: MatPaginator;
-  @ViewChild('paymentsPaginator') paymentsPaginator!: MatPaginator;
+  // Using setters for the paginators to ensure they are always linked to the data source
+  @ViewChild('invoicesPaginator') set invoicesPaginator(
+    paginator: MatPaginator
+  ) {
+    if (paginator) {
+      this.invoicesDataSource.paginator = paginator;
+    }
+  }
+  @ViewChild('paymentsPaginator') set paymentsPaginator(
+    paginator: MatPaginator
+  ) {
+    if (paginator) {
+      this.paymentsDataSource.paginator = paginator;
+    }
+  }
 
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 
@@ -180,14 +193,6 @@ export class FinanceDashboardComponent
         this.paymentsDataSource.data = data.filter(
           (item) => item.type === 'Payment'
         );
-
-        // Reassign the paginator when the data source is updated
-        if (this.invoicesDataSource.paginator === null) {
-          this.invoicesDataSource.paginator = this.invoicesPaginator;
-        }
-        if (this.paymentsDataSource.paginator === null) {
-          this.paymentsDataSource.paginator = this.paymentsPaginator;
-        }
       }),
       takeUntil(this.ngUnsubscribe)
     );
@@ -214,10 +219,10 @@ export class FinanceDashboardComponent
     ]).pipe(map(([invoices, payments]) => invoices - payments));
   }
 
-  // The `ngAfterViewInit` hook will now handle the initial paginator setup.
   ngAfterViewInit(): void {
-    this.invoicesDataSource.paginator = this.invoicesPaginator;
-    this.paymentsDataSource.paginator = this.paymentsPaginator;
+    if (this.chart) {
+      this.chart.update();
+    }
   }
 
   ngOnDestroy(): void {
