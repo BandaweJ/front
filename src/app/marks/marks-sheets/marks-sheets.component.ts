@@ -166,18 +166,26 @@ export class MarksSheetsComponent implements OnInit {
     const doc = new jsPDF('l', 'mm', 'a4') as any;
     const header = this.pdfHeader.nativeElement;
 
+    // Generate the header image from the HTML banner
     html2canvas(header, { scale: 2 }).then((canvas) => {
       const headerImgData = canvas.toDataURL('image/png');
       const headerHeight =
         (canvas.height * doc.internal.pageSize.getWidth()) / canvas.width;
-      doc.addImage(
-        headerImgData,
-        'PNG',
-        0,
-        0,
-        doc.internal.pageSize.getWidth(),
-        headerHeight
-      );
+
+      // This function will be called on every page to add the banner
+      const addHeaderToPage = () => {
+        doc.addImage(
+          headerImgData,
+          'PNG',
+          0,
+          0,
+          doc.internal.pageSize.getWidth(),
+          headerHeight
+        );
+      };
+
+      // Add the header to the first page
+      addHeaderToPage();
 
       const tableHeaders = [
         '#',
@@ -242,32 +250,10 @@ export class MarksSheetsComponent implements OnInit {
           fontStyle: 'bold',
         },
         rowPageBreak: 'avoid',
+        // This hook now only adds the header image to new pages
         didDrawPage: (data: any) => {
           if (data.pageNumber > 1) {
-            doc.addImage(
-              headerImgData,
-              'PNG',
-              0,
-              0,
-              doc.internal.pageSize.getWidth(),
-              headerHeight
-            );
-            doc.autoTable({
-              head: [tableHeaders],
-              startY: headerHeight + 5,
-              theme: 'grid',
-              styles: {
-                fontSize: 7,
-                cellPadding: 2,
-                halign: 'center',
-                valign: 'middle',
-              },
-              headStyles: {
-                fillColor: [240, 240, 240],
-                textColor: 50,
-                fontStyle: 'bold',
-              },
-            });
+            addHeaderToPage();
           }
         },
       });
