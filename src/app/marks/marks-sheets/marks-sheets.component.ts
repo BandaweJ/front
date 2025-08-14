@@ -163,30 +163,27 @@ export class MarksSheetsComponent implements OnInit {
       return;
     }
 
+    // Cast jsPDF to any to access the autoTable method
     const doc = new jsPDF('l', 'mm', 'a4') as any;
     const header = this.pdfHeader.nativeElement;
 
-    // Generate the header image from the HTML banner
+    // First, use html2canvas to generate the header image only once
     html2canvas(header, { scale: 2 }).then((canvas) => {
       const headerImgData = canvas.toDataURL('image/png');
       const headerHeight =
         (canvas.height * doc.internal.pageSize.getWidth()) / canvas.width;
 
-      // This function will be called on every page to add the banner
-      const addHeaderToPage = () => {
-        doc.addImage(
-          headerImgData,
-          'PNG',
-          0,
-          0,
-          doc.internal.pageSize.getWidth(),
-          headerHeight
-        );
-      };
+      // Add the header to the first page only
+      doc.addImage(
+        headerImgData,
+        'PNG',
+        0,
+        0,
+        doc.internal.pageSize.getWidth(),
+        headerHeight
+      );
 
-      // Add the header to the first page
-      addHeaderToPage();
-
+      // Define the table headers
       const tableHeaders = [
         '#',
         'Student Name',
@@ -201,6 +198,7 @@ export class MarksSheetsComponent implements OnInit {
         'Pstn',
       ];
 
+      // Define the table body data, applying styles for color
       const tableBody = this.reports.map((rep, index) => {
         const studentName = `${rep.report.name} ${rep.report.surname}`;
         const rowData = [
@@ -233,9 +231,11 @@ export class MarksSheetsComponent implements OnInit {
         return rowData;
       });
 
+      // This is the core autoTable call
       doc.autoTable({
         head: [tableHeaders],
         body: tableBody,
+        // Start the table at the correct position after the header
         startY: headerHeight + 5,
         theme: 'grid',
         styles: {
@@ -250,12 +250,6 @@ export class MarksSheetsComponent implements OnInit {
           fontStyle: 'bold',
         },
         rowPageBreak: 'avoid',
-        // This hook now only adds the header image to new pages
-        didDrawPage: (data: any) => {
-          if (data.pageNumber > 1) {
-            addHeaderToPage();
-          }
-        },
       });
 
       const fileName = `${this.reports[0].report.name}_Marksheet_${this.reports[0].num}_${this.reports[0].year}.pdf`;
