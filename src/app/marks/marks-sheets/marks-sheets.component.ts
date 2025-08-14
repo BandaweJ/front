@@ -252,7 +252,7 @@ export class MarksSheetsComponent implements OnInit {
         rowPageBreak: 'avoid',
       });
 
-      const fileName = `${this.reports[0].report.name}_Marksheet_${this.reports[0].num}_${this.reports[0].year}.pdf`;
+      const fileName = `${this.reports[0].name}_Marksheet_Term_${this.reports[0].num}_${this.reports[0].year}_${this.reports[0].examType}.pdf`;
       doc.save(fileName);
     });
   }
