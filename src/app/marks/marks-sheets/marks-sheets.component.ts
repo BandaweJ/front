@@ -25,6 +25,17 @@ import { ExamType } from '../models/examtype.enum';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// NEW: Import jspdf-autotable as a module
+import { applyPlugin } from 'jspdf-autotable';
+
+// IMPORTANT: Apply the plugin to the jsPDF object
+applyPlugin(jsPDF);
+
+// This is the custom interface that extends jsPDF and adds the autoTable method.
+interface jsPDFWithPlugin extends jsPDF {
+  autoTable: any;
+}
+
 @Component({
   selector: 'app-marks-sheets',
   templateUrl: './marks-sheets.component.html',
@@ -145,50 +156,124 @@ export class MarksSheetsComponent implements OnInit {
     window.print();
   }
 
-  // ADDED: The new downloadPDF method
+  // UPDATED: The new downloadPDF method using jspdf-autotable with HTML
   downloadPDF(): void {
-    if (!this.pdfReportContainer || !this.reports.length) {
-      console.error('Report container or data not available.');
+    if (!this.marksheetTable || !this.reports.length) {
+      console.error('Marksheet table or data not available.');
       return;
     }
 
-    const data = this.pdfReportContainer.nativeElement;
-    const originalWidth = data.offsetWidth;
-    const originalHeight = data.offsetHeight;
+    const doc = new jsPDF('l', 'mm', 'a4') as any;
+    const header = this.pdfHeader.nativeElement;
 
-    // Use html2canvas to convert the HTML div to a canvas image
-    html2canvas(data, {
-      scale: 2, // Increase scale for better resolution
-      useCORS: true,
-      allowTaint: true,
-    }).then((canvas) => {
-      const contentDataURL = canvas.toDataURL('image/jpeg');
+    html2canvas(header, { scale: 2 }).then((canvas) => {
+      const headerImgData = canvas.toDataURL('image/png');
+      const headerHeight =
+        (canvas.height * doc.internal.pageSize.getWidth()) / canvas.width;
+      doc.addImage(
+        headerImgData,
+        'PNG',
+        0,
+        0,
+        doc.internal.pageSize.getWidth(),
+        headerHeight
+      );
 
-      // Create a new jsPDF instance (A4 landscape)
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const tableHeaders = [
+        '#',
+        'Student Name',
+        ...this.subjects.map((s) => s.name.substring(0, 9)),
+        'Passed',
+        'A*s',
+        'As',
+        'Bs',
+        'Cs',
+        'Ds',
+        'Av Mark',
+        'Pstn',
+      ];
 
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let position = 0;
+      const tableBody = this.reports.map((rep, index) => {
+        const studentName = `${rep.report.name} ${rep.report.surname}`;
+        const rowData = [
+          { content: index + 1, styles: {} },
+          { content: studentName, styles: { halign: 'left' } },
+          ...rep.report.subjectsTable.map((subjInfo) => {
+            const mark = subjInfo ? subjInfo.mark : '';
+            const styles =
+              mark && mark >= 50
+                ? { textColor: [0, 0, 255] } // Blue for passing marks
+                : mark && mark < 50
+                ? { textColor: [255, 0, 0] } // Red for failing marks
+                : {};
+            return { content: mark, styles: styles };
+          }),
+          { content: rep.report.subjectsPassed, styles: {} },
+          { content: rep.report.symbols[0], styles: {} },
+          { content: rep.report.symbols[1], styles: {} },
+          { content: rep.report.symbols[2], styles: {} },
+          { content: rep.report.symbols[3], styles: {} },
+          { content: rep.report.symbols[4], styles: {} },
+          {
+            content: rep.report.percentageAverge
+              ? rep.report.percentageAverge.toFixed(1)
+              : '',
+            styles: {},
+          },
+          { content: rep.report.classPosition, styles: {} },
+        ];
+        return rowData;
+      });
 
-      pdf.addImage(contentDataURL, 'JPEG', 0, position, imgWidth, imgHeight);
+      doc.autoTable({
+        head: [tableHeaders],
+        body: tableBody,
+        startY: headerHeight + 5,
+        theme: 'grid',
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          halign: 'center',
+          valign: 'middle',
+        },
+        headStyles: {
+          fillColor: [240, 240, 240],
+          textColor: 50,
+          fontStyle: 'bold',
+        },
+        rowPageBreak: 'avoid',
+        didDrawPage: (data: any) => {
+          if (data.pageNumber > 1) {
+            doc.addImage(
+              headerImgData,
+              'PNG',
+              0,
+              0,
+              doc.internal.pageSize.getWidth(),
+              headerHeight
+            );
+            doc.autoTable({
+              head: [tableHeaders],
+              startY: headerHeight + 5,
+              theme: 'grid',
+              styles: {
+                fontSize: 7,
+                cellPadding: 2,
+                halign: 'center',
+                valign: 'middle',
+              },
+              headStyles: {
+                fillColor: [240, 240, 240],
+                textColor: 50,
+                fontStyle: 'bold',
+              },
+            });
+          }
+        },
+      });
 
-      // Check if the content is longer than one page and add more pages if needed
-      let heightLeft = imgHeight;
-      heightLeft -= pdfHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(contentDataURL, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
-      }
-
-      // Generate a file name based on the report data
-      const fileName = `${this.reports[0].name}_Marksheet_${this.reports[0].num}_${this.reports[0].year}.pdf`;
-      pdf.save(fileName);
+      const fileName = `${this.reports[0].report.name}_Marksheet_${this.reports[0].num}_${this.reports[0].year}.pdf`;
+      doc.save(fileName);
     });
   }
 }
