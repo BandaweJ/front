@@ -26,15 +26,43 @@
       <button mat-mini-fab type="submit" [disabled]="classForm.invalid">
         <mat-icon>list</mat-icon>
       </button>
+
+      <button mat-mini-fab color="primary" (click)="downloadPDF()" [disabled]="!dataSource.data.length"
+        title="Download Class List">
+        <mat-icon>download</mat-icon>
+      </button>
     </div>
   </form>
 
   <mat-form-field appearance="outline">
-    <mat-label>Filter</mat-label>
+    <mat-label>Filter Students</mat-label>
     <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input>
-    <mat-icon matSuffix>search</mat-icon> </mat-form-field>
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
 
-  <div class="mat-elevation-z8">
+  <mat-divider></mat-divider>
+  <div class="summary-container">
+    <h3>Class Summary</h3>
+    <div class="summary-item">
+      <mat-icon color="primary">male</mat-icon>
+      <span>Boys: <b>{{ totalBoys }}</b></span>
+    </div>
+    <div class="summary-item">
+      <mat-icon color="warn">female</mat-icon>
+      <span>Girls: <b>{{ totalGirls }}</b></span>
+    </div>
+    <div class="summary-item">
+      <mat-icon color="accent">home</mat-icon>
+      <span>Boarders: <b>{{ totalBoarders }}</b></span>
+    </div>
+    <div class="summary-item">
+      <mat-icon>school</mat-icon>
+      <span>Day Scholars: <b>{{ totalDayScholars }}</b></span>
+    </div>
+  </div>
+  <mat-divider></mat-divider>
+
+  <div class="mat-elevation-z8" *ngIf="dataSource.data.length">
     <table mat-table [dataSource]="dataSource" matSort>
 
       <ng-container matColumnDef="studentNumber">

@@ -47,6 +47,33 @@ mat-form-field {
   overflow-x: auto;
 }
 
+/* Summary */
+.summary-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 16px 0;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.1rem;
+}
+
+.summary-item mat-icon {
+  font-size: 24px;
+  height: 24px;
+  width: 24px;
+  margin-bottom: 8px;
+}
+
+/* End Summary */
+
 /* Optional: Media query for extremely small screens if you want specific wrapping behavior */
 @media (max-width: 480px) {
   .top-btns mat-form-field {
