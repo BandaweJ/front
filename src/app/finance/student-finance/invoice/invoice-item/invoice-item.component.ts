@@ -15,7 +15,7 @@ import { FeesNames } from 'src/app/finance/enums/fees-names.enum';
 export class InvoiceItemComponent {
   constructor(public sharedService: SharedService, private store: Store) {}
 
-  @Input() invoice!: InvoiceModel;
+  @Input() invoice!: InvoiceModel | null;
   @Input() downloadable!: boolean;
 
   // Add a helper method to determine the display value for the exemption
@@ -46,8 +46,9 @@ export class InvoiceItemComponent {
   save() {
     // console.log('called save with invoice ', this.invoice);
     const invoice = this.invoice;
-
-    this.store.dispatch(invoiceActions.saveInvoice({ invoice }));
+    if (invoice) {
+      this.store.dispatch(invoiceActions.saveInvoice({ invoice }));
+    }
   }
 
   download() {

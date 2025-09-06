@@ -6,33 +6,37 @@
         " " + term.year }}</mat-option>
     </mat-select>
   </mat-form-field>
-  <app-student-search *ngIf="selectedTerm" class="search"
-    (studentSelected)="selectedStudentChanged($event)"></app-student-search>
-  <app-current-enrolment *ngIf="selectedStudentEnrol" class="enrolment"
-    [studentNumber]="selectedStudentEnrol.student.studentNumber"></app-current-enrolment>
 
+  <app-student-search class="search" (studentSelected)="selectedStudentChanged($event)"></app-student-search>
+
+  <app-current-enrolment *ngIf="invoice?.student; else noEnrolment" class="enrolment"
+    [studentNumber]="invoice?.student?.studentNumber"></app-current-enrolment>
+
+  <ng-template #noEnrolment>
+    no enrolment
+  </ng-template>
+
+
+  <button mat-raised-button color="primary" (click)="fetchInvoice()"
+    [disabled]="!selectedStudentNumber || !selectedTerm">
+    <mat-icon>receipt</mat-icon> Fetch Invoice
+  </button>
 </div>
 
 <div class="container">
-
   <mat-card>
-
-    <app-invoice-item *ngIf="invoice && invoice.invoiceNumber, else noInvoice" [invoice]="invoice"
+    <app-invoice-item *ngIf="invoice?.invoiceNumber; else noInvoice" [invoice]="invoice"
       [downloadable]="false"></app-invoice-item>
+
     <ng-template #noInvoice>
       <div *ngIf="fetchInvoiceError$ | async as error; else loadingOrNoData">
         <p style="color: red;" class="no-invoice">{{ error }}</p>
       </div>
       <ng-template #loadingOrNoData>
-        <p class="no-invoice">Select a student and term to view invoice.</p>
+        <p class="no-invoice">Select a student and term and click 'Fetch Invoice'.</p>
       </ng-template>
     </ng-template>
   </mat-card>
-  <app-billing *ngIf="selectedStudentEnrol && selectedTerm" [enrolment]="selectedStudentEnrol"
-    [enrolment]="selectedStudentEnrol" class="billing-container">
 
-
-  </app-billing>
-
-
+  <app-billing *ngIf="invoice?.enrol" [enrolment]="invoice?.enrol" class="billing-container"></app-billing>
 </div>

@@ -221,8 +221,7 @@
             </button>
 
             <!-- Payments / Receipting -->
-            <button mat-button routerLink="/payments" routerLinkActive="active"
-              *ngIf="role === 'auditor' || role === 'reception'">
+            <button mat-button routerLink="/payments" routerLinkActive="active" *ngIf="role === 'auditor'">
               <mat-icon>payments</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Receipting</span>
             </button>

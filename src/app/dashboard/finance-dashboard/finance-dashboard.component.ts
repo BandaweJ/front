@@ -29,6 +29,11 @@ import { MatPaginator } from '@angular/material/paginator';
 
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { fetchStudents } from 'src/app/registration/store/registration.actions';
+import {
+  fetchClasses,
+  fetchTerms,
+} from 'src/app/enrolment/store/enrolment.actions';
 
 @Component({
   selector: 'app-finance-dashboard',
@@ -123,6 +128,9 @@ export class FinanceDashboardComponent
   ngOnInit(): void {
     this.store.dispatch(invoiceActions.fetchAllInvoices());
     this.store.dispatch(receiptActions.fetchAllReceipts());
+    this.store.dispatch(fetchStudents());
+    this.store.dispatch(fetchTerms());
+    this.store.dispatch(fetchClasses());
 
     const allData$ = this.store.pipe(select(selectAllCombinedFinanceData));
 

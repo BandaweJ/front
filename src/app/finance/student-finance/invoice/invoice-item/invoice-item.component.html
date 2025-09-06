@@ -1,5 +1,5 @@
 <div class="invoice-item">
-  <div class="invoice-download" *ngIf="invoice.bills.length > 0">
+  <div class="invoice-download" *ngIf="invoice && invoice.bills && invoice.bills.length > 0">
     <button type="button" mat-mini-fab color="primary" class="download-btn"
       (click)="downloadable ? download() : save()">
       <span class="material-icons">{{
@@ -21,14 +21,14 @@
   </div>
 
   <div class="invoice-title">
-    <h1>INVOICE FOR TERM {{ invoice.enrol.num }} {{ invoice.enrol.year }}</h1>
+    <h1>INVOICE FOR TERM {{ invoice?.enrol?.num }} {{ invoice?.enrol?.year }}</h1>
     <div class="invoice-number">
       <span class="invoice-label">Invoice #:</span>
-      <span class="invoice-value">{{ invoice.invoiceNumber }}</span>
+      <span class="invoice-value">{{ invoice?.invoiceNumber }}</span>
       <span class="invoice-label">Date:</span>
-      <span class="invoice-value">{{ invoice.invoiceDate | date }}</span>
+      <span class="invoice-value">{{ invoice?.invoiceDate | date }}</span>
       <span class="invoice-label">Due Date:</span>
-      <span class="invoice-value">{{ invoice.invoiceDueDate | date }}</span>
+      <span class="invoice-value">{{ invoice?.invoiceDueDate | date }}</span>
     </div>
   </div>
 
@@ -36,38 +36,38 @@
     <div class="bill-to">
       <span class="bill-label title">Bill To</span>
       <span class="bill-label">Name</span>
-      <span class="bill-value">{{ invoice.student.surname }} {{ invoice.student.name }}</span>
+      <span class="bill-value">{{ invoice?.student?.surname }} {{ invoice?.student?.name }}</span>
       <span class="bill-label">Student No</span>
-      <span class="bill-value">{{ invoice.student.studentNumber }}</span>
+      <span class="bill-value">{{ invoice?.student?.studentNumber }}</span>
       <span class="bill-label">Class</span>
-      <span class="bill-value">{{ invoice.enrol.name }}</span>
+      <span class="bill-value">{{ invoice?.enrol?.name }}</span>
       <span class="bill-label">Residence</span>
-      <span class="bill-value">{{ invoice.enrol.residence }}</span>
+      <span class="bill-value">{{ invoice?.enrol?.residence }}</span>
       <span class="bill-label">Phone</span>
       <span class="bill-value">{{
-        invoice.student.cell || 'Student has no phone'
+        invoice?.student?.cell || 'Student has no phone'
         }}</span>
       <span class="bill-label">Email</span>
       <span class="bill-value">{{
-        invoice.student.email || 'Student has no email'
+        invoice?.student?.email || 'Student has no email'
         }}</span>
     </div>
     <div class="bill-to">
       <span class="summary-label title">Invoice Summary</span>
       <span class="summary-label">Total Bill</span>
       <span class="summary-value">{{
-        invoice.totalBill | currency : 'USD':'symbol':'1.2-2'
+        invoice?.totalBill | currency : 'USD':'symbol':'1.2-2'
         }}</span>
       <span class="summary-label">Amount Paid</span>
       <span class="summary-value">{{
-        invoice.amountPaidOnInvoice | currency : 'USD':'symbol':'1.2-2'
+        invoice?.amountPaidOnInvoice | currency : 'USD':'symbol':'1.2-2'
         }}</span>
       <span class="summary-label">Balance Due</span>
       <span class="summary-value">{{
-        invoice.balance | currency : 'USD':'symbol':'1.2-2'
+        invoice?.balance | currency : 'USD':'symbol':'1.2-2'
         }}</span>
       <span class="summary-label">Status</span>
-      <span class="summary-value status">{{ invoice.status }}</span>
+      <span class="summary-value status">{{ invoice?.status }}</span>
     </div>
   </div>
 

@@ -43,7 +43,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   fees: FeesModel[] = [];
   isNewComer$ = this.store.select(selectIsNewComer);
   isScienceStudent: boolean = false;
-  @Input() enrolment: EnrolsModel | null = null;
+  @Input() enrolment: EnrolsModel | undefined = undefined;
   selectedBills: BillModel[] = []; // Bills already associated with the invoice from backend
   toBill: BillModel[] = []; // Temporary staging area for bills to be processed on save
 
