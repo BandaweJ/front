@@ -8,60 +8,122 @@
     </div>
   </div>
 
-  <div class="toolbar-icons">
-    <button mat-icon-button (click)="toggleSearchBar()" aria-label="Toggle search">
+  <div class="toolbar-icons" role="toolbar" aria-label="Dashboard actions">
+    <button mat-icon-button (click)="toggleSearchBar()" 
+            [attr.aria-label]="isSearchBarVisible ? 'Close search' : 'Open search'"
+            [attr.aria-expanded]="isSearchBarVisible">
       <mat-icon>{{ isSearchBarVisible ? 'close' : 'search' }}</mat-icon>
     </button>
-    <button mat-icon-button (click)="onFilter()" aria-label="Filter financial data">
+    <button mat-icon-button (click)="onFilter()" 
+            aria-label="Filter financial data"
+            title="Filter data by criteria">
       <mat-icon>filter_list</mat-icon>
     </button>
-    <button mat-icon-button [matMenuTriggerFor]="sortMenu" aria-label="Sort financial data">
+    <button mat-icon-button [matMenuTriggerFor]="sortMenu" 
+            aria-label="Sort financial data"
+            [attr.aria-haspopup]="true"
+            title="Sort data by different criteria">
       <mat-icon>sort</mat-icon>
     </button>
-    <mat-menu #sortMenu="matMenu">
-      <button mat-menu-item *ngFor="let option of sortOptions" (click)="onSortChange(option.value)">
+    <mat-menu #sortMenu="matMenu" role="menu">
+      <button mat-menu-item *ngFor="let option of sortOptions" 
+              (click)="onSortChange(option.value)"
+              [attr.aria-label]="'Sort by ' + option.label"
+              role="menuitem">
         {{ option.label }}
-        <mat-icon *ngIf="(currentSort$ | async) === option.value">done</mat-icon>
+        <mat-icon *ngIf="(currentSort$ | async) === option.value" 
+                  aria-hidden="true">done</mat-icon>
       </button>
     </mat-menu>
-    <button mat-icon-button (click)="onClearFilters()" aria-label="Clear all filters">
+    <button mat-icon-button (click)="onClearFilters()" 
+            aria-label="Clear all filters and reset view"
+            title="Reset all filters">
       <mat-icon>refresh</mat-icon>
     </button>
   </div>
 </mat-toolbar>
 
 <div class="finance-dashboard-container">
-  <div class="summary-cards">
-    <mat-card class="summary-card total-invoices-card">
-      <div class="summary-card-content">
-        <mat-icon class="card-icon">receipt_long</mat-icon>
-        <div class="summary-text">
-          <div class="card-label">Total Invoices</div>
-          <div class="card-value">{{ totalInvoices$ | async | currency:'USD' }}</div>
-        </div>
-      </div>
-    </mat-card>
-
-    <mat-card class="summary-card total-payments-card">
-      <div class="summary-card-content">
-        <mat-icon class="card-icon">payments</mat-icon>
-        <div class="summary-text">
-          <div class="card-label">Total Payments</div>
-          <div class="card-value">{{ totalPayments$ | async | currency:'USD' }}</div>
-        </div>
-      </div>
-    </mat-card>
-
-    <mat-card class="summary-card total-balance-card">
-      <div class="summary-card-content">
-        <mat-icon class="card-icon">account_balance_wallet</mat-icon>
-        <div class="summary-text">
-          <div class="card-label">Outstanding Balance</div>
-          <div class="card-value">{{ totalBalance$ | async | currency:'USD' }}</div>
-        </div>
-      </div>
-    </mat-card>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Loading financial data...</p>
   </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasError && !isLoading" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h3 class="error-title">Unable to load data</h3>
+    <p class="error-message">{{ errorMessage }}</p>
+    <button mat-raised-button color="primary" (click)="loadData()">
+      <mat-icon>refresh</mat-icon>
+      Retry
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !hasError" class="dashboard-content">
+    <div class="summary-cards" role="region" aria-label="Financial summary">
+      <mat-card class="summary-card total-invoices-card" role="article" aria-labelledby="invoices-label">
+        <div class="summary-card-content">
+          <mat-icon class="card-icon" aria-hidden="true">receipt_long</mat-icon>
+          <div class="summary-text">
+            <div class="card-label" id="invoices-label">Total Invoices</div>
+            <div class="card-value" aria-label="Total invoice amount">{{ totalInvoices$ | async | currency:'USD' }}</div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="summary-card total-payments-card" role="article" aria-labelledby="payments-label">
+        <div class="summary-card-content">
+          <mat-icon class="card-icon" aria-hidden="true">payments</mat-icon>
+          <div class="summary-text">
+            <div class="card-label" id="payments-label">Total Payments</div>
+            <div class="card-value" aria-label="Total payment amount">{{ totalPayments$ | async | currency:'USD' }}</div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="summary-card total-balance-card" role="article" aria-labelledby="balance-label">
+        <div class="summary-card-content">
+          <mat-icon class="card-icon" aria-hidden="true">account_balance_wallet</mat-icon>
+          <div class="summary-text">
+            <div class="card-label" id="balance-label">Outstanding Balance</div>
+            <div class="card-value" aria-label="Outstanding balance amount">{{ totalBalance$ | async | currency:'USD' }}</div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="summary-card collection-rate-card" role="article" aria-labelledby="collection-rate-label">
+        <div class="summary-card-content">
+          <mat-icon class="card-icon" aria-hidden="true">trending_up</mat-icon>
+          <div class="summary-text">
+            <div class="card-label" id="collection-rate-label">Collection Rate</div>
+            <div class="card-value" aria-label="Collection rate percentage">{{ collectionRate$ | async | number:'1.1-1' }}%</div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="summary-card avg-invoice-card" role="article" aria-labelledby="avg-invoice-label">
+        <div class="summary-card-content">
+          <mat-icon class="card-icon" aria-hidden="true">receipt</mat-icon>
+          <div class="summary-text">
+            <div class="card-label" id="avg-invoice-label">Avg Invoice</div>
+            <div class="card-value" aria-label="Average invoice amount">{{ averageInvoiceAmount$ | async | currency:'USD' }}</div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="summary-card total-transactions-card" role="article" aria-labelledby="total-transactions-label">
+        <div class="summary-card-content">
+          <mat-icon class="card-icon" aria-hidden="true">list_alt</mat-icon>
+          <div class="summary-text">
+            <div class="card-label" id="total-transactions-label">Total Transactions</div>
+            <div class="card-value" aria-label="Total number of transactions">{{ totalTransactions$ | async | number }}</div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
 
   <mat-card class="chart-card">
     <mat-card-header>
@@ -163,6 +225,7 @@
       </mat-card-content>
     </mat-card>
   </div>
+  </div> <!-- End dashboard-content -->
 </div>
 
 <ng-template #noDataFound>

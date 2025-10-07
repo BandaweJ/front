@@ -9,7 +9,7 @@ import { PaymentMethods } from '../enums/payment-methods.enum';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsService {
-  baseURL = `${environment.apiUrl}payment/`;
+  baseURL = `${environment.apiUrl}/payment/`;
 
   constructor(private httpClient: HttpClient) {}
   getInvoice(

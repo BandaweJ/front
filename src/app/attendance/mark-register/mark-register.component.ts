@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -7,7 +7,8 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subject, combineLatest } from 'rxjs';
+import { takeUntil, tap, map, startWith } from 'rxjs/operators';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
@@ -21,44 +22,91 @@ import {
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { RegisterModel } from '../models/register.model';
-import { markRegisterActions } from '../store/attendance.actions';
-import { selectAttendances } from '../store/attendance.selectors';
+import { markRegisterActions, attendanceActions } from '../store/attendance.actions';
+import { 
+  selectAttendances, 
+  selectClassAttendance, 
+  selectAttendanceLoading, 
+  selectAttendanceError 
+} from '../store/attendance.selectors';
+import { AttendanceRecord } from '../services/attendance.service';
 
 @Component({
   selector: 'app-mark-register',
   templateUrl: './mark-register.component.html',
   styleUrls: ['./mark-register.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MarkRegisterComponent implements OnInit {
+export class MarkRegisterComponent implements OnInit, OnDestroy {
   terms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
   registerForm!: FormGroup;
   attendances$!: Observable<RegisterModel[]>;
+  classAttendance$!: Observable<AttendanceRecord[]>;
+  isLoading$!: Observable<boolean>;
+  errorMsg$!: Observable<string>;
+  
   today = new Date();
+  selectedDate = new Date();
+  destroy$ = new Subject<void>();
 
   constructor(
     public title: Title,
     private store: Store,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
   }
 
   ngOnInit(): void {
-    this.classes$ = this.store.select(selectClasses);
-    this.terms$ = this.store.select(selectTerms);
+    this.initializeForm();
+    this.setupObservables();
+  }
 
-    this.attendances$ = this.store.select(selectAttendances);
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    this.attendances$.subscribe((attendances) => {
-      this.dataSource.data = attendances;
-    });
-
+  private initializeForm(): void {
     this.registerForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
+      date: new FormControl(this.selectedDate, [Validators.required]),
     });
+  }
+
+  private setupObservables(): void {
+    this.classes$ = this.store.select(selectClasses);
+    this.terms$ = this.store.select(selectTerms);
+    this.attendances$ = this.store.select(selectAttendances);
+    this.classAttendance$ = this.store.select(selectClassAttendance);
+    this.isLoading$ = this.store.select(selectAttendanceLoading);
+    this.errorMsg$ = this.store.select(selectAttendanceError);
+
+    // Handle error messages
+    this.errorMsg$.pipe(
+      takeUntil(this.destroy$),
+      tap(errorMsg => {
+        if (errorMsg) {
+          this.snackBar.open(errorMsg, 'Close', {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      })
+    ).subscribe();
+
+    // Update data source when class attendance changes
+    this.classAttendance$.pipe(
+      takeUntil(this.destroy$),
+      tap(attendance => {
+        this.dataSource.data = attendance;
+        this.cdr.markForCheck();
+      })
+    ).subscribe();
   }
 
   get term() {
@@ -69,15 +117,20 @@ export class MarkRegisterComponent implements OnInit {
     return this.registerForm.get('clas');
   }
 
+  get date() {
+    return this.registerForm.get('date');
+  }
+
   displayedColumns: string[] = [
+    'index',
     'studentNumber',
     'surname',
     'name',
     'gender',
-    'action',
+    'attendance',
   ];
 
-  public dataSource = new MatTableDataSource<RegisterModel>();
+  public dataSource = new MatTableDataSource<AttendanceRecord>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -89,14 +142,25 @@ export class MarkRegisterComponent implements OnInit {
   }
 
   fetchClassList() {
+    if (this.registerForm.invalid) {
+      this.markFormGroupTouched();
+      return;
+    }
+
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
+    const date = this.date?.value;
 
     const num = term.num;
     const year = term.year;
 
     this.store.dispatch(
-      markRegisterActions.fetchTodayRegisterByClass({ name, num, year })
+      attendanceActions.getClassAttendance({ 
+        className: name, 
+        termNum: num, 
+        year, 
+        date: date ? date.toISOString().split('T')[0] : undefined 
+      })
     );
   }
 
@@ -114,9 +178,55 @@ export class MarkRegisterComponent implements OnInit {
     }
   }
 
-  markPresent(attendance: RegisterModel, present: boolean) {
+  markPresent(attendance: AttendanceRecord, present: boolean) {
+    const term: TermsModel = this.term?.value;
+    const date = this.date?.value;
+
     this.store.dispatch(
-      markRegisterActions.markRegister({ attendance, present })
+      attendanceActions.markAttendance({
+        studentNumber: attendance.studentNumber,
+        className: attendance.className,
+        termNum: attendance.termNum,
+        year: attendance.year,
+        present,
+        date: date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+      })
     );
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.registerForm.controls).forEach(key => {
+      const control = this.registerForm.get(key);
+      control?.markAsTouched();
+    });
+  }
+
+  getFormErrorMessage(controlName: string): string {
+    const control = this.registerForm.get(controlName);
+    if (control?.hasError('required')) {
+      return `${this.getFieldDisplayName(controlName)} is required`;
+    }
+    return '';
+  }
+
+  private getFieldDisplayName(controlName: string): string {
+    const fieldNames: { [key: string]: string } = {
+      term: 'Term',
+      clas: 'Class',
+      date: 'Date'
+    };
+    return fieldNames[controlName] || controlName;
+  }
+
+  trackByStudentNumber(index: number, attendance: AttendanceRecord): string {
+    return attendance.studentNumber;
+  }
+
+  getGenderIcon(gender: string): string {
+    return gender?.toLowerCase() === 'male' ? 'male' : 'female';
+  }
+
+  getGenderColor(gender: string): string {
+    return gender?.toLowerCase() === 'male' ? 'male' : 'female';
   }
 }

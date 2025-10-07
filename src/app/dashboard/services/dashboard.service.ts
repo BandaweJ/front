@@ -9,7 +9,7 @@ import { StudentDashboardSummary } from '../models/student-dashboard-summary';
 })
 export class DashboardService {
   constructor(private httpClient: HttpClient) {}
-  baseURL = `${environment.apiUrl}dashboard/`;
+  baseURL = `${environment.apiUrl}/dashboard/`;
 
   getStudentDashboardSummary(
     studentNumber: string

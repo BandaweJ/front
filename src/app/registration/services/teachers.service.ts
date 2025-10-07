@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
 export class TeachersService {
   constructor(private httpClient: HttpClient) {}
 
-  private baseUrl = environment.apiUrl + 'teachers/';
+  private baseUrl = environment.apiUrl + '/teachers/';
 
   getAllTeachers(): Observable<TeachersModel[]> {
     return this.httpClient.get<TeachersModel[]>(this.baseUrl);

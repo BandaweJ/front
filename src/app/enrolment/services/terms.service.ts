@@ -8,7 +8,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class TermsService {
-  baseURL = `${environment.apiUrl}enrolment/terms`;
+  baseURL = `${environment.apiUrl}/enrolment/terms`;
 
   constructor(private httpClient: HttpClient) {}
 

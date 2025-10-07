@@ -4,6 +4,8 @@ import {
   OnDestroy,
   ViewChild,
   AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
@@ -39,16 +41,23 @@ import {
   selector: 'app-finance-dashboard',
   templateUrl: './finance-dashboard.component.html',
   styleUrls: ['./finance-dashboard.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FinanceDashboardComponent
   implements OnInit, OnDestroy, AfterViewInit
 {
+  // UI State
   isSearchBarVisible = false;
-  private ngUnsubscribe = new Subject<void>();
+  isLoading = true;
+  hasError = false;
+  errorMessage = '';
 
+  // Data Management
+  private ngUnsubscribe = new Subject<void>();
   private filterSubject = new BehaviorSubject<FinanceFilter>({});
   private sortSubject = new BehaviorSubject<string>('dateDesc');
 
+  // Data Sources
   invoicesDataSource = new MatTableDataSource<FinanceDataModel>([]);
   paymentsDataSource = new MatTableDataSource<FinanceDataModel>([]);
 
@@ -73,6 +82,12 @@ export class FinanceDashboardComponent
   totalInvoices$!: Observable<number>;
   totalPayments$!: Observable<number>;
   totalBalance$!: Observable<number>;
+  
+  // Additional financial metrics
+  averageInvoiceAmount$!: Observable<number>;
+  averagePaymentAmount$!: Observable<number>;
+  collectionRate$!: Observable<number>;
+  totalTransactions$!: Observable<number>;
 
   currentSort$ = this.sortSubject.asObservable();
   sortOptions = [
@@ -85,18 +100,70 @@ export class FinanceDashboardComponent
 
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
     scales: {
-      x: {},
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#666',
+          font: {
+            size: 12,
+            weight: 'normal',
+          },
+        },
+      },
       y: {
         min: 0,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+        },
+        ticks: {
+          color: '#666',
+          font: {
+            size: 12,
+            weight: 'normal',
+          },
+          callback: function(value) {
+            return '$' + value.toLocaleString();
+          },
+        },
       },
     },
     plugins: {
       legend: {
         display: true,
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: {
+            size: 14,
+            weight: 'bold',
+          },
+          color: '#333',
+        },
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y;
+            return label + ': $' + value.toLocaleString();
+          },
+        },
       },
     },
   };
@@ -107,84 +174,78 @@ export class FinanceDashboardComponent
       {
         data: [],
         label: 'Invoices',
-        backgroundColor: 'rgba(63, 81, 181, 0.7)',
-        borderColor: 'rgba(63, 81, 181, 1)',
-        hoverBackgroundColor: 'rgba(63, 81, 181, 0.9)',
-        hoverBorderColor: 'rgba(63, 81, 181, 1)',
+        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+        borderColor: 'rgba(102, 126, 234, 1)',
+        borderWidth: 2,
+        borderRadius: 8,
+        borderSkipped: false,
+        hoverBackgroundColor: 'rgba(102, 126, 234, 0.9)',
+        hoverBorderColor: 'rgba(102, 126, 234, 1)',
+        hoverBorderWidth: 3,
       },
       {
         data: [],
         label: 'Payments',
-        backgroundColor: 'rgba(76, 175, 80, 0.7)',
+        backgroundColor: 'rgba(76, 175, 80, 0.8)',
         borderColor: 'rgba(76, 175, 80, 1)',
+        borderWidth: 2,
+        borderRadius: 8,
+        borderSkipped: false,
         hoverBackgroundColor: 'rgba(76, 175, 80, 0.9)',
         hoverBorderColor: 'rgba(76, 175, 80, 1)',
+        hoverBorderWidth: 3,
       },
     ],
   };
 
-  constructor(private store: Store, private dialog: MatDialog) {}
+  constructor(
+    private store: Store, 
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    this.store.dispatch(invoiceActions.fetchAllInvoices());
-    this.store.dispatch(receiptActions.fetchAllReceipts());
-    this.store.dispatch(fetchStudents());
-    this.store.dispatch(fetchTerms());
-    this.store.dispatch(fetchClasses());
+    this.loadData();
+    this.setupDataSubscriptions();
+  }
 
+  loadData(): void {
+    this.isLoading = true;
+    this.hasError = false;
+    this.cdr.markForCheck();
+
+    try {
+      this.store.dispatch(invoiceActions.fetchAllInvoices());
+      this.store.dispatch(receiptActions.fetchAllReceipts());
+      this.store.dispatch(fetchStudents());
+      this.store.dispatch(fetchTerms());
+      this.store.dispatch(fetchClasses());
+    } catch (error) {
+      this.handleError('Failed to load financial data');
+    }
+  }
+
+  private setupDataSubscriptions(): void {
     const allData$ = this.store.pipe(select(selectAllCombinedFinanceData));
 
+    // Handle data loading and chart updates
     allData$
       .pipe(
-        map((data) => {
-          const monthlyTotals = new Map<
-            string,
-            { invoices: number; payments: number }
-          >();
-          data.forEach((item) => {
-            const date = new Date(item.transactionDate);
-            const monthYear = date.toLocaleString('default', {
-              month: 'short',
-              year: 'numeric',
-            });
-
-            if (!monthlyTotals.has(monthYear)) {
-              monthlyTotals.set(monthYear, { invoices: 0, payments: 0 });
-            }
-
-            const totals = monthlyTotals.get(monthYear)!;
-            if (item.type === 'Invoice') {
-              totals.invoices += +item.amount;
-            } else {
-              totals.payments += +item.amount;
-            }
-          });
-
-          const sortedKeys = Array.from(monthlyTotals.keys()).sort((a, b) => {
-            const [monthA, yearA] = a.split(' ');
-            const [monthB, yearB] = b.split(' ');
-            const dateA = new Date(`${monthA} 1, ${yearA}`);
-            const dateB = new Date(`${monthB} 1, ${yearB}`);
-            return dateA.getTime() - dateB.getTime();
-          });
-
-          this.barChartData.labels = sortedKeys;
-          this.barChartData.datasets[0].data = sortedKeys.map(
-            (key) => monthlyTotals.get(key)!.invoices
-          );
-          this.barChartData.datasets[1].data = sortedKeys.map(
-            (key) => monthlyTotals.get(key)!.payments
-          );
-        }),
+        map((data) => this.processChartData(data)),
         tap(() => {
+          this.isLoading = false;
+          this.cdr.markForCheck();
           if (this.chart) {
             this.chart.update();
           }
         }),
         takeUntil(this.ngUnsubscribe)
       )
-      .subscribe();
+      .subscribe({
+        error: (error) => this.handleError('Failed to process chart data')
+      });
 
+    // Handle filtered and sorted data
     const filteredAndSortedData$ = combineLatest([
       allData$,
       this.filterSubject.asObservable(),
@@ -201,12 +262,16 @@ export class FinanceDashboardComponent
         this.paymentsDataSource.data = data.filter(
           (item) => item.type === 'Payment'
         );
+        this.cdr.markForCheck();
       }),
       takeUntil(this.ngUnsubscribe)
     );
 
-    filteredAndSortedData$.subscribe();
+    filteredAndSortedData$.subscribe({
+      error: (error) => this.handleError('Failed to filter and sort data')
+    });
 
+    // Setup summary observables
     this.totalInvoices$ = allData$.pipe(
       map((data) =>
         data
@@ -225,6 +290,88 @@ export class FinanceDashboardComponent
       this.totalInvoices$,
       this.totalPayments$,
     ]).pipe(map(([invoices, payments]) => invoices - payments));
+
+    // Additional financial metrics
+    this.averageInvoiceAmount$ = allData$.pipe(
+      map((data) => {
+        const invoices = data.filter((item) => item.type === 'Invoice');
+        return invoices.length > 0 
+          ? invoices.reduce((acc, item) => acc + +item.amount, 0) / invoices.length 
+          : 0;
+      })
+    );
+
+    this.averagePaymentAmount$ = allData$.pipe(
+      map((data) => {
+        const payments = data.filter((item) => item.type === 'Payment');
+        return payments.length > 0 
+          ? payments.reduce((acc, item) => acc + +item.amount, 0) / payments.length 
+          : 0;
+      })
+    );
+
+    this.collectionRate$ = combineLatest([
+      this.totalInvoices$,
+      this.totalPayments$,
+    ]).pipe(
+      map(([invoices, payments]) => {
+        return invoices > 0 ? (payments / invoices) * 100 : 0;
+      })
+    );
+
+    this.totalTransactions$ = allData$.pipe(
+      map((data) => data.length)
+    );
+  }
+
+  private processChartData(data: FinanceDataModel[]): void {
+    const monthlyTotals = new Map<
+      string,
+      { invoices: number; payments: number }
+    >();
+    
+    data.forEach((item) => {
+      const date = new Date(item.transactionDate);
+      const monthYear = date.toLocaleString('default', {
+        month: 'short',
+        year: 'numeric',
+      });
+
+      if (!monthlyTotals.has(monthYear)) {
+        monthlyTotals.set(monthYear, { invoices: 0, payments: 0 });
+      }
+
+      const totals = monthlyTotals.get(monthYear)!;
+      if (item.type === 'Invoice') {
+        totals.invoices += +item.amount;
+      } else {
+        totals.payments += +item.amount;
+      }
+    });
+
+    const sortedKeys = Array.from(monthlyTotals.keys()).sort((a, b) => {
+      const [monthA, yearA] = a.split(' ');
+      const [monthB, yearB] = b.split(' ');
+      const dateA = new Date(`${monthA} 1, ${yearA}`);
+      const dateB = new Date(`${monthB} 1, ${yearB}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    this.barChartData.labels = sortedKeys;
+    this.barChartData.datasets[0].data = sortedKeys.map(
+      (key) => monthlyTotals.get(key)!.invoices
+    );
+    this.barChartData.datasets[1].data = sortedKeys.map(
+      (key) => monthlyTotals.get(key)!.payments
+    );
+  }
+
+  private handleError(message: string): void {
+    this.hasError = true;
+    this.errorMessage = message;
+    this.isLoading = false;
+    this.cdr.markForCheck();
+    console.error(message);
   }
 
   ngAfterViewInit(): void {

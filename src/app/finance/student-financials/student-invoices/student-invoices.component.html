@@ -1,90 +1,166 @@
 <div class="invoices-container">
-  <mat-card class="invoices-card">
-    <mat-card-header>
-      <mat-card-title>Student Invoices</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div *ngIf="loadingInvoices$ | async" class="loading-spinner">
-        <mat-spinner diameter="30"></mat-spinner>
-        <p>Loading invoices...</p>
-      </div>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Loading your invoices...</p>
+  </div>
 
-      <div *ngIf="errorInvoices$ | async" class="error-message">
-        <mat-icon color="warn">error</mat-icon>
-        <p>Error loading invoices. Please try again later.</p>
-        <p>{{ errorInvoices$ | async }}</p>
-      </div>
+  <!-- Error State -->
+  <div *ngIf="hasError && !isLoading" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h3 class="error-title">Unable to load invoices</h3>
+    <p class="error-message">{{ errorMessage }}</p>
+    <button mat-raised-button color="primary" (click)="loadInvoices()">
+      <mat-icon>refresh</mat-icon>
+      Retry
+    </button>
+  </div>
 
-      <div *ngIf="(invoices$ | async) as invoices; else noInvoices">
-        <div *ngIf="invoices.length > 0; else noInvoices">
-          <mat-accordion multi="true">
-            <mat-expansion-panel *ngFor="let invoice of invoices" class="invoice-panel">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <strong>Invoice #{{ invoice.invoiceNumber }}</strong> -
-                  <span [class]="getInvoiceStatusClass(invoice.status)">{{ invoice.status }}</span>
-                </mat-panel-title>
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !hasError" class="invoices-content">
+    <!-- Header -->
+    <div class="invoices-header">
+      <h2 class="invoices-title">
+        <mat-icon class="title-icon">receipt_long</mat-icon>
+        Your Invoices
+      </h2>
+      <p class="invoices-subtitle">View and manage all your billing information</p>
+    </div>
 
-                <mat-panel-description>
-                  <div class="invoice-summary">
-                    <span>Date: {{ invoice.invoiceDate | date:'mediumDate' }}</span>
-                    <span>Due: {{ invoice.invoiceDueDate | date:'mediumDate' }}</span>
-                    <span>Total: {{ invoice.totalBill | currency:'USD':'symbol':'1.2-2' }}</span>
-                    <span>Paid: {{ invoice.amountPaidOnInvoice | currency:'USD':'symbol':'1.2-2' }}</span>
-                    <span>Balance: {{ invoice.balance | currency:'USD':'symbol':'1.2-2' }}</span>
-                    <span>Class: {{ invoice.enrol.name }}</span>
-                    <span>Term: {{ invoice.enrol.num }} {{ invoice.enrol.year }}</span>
-                    <span>Residence: {{ invoice.enrol.residence }}</span>
+    <!-- Invoices List -->
+    <div *ngIf="invoices.length > 0; else noInvoices" class="invoices-list">
+        <mat-accordion multi="true" class="invoices-accordion">
+          <mat-expansion-panel *ngFor="let invoice of invoices; trackBy: trackByInvoiceId" 
+                               class="invoice-panel"
+                               [class.overdue]="isInvoiceOverdue(invoice)"
+                               [class.paid]="isInvoicePaid(invoice)">
+            
+            <mat-expansion-panel-header class="invoice-header">
+              <mat-panel-title class="invoice-title">
+                <div class="invoice-number">
+                  <mat-icon class="invoice-icon">receipt</mat-icon>
+                  <span class="invoice-number-text">Invoice #{{ invoice.invoiceNumber }}</span>
+                </div>
+                <div class="invoice-status">
+                  <mat-chip [class]="getInvoiceStatusClass(invoice.status)">
+                    {{ invoice.status }}
+                  </mat-chip>
+                </div>
+              </mat-panel-title>
+
+              <mat-panel-description class="invoice-description">
+                <div class="invoice-summary">
+                  <div class="summary-row">
+                    <span class="summary-item">
+                      <mat-icon class="summary-icon">calendar_today</mat-icon>
+                      {{ invoice.invoiceDate | date:'MMM dd, yyyy' }}
+                    </span>
+                    <span class="summary-item">
+                      <mat-icon class="summary-icon">event</mat-icon>
+                      Due: {{ invoice.invoiceDueDate | date:'MMM dd, yyyy' }}
+                    </span>
                   </div>
-                </mat-panel-description>
+                  <div class="summary-row">
+                    <span class="summary-item amount-total">
+                      <mat-icon class="summary-icon">attach_money</mat-icon>
+                      Total: {{ invoice.totalBill | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                    <span class="summary-item amount-paid">
+                      <mat-icon class="summary-icon">check_circle</mat-icon>
+                      Paid: {{ invoice.amountPaidOnInvoice | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                    <span class="summary-item amount-balance" 
+                          [class.overdue-amount]="isInvoiceOverdue(invoice)">
+                      <mat-icon class="summary-icon">account_balance_wallet</mat-icon>
+                      Balance: {{ invoice.balance | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="summary-item">
+                      <mat-icon class="summary-icon">school</mat-icon>
+                      {{ invoice.enrol.name }}
+                    </span>
+                    <span class="summary-item">
+                      <mat-icon class="summary-icon">schedule</mat-icon>
+                      {{ invoice.enrol.num }} {{ invoice.enrol.year }}
+                    </span>
+                    <span class="summary-item">
+                      <mat-icon class="summary-icon">home</mat-icon>
+                      {{ invoice.enrol.residence }}
+                    </span>
+                  </div>
+                </div>
+              </mat-panel-description>
 
-                <button mat-icon-button (click)="downloadInvoice(invoice.invoiceNumber); $event.stopPropagation()"
-                  matTooltip="Download Invoice" aria-label="Download invoice PDF">
+              <div class="invoice-actions">
+                <button mat-icon-button 
+                        (click)="downloadInvoice(invoice.invoiceNumber); $event.stopPropagation()"
+                        matTooltip="Download Invoice PDF" 
+                        aria-label="Download invoice PDF"
+                        class="download-button">
                   <mat-icon>file_download</mat-icon>
                 </button>
-              </mat-expansion-panel-header>
+              </div>
+            </mat-expansion-panel-header>
 
-              <div class="invoice-details">
-                <h4>Invoice Line Items (Bills)</h4>
-                <mat-list>
-                  <mat-list-item *ngFor="let bill of invoice.bills">
-                    <mat-icon matListItemAvatar>receipt</mat-icon>
-                    <div matListItemTitle>{{ bill.fees.description }}</div>
-                    <div matListItemLine>Amount: {{ bill.fees.amount | currency:'USD':'symbol':'1.2-2' }}</div>
-                    <mat-divider></mat-divider>
-                  </mat-list-item>
-                </mat-list>
-
-                <div *ngIf="invoice.allocations && invoice.allocations.length > 0" class="allocations-section">
-                  <h4>Payments Applied to this Invoice</h4>
-                  <mat-list>
-                    <mat-list-item *ngFor="let allocation of invoice.allocations">
-                      <mat-icon matListItemAvatar>payments</mat-icon>
-                      <div matListItemTitle>Allocated from Receipt {{ allocation.receiptId }}</div>
-                      <div matListItemLine>Amount: {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
+            <div class="invoice-details">
+              <!-- Bills Section -->
+              <div class="bills-section">
+                <h4 class="section-title">
+                  <mat-icon class="section-icon">list_alt</mat-icon>
+                  Invoice Line Items
+                </h4>
+                <div class="bills-list">
+                  <div *ngFor="let bill of invoice.bills; trackBy: trackByBillId" class="bill-item">
+                    <div class="bill-content">
+                      <div class="bill-description">
+                        <mat-icon class="bill-icon">receipt</mat-icon>
+                        <span class="bill-text">{{ bill.fees.description }}</span>
                       </div>
-                      <div matListItemLine>Date: {{ allocation.allocationDate | date:'shortDate' }}</div>
-                      <mat-divider></mat-divider>
-                    </mat-list-item>
-                  </mat-list>
+                      <div class="bill-amount">
+                        {{ bill.fees.amount | currency:'USD':'symbol':'1.2-2' }}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </mat-expansion-panel>
-          </mat-accordion>
-        </div>
-        <ng-template #noInvoices>
-          <div class="no-data-message">
-            <mat-icon>info</mat-icon>
-            <p>No invoices found for this student.</p>
-          </div>
-        </ng-template>
+
+              <!-- Allocations Section -->
+              <div *ngIf="invoice.allocations && invoice.allocations.length > 0" class="allocations-section">
+                <h4 class="section-title">
+                  <mat-icon class="section-icon">payments</mat-icon>
+                  Payments Applied
+                </h4>
+                <div class="allocations-list">
+                  <div *ngFor="let allocation of invoice.allocations; trackBy: trackByAllocationId" 
+                       class="allocation-item">
+                    <div class="allocation-content">
+                      <div class="allocation-info">
+                        <mat-icon class="allocation-icon">payment</mat-icon>
+                        <div class="allocation-details">
+                          <span class="allocation-receipt">Receipt #{{ allocation.receiptId }}</span>
+                          <span class="allocation-date">{{ allocation.allocationDate | date:'MMM dd, yyyy' }}</span>
+                        </div>
+                      </div>
+                      <div class="allocation-amount">
+                        {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
       </div>
-      <ng-template #noInvoices>
-        <div class="no-data-message">
-          <mat-icon>info</mat-icon>
-          <p>No invoices found for this student.</p>
-        </div>
-      </ng-template>
-    </mat-card-content>
-  </mat-card>
-</div>
+    </div>
+
+    <!-- No Data State -->
+    <ng-template #noInvoices>
+      <div class="no-data-container">
+        <mat-icon class="no-data-icon">receipt_long</mat-icon>
+        <h3 class="no-data-title">No Invoices Found</h3>
+        <p class="no-data-message">You don't have any invoices yet. Invoices will appear here once they are generated.</p>
+      </div>
+    </ng-template>
+  </div>

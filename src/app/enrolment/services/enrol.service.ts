@@ -11,7 +11,7 @@ import { StudentsSummary } from '../models/students-summary.model';
   providedIn: 'root',
 })
 export class EnrolService {
-  baseURL = `${environment.apiUrl}enrolment/enrol/`;
+  baseURL = `${environment.apiUrl}/enrolment/enrol/`;
 
   constructor(private httpClient: HttpClient) {}
 

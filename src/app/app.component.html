@@ -119,6 +119,12 @@
               <mat-icon>edit_note</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Mark Register</span>
             </button>
+            <!-- Attendance Reports -->
+            <button mat-button *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'"
+              routerLink="/attendance-reports" routerLinkActive="active">
+              <mat-icon>assessment</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Attendance Reports</span>
+            </button>
           </div>
 
         </mat-expansion-panel>

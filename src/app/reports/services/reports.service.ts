@@ -13,7 +13,7 @@ import { ExamType } from 'src/app/marks/models/examtype.enum';
 export class ReportsService {
   constructor(private httpClient: HttpClient) {}
 
-  baseUrl = environment.apiUrl + 'reports/';
+  baseUrl = environment.apiUrl + '/reports/';
 
   generateReports(
     name: string,

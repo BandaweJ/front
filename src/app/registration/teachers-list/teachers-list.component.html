@@ -1,30 +1,46 @@
-<mat-toolbar class="title">
-  {{ title.getTitle() }}
+<div class="teachers-container">
+  <mat-toolbar class="title">
+    <h1>{{ title.getTitle() }}</h1>
+  </mat-toolbar>
+  
+  <mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
 
-</mat-toolbar>
-<mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
+  <div class="errormsg" *ngIf="errorMsg$ | async as errorMsg">{{ errorMsg }}</div>
 
-<div class="errormsg">{{ errorMsg$ | async }}</div>
-
-<div class="top-panel">
-  <form [formGroup]="filtersForm" class="filters">
-    <mat-checkbox formControlName="males">Males</mat-checkbox>
-    <mat-checkbox formControlName="females">Females</mat-checkbox>
-    <mat-checkbox formControlName="active">Active</mat-checkbox>
-    <mat-checkbox formControlName="inactive">Inactive</mat-checkbox>
-
-  </form>
-  <mat-form-field>
-    <mat-label>Filter</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input />
-  </mat-form-field>
-  <button type="button" mat-mini-fab color="primary" (click)="openAddTeacherDialog()">
-    <mat-icon>add</mat-icon>
-  </button>
-</div>
+  <div class="top-panel">
+    <form [formGroup]="filtersForm" class="filters">
+      <mat-checkbox formControlName="males">
+        <mat-icon>male</mat-icon>
+        Males
+      </mat-checkbox>
+      <mat-checkbox formControlName="females">
+        <mat-icon>female</mat-icon>
+        Females
+      </mat-checkbox>
+      <mat-checkbox formControlName="active">
+        <mat-icon>check_circle</mat-icon>
+        Active
+      </mat-checkbox>
+      <mat-checkbox formControlName="inactive">
+        <mat-icon>cancel</mat-icon>
+        Inactive
+      </mat-checkbox>
+    </form>
+    
+    <mat-form-field appearance="outline">
+      <mat-label>Search Teachers</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Search by name, email, or role..." #input />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <button type="button" mat-mini-fab color="primary" (click)="openAddTeacherDialog()" 
+            matTooltip="Add New Teacher" aria-label="Add New Teacher">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
 
 <div class="mat-elevation-z2">
-  <table mat-table [dataSource]="dataSource" matSort>
+  <table mat-table [dataSource]="dataSource" matSort [trackBy]="trackByTeacherId">
     <!-- ID Column -->
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
@@ -109,5 +125,6 @@
     </tr>
   </table>
 
-  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of users"></mat-paginator>
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of teachers"></mat-paginator>
+</div>
 </div>

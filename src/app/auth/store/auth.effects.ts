@@ -47,7 +47,7 @@ export class AuthEffects {
           }),
           catchError(
             (error: HttpErrorResponse) =>
-              of(signinActions.signinFailure({ ...error })) // Use grouped action
+              of(signinActions.signinFailure({ error })) // Use grouped action
           )
         )
       )
@@ -69,7 +69,7 @@ export class AuthEffects {
           }),
           catchError(
             (error: HttpErrorResponse) =>
-              of(signupActions.signupFailure({ ...error })) // Use grouped action
+              of(signupActions.signupFailure({ error })) // Use grouped action
           )
         )
       )
@@ -86,7 +86,7 @@ export class AuthEffects {
           }),
           catchError(
             (error: HttpErrorResponse) =>
-              of(accountStatsActions.fetchAccountStatsFailure({ ...error })) // Use grouped action
+              of(accountStatsActions.fetchAccountStatsFailure({ error })) // Use grouped action
           )
         )
       )
@@ -107,7 +107,7 @@ export class AuthEffects {
             (error: HttpErrorResponse) =>
               of(
                 userDetailsActions.fetchUserFail({
-                  ...error,
+                  error,
                 })
               ) // Use grouped action
           )

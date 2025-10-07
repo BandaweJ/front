@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
 export class StudentsService {
   constructor(private httpClient: HttpClient) {}
 
-  private baseUrl = environment.apiUrl + 'students/';
+  private baseUrl = environment.apiUrl + '/students/';
 
   getAllStudents(): Observable<StudentsModel[]> {
     return this.httpClient.get<StudentsModel[]>(this.baseUrl);

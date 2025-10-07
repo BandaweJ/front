@@ -27,6 +27,7 @@
     "@ngrx/entity": "^16.1.0",
     "@ngrx/store": "^16.1.0",
     "@ngrx/store-devtools": "^16.1.0",
+    "@types/qrcode": "^1.5.5",
     "chart.js": "^4.5.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
@@ -36,6 +37,7 @@
     "moment": "^2.29.4",
     "ng2-charts": "^5.0.4",
     "pdfmake": "^0.2.10",
+    "qrcode": "^1.5.4",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.1"

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { TeachersModel } from '../../models/teachers.model';
@@ -6,72 +6,99 @@ import {
   addTeacherAction,
   editTeacherAction,
 } from '../../store/registration.actions';
-import * as moment from 'moment';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
-  // selectAddSuccess,
   selectRegErrorMsg,
+  selectIsLoading
 } from '../../store/registration.selectors';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable } from 'rxjs';
+import { Observable, Subject, takeUntil, filter, tap } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { ROLES } from '../../models/roles.enum';
-import { act } from '@ngrx/effects';
 
 @Component({
   selector: 'app-add-edit-teacher',
   templateUrl: './add-edit-teacher.component.html',
   styleUrls: ['./add-edit-teacher.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AddEditTeacherComponent implements OnInit {
+export class AddEditTeacherComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
   genders = ['Male', 'Female'];
   titles = ['Prof', 'Dr', 'Mr', 'Mrs', 'Miss', 'Ms'];
   addTeacherForm!: FormGroup;
   errorMsg$!: Observable<string>;
+  isLoading$!: Observable<boolean>;
   activeValues = [true, false];
   roles = Object.values(ROLES);
+  isLoading = false;
 
   constructor(
     private store: Store,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<AddEditTeacherComponent>,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA)
     public data: TeachersModel
   ) {}
 
   ngOnInit(): void {
+    this.initializeForm();
+    this.setupObservables();
+  }
+
+  private initializeForm(): void {
     this.addTeacherForm = new FormGroup({
-      id: new FormControl('', [Validators.required, Validators.minLength(10)]),
-      name: new FormControl('', [Validators.required, Validators.minLength(2)]),
-      surname: new FormControl('', [
-        Validators.required,
-        Validators.minLength(2),
-      ]),
-      dob: new FormControl(''),
+      id: new FormControl('', [Validators.required, Validators.minLength(10), Validators.pattern(/^[0-9]{2}[0-9]{6}[A-Z]{1}[0-9]{2}$/)]),
+      name: new FormControl('', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-Z\s]+$/)]),
+      surname: new FormControl('', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-Z\s]+$/)]),
+      dob: new FormControl('', [Validators.required]),
       gender: new FormControl('', [Validators.required]),
       title: new FormControl('', [Validators.required]),
-      dateOfJoining: new FormControl(''),
+      dateOfJoining: new FormControl('', [Validators.required]),
       dateOfLeaving: new FormControl(''),
       qualifications: new FormArray([]),
-      cell: new FormControl('', [
-        Validators.required,
-        Validators.minLength(10),
-      ]),
+      cell: new FormControl('', [Validators.required, Validators.minLength(10), Validators.pattern(/^[0-9+\-\s()]+$/)]),
       email: new FormControl('', [Validators.required, Validators.email]),
       address: new FormControl(''),
-      role: new FormControl(''),
-      active: new FormControl(''),
+      role: new FormControl('', [Validators.required]),
+      active: new FormControl(true, [Validators.required]),
     });
 
-    this.addTeacherForm.patchValue(this.data);
+    // Patch form with existing data if editing
+    if (this.data) {
+      this.addTeacherForm.patchValue({
+        ...this.data,
+        dob: this.data.dob ? new Date(this.data.dob) : null,
+        dateOfJoining: this.data.dateOfJoining ? new Date(this.data.dateOfJoining) : null,
+        dateOfLeaving: this.data.dateOfLeaving ? new Date(this.data.dateOfLeaving) : null,
+      });
 
-    this.data.qualifications.map((item) => {
-      const qual = new FormControl(item);
-      this.qualifications.push(qual);
-    });
-
-    this.errorMsg$ = this.store.select(selectRegErrorMsg);
+      // Add existing qualifications
+      if (this.data.qualifications && this.data.qualifications.length > 0) {
+        this.data.qualifications.forEach(qual => {
+          this.addQualification(qual);
+        });
+      }
+    } else {
+      // Add one empty qualification field for new teachers
+      this.addQualification();
+    }
   }
+
+  private setupObservables(): void {
+    this.errorMsg$ = this.store.select(selectRegErrorMsg);
+    this.isLoading$ = this.store.select(selectIsLoading);
+    
+    this.isLoading$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(loading => {
+      this.isLoading = loading;
+      this.cdr.markForCheck();
+    });
+  }
+
 
   get role() {
     return this.addTeacherForm.get('role');
@@ -126,58 +153,73 @@ export class AddEditTeacherComponent implements OnInit {
   }
 
   addTeacher() {
-    let teacher: TeachersModel = this.addTeacherForm.value;
-
-    if (!teacher.dob) {
-      teacher.dob = new Date().toISOString();
+    if (this.addTeacherForm.invalid) {
+      this.markFormGroupTouched();
+      return;
     }
 
-    if (!teacher.dateOfJoining) {
-      teacher.dateOfJoining = new Date().toISOString();
-    }
-
-    if (!teacher.dateOfLeaving) {
-      teacher.dateOfLeaving = new Date().toISOString();
-    }
+    const formValue = this.addTeacherForm.value;
+    const teacher: TeachersModel = {
+      ...formValue,
+      dob: formValue.dob ? formValue.dob.toISOString() : new Date().toISOString(),
+      dateOfJoining: formValue.dateOfJoining ? formValue.dateOfJoining.toISOString() : new Date().toISOString(),
+      dateOfLeaving: formValue.dateOfLeaving ? formValue.dateOfLeaving.toISOString() : '',
+      qualifications: formValue.qualifications.filter((qual: string) => qual && qual.trim().length > 0)
+    };
 
     if (this.data) {
       this.store.dispatch(editTeacherAction({ teacher }));
-      console.log('current role is : ', this.data.role);
-      console.log('called editTeacherAction with teacher: ', teacher.role);
-    }
-    // console.log(teacher);
-    else {
+      this.snackBar.open('Teacher updated successfully!', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      });
+      this.dialogRef.close(true);
+    } else {
       this.store.dispatch(addTeacherAction({ teacher }));
-      // this.dialogRef.close(teacher);
+      this.snackBar.open('Teacher added successfully!', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      });
+      this.dialogRef.close(true);
     }
   }
 
-  changeDatePickerDob(): any {
-    this.dob?.setValue(moment(this.dob.value.expireDate).format('YYYY-MM-DD'));
+  private markFormGroupTouched(): void {
+    Object.keys(this.addTeacherForm.controls).forEach(key => {
+      const control = this.addTeacherForm.get(key);
+      control?.markAsTouched();
+      
+      if (control instanceof FormArray) {
+        control.controls.forEach(arrayControl => {
+          arrayControl.markAsTouched();
+        });
+      }
+    });
   }
 
-  changeDatePickerDoj(): any {
-    this.dateOfJoining?.setValue(
-      moment(this.dateOfJoining.value.expireDate).format('YYYY-MM-DD')
-    );
-  }
-
-  changeDatePickerDol(): any {
-    this.dateOfLeaving?.setValue(
-      moment(this.dateOfLeaving.value.expireDate).format('YYYY-MM-DD')
-    );
+  addQualification(value: string = '') {
+    const qual = new FormControl(value, [Validators.required, Validators.minLength(2)]);
+    this.qualifications.push(qual);
+    this.cdr.markForCheck();
   }
 
   addControl() {
-    const qual = new FormControl('');
-    this.qualifications.push(qual);
+    this.addQualification();
   }
 
   delete(qualIndex: number) {
     this.qualifications.removeAt(qualIndex);
+    this.cdr.markForCheck();
   }
 
   closeDialog() {
     this.dialogRef.close(null);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

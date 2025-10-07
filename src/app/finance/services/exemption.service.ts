@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 })
 export class ExemptionService {
   // IMPORTANT: Replace with your actual backend API URL
-  baseURL = `${environment.apiUrl}exemptions/`;
+  baseURL = `${environment.apiUrl}/exemptions/`;
 
   constructor(private http: HttpClient) {}
 

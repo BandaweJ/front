@@ -1,115 +1,147 @@
 import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  OnDestroy,
   OnInit,
   ViewChild,
-  OnDestroy,
-  AfterViewInit,
-} from '@angular/core'; // Import OnDestroy and AfterViewInit
+} from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
+import { Observable, Subject, combineLatest } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil, map, startWith } from 'rxjs/operators';
+import { TermsModel } from '../../models/terms.model';
 import {
   deleteTermAction,
   fetchTerms,
-  // resetAddSuccess, // Keep commented out if not used
 } from '../../store/enrolment.actions';
-import { Observable, Subject } from 'rxjs'; // Import Subject
-import { takeUntil } from 'rxjs/operators'; // Import takeUntil
-import { TermsModel } from '../../models/terms.model';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
 import {
-  // selectDeleteSuccess, // Keep commented out if not used
   selectEnrolErrorMsg,
   selectTerms,
 } from '../../store/enrolment.selectors';
 import { AddEditTermComponent } from './add-edit-term/add-edit-term.component';
-import { Title } from '@angular/platform-browser';
-import { DatePipe } from '@angular/common'; // Import DatePipe
 
 @Component({
   selector: 'app-terms',
   templateUrl: './terms.component.html',
   styleUrls: ['./terms.component.css'],
-  providers: [DatePipe], // Provide DatePipe here if you want to use it for filtering
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
-  // Implement OnDestroy
+  terms$!: Observable<TermsModel[]>;
+  errorMsg$!: Observable<string>;
+  isLoading = false;
+  
+  private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
+  
+  searchControl = new FormControl('');
+  yearFilterControl = new FormControl('all');
+  
+  filteredTerms$!: Observable<TermsModel[]>;
+
   constructor(
     public title: Title,
     private store: Store,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private datePipe: DatePipe // Inject DatePipe
+    private cdr: ChangeDetectorRef
   ) {
     this.store.dispatch(fetchTerms());
-    this.dataSource.filterPredicate = this.customFilterPredicate; // Set custom predicate
   }
 
-  private terms$!: Observable<TermsModel[]>;
-  private errorMsg$!: Observable<string>;
+  displayedColumns: string[] = [
+    'index',
+    'num',
+    'year',
+    'startDate',
+    'endDate',
+    'duration',
+    'status',
+    'action',
+  ];
 
   public dataSource = new MatTableDataSource<TermsModel>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns: string[] = [
-    'num',
-    'year',
-    'startDate',
-    'endDate',
-    'action',
-  ];
-
-  private destroy$ = new Subject<void>(); // Subject for managing subscriptions
-
   ngOnInit(): void {
+    this.initializeObservables();
+    this.setupSearch();
+    this.setupFiltering();
+  }
+
+  private initializeObservables(): void {
     this.terms$ = this.store.select(selectTerms);
     this.errorMsg$ = this.store.select(selectEnrolErrorMsg);
+    
+    this.terms$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((terms) => {
+      this.dataSource.data = terms;
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    });
 
-    this.terms$
-      .pipe(takeUntil(this.destroy$)) // Unsubscribe on component destroy
-      .subscribe((terms) => {
-        this.dataSource.data = terms;
-      });
-
-    // Uncomment and apply takeUntil if you decide to use these subscriptions
-    // this.store.select(selectDeleteSuccess)
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe((result) => {
-    //     if (result === true) {
-    //       this.snackBar.open('Term Deleted Successfully', '', {
-    //         duration: 3500,
-    //         verticalPosition: 'top',
-    //       });
-    //     } else if (result === false) {
-    //       this.snackBar.open('Failed to delete Term. Check errors shown', '', {
-    //         duration: 3500,
-    //         verticalPosition: 'top',
-    //       });
-    //     }
-    //   });
-
-    // this.dialog.afterAllClosed
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(() => {
-    //     this.store.dispatch(resetAddSuccess());
-    //   });
-
-    // You might also want to subscribe to errorMsg$ if you plan to show errors
-    this.errorMsg$.pipe(takeUntil(this.destroy$)).subscribe((msg) => {
+    this.errorMsg$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((msg) => {
       if (msg) {
-        this.snackBar.open(msg, 'Dismiss', {
-          duration: 5000,
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar'], // Optional: Add a class for styling error messages
-        });
-        // You might want to dispatch an action to clear the error message from the store after showing it
-        // this.store.dispatch(clearEnrolErrorMsg()); // Assuming you have such an action
+        this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
+  }
+
+  private setupSearch(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(searchTerm => {
+      this.dataSource.filter = searchTerm.trim().toLowerCase();
+      if (this.dataSource.paginator) {
+        this.dataSource.paginator.firstPage();
+      }
+    });
+  }
+
+  private setupFiltering(): void {
+    this.filteredTerms$ = combineLatest([
+      this.terms$,
+      this.searchControl.valueChanges.pipe(startWith('')),
+      this.yearFilterControl.valueChanges.pipe(startWith('all'))
+    ]).pipe(
+      map(([terms, searchTerm, yearFilter]) => {
+        let filtered = terms;
+        
+        // Apply search filter
+        if (searchTerm) {
+          filtered = filtered.filter(term => 
+            term.num.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+            term.year.toString().includes(searchTerm) ||
+            term.startDate.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+            term.endDate.toString().toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+        
+        // Apply year filter
+        if (yearFilter !== 'all') {
+          filtered = filtered.filter(term => term.year.toString() === yearFilter);
+        }
+        
+        return filtered;
+      }),
+      takeUntil(this.destroy$)
+    );
   }
 
   ngAfterViewInit(): void {
@@ -122,55 +154,101 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+  onSearchChange(event: Event): void {
+    const searchTerm = (event.target as HTMLInputElement).value;
+    this.searchSubject.next(searchTerm);
   }
 
-  openAddEditTermDialog() {
-    this.dialog.open(AddEditTermComponent);
+  onFilterChange(): void {
+    this.cdr.markForCheck();
   }
 
-  deleteTerm(term: TermsModel) {
-    // You might want to add a confirmation dialog here before dispatching delete
+  openAddEditTermDialog(): void {
+    const dialogRef = this.dialog.open(AddEditTermComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(result => {
+      if (result) {
+        this.snackBar.open('Term operation completed successfully', 'Close', {
+          duration: 3000,
+          verticalPosition: 'top',
+          horizontalPosition: 'right'
+        });
+      }
+    });
+  }
+
+  deleteTerm(term: TermsModel): void {
     const confirmDelete = confirm(
       `Are you sure you want to delete Term ${term.num} ${term.year}?`
     );
     if (confirmDelete) {
       this.store.dispatch(deleteTermAction({ term }));
+      this.snackBar.open('Term deleted successfully', 'Close', {
+        duration: 3000,
+        verticalPosition: 'top',
+        horizontalPosition: 'right'
+      });
     }
   }
 
-  openEditTermDialog(data: TermsModel) {
-    this.dialog.open(AddEditTermComponent, { data });
+  openEditTermDialog(data: TermsModel): void {
+    const dialogRef = this.dialog.open(AddEditTermComponent, {
+      data,
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(result => {
+      if (result) {
+        this.snackBar.open('Term updated successfully', 'Close', {
+          duration: 3000,
+          verticalPosition: 'top',
+          horizontalPosition: 'right'
+        });
+      }
+    });
   }
 
-  /**
-   * Custom filter predicate for MatTableDataSource to search TermsModel properties.
-   * Filters by num, year, and formatted start/end dates.
-   */
-  customFilterPredicate = (data: TermsModel, filter: string): boolean => {
-    const searchString = filter.trim().toLowerCase();
+  trackByTermId(index: number, term: TermsModel): string {
+    return `${term.num}-${term.year}`;
+  }
 
-    // Convert all searchable properties to lowercase strings
-    const numStr = data.num.toString().toLowerCase();
-    const yearStr = data.year.toString().toLowerCase();
-    const startDateStr =
-      this.datePipe.transform(data.startDate, 'mediumDate')?.toLowerCase() ||
-      ''; // Format date
-    const endDateStr =
-      this.datePipe.transform(data.endDate, 'mediumDate')?.toLowerCase() || ''; // Format date
+  getTermStatus(term: TermsModel): string {
+    const now = new Date();
+    const startDate = new Date(term.startDate);
+    const endDate = new Date(term.endDate);
+    
+    if (now < startDate) {
+      return 'upcoming';
+    } else if (now >= startDate && now <= endDate) {
+      return 'current';
+    } else {
+      return 'completed';
+    }
+  }
 
-    // Check if the search string is included in any of these properties
-    return (
-      numStr.includes(searchString) ||
-      yearStr.includes(searchString) ||
-      startDateStr.includes(searchString) ||
-      endDateStr.includes(searchString)
-    );
-  };
+  getTermDuration(startDate: string, endDate: string): number {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  getAvailableYears(): number[] {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear - 5; i <= currentYear + 2; i++) {
+      years.push(i);
+    }
+    return years;
+  }
 }

@@ -1,40 +1,89 @@
 <div class="financials-dashboard-container">
-  <mat-card class="dashboard-card">
-    <mat-card-header>
-      <mat-card-title>Student Financials</mat-card-title>
-      <mat-card-subtitle *ngIf="studentNumber">Student Number: {{ studentNumber }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="outstanding-balance">
-        <h3>
-          Outstanding Balance:
-          <span *ngIf="loadingOutstandingBalance$ | async">
-            <mat-spinner diameter="20"></mat-spinner>
-          </span>
-          <span *ngIf="(outstandingBalance$ | async) !== null && !(loadingOutstandingBalance$ | async)">
-            {{ outstandingBalance$ | async | currency:'USD':'symbol':'1.2-2' }}
-          </span>
-          <span *ngIf="(outstandingBalanceError$ | async) && !(loadingOutstandingBalance$ | async)"
-            class="error-message">
-            Error loading balance.
-          </span>
-          <span
-            *ngIf="(outstandingBalance$ | async) === null && !(loadingOutstandingBalance$ | async) && !(outstandingBalanceError$ | async)">
-            N/A
-          </span>
-        </h3>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Loading your financial information...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasError && !isLoading" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h3 class="error-title">Unable to load financial data</h3>
+    <p class="error-message">{{ errorMessage }}</p>
+    <button mat-raised-button color="primary" (click)="loadUserData()">
+      <mat-icon>refresh</mat-icon>
+      Retry
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !hasError" class="dashboard-content">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+      <div class="header-content">
+        <div class="welcome-section">
+          <h1 class="dashboard-title">Student Financials</h1>
+          <p class="dashboard-subtitle" *ngIf="currentUser">
+            Welcome back, {{ currentUser.username }}
+          </p>
+          <p class="student-info" *ngIf="studentNumber">
+            Student Number: {{ studentNumber }}
+          </p>
+        </div>
+        
+        <!-- Outstanding Balance Card -->
+        <mat-card class="balance-card" role="region" aria-label="Outstanding balance">
+          <div class="balance-content">
+            <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
+            <div class="balance-details">
+              <h3 class="balance-label">Outstanding Balance</h3>
+              <div class="balance-amount">
+                <span *ngIf="loadingOutstandingBalance$ | async" class="loading-balance">
+                  <mat-spinner diameter="24"></mat-spinner>
+                </span>
+                <span *ngIf="(outstandingBalance$ | async) !== null && !(loadingOutstandingBalance$ | async)" 
+                      class="balance-value">
+                  {{ outstandingBalance$ | async | currency:'USD':'symbol':'1.2-2' }}
+                </span>
+                <span *ngIf="(outstandingBalanceError$ | async) && !(loadingOutstandingBalance$ | async)"
+                      class="error-message">
+                  Error loading balance
+                </span>
+                <span *ngIf="(outstandingBalance$ | async) === null && !(loadingOutstandingBalance$ | async) && !(outstandingBalanceError$ | async)"
+                      class="no-balance">
+                  No outstanding balance
+                </span>
+              </div>
+            </div>
+          </div>
+        </mat-card>
       </div>
+    </div>
 
-      <nav mat-tab-nav-bar class="dashboard-tabs" [tabPanel]="financialsTabPanel">
-        <a mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" routerLinkActive #rla="routerLinkActive"
-          [active]="rla.isActive">
-          {{ link.label }}
+    <!-- Navigation Tabs -->
+    <nav class="dashboard-tabs" role="tablist" aria-label="Financial sections">
+      <div class="tab-list">
+        <a *ngFor="let link of navLinks" 
+           mat-tab-link 
+           [routerLink]="link.path" 
+           routerLinkActive #rla="routerLinkActive"
+           [active]="rla.isActive"
+           class="tab-link"
+           [attr.aria-selected]="rla.isActive"
+           [attr.aria-controls]="link.path + '-panel'"
+           role="tab">
+          <mat-icon class="tab-icon">{{ link.icon }}</mat-icon>
+          <div class="tab-content">
+            <span class="tab-label">{{ link.label }}</span>
+            <span class="tab-description">{{ link.description }}</span>
+          </div>
         </a>
-      </nav>
+      </div>
+    </nav>
 
-      <mat-tab-nav-panel #financialsTabPanel class="tab-content">
-        <router-outlet></router-outlet>
-      </mat-tab-nav-panel>
-    </mat-card-content>
-  </mat-card>
+    <!-- Tab Content -->
+    <div class="tab-panel-container">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
 </div>

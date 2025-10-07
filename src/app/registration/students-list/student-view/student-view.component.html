@@ -1,74 +1,193 @@
-<mat-toolbar class="title">
-  {{ title.getTitle() }}
-
-</mat-toolbar>
-<div class="container">
-  <div class="student-details-container">
-
-    <div class="grid-cell stno">
-      <span class="detail-label">Student Number : </span>
-      <span class="detail-value" id="student-no">{{ student?.studentNumber }}</span>
+<!-- Main Container -->
+<div class="student-view-container">
+  <!-- Title Toolbar -->
+  <mat-toolbar class="student-toolbar">
+    <div class="toolbar-content">
+      <div class="title-section">
+        <button mat-icon-button (click)="goBack()" matTooltip="Go Back" aria-label="Go back to students list">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <mat-icon class="title-icon">school</mat-icon>
+        <h1 class="page-title">Student Details</h1>
+      </div>
+      <div class="toolbar-actions" *ngIf="student">
+        <button mat-raised-button color="primary" (click)="generateIDCard()" matTooltip="Generate ID Card" aria-label="Generate student ID card">
+          <mat-icon>badge</mat-icon>
+          ID Card
+        </button>
+        <button mat-raised-button color="accent" (click)="editStudent()" matTooltip="Edit Student" aria-label="Edit student">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button mat-raised-button color="warn" (click)="deleteStudent()" matTooltip="Delete Student" aria-label="Delete student">
+          <mat-icon>delete_forever</mat-icon>
+          Delete
+        </button>
+      </div>
     </div>
+  </mat-toolbar>
 
-    <div class="grid-cell idno">
-      <span class="detail-label">I.D Number : </span>
-      <span class="detail-value" id="student-id">{{student?.idnumber}}</span>
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">Loading student details...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-container" *ngIf="errorMessage">
+    <mat-icon class="error-icon">error</mat-icon>
+    <p class="error-message">{{ errorMessage }}</p>
+  </div>
+
+  <!-- Student Details -->
+  <div class="student-details-container" *ngIf="student && !isLoading">
+    <!-- Student Header Card -->
+    <mat-card class="student-header-card">
+      <div class="header-content">
+        <div class="student-avatar">
+          <mat-icon class="avatar-icon">person</mat-icon>
+        </div>
+        <div class="student-info">
+          <h2 class="student-name">{{ student.name }} {{ student.surname }}</h2>
+          <p class="student-id">Student ID: {{ student.studentNumber }}</p>
+          <div class="status-badges">
+            <span class="status-badge" [ngClass]="'status-' + student.gender.toLowerCase()">
+              <mat-icon>{{ student.gender === 'Male' ? 'male' : 'female' }}</mat-icon>
+              {{ student.gender }}
+            </span>
+            <span class="role-badge student-role">
+              <mat-icon>school</mat-icon>
+              Student
+            </span>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Student Details Grid -->
+    <div class="details-grid">
+      <!-- Personal Information Card -->
+      <mat-card class="detail-card personal-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="card-icon">person</mat-icon>
+            Personal Information
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="detail-item">
+            <span class="detail-label">Full Name</span>
+            <span class="detail-value">{{ student.name }} {{ student.surname }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Student Number</span>
+            <span class="detail-value student-number">{{ student.studentNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">ID Number</span>
+            <span class="detail-value">{{ student.idnumber || 'Not provided' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date of Birth</span>
+            <span class="detail-value">{{ student.dob | date:'mediumDate' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Age</span>
+            <span class="detail-value age-value">{{ sharedService.calculateAge(student.dob) }} years old</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Gender</span>
+            <span class="detail-value">
+              <span class="gender-chip" [ngClass]="'gender-' + student.gender.toLowerCase()">
+                <mat-icon>{{ student.gender === 'Male' ? 'male' : 'female' }}</mat-icon>
+                {{ student.gender }}
+              </span>
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Contact Information Card -->
+      <mat-card class="detail-card contact-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="card-icon">contact_phone</mat-icon>
+            Contact Information
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="detail-item">
+            <span class="detail-label">
+              <mat-icon class="detail-icon">phone</mat-icon>
+              Phone Number
+            </span>
+            <span class="detail-value">{{ student.cell || 'Not provided' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">
+              <mat-icon class="detail-icon">email</mat-icon>
+              Email Address
+            </span>
+            <span class="detail-value">{{ student.email || 'Not provided' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">
+              <mat-icon class="detail-icon">home</mat-icon>
+              Address
+            </span>
+            <span class="detail-value">{{ student.address || 'Not provided' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Academic Information Card -->
+      <mat-card class="detail-card academic-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="card-icon">school</mat-icon>
+            Academic Information
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="detail-item">
+            <span class="detail-label">Date of Joining</span>
+            <span class="detail-value">{{ student.dateOfJoining | date:'mediumDate' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Previous School</span>
+            <span class="detail-value">{{ student.prevSchool || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Student Status</span>
+            <span class="detail-value">
+              <span class="status-chip active-status">
+                <mat-icon>check_circle</mat-icon>
+                Active Student
+              </span>
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Role</span>
+            <span class="detail-value">
+              <span class="role-chip student-role">
+                <mat-icon>school</mat-icon>
+                Student
+              </span>
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
+  </div>
 
-    <div class="grid-cell age">
-      <span class="detail-label">Age : </span>
-      <span class="detail-value" id="student-age">{{ sharedService.calculateAge(student?.dob) }}</span>
-    </div>
-
-    <div class="grid-cell surname">
-      <span class="detail-label">Surname : </span>
-      <span class="detail-value" id="student-surname"> {{ student?.surname }}</span>
-    </div>
-    <div class="grid-cell name">
-      <span class="detail-label">Name:</span>
-      <span class="detail-value" id="student-name">{{ student?.name }}</span>
-    </div>
-
-    <div class="grid-cell gender">
-      <span class="detail-label">Gender : </span>
-      <span class="detail-value" id="student-gender">{{ student?.gender }}</span>
-    </div>
-
-    <div class="grid-cell cell">
-      <span class="detail-label">Cell : </span>
-      <span class="detail-value" id="student-cell">{{ student?.cell }}</span>
-    </div>
-
-    <div class="grid-cell email">
-      <span class="detail-label">Email : </span>
-      <span class="detail-value" id="student-email">{{ student?.email }}</span>
-    </div>
-    <div class="grid-cell address">
-      <span class="detail-label">Address : </span>
-      <span class="detail-value" id="student-address">{{ student?.address }}</span>
-    </div>
-
-
-
-
-
-
-
-    <div class="grid-cell doj">
-      <span class="detail-label">Date Joined : </span>
-      <span class="detail-value" id="student-doj">{{ student?.dateOfJoining | date}}</span>
-    </div>
-
-
-
-
-
-    <div class="grid-cell prev">
-      <span class="detail-label">Former School:</span>
-      <span class="detail-value" id="student-prev">{{ student?.prevSchool }}</span>
-    </div>
-
-
-
+  <!-- No Student Found -->
+  <div class="no-student-container" *ngIf="!student && !isLoading && !errorMessage">
+    <mat-icon class="no-student-icon">person_off</mat-icon>
+    <h3 class="no-student-title">Student Not Found</h3>
+    <p class="no-student-message">The requested student could not be found.</p>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Students
+    </button>
   </div>
 </div>

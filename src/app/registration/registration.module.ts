@@ -18,6 +18,7 @@ import { TeachersSummaryListComponent } from './teachers-list/teachers-summary-l
 import { TeacherViewComponent } from './teachers-list/teacher-view/teacher-view.component';
 import { StudentViewComponent } from './students-list/student-view/student-view.component';
 import { SharedService } from '../shared.service';
+import { StudentIdCardComponent } from './students-list/student-id-card/student-id-card.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { SharedService } from '../shared.service';
     TeachersSummaryListComponent,
     TeacherViewComponent,
     StudentViewComponent,
+    StudentIdCardComponent,
   ],
   imports: [
     CommonModule,

@@ -1,72 +1,114 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, Observable, Subscription, take, tap } from 'rxjs';
 import { InvoiceModel } from '../../models/invoice.model';
-import {
-  selectStudentInvoices,
-  selectLoadingStudentInvoices,
-  selectLoadStudentInvoicesErr,
-} from '../../store/finance.selector'; // Assuming these selectors exist or we'll create them
 import { invoiceActions } from '../../store/finance.actions';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
-// import { financeActions, invoiceActions } from '../../store/finance.actions'; // Assuming a financeActions group for invoices
+import { Actions, ofType } from '@ngrx/effects';
 
 @Component({
   selector: 'app-student-invoices',
   templateUrl: './student-invoices.component.html',
   styleUrls: ['./student-invoices.component.css'],
 })
-export class StudentInvoicesComponent implements OnInit {
-  user$ = this.store.select(selectUser);
-  invoices$: Observable<InvoiceModel[] | null>;
-  loadingInvoices$: Observable<boolean>;
-  errorInvoices$: Observable<any>;
-  private userSubscription: Subscription | undefined; // To unsubscribe on destroy
+export class StudentInvoicesComponent implements OnInit, OnDestroy {
+  // UI State
+  isLoading = true;
+  hasError = false;
+  errorMessage = '';
+  invoices: InvoiceModel[] = [];
 
-  constructor(private store: Store) {
-    this.invoices$ = this.store.select(selectStudentInvoices);
-    this.loadingInvoices$ = this.store.select(selectLoadingStudentInvoices); // Reusing general loading selector for now
-    this.errorInvoices$ = this.store.select(selectLoadStudentInvoicesErr); // Reusing general error selector for now
-  }
+  // Data Observables
+  user$ = this.store.select(selectUser);
+  private userSubscription: Subscription | undefined;
+  private invoicesSubscription: Subscription | undefined;
+
+  constructor(
+    private store: Store<any>,
+    private actions$: Actions
+  ) {}
 
   ngOnInit(): void {
-    // this.userSubscription = this.store
-    //   .select(selectUser)
-    //   .pipe(
-    //     filter((user) => !!user && !!user.id), // Ensure user and user.id exist
-    //     take(1), // <<< THIS IS THE KEY CHANGE: Ensures the tap/dispatch runs only once
-    //     tap((user) => {
-    //       console.log('student number from store for invoice fetch:', user!.id); // Use user!.id directly
-    //       this.store.dispatch(
-    //         invoiceActions.fetchStudentInvoices({
-    //           studentNumber: user!.id, // Use user.id directly from the tap callback
-    //         })
-    //       );
-    //     })
-    //   )
-    //   .subscribe();
+    this.setupInvoicesSubscription();
+    this.loadInvoices();
+  }
+
+  private setupInvoicesSubscription(): void {
+    this.invoicesSubscription = this.actions$
+      .pipe(ofType(invoiceActions.fetchStudentInvoicesSuccess))
+      .subscribe((action) => {
+        this.invoices = action.studentInvoices;
+        this.isLoading = false;
+        this.hasError = false;
+      });
+
+    this.actions$
+      .pipe(ofType(invoiceActions.fetchStudentInvoicesFail))
+      .subscribe(() => {
+        this.handleError('Failed to load invoices');
+      });
+  }
+
+  loadInvoices(): void {
+    this.isLoading = true;
+    this.hasError = false;
+
+    this.userSubscription = this.store
+      .select(selectUser)
+      .pipe(
+        filter((user) => !!user && !!user.id),
+        take(1),
+        tap((user) => {
+          this.store.dispatch(
+            invoiceActions.fetchStudentInvoices({
+              studentNumber: user!.id,
+            })
+          );
+        })
+      )
+      .subscribe({
+        error: (error) => this.handleError('Failed to load invoices')
+      });
+  }
+
+  private handleError(message: string): void {
+    this.hasError = true;
+    this.errorMessage = message;
+    this.isLoading = false;
+    console.error(message);
   }
 
   ngOnDestroy(): void {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
+    if (this.invoicesSubscription) {
+      this.invoicesSubscription.unsubscribe();
+    }
   }
 
-  /**
-   * Dispatches an action to download a specific invoice PDF.
-   * @param invoiceNumber The unique identifier for the invoice to download.
-   */
-  downloadInvoice(invoiceNumber: string): void {
-    if (invoiceNumber) {
-      this.store.dispatch(
-        invoiceActions.downloadInvoice({ invoiceNumber: invoiceNumber })
-      );
-      console.log(`Dispatching download for Invoice #${invoiceNumber}`);
-    } else {
-      console.warn('Cannot download invoice: Invoice number is missing.');
-      // Optionally, show a user-friendly message
-    }
+  // TrackBy functions for performance
+  trackByInvoiceId(index: number, invoice: InvoiceModel): string {
+    return invoice.invoiceNumber;
+  }
+
+  trackByBillId(index: number, bill: any): string {
+    return bill.fees.id;
+  }
+
+  trackByAllocationId(index: number, allocation: any): string {
+    return allocation.receiptId;
+  }
+
+  // Helper methods for invoice status
+  isInvoiceOverdue(invoice: InvoiceModel): boolean {
+    const today = new Date();
+    const dueDate = new Date(invoice.invoiceDueDate);
+    return dueDate < today && invoice.balance > 0;
+  }
+
+  isInvoicePaid(invoice: InvoiceModel): boolean {
+    return invoice.balance <= 0;
   }
 
   // Helper to get invoice status class for styling
@@ -86,4 +128,21 @@ export class StudentInvoicesComponent implements OnInit {
         return '';
     }
   }
+
+  /**
+   * Dispatches an action to download a specific invoice PDF.
+   * @param invoiceNumber The unique identifier for the invoice to download.
+   */
+  downloadInvoice(invoiceNumber: string): void {
+    if (invoiceNumber) {
+      this.store.dispatch(
+        invoiceActions.downloadInvoice({ invoiceNumber: invoiceNumber })
+      );
+      console.log(`Dispatching download for Invoice #${invoiceNumber}`);
+    } else {
+      console.warn('Cannot download invoice: Invoice number is missing.');
+      // Optionally, show a user-friendly message
+    }
+  }
+
 }

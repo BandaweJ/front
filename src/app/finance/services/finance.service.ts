@@ -13,7 +13,7 @@ import { FinanceDataModel } from 'src/app/finance/models/finance-data.model';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
-  baseURL = `${environment.apiUrl}finance/`;
+  baseURL = `${environment.apiUrl}/finance/`;
 
   constructor(private httpClient: HttpClient) {}
 

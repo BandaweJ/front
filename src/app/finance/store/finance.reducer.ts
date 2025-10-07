@@ -24,7 +24,7 @@ export interface State {
   studentsToBill: EnrolsModel[];
   isLoading: boolean;
   errorMessage: string;
-  selectedStudentInvoice: InvoiceModel;
+  selectedStudentInvoice: InvoiceModel | null;
   fetchInvoiceError: string;
   generateEmptyInvoiceErr: string;
   balance: BalancesModel | null;
@@ -212,78 +212,30 @@ export const financeReducer = createReducer(
     errorMessage: error.message,
   })),
   on(billStudentActions.billStudent, (state, { bills }) => {
-    const finalBillsForInvoice = bills;
+    // Simply replace the bills in the selected invoice
+    // This works for both new invoices (empty bills) and existing invoices (replace existing bills)
+    if (!state.selectedStudentInvoice) {
+      return state; // No invoice selected, nothing to update
+    }
 
-    // 1. Calculate the gross total bill (sum of all bills before any exemption)
-    const grossTotalBill = finalBillsForInvoice.reduce(
-      (sum, bill) => sum + Number(bill.fees.amount || 0), // Ensure bill.fees.amount is treated as a number
+    // Calculate the new total bill from the new bills
+    const newTotalBill = bills.reduce(
+      (sum, bill) => sum + Number(bill.fees.amount || 0),
       0
     );
 
-    // 2. Get the exemption from the current selected invoice
-    // Safely access exemption, it might be null or undefined if no exemption is applied
-    const studentExemption: ExemptionModel | undefined =
-      state.selectedStudentInvoice?.exemption;
-
-    // 3. Calculate the net total bill after applying exemption
-    let netTotalBillFromBills = grossTotalBill; // This will be the value for invoice.totalBill
-
-    if (studentExemption && studentExemption.isActive) {
-      if (
-        studentExemption.type === ExemptionType.FIXED_AMOUNT //||
-        //studentExemption.type === ExemptionType.STAFF_SIBLING
-      ) {
-        // Apply fixed amount exemption, ensuring result doesn't go below zero
-        netTotalBillFromBills = Math.max(
-          0,
-          netTotalBillFromBills - (Number(studentExemption.fixedAmount) || 0)
-        );
-      } else if (studentExemption.type === ExemptionType.PERCENTAGE) {
-        // Apply percentage exemption
-        const percentage =
-          (Number(studentExemption.percentageAmount) || 0) / 100;
-        netTotalBillFromBills = Math.max(
-          0,
-          netTotalBillFromBills * (1 - percentage)
-        );
-      } else if (studentExemption.type === ExemptionType.STAFF_SIBLING) {
-        netTotalBillFromBills = 0;
-        bills.map((bill) => {
-          if (bill.fees.name === FeesNames.foodFee) {
-            netTotalBillFromBills += 100;
-          }
-        });
-      }
-      // Round the net total bill to two decimal places for currency
-      netTotalBillFromBills = parseFloat(netTotalBillFromBills.toFixed(2));
-    }
-
-    // 4. Get other necessary amounts, ensuring they are numbers
-    const currentBalanceBfwdAmount = Number(
-      state.selectedStudentInvoice?.balanceBfwd?.amount || 0
-    );
-    const amountPaid = Number(
-      state.selectedStudentInvoice?.amountPaidOnInvoice || 0
-    );
-
-    // 5. Calculate new balance based on the net total bill, balance brought forward, and payments
-    const newBalance =
-      netTotalBillFromBills + currentBalanceBfwdAmount - amountPaid;
-    // Round the new balance to two decimal places for consistency
-    const roundedNewBalance = parseFloat(newBalance.toFixed(2));
-
     return {
       ...state,
-      isLoading: false,
-      errorMessage: '',
       selectedStudentInvoice: {
         ...state.selectedStudentInvoice,
-        bills: [...finalBillsForInvoice], // Use the new, complete array of bills
-        totalBill: netTotalBillFromBills + currentBalanceBfwdAmount, // This now reflects the net sum of current bills after exemption
-        balance: roundedNewBalance, // This is the final calculated balance
+        bills: [...bills], // Replace with the new bills
+        totalBill: newTotalBill, // Update total bill
+        balance: newTotalBill - (state.selectedStudentInvoice.amountPaidOnInvoice || 0), // Recalculate balance
       },
     };
   }),
+
+  // billStudentSuccess and billStudentFail actions removed - bills are now updated locally only
 
   on(invoiceActions.downloadInvoice, (state) => ({
     ...state,

@@ -1,37 +1,57 @@
 /* student-dashboard.component.css */
 
 .marks-graph-container {
-  /* Layout and Spacing */
-  width: 100%; /* Take full width of its parent container */
-  max-width: 900px; /* Limit maximum width for readability on large screens */
-  margin: 20px auto; /* Center the container horizontally with vertical spacing */
-  padding: 20px; /* Internal padding */
+  width: 100%;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
 
-  /* Visuals */
-  background-color: #ffffff; /* White background */
-  border: 1px solid #e0e0e0; /* Subtle border */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+.marks-graph-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 0;
+}
 
-  /* Text inside the container */
-  color: #333; /* Dark gray for text */
-  font-family: "Roboto", sans-serif; /* Example font, adjust to your project's font */
+.marks-graph-container > * {
+  position: relative;
+  z-index: 1;
 }
 
 .marks-graph-container h3 {
   text-align: center;
-  color: #3f51b5; /* A primary color, e.g., Material Design indigo */
-  margin-bottom: 25px; /* Space below the heading */
-  font-size: 1.6em; /* Larger heading */
-  font-weight: 500;
+  color: white;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #ffffff, #f0f0f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Styles for the chart canvas itself */
 canvas {
-  display: block; /* Ensure the canvas behaves as a block element */
-  width: 100% !important; /* Important to override Chart.js inline styles if needed */
-  height: 400px !important; /* Set a fixed height for the graph area */
-  /* You can adjust height as needed. Use a responsive height if preferred (e.g., 50vh) */
+  display: block;
+  width: 100% !important;
+  height: 400px !important;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 /* Styles for the "No marks data available" message */
@@ -77,93 +97,204 @@ canvas {
 .student-dashboard-main-container {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Space between the summary and graph sections */
-  padding: 20px;
+  gap: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
 }
 
 .summary-cards-container {
-  display: flex;
-  flex-wrap: wrap; /* Allow cards to wrap on smaller screens */
-  gap: 20px; /* Space between cards */
-  justify-content: center; /* Center cards horizontally */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  justify-content: center;
 }
 
 .summary-card {
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  padding: 20px;
-  min-width: 280px; /* Minimum width for cards */
-  flex: 1; /* Allow cards to grow and shrink */
-  max-width: 45%; /* Max width to ensure two columns on larger screens */
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  min-width: 350px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.summary-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
 }
 
 /* Specific styles for the new cards */
-.student-details-card,
-.enrolment-details-card {
-  /* Inherit general summary-card styles */
-  /* You can add specific colors or emphasis if desired */
-  background-color: #f8f9fa; /* A slightly different background for distinction */
+.student-details-card::before {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.enrolment-details-card::before {
+  background: linear-gradient(90deg, #f093fb, #f5576c);
+}
+
+.financial-card::before {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+}
+
+.academic-card::before {
+  background: linear-gradient(90deg, #43e97b, #38f9d7);
 }
 
 .summary-card h4 {
   text-align: center;
-  color: #5c6bc0; /* A slightly different Material Design color */
-  margin-bottom: 20px;
-  font-size: 1.4em;
-  font-weight: 500;
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 10px;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .data-item {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 1.1em;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.data-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateX(4px);
 }
 
 .data-item label {
-  font-weight: bold;
-  color: #424242;
+  font-weight: 600;
+  color: #2c3e50;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
 }
 
 .data-item span {
-  color: #616161;
+  color: #34495e;
+  font-weight: 500;
 }
 
 .amount-owed span.negative {
-  color: #d32f2f; /* Red for amount owed (if positive) */
-  font-weight: bold;
+  color: #e74c3c;
+  font-weight: 700;
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
 }
 
 .amount-owed span.positive {
-  color: #388e3c; /* Green for if they owe 0 or negative (overpaid) */
-  font-weight: bold;
+  color: #27ae60;
+  font-weight: 700;
+  background: linear-gradient(45deg, #27ae60, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
 }
 
 .no-data-message,
 .loading-spinner {
   text-align: center;
-  padding: 20px;
+  padding: 2rem;
   font-style: italic;
-  color: #757575;
+  color: #7f8c8d;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  margin: 1rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .loading-spinner {
-  font-weight: bold;
-  color: #3f51b5; /* Primary color for loading message */
+  font-weight: 600;
+  color: #3498db;
+  background: linear-gradient(45deg, #3498db, #2980b9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Responsive adjustments for summary cards */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .summary-cards-container {
-    flex-direction: column; /* Stack cards vertically on smaller screens */
-    align-items: center; /* Center stacked cards */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
+}
+
+@media (max-width: 768px) {
+  .student-dashboard-main-container {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+  
+  .summary-cards-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
   .summary-card {
-    max-width: 90%; /* Allow cards to take more width when stacked */
+    min-width: 280px;
+    padding: 1.5rem;
+  }
+  
+  .marks-graph-container {
+    margin: 1rem auto;
+    padding: 1.5rem;
+  }
+  
+  .marks-graph-container h3 {
+    font-size: 1.5rem;
+  }
+  
+  canvas {
+    height: 300px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .student-dashboard-main-container {
+    padding: 0.5rem;
+  }
+  
+  .summary-card {
+    min-width: 250px;
+    padding: 1rem;
+  }
+  
+  .marks-graph-container {
+    padding: 1rem;
+  }
+  
+  .marks-graph-container h3 {
+    font-size: 1.3rem;
+  }
+  
+  canvas {
+    height: 250px !important;
   }
 }
 
@@ -174,26 +305,50 @@ canvas {
 }
 
 .outstanding-container {
-  margin-top: 15px;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 15px;
+  margin-top: 1.5rem;
+  border-top: 2px solid #ecf0f1;
+  padding-top: 1.5rem;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
 }
 
 .outstanding-label {
-  font-weight: bold;
-  color: #5c6bc0; /* A color to make the label stand out */
-  margin-bottom: 10px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
   display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
 }
 
 .outstanding-item {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
-  font-size: 0.95em;
-  color: #d32f2f; /* Red to indicate an owed amount */
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: #e74c3c;
+  padding: 0.5rem;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.outstanding-item:hover {
+  background: rgba(231, 76, 60, 0.2);
+  transform: translateX(4px);
 }
 
 .outstanding-item span {
-  /* You can add specific styles for the amount if needed */
+  font-weight: 600;
+}
+
+.outstanding-amount {
+  font-weight: 700;
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

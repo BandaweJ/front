@@ -12,7 +12,7 @@ import { MarksProgressModel } from '../models/marks-progress.model';
   providedIn: 'root',
 })
 export class MarksService {
-  baseUrl = environment.apiUrl + 'marks/';
+  baseUrl = environment.apiUrl + '/marks/';
 
   constructor(private httpClient: HttpClient) {}
 

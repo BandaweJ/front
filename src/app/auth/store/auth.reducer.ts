@@ -57,7 +57,7 @@ export const authReducer = createReducer(
   on(signinActions.signinFailure, (state, { error }) => ({
     // Use grouped action
     ...state,
-    errorMessage: error.message,
+    errorMessage: error?.message || 'An error occurred during sign in',
     isLoggedin: false,
     accessToken: '',
     user: null,
@@ -87,7 +87,7 @@ export const authReducer = createReducer(
   on(signupActions.signupFailure, (state, { error }) => ({
     // Use grouped action
     ...state,
-    errorMessage: error.message,
+    errorMessage: error?.message || 'An error occurred during sign up',
     isLoggedin: false,
     accessToken: '',
     user: null,
@@ -124,7 +124,7 @@ export const authReducer = createReducer(
     // Use grouped action
     ...state,
     isLoading: false,
-    errorMessage: error.message,
+    errorMessage: error?.message || 'An error occurred while fetching account stats',
   })),
   on(userDetailsActions.fetchUser, (state) => ({
     // Use grouped action
@@ -143,7 +143,7 @@ export const authReducer = createReducer(
     // Use grouped action
     ...state,
     isLoading: false,
-    errorMessage: error.message,
+    errorMessage: error?.message || 'An error occurred while fetching user details',
     userDetails: null,
   }))
 );

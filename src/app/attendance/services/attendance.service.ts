@@ -1,35 +1,141 @@
 import { Injectable } from '@angular/core';
-import { RegisterModel } from '../models/register.model';
-import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
-@Injectable({ providedIn: 'root' })
+export interface AttendanceRecord {
+  id?: number;
+  studentNumber: string;
+  surname: string;
+  name: string;
+  gender: string;
+  present: boolean;
+  date: string;
+  className: string;
+  termNum: number;
+  year: number;
+  student: any;
+}
+
+export interface MarkAttendanceRequest {
+  studentNumber: string;
+  className: string;
+  termNum: number;
+  year: number;
+  present: boolean;
+  date: string;
+}
+
+export interface AttendanceReport {
+  [date: string]: AttendanceRecord[];
+}
+
+export interface AttendanceSummary {
+  className: string;
+  termNum: number;
+  year: number;
+  totalRecords: number;
+  presentCount: number;
+  absentCount: number;
+  attendanceRate: number;
+  studentStats: StudentAttendanceStats[];
+}
+
+export interface StudentAttendanceStats {
+  student: any;
+  totalDays: number;
+  presentDays: number;
+  absentDays: number;
+  attendanceRate: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class AttendanceService {
-  constructor(private httpClient: HttpClient) {}
+  private apiUrl = `${environment.apiUrl}/attendance`;
 
-  baseURL = `${environment.apiUrl}enrolment/enrol/`;
+  constructor(private http: HttpClient) {}
 
-  markRegister(
-    enrol: RegisterModel,
-    present: boolean
-  ): Observable<RegisterModel> {
-    const enro = { ...enrol };
-
-    enro.present = present;
-
-    console.log(enro);
-
-    return this.httpClient.post<RegisterModel>(this.baseURL + 'register', enro);
+  getClassAttendance(
+    className: string,
+    termNum: number,
+    year: number,
+    date?: string
+  ): Observable<AttendanceRecord[]> {
+    let url = `${this.apiUrl}/class/${className}/${termNum}/${year}`;
+    if (date) {
+      url += `?date=${date}`;
+    }
+    return this.http.get<AttendanceRecord[]>(url);
   }
 
+  markAttendance(request: MarkAttendanceRequest): Observable<AttendanceRecord> {
+    return this.http.post<AttendanceRecord>(`${this.apiUrl}/mark`, request);
+  }
+
+  getAttendanceReports(
+    className: string,
+    termNum: number,
+    year: number,
+    startDate?: string,
+    endDate?: string
+  ): Observable<AttendanceReport> {
+    let url = `${this.apiUrl}/reports/${className}/${termNum}/${year}`;
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    return this.http.get<AttendanceReport>(url);
+  }
+
+  getStudentAttendance(
+    studentNumber: string,
+    termNum: number,
+    year: number,
+    startDate?: string,
+    endDate?: string
+  ): Observable<AttendanceRecord[]> {
+    let url = `${this.apiUrl}/student/${studentNumber}/${termNum}/${year}`;
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    return this.http.get<AttendanceRecord[]>(url);
+  }
+
+  getAttendanceSummary(
+    className: string,
+    termNum: number,
+    year: number
+  ): Observable<AttendanceSummary> {
+    return this.http.get<AttendanceSummary>(`${this.apiUrl}/summary/${className}/${termNum}/${year}`);
+  }
+
+  // Legacy methods for backward compatibility
   getTodayRegisterByClass(
     name: string,
     num: number,
     year: number
-  ): Observable<RegisterModel[]> {
-    return this.httpClient.get<RegisterModel[]>(
-      `${this.baseURL}register/${name}/${num}/${year}`
-    );
+  ): Observable<AttendanceRecord[]> {
+    return this.getClassAttendance(name, num, year);
+  }
+
+  markRegister(
+    attendance: any,
+    present: boolean
+  ): Observable<AttendanceRecord> {
+    return this.markAttendance({
+      studentNumber: attendance.student?.studentNumber || attendance.studentNumber,
+      className: attendance.name || attendance.className,
+      termNum: attendance.num || attendance.termNum,
+      year: attendance.year,
+      present,
+      date: attendance.date ? new Date(attendance.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+    });
   }
 }

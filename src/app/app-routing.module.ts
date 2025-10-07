@@ -13,6 +13,7 @@ import { SubjectsComponent } from './marks/subjects/subjects.component';
 import { EnterMarksComponent } from './marks/enter-marks/enter-marks.component';
 import { ReportsComponent } from './reports/reports/reports.component';
 import { MarkRegisterComponent } from './attendance/mark-register/mark-register.component';
+import { AttendanceReportsComponent } from './attendance/attendance-reports/attendance-reports.component';
 import { MigrateClassEnrolmentComponent } from './enrolment/migrate-class-enrolment/migrate-class-enrolment.component';
 import { TeachersCommentsComponent } from './marks/teachers-comments/teachers-comments.component';
 import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.component';
@@ -157,6 +158,12 @@ const routes: Routes = [
     component: MarkRegisterComponent,
     canActivate: [AuthGuardService],
     title: 'Mark Attendance Register',
+  },
+  {
+    path: 'attendance-reports',
+    component: AttendanceReportsComponent,
+    canActivate: [AuthGuardService],
+    title: 'Attendance Reports',
   },
   {
     path: 'teachers-comments',

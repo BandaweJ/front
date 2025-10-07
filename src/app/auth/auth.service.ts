@@ -19,7 +19,7 @@ export class AuthService {
     private http: HttpClient // private router: Router, // private store: Store
   ) {}
 
-  private baseUrl = `${environment.apiUrl}auth/`;
+  private baseUrl = `${environment.apiUrl}/auth/`;
 
   getToken(): string | null {
     return localStorage.getItem('token');
@@ -59,7 +59,6 @@ export class AuthService {
   }
 
   signup(signupData: SignupInterface): Observable<{ response: boolean }> {
-    // console.log(signupData);
     return this.http.post<{ response: boolean }>(
       this.baseUrl + 'signup',
       signupData

@@ -658,4 +658,7 @@ export class FinanceEffects {
       )
     )
   );
+
+  // billStudent$ effect removed - bills are now updated locally only
+  // The user will save the entire invoice later using the save button
 }

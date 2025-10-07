@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { TeachersModel } from '../models/teachers.model';
 import {
@@ -7,7 +7,7 @@ import {
   selectRegErrorMsg,
   selectTeachers,
 } from '../store/registration.selectors';
-import { map, Observable } from 'rxjs';
+import { map, Observable, Subject, takeUntil, debounceTime, distinctUntilChanged, switchMap, startWith, combineLatest } from 'rxjs';
 import {
   deleteTeacherAction,
   fetchTeachers,
@@ -31,14 +31,19 @@ import { FormControl, FormGroup } from '@angular/forms';
   selector: 'app-teachers-list',
   templateUrl: './teachers-list.component.html',
   styleUrls: ['./teachers-list.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TeachersListComponent implements OnInit, AfterViewInit {
+export class TeachersListComponent implements OnInit, AfterViewInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
+
   constructor(
     private store: Store,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     public title: Title,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.store.dispatch(fetchTeachers());
   }
@@ -71,51 +76,68 @@ export class TeachersListComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit(): void {
+    this.initializeForm();
+    this.setupObservables();
+    this.setupSearch();
+    this.setupFiltering();
+  }
+
+  private initializeForm(): void {
     this.filtersForm = new FormGroup({
       males: new FormControl(true),
       females: new FormControl(true),
       active: new FormControl(true),
       inactive: new FormControl(true),
     });
+  }
+
+  private setupObservables(): void {
     this.teachers$ = this.store.select(selectTeachers);
     this.errorMsg$ = this.store.select(selectRegErrorMsg);
-    this.teachers$.subscribe((teachers) => {
-      this.dataSource.data = teachers;
-    });
+  }
 
-    // Filter teachers based on form changes
-    this.filteredTeachers$ = this.teachers$.pipe(
-      map((teachers) => this.applyFilters(teachers))
-    );
-
-    this.filteredTeachers$.subscribe((filteredTeachers) => {
-      this.dataSource.data = filteredTeachers;
-    });
-
-    // Subscribe to form value changes to trigger filtering
-    this.filtersForm.valueChanges.subscribe(() => {
-      this.filteredTeachers$ = this.teachers$.pipe(
-        map((teachers) => this.applyFilters(teachers))
-      );
-      this.filteredTeachers$.subscribe((filteredTeachers) => {
-        this.dataSource.data = filteredTeachers;
-      });
+  private setupSearch(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(searchTerm => {
+      this.dataSource.filter = searchTerm.trim().toLowerCase();
+      if (this.dataSource.paginator) {
+        this.dataSource.paginator.firstPage();
+      }
+      this.cdr.markForCheck();
     });
   }
 
-  applyFilters(teachers: any[]): any[] {
-    // Replace 'any' with your Teacher type
+  private setupFiltering(): void {
+    // Combine teachers data with form changes for efficient filtering
+    combineLatest([
+      this.teachers$,
+      this.filtersForm.valueChanges.pipe(startWith(this.filtersForm.value))
+    ]).pipe(
+      map(([teachers, filters]) => this.applyFilters(teachers, filters)),
+      takeUntil(this.destroy$)
+    ).subscribe((filteredTeachers) => {
+      this.dataSource.data = filteredTeachers;
+      this.cdr.markForCheck();
+    });
+  }
+
+  applyFilters(teachers: TeachersModel[], filters?: any): TeachersModel[] {
     if (!teachers) {
       return [];
     }
 
-    return teachers.filter((teacher) => {
-      const isMale = this.males?.value && teacher.gender === 'Male';
-      const isFemale = this.females?.value && teacher.gender === 'Female';
-      const isActive = this.active?.value && teacher.active === true;
-      const isInactive = this.inactive?.value && teacher.active === false;
+    const filterValues = filters || this.filtersForm.value;
 
-      return isMale || isFemale || isActive || isInactive;
+    return teachers.filter((teacher) => {
+      const genderMatch = (filterValues.males && teacher.gender === 'Male') || 
+                         (filterValues.females && teacher.gender === 'Female');
+      const statusMatch = (filterValues.active && teacher.active === true) || 
+                         (filterValues.inactive && teacher.active === false);
+
+      return genderMatch && statusMatch;
     });
   }
 
@@ -139,11 +161,12 @@ export class TeachersListComponent implements OnInit, AfterViewInit {
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.searchSubject.next(filterValue);
+  }
 
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+  // TrackBy function for better performance
+  trackByTeacherId(index: number, teacher: TeachersModel): string {
+    return teacher.id;
   }
 
   openAddTeacherDialog() {
@@ -156,7 +179,19 @@ export class TeachersListComponent implements OnInit, AfterViewInit {
   }
 
   deleteTeacher(id: string) {
-    this.store.dispatch(deleteTeacherAction({ id }));
+    if (confirm('Are you sure you want to delete this teacher? This action cannot be undone.')) {
+      this.store.dispatch(deleteTeacherAction({ id }));
+      this.snackBar.open('Teacher deleted successfully', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getRowColor(teacher: TeachersModel): string {

@@ -46,6 +46,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   @Input() enrolment: EnrolsModel | undefined = undefined;
   selectedBills: BillModel[] = []; // Bills already associated with the invoice from backend
   toBill: BillModel[] = []; // Temporary staging area for bills to be processed on save
+  currentInvoice: any = null; // Store current invoice for accessing student information
 
   academicLevel!: 'O Level' | 'A Level'; // Tracks currently selected academic level for UI logic
   showTransportFoodOptions: boolean = false; // Controls visibility of transport/food section
@@ -141,6 +142,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     // This should ideally trigger populating the form and `toBill` with existing invoice data.
     this.subscriptions.push(
       this.store.select(selectedStudentInvoice).subscribe((invoice) => {
+        this.currentInvoice = invoice; // Store current invoice for student information access
         this.selectedBills =
           invoice && Array.isArray(invoice.bills) ? [...invoice.bills] : [];
         // Only populate if fees are already loaded, otherwise feesSubscription will handle it.
@@ -651,7 +653,11 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
    * @param fee The FeesModel to add.
    */
   addFeeToToBill(fee: FeesModel | undefined): void {
-    if (!fee || !this.enrolment?.student || !this.enrolment) {
+    // Use currentInvoice.student for editing existing invoices, or enrolment.student for new invoices
+    const student = this.currentInvoice?.student || this.enrolment?.student;
+    const enrol = this.currentInvoice?.enrol || this.enrolment;
+    
+    if (!fee || !student || !enrol) {
       return;
     }
 
@@ -662,9 +668,9 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
     if (existingBillIndex === -1) {
       const newBill: BillModel = {
-        student: this.enrolment.student,
+        student: student,
         fees: fee,
-        enrol: this.enrolment,
+        enrol: enrol,
       };
       this.toBill.push(newBill);
     }
@@ -717,8 +723,9 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
   // --- Dialogs and Ngrx Dispatch ---
   billStudent(): void {
-    // This action sends the FINAL `toBill` array to your Ngrx Effect and then backend
-    if (!this.enrolment?.student) {
+    // This action updates the selected invoice with the new bills locally
+    // The user will save the invoice later using the save button
+    if (!this.currentInvoice?.student) {
       this.snackBar.open(
         'Error: Student information missing for billing.',
         'Close',
@@ -727,11 +734,23 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+    if (this.toBill.length === 0) {
+      this.snackBar.open('No bills selected to add to invoice.', 'Close', {
+        duration: 3000,
+        verticalPosition: 'top',
+        horizontalPosition: 'center',
+      });
+      return;
+    }
+
     this.store.dispatch(billStudentActions.billStudent({ bills: this.toBill }));
 
-    // After dispatching, expect the Ngrx state to eventually update via a success action
-    // (e.g., `billStudentSuccess`) from your effect, which will then trigger
-    // `selectedStudentInvoice` subscription and re-populate the form/toBill.
+    // Show success message
+    this.snackBar.open('Bills updated successfully!', 'Close', {
+      duration: 3000,
+      verticalPosition: 'top',
+      horizontalPosition: 'center',
+    });
   }
 
   confirmBill(): void {
