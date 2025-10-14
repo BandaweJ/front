@@ -1,15 +1,24 @@
-<mat-toolbar class="title">{{ title.getTitle() }}</mat-toolbar>
-
-<div class="sticky-progress-bar" matTooltip="{{ value }} out of {{ maxValue }} marks entered">
-  <div class="mat-elevation-z1 progress-bar-container">
-    <mat-progress-bar color="accent" [value]="(value/maxValue * 100)" mode="determinate"></mat-progress-bar>
-    <span class="progress-value">
-      {{ value }} / {{ maxValue }} Marks Entered
-    </span>
-  </div>
+<!-- Background Elements -->
+<div class="background-elements">
+  <div class="floating-circle circle-1"></div>
+  <div class="floating-circle circle-2"></div>
+  <div class="floating-circle circle-3"></div>
 </div>
 
-<mat-card class="container">
+<!-- Main Container -->
+<div class="main-container">
+  <mat-toolbar class="title">{{ title.getTitle() }}</mat-toolbar>
+
+  <div class="sticky-progress-bar" matTooltip="{{ value }} out of {{ maxValue }} marks entered">
+    <div class="mat-elevation-z1 progress-bar-container">
+        <mat-progress-bar color="primary" [value]="(value/maxValue * 100)" mode="determinate"></mat-progress-bar>
+      <span class="progress-value">
+        {{ value }} / {{ maxValue }} Marks Entered
+      </span>
+    </div>
+  </div>
+
+  <mat-card class="container">
   <form [formGroup]="enrolForm" (ngSubmit)="fetchClassList()">
     <div class="top-btns">
       <mat-form-field appearance="outline">
@@ -157,3 +166,4 @@
     </ng-template>
   </div>
 </mat-card>
+</div>
