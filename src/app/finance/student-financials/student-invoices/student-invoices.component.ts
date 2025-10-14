@@ -1,58 +1,34 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, Observable, Subscription, take, tap } from 'rxjs';
 import { InvoiceModel } from '../../models/invoice.model';
 import { invoiceActions } from '../../store/finance.actions';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
-import { Actions, ofType } from '@ngrx/effects';
+import { selectStudentInvoices, selectLoadingStudentInvoices, selectLoadStudentInvoicesErr } from '../../store/finance.selector';
 
 @Component({
   selector: 'app-student-invoices',
   templateUrl: './student-invoices.component.html',
   styleUrls: ['./student-invoices.component.css'],
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class StudentInvoicesComponent implements OnInit, OnDestroy {
-  // UI State
-  isLoading = true;
-  hasError = false;
-  errorMessage = '';
-  invoices: InvoiceModel[] = [];
-
   // Data Observables
   user$ = this.store.select(selectUser);
+  invoices$ = this.store.select(selectStudentInvoices);
+  loading$ = this.store.select(selectLoadingStudentInvoices);
+  error$ = this.store.select(selectLoadStudentInvoicesErr);
   private userSubscription: Subscription | undefined;
-  private invoicesSubscription: Subscription | undefined;
 
   constructor(
-    private store: Store<any>,
-    private actions$: Actions
+    private store: Store<any>
   ) {}
 
   ngOnInit(): void {
-    this.setupInvoicesSubscription();
     this.loadInvoices();
   }
 
-  private setupInvoicesSubscription(): void {
-    this.invoicesSubscription = this.actions$
-      .pipe(ofType(invoiceActions.fetchStudentInvoicesSuccess))
-      .subscribe((action) => {
-        this.invoices = action.studentInvoices;
-        this.isLoading = false;
-        this.hasError = false;
-      });
-
-    this.actions$
-      .pipe(ofType(invoiceActions.fetchStudentInvoicesFail))
-      .subscribe(() => {
-        this.handleError('Failed to load invoices');
-      });
-  }
-
   loadInvoices(): void {
-    this.isLoading = true;
-    this.hasError = false;
-
     this.userSubscription = this.store
       .select(selectUser)
       .pipe(
@@ -67,23 +43,15 @@ export class StudentInvoicesComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        error: (error) => this.handleError('Failed to load invoices')
+        error: (error) => {
+          console.error('Error loading invoices:', error);
+        }
       });
-  }
-
-  private handleError(message: string): void {
-    this.hasError = true;
-    this.errorMessage = message;
-    this.isLoading = false;
-    console.error(message);
   }
 
   ngOnDestroy(): void {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
-    }
-    if (this.invoicesSubscription) {
-      this.invoicesSubscription.unsubscribe();
     }
   }
 
@@ -138,7 +106,6 @@ export class StudentInvoicesComponent implements OnInit, OnDestroy {
       this.store.dispatch(
         invoiceActions.downloadInvoice({ invoiceNumber: invoiceNumber })
       );
-      console.log(`Dispatching download for Invoice #${invoiceNumber}`);
     } else {
       console.warn('Cannot download invoice: Invoice number is missing.');
       // Optionally, show a user-friendly message

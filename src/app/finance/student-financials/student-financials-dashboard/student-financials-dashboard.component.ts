@@ -1,10 +1,10 @@
 // src/app/finance/components/student-financials-dashboard/student-financials-dashboard.component.ts
 
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, tap, takeUntil } from 'rxjs/operators';
+import { filter, tap, takeUntil, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import {
   selectAmountDue,
@@ -19,21 +19,18 @@ import { selectUser } from 'src/app/auth/store/auth.selectors';
   selector: 'app-student-financials-dashboard',
   templateUrl: './student-financials-dashboard.component.html',
   styleUrls: ['./student-financials-dashboard.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
-  // UI State
-  isLoading = true;
-  hasError = false;
-  errorMessage = '';
-  currentUser: User | null = null;
-
   // Data Observables
-  studentNumber: string | null = null;
+  user$: Observable<User | null>;
   outstandingBalance$: Observable<number | null>;
   loadingOutstandingBalance$: Observable<boolean>;
   outstandingBalanceError$: Observable<any>;
-  user$: Observable<User | null>;
+  
+  // Computed properties
+  currentUser$: Observable<User | null>;
+  studentNumber$: Observable<string | null>;
 
   // Lifecycle Management
   private ngUnsubscribe = new Subject<void>();
@@ -64,8 +61,7 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private store: Store,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private route: ActivatedRoute
   ) {
     this.user$ = this.store.select(selectUser);
     // Select data from the store
@@ -74,6 +70,12 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
       selectIsLoadingFinancials
     );
     this.outstandingBalanceError$ = this.store.select(selectErrorMsg);
+    
+    // Initialize computed properties
+    this.currentUser$ = this.user$;
+    this.studentNumber$ = this.user$.pipe(
+      map(user => user?.id || null)
+    );
   }
 
   ngOnInit(): void {
@@ -87,15 +89,10 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
         filter((user) => !!user),
         tap((user) => {
           if (user) {
-            this.currentUser = user;
-            this.studentNumber = user.id;
-            this.isLoading = false;
-            this.cdr.markForCheck();
-            
             // Dispatch action to fetch outstanding balance
             this.store.dispatch(
               receiptActions.fetchStudentOutstandingBalance({
-                studentNumber: this.studentNumber,
+                studentNumber: user.id,
               })
             );
           }
@@ -103,7 +100,7 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe({
-        error: (error) => this.handleError('Failed to load user data')
+        error: (error) => console.error('Failed to load user data:', error)
       });
   }
 
@@ -114,13 +111,6 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  private handleError(message: string): void {
-    this.hasError = true;
-    this.errorMessage = message;
-    this.isLoading = false;
-    this.cdr.markForCheck();
-    console.error(message);
-  }
 
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();

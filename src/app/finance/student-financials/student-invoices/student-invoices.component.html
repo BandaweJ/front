@@ -1,15 +1,15 @@
 <div class="invoices-container">
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner diameter="60"></mat-spinner>
+  <div *ngIf="loading$ | async" class="loading-container">
+    <div class="loading-spinner">⏳</div>
     <p class="loading-text">Loading your invoices...</p>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="hasError && !isLoading" class="error-container">
+  <div *ngIf="(error$ | async) && !(loading$ | async)" class="error-container">
     <mat-icon class="error-icon">error_outline</mat-icon>
     <h3 class="error-title">Unable to load invoices</h3>
-    <p class="error-message">{{ errorMessage }}</p>
+    <p class="error-message">{{ error$ | async }}</p>
     <button mat-raised-button color="primary" (click)="loadInvoices()">
       <mat-icon>refresh</mat-icon>
       Retry
@@ -17,7 +17,7 @@
   </div>
 
   <!-- Main Content -->
-  <div *ngIf="!isLoading && !hasError" class="invoices-content">
+  <div *ngIf="!(loading$ | async) && !(error$ | async)" class="invoices-content">
     <!-- Header -->
     <div class="invoices-header">
       <h2 class="invoices-title">
@@ -28,9 +28,9 @@
     </div>
 
     <!-- Invoices List -->
-    <div *ngIf="invoices.length > 0; else noInvoices" class="invoices-list">
+    <div *ngIf="(invoices$ | async)?.length; else noInvoices" class="invoices-list">
         <mat-accordion multi="true" class="invoices-accordion">
-          <mat-expansion-panel *ngFor="let invoice of invoices; trackBy: trackByInvoiceId" 
+          <mat-expansion-panel *ngFor="let invoice of invoices$ | async; trackBy: trackByInvoiceId" 
                                class="invoice-panel"
                                [class.overdue]="isInvoiceOverdue(invoice)"
                                [class.paid]="isInvoicePaid(invoice)">
@@ -95,7 +95,6 @@
               <div class="invoice-actions">
                 <button mat-icon-button 
                         (click)="downloadInvoice(invoice.invoiceNumber); $event.stopPropagation()"
-                        matTooltip="Download Invoice PDF" 
                         aria-label="Download invoice PDF"
                         class="download-button">
                   <mat-icon>file_download</mat-icon>

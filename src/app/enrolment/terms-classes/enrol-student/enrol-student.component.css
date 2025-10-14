@@ -1,693 +1,128 @@
-/* Dialog Container */
-.enrol-dialog-container {
+/* Overall container for the dialog content */
+.main-container {
   display: flex;
-  flex-direction: column;
-  height: 80vh;
-  max-height: 80vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 15px;
-  overflow: auto;
-  position: relative;
-  transform: none;
+  flex-direction: column; /* Stacks children (chips and table) vertically */
+  height: 90vh; /* Make the dialog fill a good portion of the screen height */
+  max-height: 90vh; /* Prevent it from getting too tall */
+  padding: 16px; /* Padding inside the mat-card */
+  box-sizing: border-box; /* Include padding in the element's total width/height */
+  overflow: hidden; /* Hide any overflow, individual sections will scroll */
 }
 
-/* Dialog Header */
-.dialog-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1.5rem 2rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.dialog-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-  opacity: 0.3;
-}
-
-.dialog-header .header-content {
-  position: relative;
-  z-index: 1;
+/* Container for selected students (chips) */
+.selected-students-container {
+  flex-shrink: 0; /* Prevents this section from shrinking when space is tight */
+  padding: 10px 16px; /* Padding inside the chip container */
+  margin-bottom: 20px; /* Space between chips container and table container */
+  background-color: #f5f5f5; /* Light background for visual separation */
+  border-radius: 8px; /* Slightly rounded corners */
+  min-height: 80px; /* Ensures some minimum height */
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.title-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.header-icon {
-  font-size: 2rem;
-  width: 2rem;
-  height: 2rem;
-  color: #ffd700;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.title-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.dialog-title {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.dialog-subtitle {
-  margin: 0;
-  font-size: 1rem;
-  opacity: 0.9;
-  font-weight: 400;
-}
-
-.student-count {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  backdrop-filter: blur(10px);
-}
-
-/* Selected Students Section */
-.selected-students-section {
-  padding: 1.5rem 2rem 1rem;
-  flex-shrink: 0;
-}
-
-.selected-card {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.selected-header {
-  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-  color: white;
-  padding: 1rem 1.5rem;
-  margin: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.selected-header .header-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.section-icon {
-  font-size: 1.5rem;
-  width: 1.5rem;
-  height: 1.5rem;
-  color: #ffd700;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.section-title {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.count-badge {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-left: 1rem;
-}
-
-.selected-content {
-  padding: 1.5rem;
-  background: #fafbfc;
-}
-
-.chips-container {
-  min-height: 60px;
+  flex-direction: column; /* Stacks the chip list and buttons vertically */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
 mat-chip-listbox {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
+  flex-wrap: wrap; /* Allows chips to wrap to the next line */
+  gap: 8px; /* Space between individual chips */
+  padding: 8px 0; /* Vertical padding around chips */
+  max-height: 100px; /* Limit height of chip list before scrolling */
+  overflow-y: auto; /* Enable vertical scroll if many chips */
 }
 
-.student-chip {
-  background: linear-gradient(45deg, #667eea, #764ba2) !important;
-  color: white !important;
-  border-radius: 25px !important;
-  padding: 0.5rem 1rem !important;
-  font-weight: 500 !important;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-
-.student-chip:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-}
-
-.chip-content {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.chip-icon {
-  font-size: 1rem;
-  width: 1rem;
-  height: 1rem;
-  color: #ffd700;
-}
-
-.chip-text {
-  font-weight: 600;
-}
-
-.chip-number {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.125rem 0.5rem;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.remove-button {
-  color: rgba(255, 255, 255, 0.8) !important;
-  transition: color 0.3s ease !important;
-}
-
-.remove-button:hover {
-  color: #ff6b6b !important;
-}
-
-.no-students-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+.no-selected-students-message {
+  padding: 10px;
   text-align: center;
-  color: #7f8c8d;
+  color: #757575;
+  font-style: italic;
 }
 
-.empty-icon {
-  font-size: 3rem;
-  width: 3rem;
-  height: 3rem;
-  color: #bdc3c7;
-  margin-bottom: 1rem;
-}
-
-.no-students-message p {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.no-students-message span {
-  font-size: 0.9rem;
-  color: #7f8c8d;
-}
-
-/* Available Students Section */
-.available-students-section {
-  flex: 1;
-  padding: 0 2rem 1rem;
+.bottom-btns {
   display: flex;
-  flex-direction: column;
-  min-height: 0;
+  justify-content: flex-end; /* Pushes buttons to the right */
+  gap: 10px; /* Space between buttons */
+  padding-top: 10px; /* Space above buttons */
 }
 
-.students-card {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.students-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem 1.5rem;
-  margin: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.students-header .header-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.students-content {
-  padding: 1.5rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 300px;
-  max-height: 500px;
-  position: relative;
-  transform: none;
-  overflow: visible;
-}
-
-/* Search Section */
-.search-section {
-  margin-bottom: 1.5rem;
-  flex-shrink: 0;
-}
-
-.search-field {
-  width: 100%;
-}
-
-.search-field .mat-form-field-wrapper {
-  padding-bottom: 0;
-}
-
-.search-field .mat-form-field-outline {
-  border-radius: 12px;
-  border-width: 2px;
-}
-
-.search-field .mat-form-field-outline-thick {
-  border-color: #667eea;
-  border-width: 2px;
-}
-
-/* Table Section */
+/* Container for the main student table */
 .table-container {
-  flex: 1;
+  flex-grow: 1; /* Allows the table container to take up all remaining vertical space */
   display: flex;
-  flex-direction: column;
-  min-height: 200px;
-  max-height: 400px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: visible;
-  border: 2px solid red; /* Debug border */
+  flex-direction: column; /* Stacks the mat-card content (filter, table, paginator) */
+  overflow: hidden; /* Important: Prevents scrollbars on this container, allowing inner table to scroll */
 }
 
-.table-wrapper {
-  width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 1;
-  max-height: 350px;
-  border: 2px solid blue; /* Debug border */
-}
-
-.students-table {
-  width: 100%;
-  background: white;
-  border-collapse: collapse;
-  table-layout: fixed;
-  min-width: 600px;
-  border: 2px solid green; /* Debug border */
-}
-
-/* Table styling - Clean approach */
-.students-table {
-  width: 100%;
-  background: white;
-  border-collapse: collapse;
-}
-
-.students-table th,
-.students-table td {
-  border: 1px solid #e0e0e0;
-  padding: 1rem;
-  vertical-align: middle;
-  text-align: left;
-}
-
-/* Basic table styling */
-
-/* Table Headers */
-.header-row {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.header-row th {
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-align: center;
-  border: none !important;
-  padding: 1.5rem 1rem !important;
-}
-
-.header-row th mat-icon {
-  margin-right: 0.5rem;
-  font-size: 1.2rem;
-  width: 1.2rem;
-  height: 1.2rem;
-}
-
-/* Column Widths */
-.index-header,
-.index-cell {
-  width: 60px;
-  text-align: center;
-}
-
-.student-number-header,
-.student-number-cell {
-  width: 120px;
-  text-align: center;
-}
-
-.surname-header,
-.surname-cell,
-.name-header,
-.name-cell {
-  width: 150px;
-  text-align: left;
-}
-
-.gender-header,
-.gender-cell {
-  width: 100px;
-  text-align: center;
-}
-
-.action-header,
-.action-cell {
-  width: 120px;
-  text-align: center;
-}
-
-/* Table Rows */
-.data-row {
-  transition: all 0.3s ease;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.data-row:hover {
-  background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Index Column */
-.index-number {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  color: white;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+.table-container mat-card {
+  flex-grow: 1; /* Allows the mat-card itself to fill the .table-container */
   display: flex;
-  align-items: center;
+  flex-direction: column; /* Stacks contents of the mat-card */
+  padding: 0; /* Remove default mat-card padding to manage it internally */
+  overflow: hidden; /* Hide overflow for the card, internal elements will scroll */
+}
+
+.top-panel {
+  display: flex;
+  justify-content: flex-end; /* Align filter to the right */
+  padding: 16px 16px 0; /* Padding around the filter field */
+  flex-shrink: 0; /* Prevent filter area from shrinking */
+}
+
+.top-panel mat-form-field {
+  width: 300px; /* Fixed width for the filter input */
+  margin-bottom: 10px; /* Space below the filter field */
+}
+
+.mat-elevation-z2 {
+  flex-grow: 1; /* Allows the table's scrollable div to expand */
+  overflow: auto; /* Enable scrolling for the table body */
+  display: flex;
+  flex-direction: column; /* To properly place table and paginator */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse; /* For cleaner table lines */
+  flex-grow: 1; /* Allows the actual table element to fill space within its scrollable container */
+}
+
+.mat-header-cell {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.mat-column-action {
+  width: 80px; /* Fixed width for action column */
+  text-align: center;
+}
+
+.btns {
+  display: flex;
   justify-content: center;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin: 0 auto;
-}
-
-/* Student Info */
-.student-number {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #2c3e50;
-  background: #f8f9fa;
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
-  display: inline-block;
-}
-
-.student-name {
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-/* Gender Badge */
-.gender-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: inline-block;
-}
-
-.gender-male {
-  background: linear-gradient(45deg, #3498db, #2980b9);
-  color: white;
-}
-
-.gender-female {
-  background: linear-gradient(45deg, #e91e63, #c2185b);
-  color: white;
-}
-
-/* Add Button */
-.add-button {
-  background: linear-gradient(45deg, #4ecdc4, #44a08d);
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
-  transition: all 0.3s ease;
-  display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
-.add-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.6);
+.mat-row:hover {
+  background-color: #e0e0e0; /* Lighter hover color */
 }
 
-.add-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+.mat-paginator {
+  flex-shrink: 0; /* Prevents paginator from shrinking */
+  border-top: 1px solid #e0e0e0; /* Separator line for visual clarity */
 }
 
-/* No Data State */
-.no-data-row {
-  background: #fafbfc;
-}
-
-.no-data-cell {
-  padding: 3rem 2rem !important;
-  text-align: center;
-  border: none !important;
-}
-
-.no-data-content {
+/* Optional: Styles for the mat-dialog-container itself if you need to override global dialog styles */
+/* You might need to add this to your global styles or specific dialog config if not here */
+/*
+:host {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  height: 100%;
 }
-
-.no-data-content mat-icon {
-  font-size: 4rem;
-  width: 4rem;
-  height: 4rem;
-  color: #bdc3c7;
-  margin-bottom: 1rem;
-}
-
-.no-data-content h3 {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.no-data-content p {
-  margin: 0;
-  color: #7f8c8d;
-  font-size: 1rem;
-  max-width: 400px;
-  line-height: 1.5;
-}
-
-/* Paginator */
-.students-paginator {
-  background: #f8f9fa;
-  border-top: 1px solid #e9ecef;
-  border-radius: 0 0 15px 15px;
-  flex-shrink: 0;
-}
-
-/* Action Buttons */
-.action-buttons {
+.mat-dialog-container {
   display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: 1.5rem 2rem;
-  background: white;
-  border-top: 1px solid #e9ecef;
-  flex-shrink: 0;
+  flex-direction: column;
+  padding: 0 !important;
 }
-
-.cancel-button {
-  background: linear-gradient(45deg, #e74c3c, #c0392b);
-  color: white;
-  border: none;
-  border-radius: 25px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.cancel-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
-}
-
-.enroll-button {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  color: white;
-  border: none;
-  border-radius: 25px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.enroll-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-}
-
-.enroll-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.enroll-button mat-spinner {
-  margin-right: 0.5rem;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .enrol-dialog-container {
-    height: 95vh;
-    max-height: 95vh;
-  }
-  
-  .dialog-header {
-    padding: 1rem;
-  }
-  
-  .dialog-header .header-content {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .dialog-title {
-    font-size: 1.5rem;
-  }
-  
-  .selected-students-section,
-  .available-students-section {
-    padding: 1rem;
-  }
-  
-  .students-table {
-    min-width: 500px;
-  }
-  
-  .header-row th {
-    padding: 1rem 0.5rem !important;
-    font-size: 0.8rem;
-  }
-  
-  .header-row th mat-icon {
-    font-size: 1rem;
-    width: 1rem;
-    height: 1rem;
-  }
-  
-  .data-row td {
-    padding: 0.75rem 0.5rem !important;
-    font-size: 0.85rem;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
-  }
-  
-  .cancel-button,
-  .enroll-button {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .title-section {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .header-icon {
-    font-size: 1.5rem;
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-  
-  .dialog-title {
-    font-size: 1.3rem;
-  }
-  
-  .students-table {
-    min-width: 400px;
-  }
-  
-  .no-data-content h3 {
-    font-size: 1.3rem;
-  }
-  
-  .no-data-content p {
-    font-size: 0.9rem;
-  }
-}
+*/

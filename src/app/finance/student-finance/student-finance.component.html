@@ -1,42 +1,167 @@
-<div class="top-panel">
-  <mat-form-field>
-    <mat-label>Select Term</mat-label>
-    <mat-select (selectionChange)="termChanged($event.value)" [(ngModel)]="selectedTerm">
-      <mat-option *ngFor="let term of terms$ | async" [value]="term">{{ term.num +
-        " " + term.year }}</mat-option>
-    </mat-select>
-  </mat-form-field>
+<div class="student-finance-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">account_balance</mat-icon>
+        Student Finance Management
+      </h1>
+      <p class="page-subtitle">Manage student billing and invoice generation</p>
+    </div>
+  </div>
 
-  <app-student-search class="search" (studentSelected)="selectedStudentChanged($event)"></app-student-search>
+  <!-- Selection Panel -->
+  <mat-card class="selection-panel">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>search</mat-icon>
+        Student & Term Selection
+      </mat-card-title>
+             <mat-card-subtitle>Select a student and term to generate invoices, then save any edits</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="selection-form">
+        <!-- Term Selection -->
+        <mat-form-field appearance="outline" class="term-field">
+          <mat-label>Academic Term</mat-label>
+          <mat-select
+            (selectionChange)="termChanged($event.value)"
+            [(ngModel)]="selectedTerm"
+            [disabled]="(loadingInvoice$ | async) || false">
+            <mat-option *ngFor="let term of terms$ | async" [value]="term">
+              Term {{ term.num }} - {{ term.year }}
+            </mat-option>
+          </mat-select>
+          <mat-hint>Select the academic term for billing</mat-hint>
+        </mat-form-field>
 
-  <app-current-enrolment *ngIf="invoice?.student; else noEnrolment" class="enrolment"
-    [studentNumber]="invoice?.student?.studentNumber"></app-current-enrolment>
+        <!-- Student Search -->
+        <div class="student-search-container">
+          <app-student-search 
+            (studentSelected)="selectedStudentChanged($event)">
+          </app-student-search>
+        </div>
 
-  <ng-template #noEnrolment>
-    no enrolment
-  </ng-template>
+        <!-- Selected Student Info -->
+        <div *ngIf="selectedStudent" class="selected-student-info">
+          <mat-icon class="student-icon">person</mat-icon>
+          <div class="student-details">
+            <span class="student-name">{{ selectedStudent.name }} {{ selectedStudent.surname }}</span>
+            <span class="student-number">{{ selectedStudent.studentNumber }}</span>
+          </div>
+          <button mat-icon-button (click)="clearSelection()" matTooltip="Clear Selection">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
 
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+                 <button
+                   mat-raised-button
+                   color="primary"
+                   (click)="generateInvoice()"
+                   [disabled]="!isFormValid() || (loadingInvoice$ | async)"
+                   class="generate-button">
+                   <mat-icon *ngIf="!(loadingInvoice$ | async)">receipt_long</mat-icon>
+                   <mat-spinner *ngIf="loadingInvoice$ | async" diameter="20"></mat-spinner>
+                   {{ (loadingInvoice$ | async) ? 'Generating...' : 'Generate Invoice' }}
+                 </button>
 
-  <button mat-raised-button color="primary" (click)="fetchInvoice()"
-    [disabled]="!selectedStudentNumber || !selectedTerm">
-    <mat-icon>receipt</mat-icon> Fetch Invoice
-  </button>
-</div>
-
-<div class="container">
-  <mat-card>
-    <app-invoice-item *ngIf="invoice?.invoiceNumber; else noInvoice" [invoice]="invoice"
-      [downloadable]="false"></app-invoice-item>
-
-    <ng-template #noInvoice>
-      <div *ngIf="fetchInvoiceError$ | async as error; else loadingOrNoData">
-        <p style="color: red;" class="no-invoice">{{ error }}</p>
+                 <button
+                   mat-raised-button
+                   color="accent"
+                   (click)="saveInvoice()"
+                   [disabled]="!(invoice$ | async)?.invoiceNumber"
+                   class="save-button">
+                   <mat-icon>save</mat-icon>
+                   Save Invoice
+                 </button>
+          
+          <button 
+            mat-stroked-button 
+            (click)="clearSelection()"
+            [disabled]="!selectedStudent && !selectedTerm">
+            <mat-icon>refresh</mat-icon>
+            Clear All
+          </button>
+        </div>
       </div>
-      <ng-template #loadingOrNoData>
-        <p class="no-invoice">Select a student and term and click 'Fetch Invoice'.</p>
-      </ng-template>
-    </ng-template>
+    </mat-card-content>
   </mat-card>
 
-  <app-billing *ngIf="invoice?.enrol" [enrolment]="invoice?.enrol" class="billing-container"></app-billing>
+  <!-- Loading State -->
+  <div *ngIf="loadingInvoice$ | async" class="loading-container">
+    <div class="spinner-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+    <p class="loading-text">Loading invoice data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="(error$ | async) && !(loadingInvoice$ | async)" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h3 class="error-title">Unable to load invoice</h3>
+    <p class="error-message">{{ error$ | async }}</p>
+    <button mat-raised-button color="primary" (click)="generateInvoice()">
+      <mat-icon>refresh</mat-icon>
+      Retry
+    </button>
+  </div>
+
+         <!-- Main Content -->
+         <div *ngIf="!(loadingInvoice$ | async) && !(error$ | async)" class="main-content">
+           <!-- Show side-by-side layout only when there's an invoice -->
+           <div *ngIf="invoice$ | async as invoice; else noInvoiceTemplate" class="content-grid">
+             <!-- Billing Management (Left Side) -->
+             <mat-card class="billing-card">
+               <mat-card-header>
+                 <mat-card-title>
+                   <mat-icon>payment</mat-icon>
+                   Billing Management
+                 </mat-card-title>
+                 <mat-card-subtitle>Manage fees and billing for the selected student</mat-card-subtitle>
+               </mat-card-header>
+
+               <mat-card-content>
+                 <app-billing
+                   [enrolment]="invoice.enrol">
+                 </app-billing>
+               </mat-card-content>
+             </mat-card>
+
+             <!-- Invoice Details (Right Side) -->
+             <mat-card class="invoice-card">
+               <mat-card-header>
+                 <mat-card-title>
+                   <mat-icon>receipt_long</mat-icon>
+                   Invoice Details
+                 </mat-card-title>
+                 <mat-card-subtitle>Invoice #{{ invoice.invoiceNumber }}</mat-card-subtitle>
+               </mat-card-header>
+
+               <mat-card-content>
+                 <app-invoice-item
+                   [invoice]="invoice"
+                   [downloadable]="true">
+                 </app-invoice-item>
+               </mat-card-content>
+             </mat-card>
+           </div>
+
+           <!-- No Invoice Template -->
+           <ng-template #noInvoiceTemplate>
+             <mat-card class="no-data-card">
+               <mat-card-content>
+                 <div class="no-data-content">
+                   <mat-icon class="no-data-icon">receipt_long</mat-icon>
+                   <h3 class="no-data-title">No Invoice Found</h3>
+                   <p class="no-data-message">
+                     Select a student and term, then click "Generate Invoice" to create an invoice. Use "Save Invoice" to save any edits.
+                   </p>
+                 </div>
+               </mat-card-content>
+             </mat-card>
+           </ng-template>
+         </div>
 </div>

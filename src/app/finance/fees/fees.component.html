@@ -1,63 +1,258 @@
-<mat-toolbar class="title">{{ title.getTitle() }}</mat-toolbar>
-<div class="top-panel">
-  <mat-form-field>
-    <mat-label>Filter</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. 1 Blue" #input />
-  </mat-form-field>
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading$ | async">
+  <div class="loading-spinner">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Loading fees structure...</p>
+  </div>
 </div>
 
-<div class="mat-elevation-z8 table-container">
-  <div class="add">
-    <div class="add-btn">
-      <button type="button" mat-mini-fab color="primary" (click)="openAddFeesDialog()"
-        *ngIf="role === 'auditor' || role === 'reception'">
-        <mat-icon>add</mat-icon>
-      </button>
+<!-- Background Elements -->
+<div class="background-elements">
+  <div class="floating-circle circle-1"></div>
+  <div class="floating-circle circle-2"></div>
+  <div class="floating-circle circle-3"></div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="header-icon">account_balance</mat-icon>
+        <div class="page-title">School Fees Structure</div>
+        <div class="page-subtitle">Comprehensive fee breakdown for all student categories</div>
+      </div>
     </div>
-    <table mat-table [dataSource]="dataSource" matSort>
-      <!-- Name Column -->
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-        <td mat-cell *matCellDef="let row">{{ sharedService.feesNamesToString(row.name) }}</td>
-      </ng-container>
+  </div>
 
-      <!-- Amount -->
-      <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
-        <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
-      </ng-container>
+  <!-- Main Card -->
+  <div class="main-card">
+    <!-- Management Section -->
+    <div class="management-section" *ngIf="role === 'auditor' || role === 'reception' || role === 'admin'">
+      <div class="section-header">
+        <mat-icon class="section-icon">settings</mat-icon>
+        <h3>Fee Management</h3>
+      </div>
+      <div class="management-actions">
+        <button mat-raised-button color="primary" (click)="openAddFeesDialog()" class="action-button">
+          <mat-icon>add</mat-icon>
+          Add New Fee
+        </button>
+      </div>
+    </div>
 
-      <!-- Description -->
-      <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
-        <td mat-cell *matCellDef="let row">{{ row.description }}</td>
-      </ng-container>
+    <!-- Fees Structure -->
+    <div class="fees-structure">
+      <!-- O Level Fees -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">school</mat-icon>
+          <h2>O Level Fees</h2>
+          <div class="category-subtitle">Ordinary Level Student Fees</div>
+        </div>
 
-      <!-- Actions Column -->
-      <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Action</th>
-        <td mat-cell *matCellDef="let row" class="btns">
-          <button mat-icon-button color="primary" (click)="openEditFeesDialog(row)"
-            *ngIf="role === 'reception' || role === 'admin'">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <!-- <button mat-icon-button color="warn" (click)="deleteFees(row.id)">
-            <mat-icon> delete_forever </mat-icon>
-          </button> -->
-        </td>
-      </ng-container>
+        <!-- O Level Day Scholars -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">home</mat-icon>
+            <h3>Day Scholars</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of oLevelDayFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        <!-- O Level Boarders -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">hotel</mat-icon>
+            <h3>Boarders</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of oLevelBoarderFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <!-- Row shown when there is no matching data. -->
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="4">
-          No data matching the filter "{{ input.value }}"
-        </td>
-      </tr>
-    </table>
+        <!-- O Level Additional Services -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">add_circle</mat-icon>
+            <h3>Additional Services</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of oLevelAdditionalFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <mat-paginator [pageSizeOptions]="[10, 15, 50]" aria-label="Select page of users"></mat-paginator>
+      <!-- A Level Fees -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">college</mat-icon>
+          <h2>A Level Fees</h2>
+          <div class="category-subtitle">Advanced Level Student Fees</div>
+        </div>
+
+        <!-- A Level Day Scholars -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">home</mat-icon>
+            <h3>Day Scholars</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of aLevelDayFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- A Level Boarders -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">hotel</mat-icon>
+            <h3>Boarders</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of aLevelBoarderFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- A Level Science Fees -->
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">science</mat-icon>
+            <h3>Science Subjects</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of aLevelScienceFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Student Fees -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">person_add</mat-icon>
+          <h2>New Student Fees</h2>
+          <div class="category-subtitle">One-time fees for new students</div>
+        </div>
+
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">assignment</mat-icon>
+            <h3>Application & Setup</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of newStudentFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Optional Services -->
+      <div class="fee-category">
+        <div class="category-header">
+          <mat-icon class="category-icon">more_horiz</mat-icon>
+          <h2>Optional Services</h2>
+          <div class="category-subtitle">Additional services for day scholars</div>
+        </div>
+
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">restaurant</mat-icon>
+            <h3>Meals & Transport</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of optionalServiceFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -9,6 +9,36 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+/* Global Snackbar Styles */
+.error-snackbar {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+.error-snackbar .mat-mdc-snack-bar-action {
+  color: white !important;
+}
+
+/* Success Snackbar Styles */
+.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.success-snackbar .mat-mdc-snack-bar-action {
+  color: white !important;
+}
+
+/* Info Snackbar Styles */
+.info-snackbar {
+  background-color: #2196f3 !important;
+  color: white !important;
+}
+
+.info-snackbar .mat-mdc-snack-bar-action {
+  color: white !important;
+}
+
 /* Enrollment Dialog Panel Styling */
 ::ng-deep .enrol-dialog-panel {
   .mat-mdc-dialog-container {

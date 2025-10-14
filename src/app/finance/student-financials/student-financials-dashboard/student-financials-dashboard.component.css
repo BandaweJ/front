@@ -254,13 +254,13 @@
   transform: translateY(-1px);
 }
 
-.tab-link[aria-selected="true"] {
+.tab-link.active {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.tab-link[aria-selected="true"]::after {
+.tab-link.active::after {
   content: '';
   position: absolute;
   bottom: 0;

@@ -23,6 +23,7 @@ export interface State {
   fees: FeesModel[];
   studentsToBill: EnrolsModel[];
   isLoading: boolean;
+  loadingInvoice: boolean;
   errorMessage: string;
   selectedStudentInvoice: InvoiceModel | null;
   fetchInvoiceError: string;
@@ -54,6 +55,7 @@ export const initialState: State = {
   fees: [],
   studentsToBill: [],
   isLoading: false,
+  loadingInvoice: false,
   errorMessage: '',
   selectedStudentInvoice: {} as InvoiceModel,
   fetchInvoiceError: '',
@@ -156,22 +158,19 @@ export const financeReducer = createReducer(
   })),
   on(invoiceActions.fetchInvoice, (state) => ({
     ...state,
-    isLoading: true,
+    loadingInvoice: true,
     fetchInvoiceError: '',
-    // errorMessage: '',
     selectedStudentInvoice: {} as InvoiceModel,
   })),
   on(invoiceActions.fetchInvoiceSuccess, (state, { invoice }) => ({
     ...state,
-    isLoading: false,
+    loadingInvoice: false,
     fetchInvoiceError: '',
-    // errorMessage: '',
     selectedStudentInvoice: invoice,
   })),
   on(invoiceActions.fetchInvoiceFail, (state, { error }) => ({
     ...state,
-    isLoading: false,
-    // errorMessage: error.message,
+    loadingInvoice: false,
     fetchInvoiceError: error.message,
     selectedStudentInvoice: {} as InvoiceModel,
   })),

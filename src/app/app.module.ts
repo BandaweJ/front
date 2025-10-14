@@ -22,7 +22,6 @@ import { NgChartsModule } from 'ng2-charts';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AuthService } from './auth/auth.service';
 import { FinanceModule } from './finance/finance.module';
-import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog/confirm-delete-dialog.component';
 import { SharedModule } from './shared/shared.module';
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 
@@ -30,7 +29,6 @@ import { ResultsAnalysisComponent } from './results-analysis/results-analysis.co
   declarations: [
     AppComponent,
     ProfileButtonsComponent,
-    ConfirmDeleteDialogComponent,
     ResultsAnalysisComponent,
   ],
   imports: [

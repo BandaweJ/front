@@ -1,15 +1,15 @@
 <div class="receipts-container">
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
+  <div *ngIf="loading$ | async" class="loading-container">
     <mat-spinner diameter="60"></mat-spinner>
     <p class="loading-text">Loading your receipts...</p>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="hasError && !isLoading" class="error-container">
+  <div *ngIf="(error$ | async) && !(loading$ | async)" class="error-container">
     <mat-icon class="error-icon">error_outline</mat-icon>
     <h3 class="error-title">Unable to load receipts</h3>
-    <p class="error-message">{{ errorMessage }}</p>
+    <p class="error-message">{{ error$ | async }}</p>
     <button mat-raised-button color="primary" (click)="loadReceipts()">
       <mat-icon>refresh</mat-icon>
       Retry
@@ -17,7 +17,7 @@
   </div>
 
   <!-- Main Content -->
-  <div *ngIf="!isLoading && !hasError" class="receipts-content">
+  <div *ngIf="!(loading$ | async) && !(error$ | async)" class="receipts-content">
     <!-- Header -->
     <div class="receipts-header">
       <h2 class="receipts-title">
@@ -28,10 +28,9 @@
     </div>
 
     <!-- Receipts List -->
-    <div *ngIf="(receipts$ | async) as receipts; else noReceipts">
-      <div *ngIf="receipts.length > 0; else noReceipts" class="receipts-list">
+    <div *ngIf="(receipts$ | async)?.length; else noReceipts" class="receipts-list">
         <mat-accordion multi="true" class="receipts-accordion">
-          <mat-expansion-panel *ngFor="let receipt of receipts; trackBy: trackByReceiptId" 
+          <mat-expansion-panel *ngFor="let receipt of receipts$ | async; trackBy: trackByReceiptId" 
                                class="receipt-panel"
                                [class.approved]="isReceiptApproved(receipt)"
                                [class.recent]="isReceiptRecent(receipt)">
@@ -139,7 +138,6 @@
             </div>
           </mat-expansion-panel>
         </mat-accordion>
-      </div>
     </div>
 
     <!-- No Data State -->

@@ -1,61 +1,145 @@
-<mat-spinner class="spinner" *ngIf="(isLoading$ | async)"></mat-spinner>
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="(isLoading$ | async)">
+  <div class="loading-content">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">Signing you in...</p>
+  </div>
+</div>
 
-<div class="container">
-  <mat-card class="content full-width-mobile mat-elevation-z24">
-    <mat-card-header class="column-container">
-      <mat-card-title>
-        <h1 class="mat-h1">Sign In</h1>
-      </mat-card-title>
-      <mat-card-subtitle class="error mat-h1">
-        {{ errorMsg$ | async }}
-      </mat-card-subtitle>
-    </mat-card-header>
+<!-- Main Container -->
+<div class="signin-container">
+  <!-- Background Elements -->
+  <div class="background-elements">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+  </div>
 
-    <mat-card-content>
-      <form class="column-container" [formGroup]="signinForm">
-        <mat-form-field>
+  <!-- Signin Card -->
+  <mat-card class="signin-card mat-elevation-z8">
+         <!-- Header Section -->
+         <mat-card-header class="signin-header">
+      <div class="logo-container">
+        <mat-icon class="logo-icon">school</mat-icon>
+      </div>
+           <div class="welcome-section">
+             <h2 class="signin-title">Welcome Back</h2>
+             <p class="signin-subtitle">Please sign in to your account</p>
+           </div>
+         </mat-card-header>
+
+    <!-- Error Message -->
+    <div class="error-container" *ngIf="errorMsg$ | async as errorMsg">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <span class="error-message">{{ errorMsg }}</span>
+    </div>
+
+    <!-- Form Section -->
+    <mat-card-content class="signin-content">
+      <form class="signin-form" [formGroup]="signinForm" (ngSubmit)="signin()">
+        <!-- Username Field -->
+        <mat-form-field appearance="outline" class="form-field">
           <mat-label>Username</mat-label>
-          <input type="text" matInput formControlName="username" placeholder="Username" />
-          <mat-icon class="transparent" matSuffix>perm_identity</mat-icon>
-          <mat-hint>Type your username</mat-hint>
-
-          <mat-error>
-            <span *ngIf="username?.hasError('required')">
-              Username is <strong>required</strong>
-            </span>
-            <span *ngIf="username!.hasError('minlength')">{{ username?.value.length }} / min 2</span>
+          <input 
+            type="text" 
+            matInput 
+            formControlName="username" 
+            placeholder="Enter your username"
+            autocomplete="username"
+            [class.error]="username?.invalid && username?.touched" />
+          <mat-icon matPrefix class="field-icon">person</mat-icon>
+          <mat-hint *ngIf="!username?.invalid || !username?.touched">Enter your registered username</mat-hint>
+          
+          <mat-error *ngIf="username?.hasError('required') && username?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Username is required
+          </mat-error>
+          <mat-error *ngIf="username?.hasError('minlength') && username?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Username must be at least 2 characters ({{ username?.value?.length || 0 }}/2)
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field>
+        <!-- Password Field -->
+        <mat-form-field appearance="outline" class="form-field">
           <mat-label>Password</mat-label>
-          <input [type]="hide ? 'password' : 'text'" matInput formControlName="password" placeholder="Password" />
-          <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
-            [attr.aria-pressed]="hide">
-            <mat-icon class="transparent">{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <input 
+            [type]="hide ? 'password' : 'text'" 
+            matInput 
+            formControlName="password" 
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            [class.error]="password?.invalid && password?.touched" />
+          <mat-icon matPrefix class="field-icon">lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hide = !hide" 
+            [attr.aria-label]="hide ? 'Show password' : 'Hide password'"
+            [attr.aria-pressed]="!hide">
+            <mat-icon class="field-icon">{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-          <mat-hint>Password</mat-hint>
-
-          <mat-error>
-            <span *ngIf="password?.hasError('required')">
-              Password is <strong>required</strong>
-            </span>
-            <span *ngIf="password!.hasError('minlength')">{{ password?.value.length }} / min 8</span>
+          <mat-hint *ngIf="!password?.invalid || !password?.touched">Enter your password</mat-hint>
+          
+          <mat-error *ngIf="password?.hasError('required') && password?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Password is required
+          </mat-error>
+          <mat-error *ngIf="password?.hasError('minlength') && password?.touched">
+            <mat-icon class="error-icon-small">error</mat-icon>
+            Password must be at least 8 characters ({{ password?.value?.length || 0 }}/8)
           </mat-error>
         </mat-form-field>
-        <button [disabled]="signinForm.invalid" mat-raised-button color="primary" type="submit" (click)="signin()">
-          Signin
+
+        <!-- Remember Me & Forgot Password -->
+        <div class="form-options">
+          <mat-checkbox formControlName="rememberMe" class="remember-me">
+            Remember me
+          </mat-checkbox>
+          <a href="#" class="forgot-password" (click)="forgotPassword($event)">
+            Forgot password?
+          </a>
+        </div>
+
+        <!-- Sign In Button -->
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit" 
+          class="signin-button"
+          [disabled]="signinForm.invalid || (isLoading$ | async)"
+          [class.loading]="isLoading$ | async">
+          <mat-icon *ngIf="!(isLoading$ | async)">login</mat-icon>
+          <mat-spinner *ngIf="isLoading$ | async" diameter="20"></mat-spinner>
+          {{ (isLoading$ | async) ? 'Signing In...' : 'Sign In' }}
         </button>
-        <span class="or">
-          <hr />
-          OR
-          <hr />
-        </span>
-        <button mat-raised-button type="button" color="accent" (click)="switchToSignUp()">
-          Signup
+
+        <!-- Divider -->
+        <div class="divider">
+          <span class="divider-text">or</span>
+        </div>
+
+        <!-- Sign Up Button -->
+        <button 
+          mat-stroked-button 
+          type="button" 
+          class="signup-button"
+          (click)="switchToSignUp()"
+          [disabled]="isLoading$ | async">
+          <mat-icon>person_add</mat-icon>
+          Create New Account
         </button>
       </form>
     </mat-card-content>
-    <mat-card class="column-container"></mat-card>
+
+    <!-- Footer -->
+    <mat-card-footer class="signin-footer">
+      <p class="footer-text">
+        By signing in, you agree to our 
+        <a href="#" class="footer-link">Terms of Service</a> and 
+        <a href="#" class="footer-link">Privacy Policy</a>
+      </p>
+    </mat-card-footer>
   </mat-card>
 </div>

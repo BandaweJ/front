@@ -36,10 +36,12 @@ import {
   saveMarkAction,
   deleteMarkActions,
 } from '../store/marks.actions';
-import { selectMarks, selectSubjects } from '../store/marks.selectors';
+import { selectMarks, selectSubjects, isLoading } from '../store/marks.selectors';
 import { Title } from '@angular/platform-browser';
 import { ExamType } from '../models/examtype.enum';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDeleteDialogComponent } from '../../shared/confirm-delete-dialog/confirm-delete-dialog.component';
 
 interface MarkFormGroup {
   mark: FormControl<number | null>;
@@ -55,6 +57,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   classes$!: Observable<ClassesModel[]>;
   terms$!: Observable<TermsModel[]>;
   subjects$!: Observable<SubjectsModel[]>;
+  isLoading$!: Observable<boolean>;
   private errorMsg$!: Observable<string>;
 
   enrolForm!: FormGroup;
@@ -65,6 +68,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
   value = 0;
   maxValue = 0;
+  savingMarks = new Set<number>(); // Track which marks are being saved
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
@@ -128,7 +132,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private store: Store,
     public title: Title,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
@@ -154,6 +159,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
     this.subjects$ = this.store.select(selectSubjects);
+    this.isLoading$ = this.store.select(isLoading);
 
     this.store
       .select(selectMarks)
@@ -332,6 +338,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     const formGroup = this.getMarkFormGroup(index);
 
     if (formGroup.valid) {
+      // Add to saving set
+      this.savingMarks.add(index);
+
       const updatedMark: MarksModel = {
         ...markModel,
         mark: formGroup.value.mark!,
@@ -342,9 +351,14 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       };
 
       this.store.dispatch(saveMarkAction({ mark: updatedMark }));
-      this.snackBar.open('Mark saved successfully!', 'Dismiss', {
-        duration: 2000,
-      });
+      
+      // Simulate a brief delay to show saving state
+      setTimeout(() => {
+        this.savingMarks.delete(index);
+        this.snackBar.open('Mark saved successfully!', 'Dismiss', {
+          duration: 2000,
+        });
+      }, 500);
 
       formGroup.markAsPristine();
       formGroup.markAsUntouched();
@@ -364,15 +378,37 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  isSavingMark(index: number): boolean {
+    return this.savingMarks.has(index);
+  }
+
   deleteMark(mark: MarksModel) {
-    if (mark.id) {
-      this.store.dispatch(deleteMarkActions.deleteMark({ mark }));
-      this.snackBar.open('Mark deleted.', 'Dismiss', { duration: 2000 });
-    } else {
+    if (!mark.id) {
       this.snackBar.open('Cannot delete: Mark has no ID.', 'Error', {
         duration: 3000,
       });
+      return;
     }
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Mark',
+        message: `Are you sure you want to delete the mark for ${mark.student?.name} ${mark.student?.surname}?`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.store.dispatch(deleteMarkActions.deleteMark({ mark }));
+        this.snackBar.open('Mark deleted successfully.', 'Dismiss', { 
+          duration: 2000,
+          panelClass: ['success-snackbar']
+        });
+      }
+    });
   }
 
   trackByTerm(index: number, term: TermsModel): string {

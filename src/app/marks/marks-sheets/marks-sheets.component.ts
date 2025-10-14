@@ -1,7 +1,8 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
@@ -20,6 +21,7 @@ import { Title } from '@angular/platform-browser';
 import { SubjectsModel } from '../models/subjects.model';
 import { SubjectInfoModel } from 'src/app/reports/models/subject-info.model';
 import { ExamType } from '../models/examtype.enum';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 // ADDED: Import jsPDF and html2canvas
 import jsPDF from 'jspdf';
@@ -40,8 +42,9 @@ interface jsPDFWithPlugin extends jsPDF {
   selector: 'app-marks-sheets',
   templateUrl: './marks-sheets.component.html',
   styleUrls: ['./marks-sheets.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MarksSheetsComponent implements OnInit {
+export class MarksSheetsComponent implements OnInit, OnDestroy {
   @ViewChild('pdfReportContainer') pdfReportContainer!: ElementRef;
   @ViewChild('pdfHeader') pdfHeader!: ElementRef;
   @ViewChild('marksheetTable') marksheetTable!: ElementRef;
@@ -55,11 +58,13 @@ export class MarksSheetsComponent implements OnInit {
   reports!: ReportsModel[];
   subjects: SubjectsModel[] = [];
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
+  private destroy$ = new Subject<void>();
 
   constructor(
     private store: Store,
     private dialog: MatDialog,
-    public title: Title
+    public title: Title,
+    private snackBar: MatSnackBar
   ) {
     this.store.dispatch(fetchTerms());
     this.store.dispatch(fetchClasses());
@@ -70,8 +75,10 @@ export class MarksSheetsComponent implements OnInit {
     this.terms$ = this.store.select(selectTerms);
     this.isLoading$ = this.store.select(selectIsLoading);
 
-    // Your existing code to process reports
-    this.store.select(selectMarkSheet).subscribe((reps) => {
+    // Process reports with proper subscription management
+    this.store.select(selectMarkSheet)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((reps) => {
       const modifiedReports: ReportsModel[] = [];
       const subjectsArr: SubjectsModel[] = [];
 
@@ -136,17 +143,36 @@ export class MarksSheetsComponent implements OnInit {
     return this.markSheetForm.get('examType');
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   fetchMarkSheet() {
+    if (this.markSheetForm.invalid) {
+      this.snackBar.open(
+        'Please select Term, Class, and Exam Type to generate mark sheet.',
+        'Close',
+        { duration: 3000, panelClass: ['warning-snackbar'] }
+      );
+      this.markSheetForm.markAllAsTouched();
+      return;
+    }
+
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
-
     const num = term.num;
     const year = term.year;
-
     const examType = this.examType?.value;
 
     this.store.dispatch(
       markSheetActions.fetchMarkSheet({ name, num, year, examType })
+    );
+
+    this.snackBar.open(
+      `Generating mark sheet for ${name} - Term ${num} ${year} (${examType})`,
+      'Dismiss',
+      { duration: 2000, panelClass: ['info-snackbar'] }
     );
   }
 
@@ -159,101 +185,123 @@ export class MarksSheetsComponent implements OnInit {
   // UPDATED: The new downloadPDF method using jspdf-autotable with HTML
   downloadPDF(): void {
     if (!this.marksheetTable || !this.reports.length) {
-      console.error('Marksheet table or data not available.');
+      this.snackBar.open('No mark sheet data available to download.', 'Dismiss', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
       return;
     }
 
-    // Cast jsPDF to any to access the autoTable method
-    const doc = new jsPDF('l', 'mm', 'a4') as any;
-    const header = this.pdfHeader.nativeElement;
+    try {
+      // Cast jsPDF to any to access the autoTable method
+      const doc = new jsPDF('l', 'mm', 'a4') as any;
+      const header = this.pdfHeader.nativeElement;
 
-    // First, use html2canvas to generate the header image only once
-    html2canvas(header, { scale: 2 }).then((canvas) => {
-      const headerImgData = canvas.toDataURL('image/png');
-      const headerHeight =
-        (canvas.height * doc.internal.pageSize.getWidth()) / canvas.width;
+      // First, use html2canvas to generate the header image only once
+      html2canvas(header, { scale: 2 }).then((canvas) => {
+        const headerImgData = canvas.toDataURL('image/png');
+        const headerHeight =
+          (canvas.height * doc.internal.pageSize.getWidth()) / canvas.width;
 
-      // Add the header to the first page only
-      doc.addImage(
-        headerImgData,
-        'PNG',
-        0,
-        0,
-        doc.internal.pageSize.getWidth(),
-        headerHeight
-      );
+        // Add the header to the first page only
+        doc.addImage(
+          headerImgData,
+          'PNG',
+          0,
+          0,
+          doc.internal.pageSize.getWidth(),
+          headerHeight
+        );
 
-      // Define the table headers
-      const tableHeaders = [
-        '#',
-        'Student Name',
-        ...this.subjects.map((s) => s.name.substring(0, 9)),
-        'Passed',
-        'A*s',
-        'As',
-        'Bs',
-        'Cs',
-        'Ds',
-        'Av Mark',
-        'Pstn',
-      ];
-
-      // Define the table body data, applying styles for color
-      const tableBody = this.reports.map((rep, index) => {
-        const studentName = `${rep.report.name} ${rep.report.surname}`;
-        const rowData = [
-          { content: index + 1, styles: {} },
-          { content: studentName, styles: { halign: 'left' } },
-          ...rep.report.subjectsTable.map((subjInfo) => {
-            const mark = subjInfo ? subjInfo.mark : '';
-            const styles =
-              mark && mark >= 50
-                ? { textColor: [0, 0, 255] } // Blue for passing marks
-                : mark && mark < 50
-                ? { textColor: [255, 0, 0] } // Red for failing marks
-                : {};
-            return { content: mark, styles: styles };
-          }),
-          { content: rep.report.subjectsPassed, styles: {} },
-          { content: rep.report.symbols[0], styles: {} },
-          { content: rep.report.symbols[1], styles: {} },
-          { content: rep.report.symbols[2], styles: {} },
-          { content: rep.report.symbols[3], styles: {} },
-          { content: rep.report.symbols[4], styles: {} },
-          {
-            content: rep.report.percentageAverge
-              ? rep.report.percentageAverge.toFixed(1)
-              : '',
-            styles: {},
-          },
-          { content: rep.report.classPosition, styles: {} },
+        // Define the table headers
+        const tableHeaders = [
+          '#',
+          'Student Name',
+          ...this.subjects.map((s) => s.name.substring(0, 9)),
+          'Passed',
+          'A*s',
+          'As',
+          'Bs',
+          'Cs',
+          'Ds',
+          'Av Mark',
+          'Position',
         ];
-        return rowData;
-      });
 
-      // This is the core autoTable call
-      doc.autoTable({
-        head: [tableHeaders],
-        body: tableBody,
-        // Start the table at the correct position after the header
-        startY: headerHeight + 5,
-        theme: 'grid',
-        styles: {
-          fontSize: 7,
-          cellPadding: 2,
-          halign: 'center',
-          valign: 'middle',
-        },
-        headStyles: {
-          fillColor: [240, 240, 240],
-          textColor: 50,
-          fontStyle: 'bold',
-        },
-        rowPageBreak: 'avoid',
-      });
+        // Define the table body data, applying styles for color
+        const tableBody = this.reports.map((rep, index) => {
+          const studentName = `${rep.report.name} ${rep.report.surname}`;
+          const rowData = [
+            { content: index + 1, styles: {} },
+            { content: studentName, styles: { halign: 'left' } },
+            ...rep.report.subjectsTable.map((subjInfo) => {
+              const mark = subjInfo ? subjInfo.mark : '';
+              const styles =
+                mark && mark >= 50
+                  ? { textColor: [0, 0, 255] } // Blue for passing marks
+                  : mark && mark < 50
+                  ? { textColor: [255, 0, 0] } // Red for failing marks
+                  : {};
+              return { content: mark, styles: styles };
+            }),
+            { content: rep.report.subjectsPassed, styles: {} },
+            { content: rep.report.symbols[0], styles: {} },
+            { content: rep.report.symbols[1], styles: {} },
+            { content: rep.report.symbols[2], styles: {} },
+            { content: rep.report.symbols[3], styles: {} },
+            { content: rep.report.symbols[4], styles: {} },
+            {
+              content: rep.report.percentageAverge
+                ? rep.report.percentageAverge.toFixed(1)
+                : '',
+              styles: {},
+            },
+            { content: rep.report.classPosition, styles: {} },
+          ];
+          return rowData;
+        });
 
-      const fileName = `${this.reports[0].name}_Marksheet_Term_${this.reports[0].num}_${this.reports[0].year}_${this.reports[0].examType}.pdf`;
-      doc.save(fileName);
-    });
+        // This is the core autoTable call
+        doc.autoTable({
+          head: [tableHeaders],
+          body: tableBody,
+          // Start the table at the correct position after the header
+          startY: headerHeight + 5,
+          theme: 'grid',
+          styles: {
+            fontSize: 7,
+            cellPadding: 2,
+            halign: 'center',
+            valign: 'middle',
+          },
+          headStyles: {
+            fillColor: [240, 240, 240],
+            textColor: 50,
+            fontStyle: 'bold',
+          },
+          rowPageBreak: 'avoid',
+        });
+
+        const fileName = `${this.reports[0].name}_Marksheet_Term_${this.reports[0].num}_${this.reports[0].year}_${this.reports[0].examType}.pdf`;
+        doc.save(fileName);
+
+        this.snackBar.open('Mark sheet downloaded successfully!', 'Dismiss', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
+      }).catch((error) => {
+        console.error('Error generating PDF:', error);
+        this.snackBar.open('Failed to generate PDF. Please try again.', 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
+      });
+    } catch (error) {
+      console.error('Error in downloadPDF:', error);
+      this.snackBar.open('Failed to download PDF. Please try again.', 'Dismiss', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+    }
   }
 }

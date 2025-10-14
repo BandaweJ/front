@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, take, tap } from 'rxjs/operators';
@@ -16,39 +16,26 @@ import { ReceiptModel } from '../../models/payment.model';
   selector: 'app-student-receipts',
   templateUrl: './student-receipts.component.html',
   styleUrls: ['./student-receipts.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class StudentReceiptsComponent implements OnInit, OnDestroy {
-  // UI State
-  isLoading = true;
-  hasError = false;
-  errorMessage = '';
-
   // Data Observables
-  receipts$: Observable<ReceiptModel[] | null>;
-  loadingReceipts$: Observable<boolean>;
-  errorReceipts$: Observable<any>;
+  user$ = this.store.select(selectUser);
+  receipts$ = this.store.select(selectStudentReceipts);
+  loading$ = this.store.select(selectLoadingStudentReceipts);
+  error$ = this.store.select(selectLoadStudentReceiptsErr);
 
   private userSubscription: Subscription | undefined;
 
   constructor(
-    private store: Store,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.receipts$ = this.store.select(selectStudentReceipts);
-    this.loadingReceipts$ = this.store.select(selectLoadingStudentReceipts);
-    this.errorReceipts$ = this.store.select(selectLoadStudentReceiptsErr);
-  }
+    private store: Store
+  ) {}
 
   ngOnInit(): void {
     this.loadReceipts();
   }
 
   loadReceipts(): void {
-    this.isLoading = true;
-    this.hasError = false;
-    this.cdr.markForCheck();
-
     this.userSubscription = this.store
       .select(selectUser)
       .pipe(
@@ -63,16 +50,8 @@ export class StudentReceiptsComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        error: (error) => this.handleError('Failed to load receipts')
+        error: (error) => console.error('Failed to load receipts:', error)
       });
-  }
-
-  private handleError(message: string): void {
-    this.hasError = true;
-    this.errorMessage = message;
-    this.isLoading = false;
-    this.cdr.markForCheck();
-    console.error(message);
   }
 
   ngOnDestroy(): void {
@@ -92,7 +71,6 @@ export class StudentReceiptsComponent implements OnInit, OnDestroy {
       this.store.dispatch(
         receiptActions.downloadReceiptPdf({ receiptNumber: receiptNumber })
       );
-      console.log(`Dispatching download for Receipt #${receiptNumber}`);
     } else {
       console.warn('Cannot download receipt: Receipt number is missing.');
     }

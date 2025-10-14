@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'; // Import OnDestroy
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs'; // Import Subject
-import { takeUntil, tap } from 'rxjs/operators'; // Import takeUntil, tap
-import { MatSnackBar } from '@angular/material/snack-bar'; // Import MatSnackBar
+import { Observable, Subject } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import {
   selectClasses,
@@ -24,6 +24,7 @@ import { selectIsLoading } from '../marks-sheets/store/selectors'; // Ensure cor
   selector: 'app-marks-progress',
   templateUrl: './marks-progress.component.html',
   styleUrls: ['./marks-progress.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MarksProgressComponent implements OnInit, OnDestroy {
   // Implement OnDestroy
@@ -34,7 +35,7 @@ export class MarksProgressComponent implements OnInit, OnDestroy {
   ) {}
 
   marksProgressForm!: FormGroup;
-  isLoading = this.store.select(selectIsLoading);
+  isLoading$ = this.store.select(selectIsLoading);
   terms$ = this.store.select(selectTerms);
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
@@ -136,5 +137,102 @@ export class MarksProgressComponent implements OnInit, OnDestroy {
 
   trackByClass(index: number, clas: ClassesModel): any {
     return clas.name; // Assuming class name is unique
+  }
+
+  // Progress visualization helper methods
+  getProgressColor(progress: number): string {
+    if (progress >= 90) return 'primary';
+    if (progress >= 70) return 'accent';
+    if (progress >= 50) return 'warn';
+    return 'warn';
+  }
+
+  getProgressStatusClass(progress: number): string {
+    if (progress >= 90) return 'status-excellent';
+    if (progress >= 70) return 'status-good';
+    if (progress >= 50) return 'status-fair';
+    return 'status-poor';
+  }
+
+  getProgressStatusText(progress: number): string {
+    if (progress >= 90) return 'Excellent';
+    if (progress >= 70) return 'Good';
+    if (progress >= 50) return 'Fair';
+    return 'Needs Attention';
+  }
+
+  // Export functionality
+  exportData(): void {
+    if (this.dataSource.data.length === 0) {
+      this.snackBar.open('No data to export. Please fetch progress data first.', 'Dismiss', {
+        duration: 3000,
+        panelClass: ['warning-snackbar']
+      });
+      return;
+    }
+
+    try {
+      const csvContent = this.generateCSV();
+      this.downloadCSV(csvContent, 'marks-progress.csv');
+      
+      this.snackBar.open('Progress data exported successfully!', 'Dismiss', {
+        duration: 3000,
+        panelClass: ['success-snackbar']
+      });
+    } catch (error) {
+      this.snackBar.open('Failed to export data. Please try again.', 'Dismiss', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+    }
+  }
+
+  private generateCSV(): string {
+    const headers = ['Subject Code', 'Subject Name', 'Total Students', 'Marks Entered', 'Progress (%)', 'Status'];
+    const csvRows = [headers.join(',')];
+
+    this.dataSource.data.forEach(row => {
+      const values = [
+        row.subject.code,
+        `"${row.subject.name}"`,
+        row.totalStudents,
+        row.marksEntered,
+        row.progress.toFixed(1),
+        `"${this.getProgressStatusText(row.progress)}"`
+      ];
+      csvRows.push(values.join(','));
+    });
+
+    return csvRows.join('\n');
+  }
+
+  private downloadCSV(content: string, filename: string): void {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  // Summary statistics methods
+  getCompletedSubjectsCount(): number {
+    return this.dataSource.data.filter(row => row.progress >= 100).length;
+  }
+
+  getAverageProgress(): number {
+    if (this.dataSource.data.length === 0) return 0;
+    const totalProgress = this.dataSource.data.reduce((sum, row) => sum + row.progress, 0);
+    return totalProgress / this.dataSource.data.length;
+  }
+
+  getTotalStudentsCount(): number {
+    return this.dataSource.data.reduce((sum, row) => sum + row.totalStudents, 0);
   }
 }

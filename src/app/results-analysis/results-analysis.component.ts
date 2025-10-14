@@ -2,7 +2,7 @@ import { viewReportsActions } from './../reports/store/reports.actions';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store, select } from '@ngrx/store';
-import { Observable, combineLatest, Subject, of } from 'rxjs'; // Added 'of'
+import { Observable, combineLatest, Subject, of, BehaviorSubject } from 'rxjs'; // Added 'of'
 import {
   takeUntil,
   tap,
@@ -102,6 +102,10 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   // --- Initialized Observable for selected subject name ---
   selectedSubjectName$!: Observable<string>;
 
+  // Use BehaviorSubject to maintain state
+  private selectedSubjectCode$ = new BehaviorSubject<string>('');
+  private selectedStudent$ = new BehaviorSubject<StudentsModel | null>(null);
+
   public lineChartOptions: ChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -183,17 +187,14 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     );
     // --- END NEW ---
 
-    // Subject Analysis Data pipeline - now uses selector factory
+    // Subject Analysis Data pipeline - uses BehaviorSubject for reliable state
     this.subjectAnalysisData$ = combineLatest([
       this.reports$,
-      this.analysisForm.get('selectedSubject')!.valueChanges.pipe(
-        startWith(this.analysisForm.get('selectedSubject')!.value),
-        tap((code) => (this.selectedSubjectCode = code))
-      ),
+      this.selectedSubjectCode$
     ]).pipe(
       filter(
         ([reports, subjectCode]) =>
-          !!reports && reports.length > 0 && !!subjectCode
+          !!reports && reports.length > 0 && !!subjectCode && subjectCode !== ''
       ),
       map(([reports, subjectCode]) =>
         this.store
@@ -204,13 +205,10 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     );
 
-    // Student Performance Data pipeline - now uses selector factory
+    // Student Performance Data pipeline - uses BehaviorSubject for reliable state
     this.studentPerformanceDataArray$ = combineLatest([
       this.reports$,
-      this.analysisForm.get('selectedStudent')!.valueChanges.pipe(
-        startWith(this.analysisForm.get('selectedStudent')!.value),
-        tap((student) => (this.selectedStudent = student))
-      ),
+      this.selectedStudent$
     ]).pipe(
       filter(
         ([reports, student]) => !!reports && reports.length > 0 && !!student
@@ -238,6 +236,8 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.selectedSubjectCode$.complete();
+    this.selectedStudent$.complete();
   }
 
   get termControl() {
@@ -292,6 +292,10 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     this.analysisForm
       .get('selectedStudent')
       ?.patchValue(null, { emitEvent: false });
+    
+    // Reset the BehaviorSubjects
+    this.selectedSubjectCode$.next('');
+    this.selectedStudent$.next(null);
 
     const { term, clas, examType } = this.analysisForm.value;
     this.store.dispatch(
@@ -331,19 +335,29 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
       this.analysisForm
         .get('selectedStudent')
         ?.patchValue(null, { emitEvent: false });
+      // Reset the student BehaviorSubject
+      this.selectedStudent$.next(null);
     } else if (event.index === 1) {
       this.selectedSubjectCode = '';
       this.analysisForm
         .get('selectedSubject')
         ?.patchValue(null, { emitEvent: false });
+      // Reset the subject BehaviorSubject
+      this.selectedSubjectCode$.next('');
     }
   }
 
   onSubjectSelectedForOverallAnalysis(subjectCode: string): void {
-    this.analysisForm.get('selectedSubject')?.patchValue(subjectCode);
+    this.selectedSubjectCode = subjectCode;
+    this.analysisForm.get('selectedSubject')?.patchValue(subjectCode, { emitEvent: false });
+    // Update the BehaviorSubject to trigger the observable pipeline
+    this.selectedSubjectCode$.next(subjectCode);
   }
 
   onStudentSelectedForIndividualPerformance(student: StudentsModel): void {
-    this.analysisForm.get('selectedStudent')?.patchValue(student);
+    this.selectedStudent = student;
+    this.analysisForm.get('selectedStudent')?.patchValue(student, { emitEvent: false });
+    // Update the BehaviorSubject to trigger the observable pipeline
+    this.selectedStudent$.next(student);
   }
 }

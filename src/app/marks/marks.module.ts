@@ -15,6 +15,7 @@ import { MarksSheetsComponent } from './marks-sheets/marks-sheets.component';
 import { markSheetsReducer } from './marks-sheets/store/reducer';
 import { MarkSheetEffects } from './marks-sheets/store/effects';
 import { MarksProgressComponent } from './marks-progress/marks-progress.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { MarksProgressComponent } from './marks-progress/marks-progress.componen
     ReactiveFormsModule,
     FormsModule,
     NgChartsModule,
+    SharedModule,
     StoreModule.forFeature('marks', marksReducer),
     StoreModule.forFeature('markSheet', markSheetsReducer),
     EffectsModule.forFeature(MarksEffects),

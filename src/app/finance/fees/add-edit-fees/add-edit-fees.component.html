@@ -1,41 +1,125 @@
-<!-- <mat-toolbar class="title">
-  {{ title.getTitle() }}
-</mat-toolbar> -->
-<form [formGroup]="feesForm" (submit)="addFees()">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title class="card-title"> {{ data ? 'Edit Fees' : 'Add New Fees' }} </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading$ | async">
+  <div class="loading-spinner">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>{{ data ? 'Updating fee...' : 'Adding fee...' }}</p>
+  </div>
+</div>
 
-      <mat-form-field class="name">
-        <mat-label>Fees Name</mat-label>
-        <mat-select formControlName="name">
+<!-- Dialog Header -->
+<div class="dialog-header">
+  <div class="header-content">
+    <mat-icon class="header-icon">{{ data ? 'edit' : 'add' }}</mat-icon>
+    <div class="header-text">
+      <h2 class="dialog-title">{{ data ? 'Edit Fee' : 'Add New Fee' }}</h2>
+      <p class="dialog-subtitle">{{ data ? 'Update fee information' : 'Create a new fee entry' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Form Content -->
+<div class="dialog-content">
+  <form [formGroup]="feesForm" (ngSubmit)="onSubmit()" class="fees-form">
+    
+    <!-- Fee Name Field -->
+    <div class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Fee Name</mat-label>
+        <mat-select formControlName="name" [errorStateMatcher]="errorStateMatcher">
           <mat-option *ngFor="let name of feesNames" [value]="name">
-            {{ sharedService.feesNamesToString(name) }}
+            {{ getFeeDisplayName(name) }}
           </mat-option>
-
         </mat-select>
+        <mat-icon matSuffix>category</mat-icon>
+        <mat-error *ngIf="name?.hasError('required')">
+          Fee name is required
+        </mat-error>
       </mat-form-field>
+    </div>
 
-      <mat-form-field class="amount">
+    <!-- Amount Field -->
+    <div class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Amount</mat-label>
-        <input matInput formControlName="amount">
+        <input matInput 
+               formControlName="amount" 
+               type="number" 
+               step="0.01" 
+               min="0"
+               placeholder="0.00"
+               [errorStateMatcher]="errorStateMatcher">
+        <span matPrefix>$&nbsp;</span>
+        <mat-icon matSuffix>attach_money</mat-icon>
+        <mat-error *ngIf="amount?.hasError('required')">
+          Amount is required
+        </mat-error>
+        <mat-error *ngIf="amount?.hasError('min')">
+          Amount must be greater than 0
+        </mat-error>
+        <mat-error *ngIf="amount?.hasError('pattern')">
+          Please enter a valid amount
+        </mat-error>
       </mat-form-field>
+    </div>
 
-      <mat-form-field class="des">
+    <!-- Description Field -->
+    <div class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description"></textarea>
+        <textarea matInput 
+                  formControlName="description" 
+                  rows="3"
+                  placeholder="Enter a detailed description of this fee..."
+                  [errorStateMatcher]="errorStateMatcher"></textarea>
+        <mat-icon matSuffix>description</mat-icon>
+        <mat-error *ngIf="description?.hasError('maxlength')">
+          Description must be less than 500 characters
+        </mat-error>
       </mat-form-field>
+    </div>
 
+    <!-- Fee Category Info -->
+    <div class="fee-info-card" *ngIf="name?.value">
+      <div class="info-header">
+        <mat-icon class="info-icon">info</mat-icon>
+        <span class="info-title">Fee Category</span>
+      </div>
+      <div class="info-content">
+        <div class="category-badge" [ngClass]="getCategoryClass(name?.value)">
+          {{ getFeeCategory(name?.value) }}
+        </div>
+        <p class="category-description">{{ getCategoryDescription(name?.value) }}</p>
+      </div>
+    </div>
 
-    </mat-card-content>
-    <mat-card-footer>
-      <mat-card-actions class="actions">
-        <button class="submit-btn" type="submit" color="primary" mat-raised-button>
-          {{ data ? 'Edit Fees' : 'Add Fees' }}
-        </button>
-      </mat-card-actions>
-    </mat-card-footer>
-  </mat-card>
-</form>
+    <!-- Error Messages -->
+    <div class="error-container" *ngIf="errorMsg$ | async as errorMsg">
+      <div class="error-message">
+        <mat-icon class="error-icon">error</mat-icon>
+        <span>{{ errorMsg }}</span>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<!-- Dialog Actions -->
+<div class="dialog-actions">
+  <button mat-button 
+          type="button" 
+          (click)="onCancel()" 
+          class="cancel-button">
+    <mat-icon>close</mat-icon>
+    Cancel
+  </button>
+  
+  <button mat-raised-button 
+          color="primary" 
+          type="submit" 
+          [disabled]="feesForm.invalid || (isLoading$ | async)"
+          (click)="onSubmit()"
+          class="submit-button">
+    <mat-icon>{{ data ? 'save' : 'add' }}</mat-icon>
+    {{ data ? 'Update Fee' : 'Add Fee' }}
+  </button>
+</div>

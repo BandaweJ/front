@@ -1,6 +1,6 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, timeout, catchError, throwError } from 'rxjs';
 import { InvoiceModel } from '../models/invoice.model';
 import { environment } from 'src/environments/environment';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
@@ -22,6 +22,7 @@ export class PaymentsService {
         `${this.baseURL}invoice/${studentNumber}/${num}/${year}`
       )
       .pipe(
+        timeout(30000), // 30 second timeout
         map((invoice) => {
           // Ensure balanceBfwd and its amount exist and convert if it's a string
           if (
@@ -33,6 +34,9 @@ export class PaymentsService {
           // Apply similar conversions for other numeric fields if needed
           // ...
           return invoice;
+        }),
+        catchError((error) => {
+          return throwError(() => error);
         })
       );
   }

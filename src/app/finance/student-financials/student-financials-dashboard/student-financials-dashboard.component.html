@@ -1,32 +1,15 @@
 <div class="financials-dashboard-container">
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner diameter="60"></mat-spinner>
-    <p class="loading-text">Loading your financial information...</p>
-  </div>
-
-  <!-- Error State -->
-  <div *ngIf="hasError && !isLoading" class="error-container">
-    <mat-icon class="error-icon">error_outline</mat-icon>
-    <h3 class="error-title">Unable to load financial data</h3>
-    <p class="error-message">{{ errorMessage }}</p>
-    <button mat-raised-button color="primary" (click)="loadUserData()">
-      <mat-icon>refresh</mat-icon>
-      Retry
-    </button>
-  </div>
-
   <!-- Main Content -->
-  <div *ngIf="!isLoading && !hasError" class="dashboard-content">
+  <div class="dashboard-content">
     <!-- Header Section -->
     <div class="dashboard-header">
       <div class="header-content">
         <div class="welcome-section">
           <h1 class="dashboard-title">Student Financials</h1>
-          <p class="dashboard-subtitle" *ngIf="currentUser">
+          <p class="dashboard-subtitle" *ngIf="currentUser$ | async as currentUser">
             Welcome back, {{ currentUser.username }}
           </p>
-          <p class="student-info" *ngIf="studentNumber">
+          <p class="student-info" *ngIf="studentNumber$ | async as studentNumber">
             Student Number: {{ studentNumber }}
           </p>
         </div>
@@ -63,12 +46,11 @@
     <!-- Navigation Tabs -->
     <nav class="dashboard-tabs" role="tablist" aria-label="Financial sections">
       <div class="tab-list">
-        <a *ngFor="let link of navLinks" 
-           mat-tab-link 
+        <a *ngFor="let link of navLinks; let i = index" 
            [routerLink]="link.path" 
            routerLinkActive #rla="routerLinkActive"
-           [active]="rla.isActive"
            class="tab-link"
+           [class.active]="rla.isActive"
            [attr.aria-selected]="rla.isActive"
            [attr.aria-controls]="link.path + '-panel'"
            role="tab">

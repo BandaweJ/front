@@ -52,6 +52,11 @@ export const selectExemptionsLoading = createSelector(
   (state: fromFinanceReducer.State) => state.exemptionLoading
 );
 
+export const selectLoadingInvoice = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.loadingInvoice
+);
+
 export const selectExemptionsError = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.exemptionError

@@ -1,16 +1,12 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   Inject,
   OnInit,
   ViewChild,
-  OnDestroy,
+  OnDestroy, // Import OnDestroy
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { FormControl } from '@angular/forms';
 import { EnrolsModel } from '../../models/enrols.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { Store } from '@ngrx/store';
@@ -20,8 +16,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { enrolStudents } from '../../store/enrolment.actions';
-import { Subject, combineLatest } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
+import { Subject, combineLatest } from 'rxjs'; // Import Subject and combineLatest
+import { takeUntil, filter as rxFilter } from 'rxjs/operators'; // Import takeUntil and rename filter to rxFilter
 import { selectEnrols } from '../../store/enrolment.selectors';
 import { Residence } from '../../models/residence.enum';
 
@@ -29,147 +25,56 @@ import { Residence } from '../../models/residence.enum';
   selector: 'app-enrol-student',
   templateUrl: './enrol-student.component.html',
   styleUrls: ['./enrol-student.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EnrolStudentComponent implements OnInit, AfterViewInit, OnDestroy {
-  studentsToEnrol: StudentsModel[] = [];
-  enrols: EnrolsModel[] = [];
-  isLoading = false;
-  searchControl = new FormControl('');
+  // Implement OnDestroy
+  studentsToEnrol: StudentsModel[] = []; // Holds students selected for enrollment
+  enrols: EnrolsModel[] = []; // Stores currently enrolled students from the store
 
   public dataSource = new MatTableDataSource<StudentsModel>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns = ['index', 'studentNumber', 'surname', 'name', 'gender', 'action'];
+  displayedColumns = ['studentNumber', 'surname', 'name', 'gender', 'action'];
 
-  private destroy$ = new Subject<void>();
-  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>(); // For managing subscriptions
 
   constructor(
     private store: Store,
     private dialogRef: MatDialogRef<EnrolStudentComponent>,
-    private cdr: ChangeDetectorRef,
-    private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA)
-    public data: { name: string; num: number; year: number }
+    private data: { name: string; num: number; year: number }
   ) {
     this.store.dispatch(registrationActions.fetchStudents());
+    // Set the custom filter predicate in the constructor
     this.dataSource.filterPredicate = this.customFilterPredicate;
   }
 
   ngOnInit(): void {
-    console.log('EnrolStudentComponent ngOnInit - Starting initialization');
-    this.initializeObservables();
-    this.setupSearch();
-  }
-
-
-  private initializeObservables(): void {
+    // Combine both student and enrolments observables to filter students
     combineLatest([
       this.store.select(selectEnrols),
       this.store.select(selectStudents),
     ])
-      .pipe(
-        takeUntil(this.destroy$),
-        tap(([enrols, allStudents]) => {
-          this.enrols = enrols || [];
-          this.isLoading = false;
-          
-          // Check if allStudents is valid and has data
-          if (!allStudents || !Array.isArray(allStudents) || allStudents.length === 0) {
-            this.store.dispatch(registrationActions.fetchStudents());
-            this.dataSource.data = [];
-            return;
-          }
-          
-          // Check if students have actual data (not empty objects)
-          const validStudents = allStudents.filter(student => 
-            student && 
-            typeof student === 'object' && 
-            Object.keys(student).length > 0 &&
-            student.studentNumber
-          );
-          
-          // If no valid students, try to reload after a short delay
-          if (validStudents.length === 0) {
-            setTimeout(() => {
-              this.store.dispatch(registrationActions.fetchStudents());
-            }, 1000);
-            this.dataSource.data = [];
-            return;
-          }
-          
-          // Filter out students who are already enrolled
-          const availableStudents = validStudents.filter((student) => {
-            return !this.enrols.some(
-              (enrol) => enrol.student?.studentNumber === student.studentNumber
-            );
-          });
-          
-          this.dataSource.data = availableStudents;
-          
-          console.log('Data loaded - Available students:', availableStudents.length);
-          console.log('Data loaded - First student:', availableStudents[0]);
-          console.log('Data loaded - DataSource data:', this.dataSource.data);
-          
-          // Force change detection and table update
-          setTimeout(() => {
-            this.cdr.markForCheck();
-            console.log('Change detection triggered - DataSource data after CD:', this.dataSource.data);
-          }, 0);
-        })
-      )
-      .subscribe();
-  }
+      .pipe(takeUntil(this.destroy$)) // Unsubscribe when component is destroyed
+      .subscribe(([enrols, allStudents]) => {
+        this.enrols = enrols; // Store current enrolments
 
-  private setupSearch(): void {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe(searchTerm => {
-      this.dataSource.filter = searchTerm.trim().toLowerCase();
-      if (this.dataSource.paginator) {
-        this.dataSource.paginator.firstPage();
-      }
-    });
+        // Filter out students who are already enrolled in the current class/term combination
+        // Note: This logic assumes 'enrols' from store is specifically for the current class/term.
+        // If selectEnrols returns all enrolments, you might need to filter by class/term too.
+        this.dataSource.data = allStudents.filter((student) => {
+          return !this.enrols.some(
+            (enrol) => enrol.student.studentNumber === student.studentNumber
+          );
+        });
+      });
   }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.cdr.markForCheck();
-    
-    // Debug: Measure element heights and log data
-    setTimeout(() => {
-      this.measureElementHeights();
-      console.log('AfterViewInit - DataSource data:', this.dataSource.data);
-      console.log('AfterViewInit - DataSource length:', this.dataSource.data.length);
-      console.log('AfterViewInit - Is loading:', this.isLoading);
-    }, 100);
-  }
-
-  private measureElementHeights(): void {
-    const container = document.getElementById('table-container');
-    const wrapper = document.getElementById('table-wrapper');
-    const table = document.getElementById('students-table');
-    
-    if (container) {
-      const containerHeight = container.offsetHeight;
-      document.getElementById('container-height')!.textContent = `${containerHeight}px`;
-    }
-    
-    if (wrapper) {
-      const wrapperHeight = wrapper.offsetHeight;
-      document.getElementById('wrapper-height')!.textContent = `${wrapperHeight}px`;
-    }
-    
-    if (table) {
-      const tableHeight = table.offsetHeight;
-      document.getElementById('table-height')!.textContent = `${tableHeight}px`;
-    }
   }
 
   ngOnDestroy(): void {
@@ -177,39 +82,35 @@ export class EnrolStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$.complete(); // Complete the subject
   }
 
-  addToEnrolList(student: StudentsModel): void {
+  /**
+   * Adds a student to the temporary list of students to be enrolled.
+   * Removes the student from the main table.
+   * @param student The student to add.
+   */
+  addToEnrolList(student: StudentsModel) {
     this.studentsToEnrol.push(student);
+    // Update dataSource by filtering out the added student
     this.dataSource.data = this.dataSource.data.filter(
       (st) => st.studentNumber !== student.studentNumber
     );
-    this.applyFilter(null);
-    this.cdr.markForCheck();
-    
-    this.snackBar.open(`${student.name} ${student.surname} added to enrollment list`, 'Close', {
-      duration: 2000,
-      verticalPosition: 'top',
-      horizontalPosition: 'right'
-    });
+    // Important: Reapply filter and sort after modifying dataSource.data
+    this.applyFilter(null); // Pass null or a dummy event if applyFilter doesn't need it
   }
 
-  removeFromEnrolList(student: StudentsModel): void {
+  /**
+   * Removes a student from the temporary list of students to be enrolled.
+   * Adds the student back to the main table.
+   * @param student The student to remove.
+   */
+  removeFromEnrolList(student: StudentsModel) {
     this.studentsToEnrol = this.studentsToEnrol.filter(
       (st) => st.studentNumber !== student.studentNumber
     );
+    // Add student back to dataSource, and re-sort/filter if needed
+    // Using unshift to add to the beginning, but sort/filter will reorder
     this.dataSource.data = [student, ...this.dataSource.data];
-    this.applyFilter(null);
-    this.cdr.markForCheck();
-    
-    this.snackBar.open(`${student.name} ${student.surname} removed from enrollment list`, 'Close', {
-      duration: 2000,
-      verticalPosition: 'top',
-      horizontalPosition: 'right'
-    });
-  }
-
-  onSearchChange(event: Event): void {
-    const searchTerm = (event.target as HTMLInputElement).value;
-    this.searchSubject.next(searchTerm);
+    // Important: Reapply filter and sort after modifying dataSource.data
+    this.applyFilter(null); // Pass null or a dummy event
   }
 
   /**
@@ -252,43 +153,38 @@ export class EnrolStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  closeDialog(): void {
+  /**
+   * Closes the dialog without enrolling any students.
+   */
+  closeDialog() {
     this.dialogRef.close();
   }
 
-  enrolStudents(): void {
-    if (this.studentsToEnrol.length === 0) {
-      this.snackBar.open('Please select at least one student to enroll', 'Close', {
-        duration: 3000,
-        verticalPosition: 'top',
-        horizontalPosition: 'right'
+  /**
+   * Dispatches the action to enrol the selected students.
+   */
+  enrolStudents() {
+    const enrolsToDispatch: EnrolsModel[] = [];
+
+    // Map the selected students into EnrolsModel objects
+    if (this.studentsToEnrol.length > 0) {
+      this.studentsToEnrol.forEach((student) => {
+        // Ensure residence is handled. If it's always Boarder, then fine.
+        // If it should come from the student model, use student.residence.
+        const enrol: EnrolsModel = {
+          student,
+          name: this.data.name, // class name
+          num: this.data.num, // term number
+          year: this.data.year, // term year
+          residence: Residence.Boarder, // Use student's residence if available, else default
+          // id: '', // id should typically be generated by backend
+        };
+        enrolsToDispatch.push(enrol);
       });
-      return;
+
+      this.store.dispatch(enrolStudents({ enrols: enrolsToDispatch }));
+      this.dialogRef.close(); // Close dialog after dispatching enrol action
     }
-
-    this.isLoading = true;
-    this.cdr.markForCheck();
-
-    const enrolsToDispatch: EnrolsModel[] = this.studentsToEnrol.map((student) => ({
-      student,
-      name: this.data.name,
-      num: this.data.num,
-      year: this.data.year,
-      residence: Residence.Boarder,
-    }));
-
-    this.store.dispatch(enrolStudents({ enrols: enrolsToDispatch }));
-    
-    this.snackBar.open(`Successfully enrolled ${this.studentsToEnrol.length} student(s)`, 'Close', {
-      duration: 3000,
-      verticalPosition: 'top',
-      horizontalPosition: 'right'
-    });
-    
-    this.dialogRef.close();
-  }
-
-  trackByStudentId(index: number, student: StudentsModel): string {
-    return student.studentNumber || `${index}`;
+    // Optional: Add a snackbar/toast if no students are selected for enrolment
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, take, tap } from 'rxjs/operators';
@@ -18,42 +18,26 @@ import {
   selector: 'app-student-payment-history',
   templateUrl: './student-payment-history.component.html',
   styleUrls: ['./student-payment-history.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class StudentPaymentHistoryComponent implements OnInit, OnDestroy {
-  // UI State
-  isLoading = true;
-  hasError = false;
-  errorMessage = '';
-
   // Data Observables
-  paymentHistory$: Observable<PaymentHistoryItem[] | null>;
-  loadingPaymentHistory$: Observable<boolean>;
-  errorPaymentHistory$: Observable<any>;
-  private userSubscription: Subscription | undefined; // Error from invoices or receipts fetch
+  user$ = this.store.select(selectUser);
+  paymentHistory$ = this.store.select(selectCombinedPaymentHistory);
+  loading$ = this.store.select(selectLoadingStudentReceipts);
+  error$ = this.store.select(selectLoadStudentReceiptsErr);
+  
+  private userSubscription: Subscription | undefined;
 
   constructor(
-    private store: Store,
-    private cdr: ChangeDetectorRef
-  ) {
-    // Select the combined history directly
-    this.paymentHistory$ = this.store.select(selectCombinedPaymentHistory);
-    // Loading and error states should reflect the loading/error of invoices/receipts
-    this.loadingPaymentHistory$ = this.store.select(
-      selectLoadingStudentReceipts
-    );
-    this.errorPaymentHistory$ = this.store.select(selectLoadStudentReceiptsErr);
-  }
+    private store: Store
+  ) {}
 
   ngOnInit(): void {
     this.loadPaymentHistory();
   }
 
   loadPaymentHistory(): void {
-    this.isLoading = true;
-    this.hasError = false;
-    this.cdr.markForCheck();
-
     this.userSubscription = this.store
       .select(selectUser)
       .pipe(
@@ -74,16 +58,8 @@ export class StudentPaymentHistoryComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        error: (error) => this.handleError('Failed to load payment history')
+        error: (error) => console.error('Failed to load payment history:', error)
       });
-  }
-
-  private handleError(message: string): void {
-    this.hasError = true;
-    this.errorMessage = message;
-    this.isLoading = false;
-    this.cdr.markForCheck();
-    console.error(message);
   }
 
   ngOnDestroy(): void {

@@ -155,9 +155,9 @@ export class FinanceEffects {
                 invoice,
               });
             }),
-            catchError((error: HttpErrorResponse) =>
-              of(invoiceActions.fetchInvoiceFail({ ...error }))
-            )
+            catchError((error: HttpErrorResponse) => {
+              return of(invoiceActions.fetchInvoiceFail({ ...error }));
+            })
           )
       )
     )

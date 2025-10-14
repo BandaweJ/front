@@ -41,6 +41,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
   isLoading$ = this.store.select(selectIsLoading); // This is crucial for the spinner
   currentEnrolment!: EnrolsModel;
 
+  // Analytics properties
+  totalStudents = 0;
+  totalSubjects = 0;
+  averageMark = 0;
+  passRate = 0;
+
   private subscriptions: Subscription[] = [];
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
@@ -79,6 +85,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
             );
           }
         }
+      })
+    );
+
+    // Subscribe to reports changes to calculate analytics
+    this.subscriptions.push(
+      this.reports$.subscribe((reports) => {
+        this.calculateAnalytics(reports);
       })
     );
   }
@@ -156,6 +169,85 @@ export class ReportsComponent implements OnInit, OnDestroy {
   viewReports() {
     this.mode = 'view';
     this.fetchReportsBasedOnForm(); // Call the fetch method when 'View' is clicked
+  }
+
+  // Analytics methods
+  calculateAnalytics(reports: ReportsModel[]): void {
+    if (!reports || reports.length === 0) {
+      this.resetAnalytics();
+      return;
+    }
+
+    this.totalStudents = this.getUniqueStudentsCount(reports);
+    this.totalSubjects = this.getUniqueSubjectsCount(reports);
+    this.averageMark = this.calculateAverageMark(reports);
+    this.passRate = this.calculatePassRate(reports);
+  }
+
+  private resetAnalytics(): void {
+    this.totalStudents = 0;
+    this.totalSubjects = 0;
+    this.averageMark = 0;
+    this.passRate = 0;
+  }
+
+  private getUniqueStudentsCount(reports: ReportsModel[]): number {
+    const uniqueStudents = new Set(reports.map(report => report.studentNumber));
+    return uniqueStudents.size;
+  }
+
+  private getUniqueSubjectsCount(reports: ReportsModel[]): number {
+    const uniqueSubjects = new Set<string>();
+    
+    reports.forEach(report => {
+      if (report.report && report.report.subjectsTable) {
+        report.report.subjectsTable.forEach(subject => {
+          if (subject.subjectCode) {
+            uniqueSubjects.add(subject.subjectCode);
+          }
+        });
+      }
+    });
+    
+    return uniqueSubjects.size;
+  }
+
+  private calculateAverageMark(reports: ReportsModel[]): number {
+    let totalMarks = 0;
+    let markCount = 0;
+
+    reports.forEach(report => {
+      if (report.report && report.report.subjectsTable) {
+        report.report.subjectsTable.forEach(subject => {
+          if (subject.mark !== null && subject.mark !== undefined) {
+            totalMarks += subject.mark;
+            markCount++;
+          }
+        });
+      }
+    });
+
+    return markCount > 0 ? Math.round((totalMarks / markCount) * 100) / 100 : 0;
+  }
+
+  private calculatePassRate(reports: ReportsModel[]): number {
+    let totalMarks = 0;
+    let passingMarks = 0;
+
+    reports.forEach(report => {
+      if (report.report && report.report.subjectsTable) {
+        report.report.subjectsTable.forEach(subject => {
+          if (subject.mark !== null && subject.mark !== undefined) {
+            totalMarks++;
+            if (subject.mark >= 50) { // Assuming 50% is passing
+              passingMarks++;
+            }
+          }
+        });
+      }
+    });
+
+    return totalMarks > 0 ? Math.round((passingMarks / totalMarks) * 100 * 100) / 100 : 0;
   }
 
   ngOnDestroy(): void {

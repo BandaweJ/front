@@ -54,18 +54,18 @@ export class AddEditStudentComponent implements OnInit, OnDestroy {
   private initializeForm(): void {
     this.addStudentForm = new FormGroup({
       idnumber: new FormControl('', [
-        Validators.required,
+        // Validators.required,
         Validators.minLength(10),
         Validators.pattern(/^[0-9]{2}[0-9]{6}[A-Z]{1}[0-9]{2}$/)
       ]),
       name: new FormControl('', [Validators.required, Validators.minLength(2)]),
       surname: new FormControl('', [Validators.required, Validators.minLength(2)]),
-      dob: new FormControl('', [Validators.required]),
+      dob: new FormControl(''),
       gender: new FormControl('', [Validators.required]),
-      dateOfJoining: new FormControl('', [Validators.required]),
-      cell: new FormControl('', [Validators.required, Validators.minLength(10)]),
-      email: new FormControl('', [Validators.required, Validators.email]),
-      address: new FormControl('', [Validators.required]),
+      dateOfJoining: new FormControl(''),
+      cell: new FormControl('', [Validators.minLength(10)]),
+      email: new FormControl('', [Validators.email]),
+      address: new FormControl(''),
       prevSchool: new FormControl(''),
       studentNumber: new FormControl(''),
       role: new FormControl(ROLES.student),
