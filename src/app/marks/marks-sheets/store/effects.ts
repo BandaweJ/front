@@ -5,6 +5,7 @@ import { ReportsService } from 'src/app/reports/services/reports.service';
 import { markSheetActions } from './actions';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ReportsModel } from 'src/app/reports/models/reports.model';
 
 @Injectable()
 export class MarkSheetEffects {
@@ -22,7 +23,7 @@ export class MarkSheetEffects {
         this.reportsService
           .generateReports(data.name, data.num, data.year, data.examType)
           .pipe(
-            tap((data) =>
+            tap((reports) =>
               this.snackBar.open(`Mark sheet generated successfully`, 'OK', {
                 duration: 3000,
                 verticalPosition: 'top',
@@ -39,4 +40,5 @@ export class MarkSheetEffects {
       )
     )
   );
+
 }

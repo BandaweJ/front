@@ -23,6 +23,7 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { AuthService } from './auth/auth.service';
 import { FinanceModule } from './finance/finance.module';
 import { SharedModule } from './shared/shared.module';
+import { UserManagementModule } from './user-management/user-management.module';
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 
 @NgModule({
@@ -43,6 +44,7 @@ import { ResultsAnalysisComponent } from './results-analysis/results-analysis.co
     ReportsModule,
     AttendanceModule,
     FinanceModule,
+    UserManagementModule,
     MaterialModule,
     BrowserModule,
     AppRoutingModule,

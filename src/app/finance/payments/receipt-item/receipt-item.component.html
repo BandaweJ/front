@@ -7,7 +7,7 @@
       <span class="material-icons">print</span>
     </button>
 
-    <button *ngIf="!receipt.isVoided && (userRole$ | async) === 'reception'" type="button" mat-mini-fab color="warn"
+    <button *ngIf="!receipt.isVoided && (userRole$ | async) === 'auditor' || (userRole$ | async) === 'director'" type="button" mat-mini-fab color="warn"
       class="void-btn" (click)="voidReceipt()" title="Void Receipt">
       <span class="material-icons">cancel</span>
     </button>

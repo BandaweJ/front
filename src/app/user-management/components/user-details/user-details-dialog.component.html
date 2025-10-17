@@ -1,0 +1,184 @@
+<div class="user-details-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>person</mat-icon>
+      User Details
+    </h2>
+    <button mat-icon-button (click)="onClose()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <div *ngIf="loading$ | async" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading user details...</p>
+    </div>
+
+    <div *ngIf="error$ | async" class="error-container">
+      <mat-icon class="error-icon">error</mat-icon>
+      <p class="error-message">{{ error$ | async }}</p>
+    </div>
+
+    <div *ngIf="userDetails$ | async as user" class="user-details-content">
+      
+      <!-- User Header -->
+      <div class="user-header">
+        <div class="user-avatar">
+          <mat-icon class="avatar-icon">person</mat-icon>
+        </div>
+        <div class="user-info">
+          <h3 class="user-name">{{ user.name }}</h3>
+          <p class="user-username">@{{ user.username }}</p>
+          <div class="user-badges">
+            <mat-chip [color]="getStatusColor(user.status)" class="status-chip">
+              <mat-icon>{{ getStatusIcon(user.status) }}</mat-icon>
+              {{ getRoleDisplayName(user.status) }}
+            </mat-chip>
+            <mat-chip color="primary" class="role-chip">
+              {{ getRoleDisplayName(user.role) }}
+            </mat-chip>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Information -->
+      <div class="user-sections">
+        
+        <!-- Basic Information -->
+        <div class="info-section">
+          <h4 class="section-title">
+            <mat-icon>info</mat-icon>
+            Basic Information
+          </h4>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Username</label>
+              <span>{{ user.username }}</span>
+            </div>
+            <div class="info-item">
+              <label>Full Name</label>
+              <span>{{ user.name }}</span>
+            </div>
+            <div class="info-item">
+              <label>Role</label>
+              <span>{{ getRoleDisplayName(user.role) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Status</label>
+              <span class="status-text" [class]="'status-' + user.status">
+                <mat-icon>{{ getStatusIcon(user.status) }}</mat-icon>
+                {{ getRoleDisplayName(user.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="info-section" *ngIf="user.email || user.phone">
+          <h4 class="section-title">
+            <mat-icon>contact_mail</mat-icon>
+            Contact Information
+          </h4>
+          <div class="info-grid">
+            <div class="info-item" *ngIf="user.email">
+              <label>Email</label>
+              <span>{{ user.email }}</span>
+            </div>
+            <div class="info-item" *ngIf="user.phone">
+              <label>Phone</label>
+              <span>{{ user.phone }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Information -->
+        <div class="info-section">
+          <h4 class="section-title">
+            <mat-icon>account_circle</mat-icon>
+            Profile Information
+          </h4>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Profile ID</label>
+              <span>{{ user.profileId }}</span>
+            </div>
+            <div class="info-item" *ngIf="user.profile.studentNumber">
+              <label>Student Number</label>
+              <span>{{ user.profile.studentNumber }}</span>
+            </div>
+            <div class="info-item" *ngIf="user.profile.employeeId">
+              <label>Employee ID</label>
+              <span>{{ user.profile.employeeId }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Information -->
+        <div class="info-section">
+          <h4 class="section-title">
+            <mat-icon>account_balance</mat-icon>
+            Account Information
+          </h4>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Created</label>
+              <span>{{ user.createdAt | date:'medium' }}</span>
+            </div>
+            <div class="info-item" *ngIf="user.lastLogin">
+              <label>Last Login</label>
+              <span>{{ user.lastLogin | date:'medium' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Created By</label>
+              <span>{{ user.createdBy }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Summary -->
+        <div class="info-section">
+          <h4 class="section-title">
+            <mat-icon>analytics</mat-icon>
+            Activity Summary
+          </h4>
+          <div class="activity-summary">
+            <div class="activity-item">
+              <mat-icon class="activity-icon">history</mat-icon>
+              <div class="activity-info">
+                <span class="activity-label">Total Activities</span>
+                <span class="activity-value">{{ user.activityCount }}</span>
+              </div>
+            </div>
+            <div class="activity-item">
+              <mat-icon class="activity-icon">devices</mat-icon>
+              <div class="activity-info">
+                <span class="activity-label">Active Sessions</span>
+                <span class="activity-value">{{ user.sessionCount }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onClose()" class="cancel-button">
+      <mat-icon>close</mat-icon>
+      Close
+    </button>
+    <button mat-raised-button color="primary" (click)="onEditUser()" class="action-button">
+      <mat-icon>edit</mat-icon>
+      Edit User
+    </button>
+    <button mat-raised-button color="accent" (click)="onResetPassword()" class="action-button">
+      <mat-icon>lock_reset</mat-icon>
+      Reset Password
+    </button>
+    <button mat-raised-button color="warn" (click)="onViewActivity()" class="action-button">
+      <mat-icon>history</mat-icon>
+      View Activity
+    </button>
+  </mat-dialog-actions>
+</div>

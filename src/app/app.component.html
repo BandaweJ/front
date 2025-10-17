@@ -51,6 +51,12 @@
               <mat-icon>family_restroom</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Parents</span>
             </button>
+            
+            <!-- User Management (Admin Only) -->
+            <button mat-button *ngIf="role === 'admin'" routerLink="/user-management" routerLinkActive="active">
+              <mat-icon>admin_panel_settings</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">User Management</span>
+            </button>
           </div>
         </mat-expansion-panel>
 
@@ -227,7 +233,7 @@
             </button>
 
             <!-- Payments / Receipting -->
-            <button mat-button routerLink="/payments" routerLinkActive="active" *ngIf="role === 'auditor'">
+            <button mat-button routerLink="/payments" routerLinkActive="active" *ngIf="role === 'auditor' || role === 'director'">
               <mat-icon>payments</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Receipting</span>
             </button>
@@ -239,7 +245,7 @@
             </button>
 
             <!-- Billing / Invoicing -->
-            <button mat-button routerLink="/student-finance" routerLinkActive="active" *ngIf="role === 'reception'">
+            <button mat-button routerLink="/student-finance" routerLinkActive="active" *ngIf="role === 'reception' || role === 'director' || role === 'auditor'">
               <mat-icon>request_quote</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Billing</span>
             </button>
@@ -253,7 +259,7 @@
 
             <!-- Exemptions -->
             <button mat-button routerLink="/exemptions" routerLinkActive="active"
-              *ngIf="role === 'auditor' || role === 'director' || role === 'reception'">
+              *ngIf="role === 'auditor' || role === 'director'">
               <mat-icon>money_off</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Exemptions</span>
             </button>
