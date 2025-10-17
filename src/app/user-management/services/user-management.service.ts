@@ -77,3 +77,5 @@ export class UserManagementService {
     return this.httpClient.get<UserActivityPaginatedModel>(`${this.baseUrl}/activity/system`, { params });
   }
 }
+
+

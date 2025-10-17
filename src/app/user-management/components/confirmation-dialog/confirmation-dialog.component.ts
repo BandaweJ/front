@@ -163,3 +163,5 @@ export class ConfirmationDialogComponent {
     return colors[this.data.type || 'warning'] || colors['warning'];
   }
 }
+
+

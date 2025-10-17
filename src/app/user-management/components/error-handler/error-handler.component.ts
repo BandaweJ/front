@@ -116,3 +116,5 @@ export class ErrorHandlerComponent implements OnInit {
     window.location.reload();
   }
 }
+
+

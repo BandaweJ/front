@@ -141,3 +141,5 @@ export class SuccessToastComponent implements OnInit, OnDestroy {
     return icons[this.type] || icons['success'];
   }
 }
+
+

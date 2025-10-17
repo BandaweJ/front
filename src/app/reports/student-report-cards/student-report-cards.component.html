@@ -39,8 +39,10 @@
     {{ errorMessage$ | async }}
   </div>
 
-  <div *ngIf="selectedReport$ | async as currentReport; else noReportSelected">
-    <app-report [report]="currentReport"></app-report>
+  <div *ngIf="selectedReport$ | async as currentReport; else noReportSelected" class="report-container">
+    <div class="report-wrapper">
+      <app-report [report]="currentReport"></app-report>
+    </div>
   </div>
 
   <ng-template #noReportSelected>

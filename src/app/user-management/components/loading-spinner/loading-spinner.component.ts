@@ -71,3 +71,5 @@ export class LoadingSpinnerComponent {
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
   @Input() type: 'default' | 'overlay' | 'inline' = 'default';
 }
+
+

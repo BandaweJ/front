@@ -184,3 +184,5 @@ export class FormValidationService {
     return { score, label, color, requirements };
   }
 }
+
+

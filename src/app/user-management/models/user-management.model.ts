@@ -76,3 +76,5 @@ export interface UserActivityPaginatedModel {
   limit: number;
   totalPages: number;
 }
+
+
