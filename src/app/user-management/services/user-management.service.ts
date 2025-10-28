@@ -33,11 +33,13 @@ export class UserManagementService {
     return this.httpClient.get<UserDetailsModel>(`${environment.apiUrl}/auth/${id}/${role}`);
   }
 
-  updateUser(id: string, user: UpdateUserModel): Observable<UserDetailsModel> {
-    return this.httpClient.put<UserDetailsModel>(`${this.baseUrl}/${id}`, user);
+  updateUser(id: string, user: UpdateUserModel): Observable<{ message: string }> {
+    // Update account (username)
+    return this.httpClient.patch<{ message: string }>(`${environment.apiUrl}/auth/${id}`, { username: user.username });
   }
 
   deleteUser(id: string): Observable<{ message: string }> {
+    // TODO: Implement account deletion in backend
     return this.httpClient.delete<{ message: string }>(`${this.baseUrl}/${id}`);
   }
 
@@ -46,7 +48,7 @@ export class UserManagementService {
   }
 
   resetPassword(id: string): Observable<{ message: string; temporaryPassword: string }> {
-    return this.httpClient.post<{ message: string; temporaryPassword: string }>(`${this.baseUrl}/${id}/reset-password`, {});
+    return this.httpClient.post<{ message: string; temporaryPassword: string }>(`${environment.apiUrl}/auth/${id}/reset-password`, {});
   }
 
   getUserActivity(id: string, page: number = 1, limit: number = 20): Observable<UserActivityPaginatedModel> {

@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { UserManagementService } from '../../services/user-management.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
 import { UserDetailsModel } from '../../models/user-management.model';
@@ -38,7 +40,10 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private dialogRef: MatDialogRef<UserDetailsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { userId: string; role: string }
+    @Inject(MAT_DIALOG_DATA) public data: { userId: string; role: string },
+    private userManagementService: UserManagementService,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -55,15 +60,38 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   }
 
   onEditUser(): void {
-    console.log('Edit user functionality to be implemented');
+    // TODO: Open edit user dialog
+    console.log('Edit user:', this.data.userId);
+    // For now, just show the user info
+    this.dialogRef.close({ action: 'edit' });
   }
 
   onResetPassword(): void {
-    console.log('Reset password functionality to be implemented');
+    this.userManagementService.resetPassword(this.data.userId).subscribe({
+      next: (response) => {
+        this.snackBar.open(`Password reset successfully. Temporary password: ${response.temporaryPassword}`, 'Copy', {
+          duration: 10000,
+          verticalPosition: 'top',
+          horizontalPosition: 'center',
+        }).onAction().subscribe(() => {
+          navigator.clipboard.writeText(response.temporaryPassword);
+        });
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to reset password', 'Close', {
+          duration: 5000,
+          verticalPosition: 'top',
+          horizontalPosition: 'center',
+        });
+      }
+    });
   }
 
   onViewActivity(): void {
-    console.log('View activity functionality to be implemented');
+    // TODO: Open activity dialog
+    console.log('View activity for:', this.data.userId);
+    // For now, just close and show message
+    alert('User activity logging - backend needs implementation');
   }
 
   getRoleDisplayName(role: string): string {
