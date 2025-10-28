@@ -23,22 +23,9 @@ export class UserManagementService {
     search?: string,
     role?: string,
     status?: string
-  ): Observable<UserListPaginatedModel> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
-
-    if (search) {
-      params = params.set('search', search);
-    }
-    if (role) {
-      params = params.set('role', role);
-    }
-    if (status) {
-      params = params.set('status', status);
-    }
-
-    return this.httpClient.get<UserListPaginatedModel>(`${this.baseUrl}`, { params });
+  ): Observable<any[]> {
+    // Use the new backend endpoint
+    return this.httpClient.get<any[]>(`${environment.apiUrl}/auth/accounts/all`);
   }
 
   getUserById(id: string): Observable<UserDetailsModel> {

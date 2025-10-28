@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -6,7 +5,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { FormControl } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ROLES } from '../../../registration/models/roles.enum';
 import { UserManagementModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
@@ -16,12 +15,45 @@ import { UserDetailsDialogComponent } from '../user-details/user-details-dialog.
 import { UserActivityComponent } from '../user-activity/user-activity.component';
 import { BulkOperationsComponent, BulkOperationData } from '../bulk-operations/bulk-operations.component';
 import { SystemActivityComponent } from '../system-activity/system-activity.component';
-import { ConfirmDeleteDialogComponent } from '../../../confirm-delete-dialog/confirm-delete-dialog.component';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-user-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatCheckboxModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    RouterModule,
+  ],
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  styleUrls: ['./user-list.component.scss']
 })
 export class UserListComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -166,21 +198,21 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   openDeleteUserDialog(user: UserManagementModel): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Delete User',
-        message: `Are you sure you want to delete user "${user.username}"? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel'
-      }
-    });
+    // const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    //   width: '400px',
+    //   data: {
+    //     title: 'Delete User',
+    //     message: `Are you sure you want to delete user "${user.username}"? This action cannot be undone.`,
+    //     confirmText: 'Delete',
+    //     cancelText: 'Cancel'
+    //   }
+    // });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.deleteUser(user.id);
-      }
-    });
+    // dialogRef.afterClosed().subscribe(result => {
+    //   if (result) {
+    //     this.deleteUser(user.id);
+    //   }
+    // });
   }
 
   private deleteUser(userId: string): void {

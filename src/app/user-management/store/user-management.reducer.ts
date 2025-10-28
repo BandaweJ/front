@@ -4,7 +4,7 @@ import { UserManagementModel, UserDetailsModel, UserListPaginatedModel, UserActi
 import { userManagementActions } from './user-management.actions';
 
 export interface UserManagementState {
-  users: UserListPaginatedModel | null;
+  users: UserManagementModel[] | null;
   userDetails: UserDetailsModel | null;
   userActivity: UserActivityPaginatedModel | null;
   systemActivity: UserActivityPaginatedModel | null;
@@ -104,11 +104,7 @@ export const userManagementReducer = createReducer(
   })),
   on(userManagementActions.deleteUserSuccess, (state, { id }) => ({
     ...state,
-    users: state.users ? {
-      ...state.users,
-      users: state.users.users.filter(user => user.id !== id),
-      total: state.users.total - 1,
-    } : null,
+    users: state.users?.filter(user => user.id !== id) || null,
     loading: false,
     error: null,
   })),

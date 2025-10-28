@@ -7,7 +7,7 @@ export const userManagementActions = createActionGroup({
   events: {
     // Load Users
     loadUsers: props<{ page?: number; limit?: number; search?: string; role?: string; status?: string }>(),
-    loadUsersSuccess: props<{ users: UserListPaginatedModel }>(),
+    loadUsersSuccess: props<{ users: UserManagementModel[] }>(),
     loadUsersFailure: props<{ error: string }>(),
 
     // Load User Details

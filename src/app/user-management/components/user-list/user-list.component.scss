@@ -1,3 +1,21 @@
+// School Theme Variables
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$accent-gold: #ffc107;
+$warn-brown: #795548;
+
+// Theme Colors
+$white: #ffffff;
+$text-primary: #2c3e50;
+$text-secondary: #7f8c8d;
+$text-muted: #6c757d;
+$text-light: #adb5bd;
+$border-color: #e9ecef;
+$border-dark: #dee2e6;
+$bg-light: #f8f9fa;
+$bg-gradient-start: #e3f2fd;
+$bg-gradient-end: #f3e5f5;
+
 /* User Management Header */
 .user-management-header {
   margin-bottom: 2rem;
@@ -11,31 +29,33 @@
   gap: 1rem;
 }
 
-.title-section h1 {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
+.title-section {
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+    color: $text-primary;
+  }
 
-.title-section p {
-  margin: 0.5rem 0 0 0;
-  color: #7f8c8d;
-  font-size: 1rem;
+  p {
+    margin: 0.5rem 0 0 0;
+    color: $text-secondary;
+    font-size: 1rem;
+  }
 }
 
 .action-buttons {
   display: flex;
   gap: 1rem;
-}
 
-.action-buttons button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+  }
 }
 
 /* Filters Section */
@@ -51,8 +71,8 @@
 .bulk-actions-card {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border: 1px solid #bbdefb;
+  background: linear-gradient(135deg, $bg-gradient-start 0%, $bg-gradient-end 100%);
+  border: 1px solid lighten($primary-blue, 40%);
 }
 
 .bulk-actions-content {
@@ -71,13 +91,13 @@
 }
 
 .selection-icon {
-  color: #1976d2;
+  color: $primary-blue-dark;
   font-size: 1.25rem;
 }
 
 .selection-text {
   font-weight: 500;
-  color: #1976d2;
+  color: $primary-blue-dark;
   font-size: 1rem;
 }
 
@@ -96,11 +116,11 @@
   font-weight: 500;
   font-size: 0.875rem;
   transition: all 0.2s ease;
-}
 
-.bulk-action-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
 }
 
 .filters-card {
@@ -152,33 +172,35 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+
+  th {
+    background: linear-gradient(135deg, $bg-light 0%, darken($bg-light, 5%) 100%);
+    color: darken($text-muted, 10%);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+    border-bottom: 2px solid $border-dark;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid $border-color;
+    vertical-align: middle;
+  }
 }
 
-.users-table th {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  color: #495057;
-  font-weight: 600;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 1rem 0.75rem;
-  border-bottom: 2px solid #dee2e6;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.users-table td {
-  padding: 1rem 0.75rem;
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: middle;
-}
-
-.user-row:hover {
-  background-color: #f8f9fa;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+.user-row {
+  &:hover {
+    background-color: $bg-light;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
 }
 
 /* Username Column */
@@ -189,13 +211,13 @@
 }
 
 .user-icon {
-  color: #6c757d;
+  color: $text-muted;
   font-size: 1.25rem;
 }
 
 .username-text {
   font-weight: 500;
-  color: #2c3e50;
+  color: $text-primary;
   font-size: 0.9rem;
 }
 
@@ -208,12 +230,12 @@
 
 .name-text {
   font-weight: 500;
-  color: #2c3e50;
+  color: $text-primary;
   font-size: 0.9rem;
 }
 
 .email-text {
-  color: #6c757d;
+  color: $text-muted;
   font-size: 0.8rem;
 }
 
@@ -235,7 +257,7 @@
 }
 
 .date-text {
-  color: #6c757d;
+  color: $text-muted;
   font-size: 0.85rem;
 }
 
@@ -244,21 +266,21 @@
   display: flex;
   gap: 0.25rem;
   align-items: center;
-}
 
-.actions-cell button {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
+  button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 
-.actions-cell button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
 }
 
 /* No Data State */
@@ -276,7 +298,7 @@
 
 .no-data-icon {
   font-size: 4rem;
-  color: #dee2e6;
+  color: $border-dark;
   width: 4rem;
   height: 4rem;
 }
@@ -284,20 +306,20 @@
 .no-data-text {
   font-size: 1.25rem;
   font-weight: 500;
-  color: #6c757d;
+  color: $text-muted;
   margin: 0;
 }
 
 .no-data-subtext {
   font-size: 0.9rem;
-  color: #adb5bd;
+  color: $text-light;
   margin: 0;
 }
 
 /* Paginator */
 .users-paginator {
-  border-top: 1px solid #e9ecef;
-  background-color: #f8f9fa;
+  border-top: 1px solid $border-color;
+  background-color: $bg-light;
 }
 
 /* Loading Overlay */
@@ -314,13 +336,13 @@
   justify-content: center;
   z-index: 1000;
   gap: 1rem;
-}
 
-.loading-overlay p {
-  margin: 0;
-  color: #6c757d;
-  font-size: 1rem;
-  font-weight: 500;
+  p {
+    margin: 0;
+    color: $text-muted;
+    font-size: 1rem;
+    font-weight: 500;
+  }
 }
 
 /* Responsive Design */
@@ -342,11 +364,11 @@
 
   .users-table {
     font-size: 0.8rem;
-  }
 
-  .users-table th,
-  .users-table td {
-    padding: 0.75rem 0.5rem;
+    th,
+    td {
+      padding: 0.75rem 0.5rem;
+    }
   }
 
   .actions-cell {
@@ -362,11 +384,11 @@
 
   .displayedColumns {
     display: none;
-  }
 
-  .displayedColumns:first-child,
-  .displayedColumns:nth-child(2),
-  .displayedColumns:last-child {
-    display: table-cell;
+    &:first-child,
+    &:nth-child(2),
+    &:last-child {
+      display: table-cell;
+    }
   }
 }

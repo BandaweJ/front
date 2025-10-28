@@ -36,16 +36,16 @@ export const selectError = createSelector(
 
 export const selectUsersList = createSelector(
   selectUsers,
-  (users) => users?.users || []
+  (users) => users || []
 );
 
 export const selectUsersPagination = createSelector(
   selectUsers,
   (users) => users ? {
-    total: users.total,
-    page: users.page,
-    limit: users.limit,
-    totalPages: users.totalPages,
+    total: users.length,
+    page: 1,
+    limit: users.length,
+    totalPages: 1,
   } : null
 );
 

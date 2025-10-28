@@ -21,7 +21,29 @@ export class UserManagementEffects {
       ofType(userManagementActions.loadUsers),
       switchMap(({ page, limit, search, role, status }) =>
         this.userManagementService.getAllUsers(page, limit, search, role, status).pipe(
-          map((users) => userManagementActions.loadUsersSuccess({ users })),
+          map((response: any[]) => {
+            // Filter the response array based on search criteria if needed
+            let filteredUsers = response;
+            
+            if (search) {
+              const searchLower = search.toLowerCase();
+              filteredUsers = filteredUsers.filter(user => 
+                user.username?.toLowerCase().includes(searchLower) ||
+                user.name?.toLowerCase().includes(searchLower) ||
+                user.email?.toLowerCase().includes(searchLower)
+              );
+            }
+            
+            if (role) {
+              filteredUsers = filteredUsers.filter(user => user.role === role);
+            }
+            
+            if (status) {
+              filteredUsers = filteredUsers.filter(user => user.status === status);
+            }
+            
+            return userManagementActions.loadUsersSuccess({ users: filteredUsers });
+          }),
           catchError((error) =>
             of(userManagementActions.loadUsersFailure({ error: error.message || 'Failed to load users' }))
           )

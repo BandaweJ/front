@@ -47,7 +47,6 @@ import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-d
 
 @NgModule({
   declarations: [
-    UserListComponent,
     CreateUserDialogComponent,
     UserDetailsDialogComponent,
     UserActivityComponent,
@@ -84,6 +83,9 @@ import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-d
     // Store
     StoreModule.forFeature('userManagement', userManagementReducer),
     EffectsModule.forFeature([UserManagementEffects]),
+
+    // Standalone components
+    UserListComponent,
   ],
   providers: [UserManagementService],
   exports: [
