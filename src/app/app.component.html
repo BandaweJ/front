@@ -3,7 +3,8 @@
     <mat-icon (click)="sidenav.toggle(); isSidenavCollapsed = false"
       *ngIf="isLoggedInState && isScreenSmall">menu</mat-icon>
   </ng-container>
-  <span>
+  <span class="toolbar-brand">
+    <img src="assets/jhs_logo.jpg" alt="JHS Logo">
     <h1>Junior High School</h1>
   </span>
 
@@ -338,9 +339,73 @@
           </div>
         </mat-expansion-panel>
 
+        <!-- System Administration (Admin Only) -->
+        <mat-expansion-panel *ngIf="role === 'admin'">
+          <!-- System Administration Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>settings_system_daydream</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">System Administration</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- System Administration Content -->
+          <div class="sidenav-container">
+            <!-- User Management -->
+            <button mat-button routerLink="/system/users" routerLinkActive="active">
+              <mat-icon>manage_accounts</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">User Management</span>
+            </button>
+
+            <!-- Role & Permissions -->
+            <button mat-button routerLink="/system/roles" routerLinkActive="active">
+              <mat-icon>admin_panel_settings</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Role & Permissions</span>
+            </button>
+
+            <!-- Academic Settings -->
+            <button mat-button routerLink="/system/academic" routerLinkActive="active">
+              <mat-icon>school</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Academic Settings</span>
+            </button>
+
+            <!-- System Settings -->
+            <button mat-button routerLink="/system/settings" routerLinkActive="active">
+              <mat-icon>settings</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">System Settings</span>
+            </button>
+
+            <!-- Audit Logs -->
+            <button mat-button routerLink="/system/audit" routerLinkActive="active">
+              <mat-icon>history</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Audit Logs</span>
+            </button>
+
+            <!-- Analytics & Reports -->
+            <button mat-button routerLink="/system/analytics" routerLinkActive="active">
+              <mat-icon>insights</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Analytics & Reports</span>
+            </button>
+
+            <!-- Backup & Restore -->
+            <button mat-button routerLink="/system/backup" routerLinkActive="active">
+              <mat-icon>backup</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Backup & Restore</span>
+            </button>
+
+            <!-- Integration Settings -->
+            <button mat-button routerLink="/system/integrations" routerLinkActive="active">
+              <mat-icon>link</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Integrations</span>
+            </button>
+          </div>
+        </mat-expansion-panel>
+
       </mat-accordion>
     </div>
   </mat-sidenav>
-  <mat-sidenav-content role="main"> <router-outlet></router-outlet>
+  <mat-sidenav-content role="main" [class.animated-bg-light]="currentTheme === 'light'" [class.animated-bg-dark]="currentTheme === 'dark'">
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

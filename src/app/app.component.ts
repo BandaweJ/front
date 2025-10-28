@@ -12,6 +12,7 @@ import { MediaMatcher } from '@angular/cdk/layout';
 import { Store } from '@ngrx/store';
 import { selectIsLoggedIn, selectUser } from './auth/store/auth.selectors';
 import { checkAuthStatus } from './auth/store/auth.actions';
+import { ThemeService, Theme } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,9 @@ import { checkAuthStatus } from './auth/store/auth.actions';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'My App';
+  title = 'Junior High School';
+  
+  currentTheme: Theme = 'light';
 
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
@@ -39,7 +42,8 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
     private media: MediaMatcher,
-    private store: Store
+    private store: Store,
+    private themeService: ThemeService
   ) {
     this.mobileQuery = media.matchMedia('(max-width: 767px)');
     this._mobileQueryListener = () => {
@@ -51,6 +55,11 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
+    
     this.store.dispatch(checkAuthStatus());
 
     this.checkScreenSize(); // Initial screen size check

@@ -20,10 +20,31 @@ mat-toolbar {
   width: 100%;
   height: 80px;
   z-index: 1000;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  box-shadow: 0 8px 32px rgba(33, 150, 243, 0.3);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Toolbar brand container */
+.toolbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Logo styles */
+.toolbar-brand img {
+  height: 50px;
+  width: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.toolbar-brand img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .mat-icon {
@@ -424,6 +445,36 @@ mat-sidenav-content {
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  position: relative;
+}
+
+/* Content wrapper for animated backgrounds */
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+/* Dark theme adjustments for sidenav and content */
+.dark-theme mat-sidenav,
+.dark-theme .sidenav-container {
+  background: #1e1e1e !important;
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+.dark-theme mat-expansion-panel {
+  background: #2c2c2c !important;
+  border-color: rgba(100, 181, 246, 0.2) !important;
+}
+
+.dark-theme .menu-text,
+.dark-theme mat-expansion-panel-header {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+.dark-theme .sidenav-container button.mat-button {
+  background: rgba(100, 181, 246, 0.1) !important;
+  color: rgba(255, 255, 255, 0.87) !important;
 }
 
 /* --- Media Queries --- */
