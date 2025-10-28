@@ -15,6 +15,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { EditUserDialogComponent } from '../edit-user/edit-user-dialog.component';
 
 @Component({
   selector: 'app-user-details-dialog',
@@ -62,10 +63,28 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   }
 
   onEditUser(): void {
-    // TODO: Open edit user dialog
-    console.log('Edit user:', this.data.userId);
-    // For now, just show the user info
-    this.dialogRef.close({ action: 'edit' });
+    this.userDetails$.pipe(takeUntil(this.destroy$)).subscribe(user => {
+      if (user) {
+        const editDialogRef = this.dialog.open(EditUserDialogComponent, {
+          width: '600px',
+          data: { 
+            userId: this.data.userId, 
+            role: this.data.role,
+            user: user
+          }
+        });
+
+        editDialogRef.afterClosed().subscribe(result => {
+          if (result) {
+            // Reload user details if update was successful
+            this.store.dispatch(userManagementActions.loadUserDetails({ 
+              id: this.data.userId, 
+              role: this.data.role 
+            }));
+          }
+        });
+      }
+    });
   }
 
   onResetPassword(): void {

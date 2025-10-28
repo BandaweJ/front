@@ -45,6 +45,7 @@ import { UserManagementService } from './services/user-management.service';
 // Shared
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { UserManagementRoutingModule } from './user-management-routing.module';
+import { EditUserDialogComponent } from './components/edit-user/edit-user-dialog.component';
 
 @NgModule({
   declarations: [
@@ -87,6 +88,7 @@ import { UserManagementRoutingModule } from './user-management-routing.module';
     UserListComponent,
     CreateUserDialogComponent,
     UserDetailsDialogComponent,
+    EditUserDialogComponent,
 
     // Routing
     UserManagementRoutingModule,
