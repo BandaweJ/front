@@ -67,10 +67,12 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   }
 
   getRoleDisplayName(role: string): string {
+    if (!role) return 'Unknown';
     return role.charAt(0).toUpperCase() + role.slice(1);
   }
 
   getStatusColor(status: string): string {
+    if (!status) return 'primary';
     switch (status) {
       case 'active':
         return 'primary';
@@ -84,6 +86,7 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   }
 
   getStatusIcon(status: string): string {
+    if (!status) return 'help';
     switch (status) {
       case 'active':
         return 'check_circle';

@@ -28,13 +28,9 @@
           <mat-icon class="avatar-icon">person</mat-icon>
         </div>
         <div class="user-info">
-          <h3 class="user-name">{{ user.name }}</h3>
-          <p class="user-username">@{{ user.username }}</p>
+          <h3 class="user-name">{{ user.name || '' }} {{ user.surname || '' }}</h3>
+          <p class="user-username">{{ user.role || 'Unknown Role' }}</p>
           <div class="user-badges">
-            <mat-chip [color]="getStatusColor(user.status)" class="status-chip">
-              <mat-icon>{{ getStatusIcon(user.status) }}</mat-icon>
-              {{ getRoleDisplayName(user.status) }}
-            </mat-chip>
             <mat-chip color="primary" class="role-chip">
               {{ getRoleDisplayName(user.role) }}
             </mat-chip>
@@ -53,29 +49,26 @@
           </h4>
           <div class="info-grid">
             <div class="info-item">
-              <label>Username</label>
-              <span>{{ user.username }}</span>
+              <label>Full Name</label>
+              <span>{{ user.name || '' }} {{ user.surname || '' }}</span>
             </div>
             <div class="info-item">
-              <label>Full Name</label>
-              <span>{{ user.name }}</span>
+              <label>ID</label>
+              <span>{{ user.id }}</span>
             </div>
             <div class="info-item">
               <label>Role</label>
               <span>{{ getRoleDisplayName(user.role) }}</span>
             </div>
-            <div class="info-item">
-              <label>Status</label>
-              <span class="status-text" [class]="'status-' + user.status">
-                <mat-icon>{{ getStatusIcon(user.status) }}</mat-icon>
-                {{ getRoleDisplayName(user.status) }}
-              </span>
+            <div class="info-item" *ngIf="user.title">
+              <label>Title</label>
+              <span>{{ user.title }}</span>
             </div>
           </div>
         </div>
 
         <!-- Contact Information -->
-        <div class="info-section" *ngIf="user.email || user.phone">
+        <div class="info-section" *ngIf="user.email || user.cell">
           <h4 class="section-title">
             <mat-icon>contact_mail</mat-icon>
             Contact Information
@@ -85,77 +78,60 @@
               <label>Email</label>
               <span>{{ user.email }}</span>
             </div>
-            <div class="info-item" *ngIf="user.phone">
+            <div class="info-item" *ngIf="user.cell">
               <label>Phone</label>
-              <span>{{ user.phone }}</span>
+              <span>{{ user.cell }}</span>
+            </div>
+            <div class="info-item" *ngIf="user.address">
+              <label>Address</label>
+              <span>{{ user.address }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Profile Information -->
-        <div class="info-section">
+        <!-- Additional Information -->
+        <div class="info-section" *ngIf="user.gender || user.dob">
           <h4 class="section-title">
             <mat-icon>account_circle</mat-icon>
-            Profile Information
+            Additional Information
           </h4>
           <div class="info-grid">
-            <div class="info-item">
-              <label>Profile ID</label>
-              <span>{{ user.profileId }}</span>
+            <div class="info-item" *ngIf="user.gender">
+              <label>Gender</label>
+              <span>{{ user.gender }}</span>
             </div>
-            <div class="info-item" *ngIf="user.profile.studentNumber">
-              <label>Student Number</label>
-              <span>{{ user.profile.studentNumber }}</span>
+            <div class="info-item" *ngIf="user.dob">
+              <label>Date of Birth</label>
+              <span>{{ user.dob | date:'mediumDate' }}</span>
             </div>
-            <div class="info-item" *ngIf="user.profile.employeeId">
-              <label>Employee ID</label>
-              <span>{{ user.profile.employeeId }}</span>
+            <div class="info-item" *ngIf="user.dateOfJoining">
+              <label>Date of Joining</label>
+              <span>{{ user.dateOfJoining | date:'mediumDate' }}</span>
+            </div>
+            <div class="info-item" *ngIf="user.qualifications">
+              <label>Qualifications</label>
+              <span>{{ user.qualifications }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Account Information -->
-        <div class="info-section">
+        <!-- Activity Status -->
+        <div class="info-section" *ngIf="user.active !== undefined">
           <h4 class="section-title">
             <mat-icon>account_balance</mat-icon>
-            Account Information
+            Status Information
           </h4>
           <div class="info-grid">
             <div class="info-item">
-              <label>Created</label>
-              <span>{{ user.createdAt | date:'medium' }}</span>
+              <label>Account Status</label>
+              <span class="status-text" [class.status-active]="user.active" [class.status-inactive]="!user.active">
+                <mat-icon>{{ user.active ? 'check_circle' : 'block' }}</mat-icon>
+                {{ user.active ? 'Active' : 'Inactive' }}
+              </span>
             </div>
-            <div class="info-item" *ngIf="user.lastLogin">
-              <label>Last Login</label>
-              <span>{{ user.lastLogin | date:'medium' }}</span>
-            </div>
-            <div class="info-item">
-              <label>Created By</label>
-              <span>{{ user.createdBy }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Activity Summary -->
-        <div class="info-section">
-          <h4 class="section-title">
-            <mat-icon>analytics</mat-icon>
-            Activity Summary
-          </h4>
-          <div class="activity-summary">
-            <div class="activity-item">
-              <mat-icon class="activity-icon">history</mat-icon>
-              <div class="activity-info">
-                <span class="activity-label">Total Activities</span>
-                <span class="activity-value">{{ user.activityCount }}</span>
-              </div>
-            </div>
-            <div class="activity-item">
-              <mat-icon class="activity-icon">devices</mat-icon>
-              <div class="activity-info">
-                <span class="activity-label">Active Sessions</span>
-                <span class="activity-value">{{ user.sessionCount }}</span>
-              </div>
+            <div class="info-item" *ngIf="user.dateOfLeaving">
+              <label>Date of Leaving</label>
+              <span>{{ user.dateOfLeaving | date:'mediumDate' }}</span>
             </div>
           </div>
         </div>

@@ -13,16 +13,18 @@ export interface UserManagementModel {
 }
 
 export interface UserDetailsModel extends UserManagementModel {
-  profile: {
-    id: string;
-    name: string;
-    email?: string;
-    phone?: string;
-    studentNumber?: string;
-    employeeId?: string;
-  };
-  activityCount: number;
-  sessionCount: number;
+  surname?: string;
+  title?: string;
+  cell?: string;
+  address?: string;
+  gender?: string;
+  dob?: Date;
+  dateOfJoining?: Date;
+  dateOfLeaving?: Date;
+  qualifications?: string[];
+  active?: boolean;
+  idnumber?: string;
+  prevSchool?: string;
 }
 
 export interface UserListPaginatedModel {
