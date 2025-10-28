@@ -88,7 +88,14 @@ export class UserManagementEffects {
       ofType(userManagementActions.updateUser),
       switchMap(({ id, user }) =>
         this.userManagementService.updateUser(id, user).pipe(
-          map((updatedUser) => userManagementActions.updateUserSuccess({ user: updatedUser })),
+          map((response) => {
+            this.snackBar.open(response.message || 'User updated successfully', 'OK', {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            });
+            return userManagementActions.updateUserSuccess({ user: null as any });
+          }),
           catchError((error) =>
             of(userManagementActions.updateUserFailure({ error: error.message || 'Failed to update user' }))
           )

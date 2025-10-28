@@ -22,7 +22,7 @@ export const userManagementActions = createActionGroup({
 
     // Update User
     updateUser: props<{ id: string; user: UpdateUserModel }>(),
-    updateUserSuccess: props<{ user: UserDetailsModel }>(),
+    updateUserSuccess: props<{ user: any }>(),
     updateUserFailure: props<{ error: string }>(),
 
     // Delete User

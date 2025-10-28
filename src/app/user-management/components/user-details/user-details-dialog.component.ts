@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-user-details-dialog',
@@ -26,6 +27,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatCardModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
   ],
   templateUrl: './user-details-dialog.component.html',
   styleUrls: ['./user-details-dialog.component.scss']
