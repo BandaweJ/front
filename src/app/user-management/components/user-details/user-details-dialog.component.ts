@@ -38,11 +38,11 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private dialogRef: MatDialogRef<UserDetailsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { userId: string }
+    @Inject(MAT_DIALOG_DATA) public data: { userId: string; role: string }
   ) {}
 
   ngOnInit(): void {
-    this.store.dispatch(userManagementActions.loadUserDetails({ id: this.data.userId }));
+    this.store.dispatch(userManagementActions.loadUserDetails({ id: this.data.userId, role: this.data.role }));
   }
 
   ngOnDestroy(): void {

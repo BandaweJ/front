@@ -194,7 +194,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   openUserDetailsDialog(user: UserManagementModel): void {
     this.dialog.open(UserDetailsDialogComponent, {
       width: '800px',
-      data: { userId: user.id }
+      data: { userId: user.id, role: user.role }
     });
   }
 

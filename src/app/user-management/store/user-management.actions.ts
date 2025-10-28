@@ -11,7 +11,7 @@ export const userManagementActions = createActionGroup({
     loadUsersFailure: props<{ error: string }>(),
 
     // Load User Details
-    loadUserDetails: props<{ id: string }>(),
+    loadUserDetails: props<{ id: string; role: string }>(),
     loadUserDetailsSuccess: props<{ user: UserDetailsModel }>(),
     loadUserDetailsFailure: props<{ error: string }>(),
 

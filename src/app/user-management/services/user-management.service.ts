@@ -28,8 +28,9 @@ export class UserManagementService {
     return this.httpClient.get<any[]>(`${environment.apiUrl}/auth/accounts/all`);
   }
 
-  getUserById(id: string): Observable<UserDetailsModel> {
-    return this.httpClient.get<UserDetailsModel>(`${this.baseUrl}/${id}`);
+  getUserById(id: string, role: string): Observable<UserDetailsModel> {
+    // Use the existing auth endpoint
+    return this.httpClient.get<UserDetailsModel>(`${environment.apiUrl}/auth/${id}/${role}`);
   }
 
   updateUser(id: string, user: UpdateUserModel): Observable<UserDetailsModel> {

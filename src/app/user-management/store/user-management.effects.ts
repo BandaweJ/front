@@ -56,8 +56,8 @@ export class UserManagementEffects {
   loadUserDetails$ = createEffect(() =>
     this.actions$.pipe(
       ofType(userManagementActions.loadUserDetails),
-      switchMap(({ id }) =>
-        this.userManagementService.getUserById(id).pipe(
+      switchMap(({ id, role }) =>
+        this.userManagementService.getUserById(id, role).pipe(
           map((user) => userManagementActions.loadUserDetailsSuccess({ user })),
           catchError((error) =>
             of(userManagementActions.loadUserDetailsFailure({ error: error.message || 'Failed to load user details' }))
