@@ -43,7 +43,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     private media: MediaMatcher,
     private store: Store,
-    private themeService: ThemeService
+    public themeService: ThemeService  // Made public for template access
   ) {
     this.mobileQuery = media.matchMedia('(max-width: 767px)');
     this._mobileQueryListener = () => {

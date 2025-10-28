@@ -8,7 +8,14 @@
     <h1>Junior High School</h1>
   </span>
 
-  <app-profile-buttons [isLoggedIn]="isLoggedIn$ | async"></app-profile-buttons>
+  <div class="toolbar-actions">
+    <button mat-icon-button (click)="themeService.toggleTheme()" 
+            [matTooltip]="(currentTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode')"
+            class="theme-toggle-btn">
+      <mat-icon>{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+    </button>
+    <app-profile-buttons [isLoggedIn]="isLoggedIn$ | async"></app-profile-buttons>
+  </div>
 </mat-toolbar>
 
 <mat-sidenav-container>
