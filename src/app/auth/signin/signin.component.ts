@@ -35,7 +35,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatProgressSpinnerModule
   ],
   templateUrl: './signin.component.html',
-  styleUrls: ['./signin.component.css'],
+  styleUrls: ['./signin.component.scss'],
 })
 export class SigninComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
