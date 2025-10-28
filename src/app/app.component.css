@@ -577,10 +577,6 @@ mat-sidenav-content {
     flex-grow: 1;
     padding: 2rem;
   }
-
-  .toolbar mat-icon {
-    display: none;
-  }
 }
 
 /* Large devices (1200px and up) */
