@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { signinActions } from '../store/auth.actions';
 import { SigninInterface } from '../models/signin.model';
@@ -7,24 +7,46 @@ import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
 import * as fromAuthSelectors from '../store/auth.selectors';
 import { Title } from '@angular/platform-browser';
 import { resetErrorMessage } from '../store/auth.actions';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-signin',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './signin.component.html',
   styleUrls: ['./signin.component.css'],
 })
 export class SigninComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  currentTheme: Theme = 'light';
 
   constructor(
     private store: Store,
     private router: Router,
     private title: Title,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private themeService: ThemeService
   ) {}
 
   signinForm!: FormGroup;
@@ -34,7 +56,12 @@ export class SigninComponent implements OnInit, OnDestroy {
   formSubmitted = false;
 
   ngOnInit(): void {
-    this.title.setTitle('Sign In - School Management System');
+    this.title.setTitle('Sign In - Junior High School');
+    
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
     
     this.errorMsg$ = this.store.select(fromAuthSelectors.selectErrorMsg);
     this.isLoading$ = this.store.select(fromAuthSelectors.isLoading);

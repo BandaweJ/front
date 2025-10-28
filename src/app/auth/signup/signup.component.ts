@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { SignupInterface } from '../models/signup.model';
@@ -10,24 +10,52 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { isLoading, selectErrorMsg } from '../store/auth.selectors';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { Title } from '@angular/platform-browser';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-signup',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatCardModule,
+    MatSelectModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css'],
 })
 export class SignupComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  currentTheme: Theme = 'light';
 
   constructor(
     private store: Store, 
     private router: Router,
     private title: Title,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
-    this.title.setTitle('Sign Up - School Management System');
+    this.title.setTitle('Sign Up - Junior High School');
+    
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
     
     this.errorMsg$ = this.store.select(selectErrorMsg);
     this.isLoading$ = this.store.select(isLoading);

@@ -34,9 +34,17 @@
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
   overflow: hidden;
+}
+
+/* Theme-aware background gradient */
+.signin-container.animated-bg-light {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 50%, #ffc107 100%);
+}
+
+.signin-container.animated-bg-dark {
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 50%, #ffb300 100%);
 }
 
 /* Background Elements */
@@ -53,8 +61,9 @@
 .circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   animation: float 6s ease-in-out infinite;
+  backdrop-filter: blur(20px);
 }
 
 .circle-1 {
@@ -107,7 +116,7 @@
 .signin-header {
   text-align: center;
   padding: 2.5rem 2.5rem 2rem;
-  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   color: white;
   margin: 0;
   display: flex;
