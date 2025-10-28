@@ -30,6 +30,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { RouterModule } from '@angular/router';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
 
 @Component({
   selector: 'app-user-list',
@@ -87,13 +88,18 @@ export class UserListComponent implements OnInit, OnDestroy {
   selectedUsers: UserManagementModel[] = [];
   isAllSelected = false;
   isIndeterminate = false;
+  currentTheme: Theme = 'light';
 
   constructor(
     private store: Store,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
     this.setupSearch();
     this.loadUsers();
     this.setupSubscriptions();

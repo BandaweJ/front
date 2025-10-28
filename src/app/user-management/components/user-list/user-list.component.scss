@@ -19,6 +19,34 @@ $bg-gradient-end: #f3e5f5;
 /* User Management Header */
 .user-management-header {
   margin-bottom: 2rem;
+  
+  &.animated-bg-light {
+    background: linear-gradient(135deg, #e0f2f7 0%, #bbdefb 100%);
+    animation: gradientShiftLight 15s ease infinite;
+    background-size: 200% 200%;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  &.animated-bg-dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a2a3a 100%);
+    animation: gradientShiftDark 15s ease infinite;
+    background-size: 200% 200%;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}
+
+@keyframes gradientShiftLight {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes gradientShiftDark {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .header-content {
