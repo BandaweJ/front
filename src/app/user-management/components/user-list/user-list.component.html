@@ -1,5 +1,14 @@
+<!-- Main Container with Theme -->
+<div class="user-management-container" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
+
+<!-- Loading Overlay -->
+<div *ngIf="loading$ | async" class="loading-overlay">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p>Loading users...</p>
+</div>
+
 <!-- User Management Header -->
-<div class="user-management-header" [class.animated-bg-light]="currentTheme === 'light'" [class.animated-bg-dark]="currentTheme === 'dark'">
+<div class="user-management-header">
   <div class="header-content">
     <div class="title-section">
       <h1>👥 User Management</h1>
@@ -219,8 +228,4 @@
   </mat-card>
 </div>
 
-<!-- Loading Overlay -->
-<div *ngIf="loading$ | async" class="loading-overlay">
-  <mat-spinner diameter="50"></mat-spinner>
-  <p>Loading users...</p>
-</div>
+</div> <!-- End main container -->

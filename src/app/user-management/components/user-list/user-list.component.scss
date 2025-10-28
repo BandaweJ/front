@@ -16,37 +16,44 @@ $bg-light: #f8f9fa;
 $bg-gradient-start: #e3f2fd;
 $bg-gradient-end: #f3e5f5;
 
+/* Main Container with Theme */
+.user-management-container {
+  padding: 2rem;
+  min-height: calc(100vh - 80px);
+  
+  &.theme-light {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  }
+
+  &.theme-dark {
+    background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
+    color: #e0e0e0;
+
+    .title-section h1 {
+      color: #e0e0e0;
+    }
+
+    .title-section p {
+      color: #b0b0b0;
+    }
+
+    .filters-card,
+    .table-card,
+    .bulk-actions-card {
+      background: #2c2c2c;
+      color: #e0e0e0;
+    }
+
+    .filters-card,
+    .table-card {
+      border: 1px solid rgba(33, 150, 243, 0.2);
+    }
+  }
+}
+
 /* User Management Header */
 .user-management-header {
   margin-bottom: 2rem;
-  
-  &.animated-bg-light {
-    background: linear-gradient(135deg, #e0f2f7 0%, #bbdefb 100%);
-    animation: gradientShiftLight 15s ease infinite;
-    background-size: 200% 200%;
-    padding: 1rem;
-    border-radius: 8px;
-  }
-
-  &.animated-bg-dark {
-    background: linear-gradient(135deg, #2c3e50 0%, #1a2a3a 100%);
-    animation: gradientShiftDark 15s ease infinite;
-    background-size: 200% 200%;
-    padding: 1rem;
-    border-radius: 8px;
-  }
-}
-
-@keyframes gradientShiftLight {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes gradientShiftDark {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 .header-content {
