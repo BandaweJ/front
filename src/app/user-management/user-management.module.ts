@@ -44,6 +44,7 @@ import { UserManagementService } from './services/user-management.service';
 
 // Shared
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
+import { UserManagementRoutingModule } from './user-management-routing.module';
 
 @NgModule({
   declarations: [
@@ -86,6 +87,9 @@ import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-d
 
     // Standalone components
     UserListComponent,
+
+    // Routing
+    UserManagementRoutingModule,
   ],
   providers: [UserManagementService],
   exports: [

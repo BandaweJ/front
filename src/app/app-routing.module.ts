@@ -40,7 +40,7 @@ import { EnrollmentBillingReconciliationReportComponent } from './finance/report
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 import { CreateExemptionComponent } from './finance/create-exemption/create-exemption.component';
 import { ExemptionReportsComponent } from './finance/reports/exemption-reports/exemption-reports/exemption-reports.component';
-import { UserListComponent } from './user-management/components/user-list/user-list.component';
+// Lazy loaded - removed direct import
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -257,7 +257,7 @@ const routes: Routes = [
   },
   {
     path: 'user-management',
-    component: UserListComponent,
+    loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
     canActivate: [AuthGuardService],
     title: 'User Management',
   },
