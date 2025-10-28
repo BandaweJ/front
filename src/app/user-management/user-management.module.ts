@@ -48,8 +48,6 @@ import { UserManagementRoutingModule } from './user-management-routing.module';
 
 @NgModule({
   declarations: [
-    CreateUserDialogComponent,
-    UserDetailsDialogComponent,
     UserActivityComponent,
     BulkOperationsComponent,
     SystemActivityComponent,
@@ -87,6 +85,8 @@ import { UserManagementRoutingModule } from './user-management-routing.module';
 
     // Standalone components
     UserListComponent,
+    CreateUserDialogComponent,
+    UserDetailsDialogComponent,
 
     // Routing
     UserManagementRoutingModule,

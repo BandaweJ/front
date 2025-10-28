@@ -1,16 +1,32 @@
 /* eslint-disable prettier/prettier */
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
 import { UserDetailsModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectUserDetails, selectLoading, selectError } from '../../store/user-management.selectors';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-user-details-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './user-details-dialog.component.html',
-  styleUrls: ['./user-details-dialog.component.css']
+  styleUrls: ['./user-details-dialog.component.scss']
 })
 export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -26,7 +42,6 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Load user details
     this.store.dispatch(userManagementActions.loadUserDetails({ id: this.data.userId }));
   }
 
@@ -40,17 +55,14 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   }
 
   onEditUser(): void {
-    // TODO: Implement edit user functionality
     console.log('Edit user functionality to be implemented');
   }
 
   onResetPassword(): void {
-    // TODO: Implement reset password functionality
     console.log('Reset password functionality to be implemented');
   }
 
   onViewActivity(): void {
-    // TODO: Implement view activity functionality
     console.log('View activity functionality to be implemented');
   }
 
@@ -84,5 +96,3 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
     }
   }
 }
-
-

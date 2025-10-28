@@ -1,18 +1,37 @@
 /* eslint-disable prettier/prettier */
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
 import { ROLES } from '../../../registration/models/roles.enum';
 import { CreateUserModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectLoading } from '../../store/user-management.selectors';
+import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-create-user-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './create-user-dialog.component.html',
-  styleUrls: ['./create-user-dialog.component.css']
+  styleUrls: ['./create-user-dialog.component.scss']
 })
 export class CreateUserDialogComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -40,13 +59,11 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Listen for successful user creation
     this.store.select(selectLoading)
       .pipe(takeUntil(this.destroy$))
       .subscribe(loading => {
         if (!loading) {
-          // Check if user was created successfully (you might want to add a success selector)
-          // For now, we'll just close the dialog after a short delay
+          // Dialog will close after successful creation
         }
       });
   }
@@ -83,7 +100,6 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
 
       this.store.dispatch(userManagementActions.createUser({ user: createUserData }));
       
-      // Close dialog after successful creation
       setTimeout(() => {
         this.dialogRef.close(true);
       }, 1000);
@@ -155,5 +171,3 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
     return role.charAt(0).toUpperCase() + role.slice(1);
   }
 }
-
-
