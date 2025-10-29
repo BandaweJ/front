@@ -1,19 +1,37 @@
 /* eslint-disable prettier/prettier */
 import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { UserActivityModel, UserActivityPaginatedModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectUserActivity, selectLoading, selectError } from '../../store/user-management.selectors';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-user-activity',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatIconModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatPaginatorModule,
+  ],
   templateUrl: './user-activity.component.html',
-  styleUrls: ['./user-activity.component.css']
+  styleUrls: ['./user-activity.component.scss']
 })
 export class UserActivityComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  currentTheme: 'light' | 'dark' = 'light';
 
   userActivity$ = this.store.select(selectUserActivity);
   loading$ = this.store.select(selectLoading);
@@ -26,12 +44,18 @@ export class UserActivityComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private dialogRef: MatDialogRef<UserActivityComponent>,
+    public themeService: ThemeService,
     @Inject(MAT_DIALOG_DATA) public data: { userId: string; userName: string }
   ) {}
 
   ngOnInit(): void {
     this.loadUserActivity();
     this.setupSubscriptions();
+    
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
   }
 
   ngOnDestroy(): void {

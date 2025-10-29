@@ -17,6 +17,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { EditUserDialogComponent } from '../edit-user/edit-user-dialog.component';
 import { ResetPasswordDialogComponent } from '../reset-password/reset-password-dialog.component';
+import { UserActivityComponent } from '../user-activity/user-activity.component';
 
 @Component({
   selector: 'app-user-details-dialog',
@@ -118,10 +119,18 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   }
 
   onViewActivity(): void {
-    // TODO: Open activity dialog
-    console.log('View activity for:', this.data.userId);
-    // For now, just close and show message
-    alert('User activity logging - backend needs implementation');
+    this.userDetails$.pipe(takeUntil(this.destroy$)).subscribe(user => {
+      if (user) {
+        this.dialog.open(UserActivityComponent, {
+          width: '900px',
+          height: '600px',
+          data: { 
+            userId: this.data.userId, 
+            userName: `${user.name || ''} ${user.surname || ''}`.trim() || user.username || 'User'
+          }
+        });
+      }
+    });
   }
 
   getRoleDisplayName(role: string): string {

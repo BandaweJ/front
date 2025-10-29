@@ -1,5 +1,5 @@
-<div class="user-activity-dialog">
-  <div class="dialog-header">
+<div class="user-activity-dialog" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
+  <div class="dialog-header" [class.animated-bg-light]="currentTheme === 'light'" [class.animated-bg-dark]="currentTheme === 'dark'">
     <h2 mat-dialog-title>
       <mat-icon>history</mat-icon>
       Activity Log - {{ data.userName }}

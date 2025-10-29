@@ -65,7 +65,7 @@ export class UserManagementService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.httpClient.get<UserActivityPaginatedModel>(`${this.baseUrl}/${id}/activity`, { params });
+    return this.httpClient.get<UserActivityPaginatedModel>(`${environment.apiUrl}/auth/${id}/activity`, { params });
   }
 
   getSystemActivity(page: number = 1, limit: number = 20): Observable<UserActivityPaginatedModel> {

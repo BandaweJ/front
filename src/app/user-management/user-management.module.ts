@@ -50,7 +50,6 @@ import { ResetPasswordDialogComponent } from './components/reset-password/reset-
 
 @NgModule({
   declarations: [
-    UserActivityComponent,
     BulkOperationsComponent,
     SystemActivityComponent,
     ErrorHandlerComponent,
@@ -91,6 +90,7 @@ import { ResetPasswordDialogComponent } from './components/reset-password/reset-
     UserDetailsDialogComponent,
     EditUserDialogComponent,
     ResetPasswordDialogComponent,
+    UserActivityComponent,
 
     // Routing
     UserManagementRoutingModule,
