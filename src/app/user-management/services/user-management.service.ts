@@ -44,8 +44,11 @@ export class UserManagementService {
   }
 
   deleteUser(id: string): Observable<{ message: string }> {
-    // TODO: Implement account deletion in backend
-    return this.httpClient.delete<{ message: string }>(`${this.baseUrl}/${id}`);
+    return this.httpClient.delete<{ message: string }>(`${environment.apiUrl}/auth/accounts/${id}`);
+  }
+
+  restoreUser(id: string): Observable<{ message: string }> {
+    return this.httpClient.post<{ message: string }>(`${environment.apiUrl}/auth/accounts/${id}/restore`, {});
   }
 
   changePassword(id: string, passwordData: ChangePasswordModel): Observable<{ message: string }> {

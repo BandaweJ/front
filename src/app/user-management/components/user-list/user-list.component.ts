@@ -11,9 +11,10 @@ import { UserManagementModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectUsersList, selectLoading, selectError, selectUsersPagination } from '../../store/user-management.selectors';
 import { CreateUserDialogComponent } from '../create-user/create-user-dialog.component';
-import { EditUserDialogComponent } from '../edit-user/edit-user-dialog.component';
 import { UserDetailsDialogComponent } from '../user-details/user-details-dialog.component';
+import { EditUserDialogComponent } from '../edit-user/edit-user-dialog.component';
 import { UserActivityComponent } from '../user-activity/user-activity.component';
+import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { BulkOperationsComponent, BulkOperationData } from '../bulk-operations/bulk-operations.component';
 import { SystemActivityComponent } from '../system-activity/system-activity.component';
 import { CommonModule } from '@angular/common';
@@ -218,21 +219,26 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   openDeleteUserDialog(user: UserManagementModel): void {
-    // const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-    //   width: '400px',
-    //   data: {
-    //     title: 'Delete User',
-    //     message: `Are you sure you want to delete user "${user.username}"? This action cannot be undone.`,
-    //     confirmText: 'Delete',
-    //     cancelText: 'Cancel'
-    //   }
-    // });
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '500px',
+      data: {
+        title: 'Delete User',
+        message: `Are you sure you want to delete user "${user.username}"? This action will mark the account as inactive.`,
+        userInfo: {
+          name: user.name || 'N/A',
+          username: user.username,
+          role: user.role,
+        },
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    });
 
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if (result) {
-    //     this.deleteUser(user.id);
-    //   }
-    // });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.deleteUser(user.id);
+      }
+    });
   }
 
   private deleteUser(userId: string): void {

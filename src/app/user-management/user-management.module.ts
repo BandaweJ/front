@@ -43,10 +43,10 @@ import { UserManagementEffects } from './store/user-management.effects';
 import { UserManagementService } from './services/user-management.service';
 
 // Shared
-import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { UserManagementRoutingModule } from './user-management-routing.module';
 import { EditUserDialogComponent } from './components/edit-user/edit-user-dialog.component';
 import { ResetPasswordDialogComponent } from './components/reset-password/reset-password-dialog.component';
+import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @NgModule({
   declarations: [
@@ -91,6 +91,7 @@ import { ResetPasswordDialogComponent } from './components/reset-password/reset-
     EditUserDialogComponent,
     ResetPasswordDialogComponent,
     UserActivityComponent,
+    ConfirmDeleteDialogComponent,
 
     // Routing
     UserManagementRoutingModule,
