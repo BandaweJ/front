@@ -38,6 +38,11 @@ export class UserManagementService {
     return this.httpClient.patch<{ message: string }>(`${environment.apiUrl}/auth/${id}`, { username: user.username });
   }
 
+  updateProfile(id: string, profileData: any): Observable<{ message: string }> {
+    // Update profile (name, surname, email, cell, address)
+    return this.httpClient.patch<{ message: string }>(`${environment.apiUrl}/auth/${id}/profile`, profileData);
+  }
+
   deleteUser(id: string): Observable<{ message: string }> {
     // TODO: Implement account deletion in backend
     return this.httpClient.delete<{ message: string }>(`${this.baseUrl}/${id}`);

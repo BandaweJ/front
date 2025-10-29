@@ -69,25 +69,34 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
         username: formValue.username
       });
 
-      // Update profile based on role
-      let profileUpdate$;
-      if (this.data.role === 'student') {
-        // Use students endpoint
-        // This would need a proper students service endpoint
-        profileUpdate$ = null;
-      } else if (['teacher', 'admin', 'hod', 'reception', 'auditor', 'director'].includes(this.data.role)) {
-        // Use teachers endpoint  
-        profileUpdate$ = null; // TODO: Add proper endpoint
-      }
+      // Prepare profile data (exclude username)
+      const { username, ...profileData } = formValue;
 
+      // Update profile (name, surname, email, cell, address)
+      const profileUpdate$ = this.userManagementService.updateProfile(this.data.userId, profileData);
+
+      // Chain both updates
       accountUpdate$.subscribe({
-        next: (response) => {
-          this.snackBar.open(response.message || 'User updated successfully', 'OK', {
-            duration: 3000,
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
+        next: (accountResponse) => {
+          profileUpdate$.subscribe({
+            next: (profileResponse) => {
+              this.loading = false;
+              this.snackBar.open('User updated successfully', 'OK', {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              });
+              this.dialogRef.close(true);
+            },
+            error: (error) => {
+              this.loading = false;
+              this.snackBar.open('Account updated but profile update failed', 'OK', {
+                duration: 5000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              });
+            }
           });
-          this.dialogRef.close(true);
         },
         error: (error) => {
           this.loading = false;
