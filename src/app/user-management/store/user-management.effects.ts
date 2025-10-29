@@ -142,7 +142,7 @@ export class UserManagementEffects {
         this.userManagementService.resetPassword(id).pipe(
           map((response) => userManagementActions.resetPasswordSuccess({ 
             message: response.message, 
-            temporaryPassword: response.temporaryPassword 
+            generatedPassword: response.generatedPassword 
           })),
           catchError((error) =>
             of(userManagementActions.resetPasswordFailure({ error: error.message || 'Failed to reset password' }))
@@ -242,8 +242,8 @@ export class UserManagementEffects {
   resetPasswordSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(userManagementActions.resetPasswordSuccess),
-      tap(({ temporaryPassword }) => {
-        this.snackBar.open(`Password reset successfully. Temporary password: ${temporaryPassword}`, 'OK', {
+      tap(({ generatedPassword }) => {
+        this.snackBar.open(`Password reset successfully. Generated password: ${generatedPassword}`, 'OK', {
           duration: 10000,
           verticalPosition: 'top',
           horizontalPosition: 'center',

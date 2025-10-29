@@ -11,6 +11,7 @@ import { UserManagementModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectUsersList, selectLoading, selectError, selectUsersPagination } from '../../store/user-management.selectors';
 import { CreateUserDialogComponent } from '../create-user/create-user-dialog.component';
+import { EditUserDialogComponent } from '../edit-user/edit-user-dialog.component';
 import { UserDetailsDialogComponent } from '../user-details/user-details-dialog.component';
 import { UserActivityComponent } from '../user-activity/user-activity.component';
 import { BulkOperationsComponent, BulkOperationData } from '../bulk-operations/bulk-operations.component';
@@ -199,8 +200,21 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   openEditUserDialog(user: UserManagementModel): void {
-    // TODO: Implement edit user dialog
-    console.log('Edit user:', user);
+    const editDialogRef = this.dialog.open(EditUserDialogComponent, {
+      width: '600px',
+      data: { 
+        userId: user.id, 
+        role: user.role,
+        user: user
+      }
+    });
+
+    editDialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Reload users if update was successful
+        this.loadUsers();
+      }
+    });
   }
 
   openDeleteUserDialog(user: UserManagementModel): void {

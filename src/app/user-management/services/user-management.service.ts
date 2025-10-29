@@ -52,8 +52,12 @@ export class UserManagementService {
     return this.httpClient.post<{ message: string }>(`${this.baseUrl}/${id}/change-password`, passwordData);
   }
 
-  resetPassword(id: string): Observable<{ message: string; temporaryPassword: string }> {
-    return this.httpClient.post<{ message: string; temporaryPassword: string }>(`${environment.apiUrl}/auth/${id}/reset-password`, {});
+  resetPassword(id: string): Observable<{ message: string; generatedPassword: string }> {
+    return this.httpClient.post<{ message: string; generatedPassword: string }>(`${environment.apiUrl}/auth/${id}/reset-password`, {});
+  }
+
+  setCustomPassword(id: string, password: string): Observable<{ message: string }> {
+    return this.httpClient.post<{ message: string }>(`${environment.apiUrl}/auth/${id}/set-password`, { password });
   }
 
   getUserActivity(id: string, page: number = 1, limit: number = 20): Observable<UserActivityPaginatedModel> {

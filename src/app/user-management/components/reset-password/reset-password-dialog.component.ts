@@ -79,7 +79,7 @@ export class ResetPasswordDialogComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.loading = false;
-          this.generatedPassword = response.temporaryPassword;
+          this.generatedPassword = response.generatedPassword;
           this.snackBar.open('Password generated successfully', 'OK', {
             duration: 3000,
             verticalPosition: 'top',
@@ -102,9 +102,7 @@ export class ResetPasswordDialogComponent implements OnInit, OnDestroy {
       this.loading = true;
       const newPassword = this.manualPasswordForm.get('newPassword')?.value;
       
-      // TODO: Implement manual password setting in backend
-      // For now, we'll use the reset password endpoint
-      this.userManagementService.resetPassword(this.data.userId)
+      this.userManagementService.setCustomPassword(this.data.userId, newPassword)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response) => {

@@ -37,7 +37,7 @@ export const userManagementActions = createActionGroup({
 
     // Reset Password
     resetPassword: props<{ id: string }>(),
-    resetPasswordSuccess: props<{ message: string; temporaryPassword: string }>(),
+    resetPasswordSuccess: props<{ message: string; generatedPassword: string }>(),
     resetPasswordFailure: props<{ error: string }>(),
 
     // Load User Activity

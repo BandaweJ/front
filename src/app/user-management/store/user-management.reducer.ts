@@ -137,7 +137,7 @@ export const userManagementReducer = createReducer(
     loading: true,
     error: null,
   })),
-  on(userManagementActions.resetPasswordSuccess, (state, { message, temporaryPassword }) => ({
+  on(userManagementActions.resetPasswordSuccess, (state, { message, generatedPassword }) => ({
     ...state,
     loading: false,
     error: null,
