@@ -16,6 +16,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { EditUserDialogComponent } from '../edit-user/edit-user-dialog.component';
+import { ResetPasswordDialogComponent } from '../reset-password/reset-password-dialog.component';
 
 @Component({
   selector: 'app-user-details-dialog',
@@ -88,22 +89,30 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
   }
 
   onResetPassword(): void {
-    this.userManagementService.resetPassword(this.data.userId).subscribe({
-      next: (response) => {
-        this.snackBar.open(`Password reset successfully. Temporary password: ${response.temporaryPassword}`, 'Copy', {
-          duration: 10000,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-        }).onAction().subscribe(() => {
-          navigator.clipboard.writeText(response.temporaryPassword);
-        });
-      },
-      error: (error) => {
-        this.snackBar.open('Failed to reset password', 'Close', {
-          duration: 5000,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-        });
+    // Open reset password dialog
+    const resetPasswordDialogRef = this.dialog.open(ResetPasswordDialogComponent, {
+      width: '700px',
+      data: { 
+        userId: this.data.userId, 
+        role: this.data.role,
+        user: null // Will be populated from userDetails$
+      }
+    });
+
+    // Pass the current user data when it loads
+    this.userDetails$.pipe(takeUntil(this.destroy$)).subscribe(user => {
+      if (user && !resetPasswordDialogRef.componentInstance.data.user) {
+        resetPasswordDialogRef.componentInstance.data.user = user;
+      }
+    });
+
+    resetPasswordDialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Reload user details if password was reset successfully
+        this.store.dispatch(userManagementActions.loadUserDetails({ 
+          id: this.data.userId, 
+          role: this.data.role 
+        }));
       }
     });
   }

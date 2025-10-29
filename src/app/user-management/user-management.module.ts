@@ -46,6 +46,7 @@ import { UserManagementService } from './services/user-management.service';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { UserManagementRoutingModule } from './user-management-routing.module';
 import { EditUserDialogComponent } from './components/edit-user/edit-user-dialog.component';
+import { ResetPasswordDialogComponent } from './components/reset-password/reset-password-dialog.component';
 
 @NgModule({
   declarations: [
@@ -89,6 +90,7 @@ import { EditUserDialogComponent } from './components/edit-user/edit-user-dialog
     CreateUserDialogComponent,
     UserDetailsDialogComponent,
     EditUserDialogComponent,
+    ResetPasswordDialogComponent,
 
     // Routing
     UserManagementRoutingModule,
