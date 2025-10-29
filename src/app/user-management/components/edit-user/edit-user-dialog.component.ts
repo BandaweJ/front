@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
@@ -42,17 +42,30 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.editUserForm = this.fb.group({
-      username: [data.user?.username || '', [Validators.required, Validators.minLength(3)]],
-      name: [data.user?.name || '', [Validators.required]],
-      surname: [data.user?.surname || ''],
-      email: [data.user?.email || '', [Validators.email]],
-      cell: [data.user?.cell || ''],
-      address: [data.user?.address || ''],
-      active: [data.user?.active !== undefined ? data.user.active : true],
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      name: ['', [Validators.required]],
+      surname: [''],
+      email: ['', [this.optionalEmailValidator]],
+      cell: [''],
+      address: [''],
+      active: [true],
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Initialize form with user data when available
+    if (this.data.user) {
+      this.editUserForm.patchValue({
+        username: this.data.user.username || '',
+        name: this.data.user.name || '',
+        surname: this.data.user.surname || '',
+        email: this.data.user.email || '',
+        cell: this.data.user.cell || '',
+        address: this.data.user.address || '',
+        active: this.data.user.active !== undefined ? this.data.user.active : true,
+      });
+    }
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -123,8 +136,32 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
       if (field.errors['email']) {
         return 'Please enter a valid email address';
       }
+      if (field.errors['minlength']) {
+        return `${this.getFieldDisplayName(fieldName)} must be at least ${field.errors['minlength'].requiredLength} characters`;
+      }
     }
     return '';
+  }
+
+  // Check if form has any changes
+  hasFormChanges(): boolean {
+    if (!this.data.user) return false;
+    
+    const currentValues = {
+      username: this.data.user.username || '',
+      name: this.data.user.name || '',
+      surname: this.data.user.surname || '',
+      email: this.data.user.email || '',
+      cell: this.data.user.cell || '',
+      address: this.data.user.address || '',
+      active: this.data.user.active !== undefined ? this.data.user.active : true,
+    };
+
+    const formValues = this.editUserForm.value;
+    
+    return Object.keys(currentValues).some(key => 
+      currentValues[key as keyof typeof currentValues] !== formValues[key as keyof typeof formValues]
+    );
   }
 
   private getFieldDisplayName(fieldName: string): string {
@@ -137,6 +174,14 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
       address: 'Address',
     };
     return displayNames[fieldName] || fieldName;
+  }
+
+  // Custom validator for optional email
+  private optionalEmailValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value || control.value.trim() === '') {
+      return null; // Valid when empty
+    }
+    return Validators.email(control); // Use standard email validator when not empty
   }
 }
 

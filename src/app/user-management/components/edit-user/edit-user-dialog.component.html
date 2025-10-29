@@ -77,7 +77,7 @@
       mat-raised-button 
       color="primary" 
       (click)="onSubmit()" 
-      [disabled]="editUserForm.invalid || loading"
+      [disabled]="!hasFormChanges() || editUserForm.invalid || loading"
       class="submit-button">
       <mat-icon *ngIf="!loading">save</mat-icon>
       <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
