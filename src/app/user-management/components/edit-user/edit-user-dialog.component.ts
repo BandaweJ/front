@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, switchMap, catchError, of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -77,49 +77,38 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
       this.loading = true;
       const formValue = this.editUserForm.value;
       
-      // Update account (username)
-      const accountUpdate$ = this.userManagementService.updateUser(this.data.userId, {
-        username: formValue.username
-      });
-
       // Prepare profile data (exclude username)
       const { username, ...profileData } = formValue;
 
-      // Update profile (name, surname, email, cell, address)
-      const profileUpdate$ = this.userManagementService.updateProfile(this.data.userId, profileData);
-
-      // Chain both updates
-      accountUpdate$.subscribe({
-        next: (accountResponse) => {
-          profileUpdate$.subscribe({
-            next: (profileResponse) => {
-              this.loading = false;
-              this.snackBar.open('User updated successfully', 'OK', {
-                duration: 3000,
-                verticalPosition: 'top',
-                horizontalPosition: 'center',
-              });
-              this.dialogRef.close(true);
-            },
-            error: (error) => {
-              this.loading = false;
-              this.snackBar.open('Account updated but profile update failed', 'OK', {
-                duration: 5000,
-                verticalPosition: 'top',
-                horizontalPosition: 'center',
-              });
-            }
-          });
-        },
-        error: (error) => {
-          this.loading = false;
-          this.snackBar.open('Failed to update user', 'Close', {
-            duration: 5000,
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
-          });
-        }
-      });
+      // Chain both updates using RxJS operators
+      this.userManagementService.updateUser(this.data.userId, { username: formValue.username })
+        .pipe(
+          switchMap(accountResponse => 
+            this.userManagementService.updateProfile(this.data.userId, profileData)
+          ),
+          takeUntil(this.destroy$)
+        )
+        .subscribe({
+          next: (profileResponse) => {
+            this.loading = false;
+            // Close dialog first
+            this.dialogRef.close(true);
+            // Then show success message
+            this.snackBar.open('User updated successfully', 'OK', {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            });
+          },
+          error: (error) => {
+            this.loading = false;
+            this.snackBar.open('Failed to update user', 'Close', {
+              duration: 5000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            });
+          }
+        });
     }
   }
 
