@@ -46,12 +46,11 @@ import { UserManagementService } from './services/user-management.service';
 import { UserManagementRoutingModule } from './user-management-routing.module';
 import { EditUserDialogComponent } from './components/edit-user/edit-user-dialog.component';
 import { ResetPasswordDialogComponent } from './components/reset-password/reset-password-dialog.component';
-import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog/confirm-delete-dialog.component';
+// ConfirmDialogComponent is now standalone and shared - lazy loaded when needed
 
 @NgModule({
   declarations: [
     BulkOperationsComponent,
-    SystemActivityComponent,
     ErrorHandlerComponent,
     LoadingSpinnerComponent,
     ConfirmationDialogComponent,
@@ -91,7 +90,7 @@ import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog
     EditUserDialogComponent,
     ResetPasswordDialogComponent,
     UserActivityComponent,
-    ConfirmDeleteDialogComponent,
+    SystemActivityComponent,
 
     // Routing
     UserManagementRoutingModule,
@@ -103,7 +102,6 @@ import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog
     UserDetailsDialogComponent,
     UserActivityComponent,
     BulkOperationsComponent,
-    SystemActivityComponent,
     ErrorHandlerComponent,
     LoadingSpinnerComponent,
     ConfirmationDialogComponent,

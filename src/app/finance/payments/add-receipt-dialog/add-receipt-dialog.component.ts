@@ -1,51 +1,80 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { PaymentMethods } from '../../enums/payment-methods.enum';
 import { Store } from '@ngrx/store';
 import {
-  // Good: You're now explicitly using selectAmountDue
-  selectAmountDue,
+  getStudentLedger,
+  LedgerEntry,
   selectCreatedReceipt,
-  // Good: You're using selectNewReceipt, aligning with your reducer's `createdReceipt`
-  // ADD these back if you want to show loading/error states in the UI
-  selectIsLoadingFinancials,
-  // selectFinancialsError,
-  // selectIsSavingReceipt,
-  // selectSaveReceiptError,
+  selectIsLoading,
+  selectErrorMsg,
 } from '../../store/finance.selector';
-import { receiptActions } from '../../store/finance.actions';
-import { filter, Observable, Subject, takeUntil } from 'rxjs'; // Removed `combineLatest` as it's not explicitly used here
+import { receiptActions, invoiceActions } from '../../store/finance.actions';
+import { filter, map, combineLatest, Observable, Subject, takeUntil } from 'rxjs';
 import { State } from '../../store/finance.reducer';
-import { MatDialogRef } from '@angular/material/dialog';
 import { ReceiptModel } from '../../models/payment.model';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 @Component({
   selector: 'app-add-receipt-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatCardModule,
+    SharedModule,
+  ],
   templateUrl: './add-receipt-dialog.component.html',
-  styleUrls: ['./add-receipt-dialog.component.css'],
+  styleUrls: ['./add-receipt-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddReceiptDialogComponent implements OnInit, OnDestroy {
   addReceiptForm: FormGroup;
-  student!: StudentsModel; // This will now be set by getSelectedStudent
+  student!: StudentsModel;
   paymentMethods = [...Object.values(PaymentMethods)];
 
   // Observables for state from NgRx Store
-  amountDue$: Observable<number | null>;
-
-  // Re-add these if you plan to use them in your template for loading/error indicators
-  isLoadingFinancials$: Observable<boolean>;
-  // financialsError$: Observable<string | null>;
-  // isSavingReceipt$: Observable<boolean>;
-  // saveReceiptError$: Observable<string | null>;
+  amountDue$: Observable<number> = new Observable<number>();
   createdReceipt$!: Observable<ReceiptModel>;
-
+  isLoading$!: Observable<boolean>;
+  error$!: Observable<string>;
+  isLoadingBalance$: Observable<boolean> = new Observable<boolean>();
+  
+  // Computed observables for suggestions
+  outstandingAfterPayment$: Observable<number> = new Observable<number>();
+  isOverpayment$: Observable<boolean> = new Observable<boolean>();
+  suggestionMessage$: Observable<string | null> = new Observable<string | null>();
+  
+  currentTheme: Theme = 'light';
   private destroy$ = new Subject<void>();
 
   constructor(
     public dialogRef: MatDialogRef<AddReceiptDialogComponent>,
     private fb: FormBuilder,
-    private store: Store<State>
+    private store: Store<State>,
+    public themeService: ThemeService,
+    private cdr: ChangeDetectorRef,
+    private snackBar: MatSnackBar
   ) {
     this.addReceiptForm = this.fb.group({
       amountPaid: ['', [Validators.required, Validators.min(0.01)]],
@@ -53,36 +82,110 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
       description: [''],
     });
 
-    this.amountDue$ = this.store.select(selectAmountDue);
-    this.store.select(selectAmountDue).subscribe((val) => console.log(val));
-
-    // Initialize loading and error observables if you re-add them
-    this.isLoadingFinancials$ = this.store.select(selectIsLoadingFinancials);
-    // this.financialsError$ = this.store.select(selectFinancialsError);
-    // this.isSavingReceipt$ = this.store.select(selectIsSavingReceipt);
-    // this.saveReceiptError$ = this.store.select(selectSaveReceiptError);
     this.createdReceipt$ = this.store.select(selectCreatedReceipt);
+    this.isLoading$ = this.store.select(selectIsLoading);
+    this.error$ = this.store.select(selectErrorMsg);
+    
+    // Watch for form changes to calculate suggestions
+    this.setupSuggestionObservables();
+  }
+
+  private setupSuggestionObservables(): void {
+    const amountPaidControl = this.addReceiptForm.get('amountPaid');
+    
+    if (amountPaidControl) {
+      this.outstandingAfterPayment$ = combineLatest([
+        this.amountDue$,
+        amountPaidControl.valueChanges.pipe(map(val => +val || 0))
+      ]).pipe(
+        map(([amountDue, amountPaid]) => Math.max(0, amountDue - amountPaid))
+      );
+
+      this.isOverpayment$ = combineLatest([
+        this.amountDue$,
+        amountPaidControl.valueChanges.pipe(map(val => +val || 0))
+      ]).pipe(
+        map(([amountDue, amountPaid]) => amountPaid > amountDue && amountDue > 0)
+      );
+
+      this.suggestionMessage$ = combineLatest([
+        this.amountDue$,
+        amountPaidControl.valueChanges.pipe(map(val => +val || 0)),
+        this.outstandingAfterPayment$
+      ]).pipe(
+        map(([amountDue, amountPaid, outstanding]) => {
+          if (!amountPaid || amountPaid <= 0) return null;
+          
+          if (amountPaid > amountDue && amountDue > 0) {
+            const overpayment = amountPaid - amountDue;
+            return `⚠️ Overpayment detected: $${overpayment.toFixed(2)} will be credited to the student's account.`;
+          }
+          
+          if (amountPaid === amountDue && amountDue > 0) {
+            return '✅ This payment will clear the full balance.';
+          }
+          
+          if (outstanding > 0 && outstanding < amountDue) {
+            return `ℹ️ After this payment, $${outstanding.toFixed(2)} will remain outstanding.`;
+          }
+          
+          return null;
+        })
+      );
+    }
   }
 
   ngOnInit(): void {
-    // Moved the subscription for closing the dialog to ngOnInit
+    // Ensure invoices and receipts are loaded in the store for balance calculation
+    this.store.dispatch(invoiceActions.fetchAllInvoices());
+    this.store.dispatch(receiptActions.fetchAllReceipts());
+
+    // Close dialog when receipt is successfully created
     this.createdReceipt$
       .pipe(
-        filter((receipt) => !!receipt && !!receipt.receiptNumber), // Ensure receipt is not null and has a receiptNumber
+        filter((receipt) => !!receipt && !!receipt.receiptNumber),
         takeUntil(this.destroy$)
       )
       .subscribe((receipt) => {
+        this.snackBar.open(
+          `Receipt ${receipt.receiptNumber} created successfully!`,
+          'Close',
+          {
+            duration: 3000,
+            panelClass: ['success-snackbar'],
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+          }
+        );
         this.dialogRef.close(receipt);
       });
 
-    // You might want to consider dispatching fetchStudentOutstandingBalance
-    // here if the dialog *always* opens with a student (even if you don't use MAT_DIALOG_DATA for it).
-    // If the student search is truly internal and the balance is fetched *after* selection,
-    // then it's fine to leave it in getSelectedStudent.
+    // Handle errors
+    this.error$
+      .pipe(
+        filter((error) => !!error),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((error) => {
+        this.snackBar.open(`Error: ${error}`, 'Close', {
+          duration: 5000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
+        this.cdr.markForCheck();
+      });
+
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
   }
 
   ngOnDestroy(): void {
-    this.store.dispatch(receiptActions.clearStudentFinancials());
     this.store.dispatch(receiptActions.clearCreatedReceipt());
     this.destroy$.next();
     this.destroy$.complete();
@@ -125,12 +228,41 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
   getSelectedStudent(student: StudentsModel) {
     this.student = student;
     if (this.student.studentNumber) {
-      // Dispatch action to fetch student's outstanding balance
-      this.store.dispatch(
-        receiptActions.fetchStudentOutstandingBalance({
-          studentNumber: this.student.studentNumber,
+      // Calculate balance from store using the same ledger calculation
+      this.amountDue$ = this.store.select(
+        getStudentLedger(this.student.studentNumber)
+      ).pipe(
+        map((ledger: LedgerEntry[]) => {
+          if (!ledger || ledger.length === 0) {
+            return 0;
+          }
+          return ledger[ledger.length - 1].runningBalance;
         })
       );
+      
+      // Re-setup suggestions when student changes
+      this.setupSuggestionObservables();
+      this.cdr.markForCheck();
     }
+  }
+
+  // Helper method to get suggested amount (full balance or partial)
+  getSuggestedAmount(): number {
+    let suggested = 0;
+    this.amountDue$.pipe(takeUntil(this.destroy$)).subscribe(amount => {
+      suggested = amount;
+    });
+    return suggested;
+  }
+
+  fillFullBalance(): void {
+    this.amountDue$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(amount => {
+        if (amount > 0) {
+          this.addReceiptForm.patchValue({ amountPaid: amount.toFixed(2) });
+          this.cdr.markForCheck();
+        }
+      });
   }
 }

@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { UserManagementService } from '../../services/user-management.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -24,6 +25,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './edit-user-dialog.component.html',
   styleUrls: ['./edit-user-dialog.component.scss']
@@ -78,6 +80,7 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
       const formValue = this.editUserForm.value;
       
       // Prepare profile data (exclude username)
+      // Include active status in profile data for backend to handle
       const { username, ...profileData } = formValue;
 
       // Chain both updates using RxJS operators

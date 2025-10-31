@@ -1,4 +1,4 @@
-<div class="invoices-container">
+<div class="invoices-container" [class.theme-dark]="currentTheme === 'dark'">
   <!-- Loading State -->
   <div *ngIf="loading$ | async" class="loading-container">
     <div class="loading-spinner">⏳</div>

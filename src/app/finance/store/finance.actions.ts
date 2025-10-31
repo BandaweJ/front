@@ -150,9 +150,29 @@ export const receiptActions = createActionGroup({
 export const exemptionActions = createActionGroup({
   source: 'Exemption',
   events: {
+    // Create
     'Create Exemption': props<{ exemption: ExemptionModel }>(),
     'Create Exemption Success': props<{ exemption: ExemptionModel }>(),
     'Create Exemption Failure': props<{ error: string }>(),
-    // You might add actions for Fetching, Updating, Deleting exemptions here later
+    
+    // Fetch All
+    'Fetch All Exemptions': props<{ studentNumber?: string; type?: string; isActive?: boolean }>(),
+    'Fetch All Exemptions Success': props<{ exemptions: ExemptionModel[] }>(),
+    'Fetch All Exemptions Failure': props<{ error: string }>(),
+    
+    // Fetch By ID
+    'Fetch Exemption By Id': props<{ id: number }>(),
+    'Fetch Exemption By Id Success': props<{ exemption: ExemptionModel }>(),
+    'Fetch Exemption By Id Failure': props<{ error: string }>(),
+    
+    // Update
+    'Update Exemption': props<{ id: number; exemption: Partial<ExemptionModel> }>(),
+    'Update Exemption Success': props<{ exemption: ExemptionModel }>(),
+    'Update Exemption Failure': props<{ error: string }>(),
+    
+    // Delete
+    'Delete Exemption': props<{ id: number }>(),
+    'Delete Exemption Success': props<{ id: number }>(),
+    'Delete Exemption Failure': props<{ error: string }>(),
   },
 });

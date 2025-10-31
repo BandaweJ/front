@@ -54,16 +54,30 @@ export const authReducer = createReducer(
     accStats: null, // Clear stats on new signin
     isLoading: false,
   })),
-  on(signinActions.signinFailure, (state, { error }) => ({
-    // Use grouped action
-    ...state,
-    errorMessage: error?.message || 'An error occurred during sign in',
-    isLoggedin: false,
-    accessToken: '',
-    user: null,
-    accStats: null,
-    isLoading: false,
-  })),
+  on(signinActions.signinFailure, (state, { error }) => {
+    // Extract error message from HttpErrorResponse
+    // Backend error messages are in error.error.message
+    // Fallback to error.error.error, error.message, or default message
+    let errorMessage = 'An error occurred during sign in';
+    
+    if (error?.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error?.error?.error) {
+      errorMessage = error.error.error;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+
+    return {
+      ...state,
+      errorMessage,
+      isLoggedin: false,
+      accessToken: '',
+      user: null,
+      accStats: null,
+      isLoading: false,
+    };
+  }),
   on(signupActions.signup, (state) => ({
     // Use grouped action
     ...state,
@@ -84,16 +98,28 @@ export const authReducer = createReducer(
     accStats: null,
     isLoading: false,
   })),
-  on(signupActions.signupFailure, (state, { error }) => ({
-    // Use grouped action
-    ...state,
-    errorMessage: error?.message || 'An error occurred during sign up',
-    isLoggedin: false,
-    accessToken: '',
-    user: null,
-    accStats: null,
-    isLoading: false,
-  })),
+  on(signupActions.signupFailure, (state, { error }) => {
+    // Extract error message from HttpErrorResponse
+    let errorMessage = 'An error occurred during sign up';
+    
+    if (error?.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error?.error?.error) {
+      errorMessage = error.error.error;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+
+    return {
+      ...state,
+      errorMessage,
+      isLoggedin: false,
+      accessToken: '',
+      user: null,
+      accStats: null,
+      isLoading: false,
+    };
+  }),
   on(resetErrorMessage, (state) => ({
     // Individual action
     ...state,
@@ -120,12 +146,23 @@ export const authReducer = createReducer(
     isLoading: false,
     accStats: { ...stats },
   })),
-  on(accountStatsActions.fetchAccountStatsFailure, (state, { error }) => ({
-    // Use grouped action
-    ...state,
-    isLoading: false,
-    errorMessage: error?.message || 'An error occurred while fetching account stats',
-  })),
+  on(accountStatsActions.fetchAccountStatsFailure, (state, { error }) => {
+    let errorMessage = 'An error occurred while fetching account stats';
+    
+    if (error?.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error?.error?.error) {
+      errorMessage = error.error.error;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+
+    return {
+      ...state,
+      isLoading: false,
+      errorMessage,
+    };
+  }),
   on(userDetailsActions.fetchUser, (state) => ({
     // Use grouped action
     ...state,
@@ -139,11 +176,22 @@ export const authReducer = createReducer(
     errorMessage: '',
     userDetails: user,
   })),
-  on(userDetailsActions.fetchUserFail, (state, { error }) => ({
-    // Use grouped action
-    ...state,
-    isLoading: false,
-    errorMessage: error?.message || 'An error occurred while fetching user details',
-    userDetails: null,
-  }))
+  on(userDetailsActions.fetchUserFail, (state, { error }) => {
+    let errorMessage = 'An error occurred while fetching user details';
+    
+    if (error?.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error?.error?.error) {
+      errorMessage = error.error.error;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+
+    return {
+      ...state,
+      isLoading: false,
+      errorMessage,
+      userDetails: null,
+    };
+  })
 );

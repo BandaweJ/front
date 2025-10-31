@@ -86,9 +86,10 @@
 
           <div class="data-item amount-owed">
             <label>Total Amount Owed:</label>
-            <span [class.positive]="financialSummary.amountOwed <= 0"
-              [class.negative]="financialSummary.amountOwed > 0">
-              {{ financialSummary.amountOwed | currency:'USD':'symbol':'1.2-2' }}
+            <span *ngIf="amountOwed$ | async as amountOwed"
+              [class.positive]="amountOwed <= 0"
+              [class.negative]="amountOwed > 0">
+              {{ amountOwed | currency:'USD':'symbol':'1.2-2' }}
             </span>
           </div>
 
@@ -101,10 +102,12 @@
               <span class="outstanding-amount">{{ balance.amount | currency:'USD':'symbol':'1.2-2' }}</span>
             </div>
           </div>
-          <div *ngIf="financialSummary.outstandingBalances?.length === 0 && financialSummary.amountOwed > 0"
-            class="outstanding-container">
-            <label class="outstanding-label">Amount owed is not yet allocated to a term.</label>
-          </div>
+          <ng-container *ngIf="amountOwed$ | async as amountOwed">
+            <div *ngIf="financialSummary.outstandingBalances?.length === 0 && amountOwed > 0"
+              class="outstanding-container">
+              <label class="outstanding-label">Amount owed is not yet allocated to a term.</label>
+            </div>
+          </ng-container>
         </ng-container>
 
       </div>

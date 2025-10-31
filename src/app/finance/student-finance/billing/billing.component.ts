@@ -5,7 +5,11 @@ import {
   OnInit,
   SimpleChanges,
   OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   billStudentActions,
@@ -21,23 +25,40 @@ import {
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { BillModel } from '../../models/bill.model';
 import { SharedService } from 'src/app/shared.service';
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDeleteDialogComponent } from 'src/app/confirm-delete-dialog/confirm-delete-dialog.component';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  FormControl,
-} from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+// ConfirmDeleteDialogComponent will be lazy loaded
 import { Residence } from 'src/app/enrolment/models/residence.enum';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subscription, combineLatest, Subject } from 'rxjs';
-import { startWith, distinctUntilChanged, map } from 'rxjs/operators';
+import { startWith, distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
+import { ThemeService, Theme } from '../../../services/theme.service';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-billing',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatIconModule,
+    MatRadioModule,
+    MatCheckboxModule,
+    MatDividerModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatSnackBarModule,
+    MatDialogModule,
+  ],
   templateUrl: './billing.component.html',
-  styleUrls: ['./billing.component.css'],
+  styleUrls: ['./billing.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   fees: FeesModel[] = [];
@@ -57,6 +78,8 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   // --- Subscriptions to manage memory leaks ---
   private subscriptions: Subscription[] = [];
   private accommodationTypeTrigger$: Subject<void> = new Subject<void>();
+  private destroy$ = new Subject<void>();
+  currentTheme: Theme = 'light';
 
   // --- Properties to track currently selected exclusive fees ---
   // These help in removing the *old* fee when a new one is selected in a radio group
@@ -68,47 +91,84 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     public sharedService: SharedService,
     public dialog: MatDialog,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    public themeService: ThemeService,
+    private cdr: ChangeDetectorRef
   ) {
     this.store.dispatch(feesActions.fetchFees());
   }
 
   // --- Getters for Form Controls for cleaner access ---
   get selectedAcademicLevel(): FormControl {
+    if (!this.academicSettingsForm) {
+      // Initialize form if it doesn't exist yet (can happen if ngOnChanges is called before ngOnInit)
+      this.initializeForm();
+    }
     return this.academicSettingsForm.get(
       'selectedAcademicLevel'
     ) as FormControl;
   }
   get oLevelNewComer(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
     return this.academicSettingsForm.get('oLevelNewComer') as FormControl;
   }
   get aLevelNewComer(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
     return this.academicSettingsForm.get('aLevelNewComer') as FormControl;
   }
   get aLevelScienceLevy(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
     return this.academicSettingsForm.get('aLevelScienceLevy') as FormControl;
   }
   get oLevelAccommodationType(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
     return this.academicSettingsForm.get(
       'oLevelAccommodationType'
     ) as FormControl;
   }
   get aLevelAccommodationType(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
     return this.academicSettingsForm.get(
       'aLevelAccommodationType'
     ) as FormControl;
   }
   get foodOption(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
     return this.academicSettingsForm.get('foodOption') as FormControl;
   }
   get transportOption(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
     return this.academicSettingsForm.get('transportOption') as FormControl;
   }
 
   ngOnInit(): void {
-    this.initializeForm();
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+      this.cdr.markForCheck();
+    });
+
+    // Only initialize if not already initialized (could have been initialized by getter)
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
     this.subscribeToStoreChanges();
     this.setupFormControlListeners();
+    this.cdr.markForCheck();
   }
 
   private initializeForm(): void {
@@ -134,6 +194,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         // This handles cases where fees load *after* the invoice.
         if (this.enrolment && this.selectedBills.length > 0) {
           this.populateFormAndToBillFromSelectedBills(this.selectedBills);
+          this.cdr.markForCheck();
         }
       })
     );
@@ -149,6 +210,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         if (this.fees.length > 0) {
           this.populateFormAndToBillFromSelectedBills(this.selectedBills);
         }
+        this.cdr.markForCheck();
       })
     );
   }
@@ -372,12 +434,40 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
    * It also sets the `current...AccommodationFee` trackers based on the loaded state.
    */
   private populateFormAndToBillFromSelectedBills(bills: BillModel[]): void {
-    if (!this.fees || this.fees.length === 0 || !this.enrolment?.student) {
+    if (!this.fees || this.fees.length === 0) {
       return;
     }
 
-    const formUpdates: { [key: string]: any } = {};
+    // Determine academic level from enrolment name - try multiple sources
+    let enrolName = '';
+    if (this.enrolment?.name) {
+      enrolName = this.enrolment.name;
+    } else if (this.currentInvoice?.enrol?.name) {
+      enrolName = this.currentInvoice.enrol.name;
+    } else if (bills && bills.length > 0 && bills[0]?.enrol?.name) {
+      enrolName = bills[0].enrol.name;
+    }
+    
+    const firstChar = enrolName.charAt(0);
+    let determinedLevel: 'O Level' | 'A Level' = this.academicLevel || 'O Level';
+    
+    if (firstChar === '5' || firstChar === '6') {
+      determinedLevel = 'A Level';
+    } else if (firstChar === '1' || firstChar === '2' || firstChar === '3' || firstChar === '4') {
+      determinedLevel = 'O Level';
+    }
+    
+    // Check if we have student info - if not, try to get it from bills or invoice
+    const student = this.enrolment?.student || this.currentInvoice?.student || (bills && bills.length > 0 ? bills[0]?.student : null);
+    if (!student) {
+      return; // Can't proceed without student info
+    }
+
+    const formUpdates: { [key: string]: any } = {
+      selectedAcademicLevel: determinedLevel, // Set academic level based on enrolment
+    };
     const initialToBill: BillModel[] = [];
+    this.academicLevel = determinedLevel;
 
     // Reset trackers for accommodation fees
     this.currentOLevelAccommodationFee = undefined;
@@ -392,13 +482,17 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       bill: BillModel | undefined,
       fee: FeesModel | undefined
     ) => {
-      if (bill && fee && this.enrolment?.student) {
-        initialToBill.push({
-          ...bill,
-          fees: fee,
-          student: this.enrolment.student,
-          enrol: this.enrolment,
-        });
+      if (bill && fee && student) {
+        // Use enrolment from current enrolment, invoice, or bill
+        const enrol = this.enrolment || this.currentInvoice?.enrol || bill.enrol;
+        if (enrol) {
+          initialToBill.push({
+            ...bill,
+            fees: fee,
+            student: student,
+            enrol: enrol,
+          });
+        }
       }
     };
 
@@ -517,11 +611,35 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       (id) => initialToBill.find((b) => b.fees.id === id)!
     );
 
+    // Ensure academic level controls are properly toggled based on determined level
+    this.toggleAcademicLevelControls(determinedLevel);
     this.accommodationTypeTrigger$.next();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['enrolment'] && changes['enrolment'].currentValue) {
+    if (changes['enrolment']) {
+      this.cdr.markForCheck();
+      
+      // Only proceed if we have an enrolment
+      if (!this.enrolment) {
+        return;
+      }
+      
+      // Determine academic level from enrolment name (first character)
+      const enrolName = this.enrolment?.name || '';
+      const firstChar = enrolName.charAt(0);
+      let determinedLevel: 'O Level' | 'A Level' = 'O Level';
+      
+      if (firstChar === '5' || firstChar === '6') {
+        determinedLevel = 'A Level';
+      } else if (firstChar === '1' || firstChar === '2' || firstChar === '3' || firstChar === '4') {
+        determinedLevel = 'O Level';
+      }
+      
+      // Set the academic level in the form (without emitting events to avoid triggering listeners prematurely)
+      this.selectedAcademicLevel.setValue(determinedLevel, { emitEvent: false });
+      this.academicLevel = determinedLevel;
+      
       // Check if the enrolment name indicates a science student
       this.isScienceStudent =
         this.enrolment?.name?.toLowerCase().includes('science') ?? false;
@@ -536,17 +654,27 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       // If enrolment changes AND fees/selectedBills are already available, re-populate.
       if (this.fees.length > 0 && this.selectedBills.length > 0) {
         this.populateFormAndToBillFromSelectedBills(this.selectedBills);
-      } else if (this.fees.length > 0) {
+        this.cdr.markForCheck();
+      } else if (this.fees.length > 0 && this.enrolment?.student) {
         // If fees are loaded but no selected bills for new enrolment, reset form
-        this.resetFormAndBills();
+        // But preserve the determined academic level
+        this.resetFormAndBills(determinedLevel);
+        this.cdr.markForCheck();
       }
+      
+      // Trigger academic level controls to enable/disable based on determined level
+      this.toggleAcademicLevelControls(determinedLevel);
+      this.accommodationTypeTrigger$.next();
+      
+      this.cdr.markForCheck();
     }
   }
 
-  private resetFormAndBills(): void {
+  private resetFormAndBills(academicLevel?: 'O Level' | 'A Level'): void {
+    const level = academicLevel || this.academicLevel || 'O Level';
     this.academicSettingsForm.reset(
       {
-        selectedAcademicLevel: 'O Level',
+        selectedAcademicLevel: level,
         oLevelNewComer: false,
         aLevelNewComer: false,
         aLevelScienceLevy: false,
@@ -560,6 +688,8 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     this.toBill = [];
     this.currentOLevelAccommodationFee = undefined;
     this.currentALevelAccommodationFee = undefined;
+    this.academicLevel = level;
+    this.toggleAcademicLevelControls(level);
     this.accommodationTypeTrigger$.next(); // Trigger to update UI based on reset
   }
 
@@ -753,12 +883,16 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  confirmBill(): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+  async confirmBill(): Promise<void> {
+    // Lazy load the confirm dialog component
+    const { ConfirmDialogComponent } = await import('src/app/shared/confirm-dialog/confirm-dialog.component');
+    
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '300px',
       data: {
         message: 'Are you sure you want to bill student with selected fees?',
         title: 'Confirm Billing',
+        bills: this.toBill,
       },
     });
 
@@ -778,5 +912,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

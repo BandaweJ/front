@@ -41,6 +41,10 @@ import {
   invoiceActions,
   receiptActions,
 } from 'src/app/finance/store/finance.actions';
+import {
+  getStudentLedger,
+  LedgerEntry,
+} from 'src/app/finance/store/finance.selector';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -56,6 +60,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   public currentEnrolment$: Observable<EnrolsModel | null>;
   public enrolmentLoading$: Observable<boolean>;
   public enrolmentLoaded$: Observable<boolean>;
+  
+  // Amount owed calculated from store (single source of truth)
+  public amountOwed$: Observable<number>;
 
   public lineChartData: ChartConfiguration<'line'>['data'] = {
     datasets: [],
@@ -117,6 +124,22 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.studentDetails$ = this.currentEnrolment$.pipe(
       map((enrolment) => (enrolment ? enrolment.student : null))
     );
+    
+    // Calculate amount owed from store using ledger selector (single source of truth)
+    this.amountOwed$ = (this.store.select(selectUser) as Observable<User | null>).pipe(
+      filter((user): user is User => !!user && !!user.id),
+      switchMap((user) => {
+        return this.store.select(getStudentLedger(user.id)).pipe(
+          map((ledger: LedgerEntry[]) => {
+            if (!ledger || ledger.length === 0) {
+              return 0;
+            }
+            // Return the running balance from the last ledger entry
+            return ledger[ledger.length - 1].runningBalance;
+          })
+        );
+      })
+    );
   }
 
   ngOnInit(): void {
@@ -138,23 +161,15 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                 studentNumber,
               })
             );
+            // Ensure invoices and receipts are loaded for ledger calculation
             this.store.dispatch(
-              receiptActions.fetchStudentOutstandingBalance({
-                studentNumber,
-              })
+              invoiceActions.fetchAllInvoices()
+            );
+            this.store.dispatch(
+              receiptActions.fetchAllReceipts()
             );
             this.store.dispatch(
               studentDashboardActions.fetchStudentDashboardSummary({
-                studentNumber,
-              })
-            );
-            this.store.dispatch(
-              invoiceActions.fetchStudentInvoices({
-                studentNumber,
-              })
-            );
-            this.store.dispatch(
-              receiptActions.fetchStudentReceipts({
                 studentNumber,
               })
             );

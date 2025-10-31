@@ -14,7 +14,7 @@ import { CreateUserDialogComponent } from '../create-user/create-user-dialog.com
 import { UserDetailsDialogComponent } from '../user-details/user-details-dialog.component';
 import { EditUserDialogComponent } from '../edit-user/edit-user-dialog.component';
 import { UserActivityComponent } from '../user-activity/user-activity.component';
-import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
+// ConfirmDialogComponent will be lazy loaded
 import { BulkOperationsComponent, BulkOperationData } from '../bulk-operations/bulk-operations.component';
 import { SystemActivityComponent } from '../system-activity/system-activity.component';
 import { CommonModule } from '@angular/common';
@@ -218,8 +218,9 @@ export class UserListComponent implements OnInit, OnDestroy {
     });
   }
 
-  openDeleteUserDialog(user: UserManagementModel): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+  async openDeleteUserDialog(user: UserManagementModel): Promise<void> {
+    const { ConfirmDialogComponent } = await import('src/app/shared/confirm-dialog/confirm-dialog.component');
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '500px',
       data: {
         title: 'Delete User',

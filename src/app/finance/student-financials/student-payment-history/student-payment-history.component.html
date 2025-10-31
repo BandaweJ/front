@@ -1,23 +1,12 @@
-<div class="payment-history-container">
+<div class="payment-history-container" [class.theme-dark]="currentTheme === 'dark'">
   <!-- Loading State -->
   <div *ngIf="loading$ | async" class="loading-container">
     <mat-spinner diameter="60"></mat-spinner>
     <p class="loading-text">Loading your payment history...</p>
   </div>
 
-  <!-- Error State -->
-  <div *ngIf="(error$ | async) && !(loading$ | async)" class="error-container">
-    <mat-icon class="error-icon">error_outline</mat-icon>
-    <h3 class="error-title">Unable to load payment history</h3>
-    <p class="error-message">{{ error$ | async }}</p>
-    <button mat-raised-button color="primary" (click)="loadPaymentHistory()">
-      <mat-icon>refresh</mat-icon>
-      Retry
-    </button>
-  </div>
-
   <!-- Main Content -->
-  <div *ngIf="!(loading$ | async) && !(error$ | async)" class="payment-history-content">
+  <div *ngIf="!(loading$ | async)" class="payment-history-content">
     <!-- Header -->
     <div class="payment-history-header">
       <h2 class="payment-history-title">
@@ -61,9 +50,17 @@
                     </mat-chip>
                   </div>
                 </div>
-                <div class="transaction-amount" [class]="getTransactionDirectionClass(item.direction)">
-                  <span class="amount-symbol">{{ item.direction === 'in' ? '+' : '-' }}</span>
-                  {{ item.amount | currency:'USD':'symbol':'1.2-2' }}
+                <div class="transaction-amount-section">
+                  <div class="transaction-amount" [class]="getTransactionDirectionClass(item.direction)">
+                    <span class="amount-symbol">{{ item.direction === 'in' ? '+' : '-' }}</span>
+                    {{ item.amount | currency:'USD':'symbol':'1.2-2' }}
+                  </div>
+                  <div *ngIf="item.runningBalance !== undefined" class="running-balance">
+                    <span class="balance-label">Balance:</span>
+                    <span class="balance-value" [class.balance-positive]="item.runningBalance <= 0" [class.balance-negative]="item.runningBalance > 0">
+                      {{ item.runningBalance | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                  </div>
                 </div>
               </div>
 

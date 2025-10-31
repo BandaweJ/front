@@ -1,19 +1,49 @@
-import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { Component, Inject, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PaymentMethods } from '../../enums/payment-methods.enum';
-import { map, Observable, of, startWith } from 'rxjs';
+import { map, Observable, of, startWith, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { select, Store } from '@ngrx/store';
 import { selectStudents } from 'src/app/registration/store/registration.selectors';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ReceiptFilter } from '../../models/receipt-filter.model';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 @Component({
   selector: 'app-filter-receipts-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
+    MatAutocompleteModule,
+    SharedModule,
+  ],
   templateUrl: './filter-receipts-dialog.component.html',
-  styleUrls: ['./filter-receipts-dialog.component.css'],
+  styleUrls: ['./filter-receipts-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FilterReceiptsDialogComponent {
+export class FilterReceiptsDialogComponent implements OnInit, OnDestroy {
   filterForm!: FormGroup;
   paymentMethods = Object.values(PaymentMethods); // Get all values from your enum
 
@@ -23,12 +53,16 @@ export class FilterReceiptsDialogComponent {
   );
   filteredStudents$: Observable<StudentsModel[]> = of([]);
   selectedStudent: StudentsModel | null = null; // Store the selected student object
+  currentTheme: Theme = 'light';
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<FilterReceiptsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { currentFilters: ReceiptFilter },
-    private store: Store // Inject NgRx Store
+    private store: Store,
+    public themeService: ThemeService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -87,6 +121,14 @@ export class FilterReceiptsDialogComponent {
         }
       }
     });
+
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
   }
 
   // Helper to get student name for initial filter form display
@@ -154,5 +196,10 @@ export class FilterReceiptsDialogComponent {
 
   cancel(): void {
     this.dialogRef.close(); // Close without passing any data
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

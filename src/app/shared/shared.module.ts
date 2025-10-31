@@ -7,7 +7,7 @@ import { ReplaceUnderscoresPipe } from './pipes/replace-underscores.pipe';
 import { GetUniqueTermNumbersPipe } from './pipes/get-unique-term-numbers.pipe';
 import { GetUniqueTermYearsPipe } from './pipes/get-unique-term-years.pipe';
 import { ConfirmationDialogComponent } from './confirmation-dialo/confirmation-dialo.component';
-import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog/confirm-delete-dialog.component';
+// ConfirmDialogComponent is now standalone and shared - no need to declare here
 
 @NgModule({
   declarations: [
@@ -16,14 +16,12 @@ import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog/confirm-de
     GetUniqueTermNumbersPipe,
     GetUniqueTermYearsPipe,
     ConfirmationDialogComponent,
-    ConfirmDeleteDialogComponent,
   ],
   exports: [
     StudentSearchComponent,
     ReplaceUnderscoresPipe,
     GetUniqueTermNumbersPipe,
     GetUniqueTermYearsPipe,
-    ConfirmDeleteDialogComponent,
   ],
   imports: [CommonModule, MaterialModule, ReactiveFormsModule],
 })

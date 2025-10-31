@@ -1,15 +1,41 @@
 /* eslint-disable prettier/prettier */
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
 import { UserActivityModel, UserActivityPaginatedModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectSystemActivity, selectLoading, selectError } from '../../store/user-management.selectors';
+import { ThemeService, Theme } from '../../../services/theme.service';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-system-activity',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+    DatePipe,
+  ],
   templateUrl: './system-activity.component.html',
-  styleUrls: ['./system-activity.component.css']
+  styleUrls: ['./system-activity.component.scss']
 })
 export class SystemActivityComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -43,9 +69,19 @@ export class SystemActivityComponent implements OnInit, OnDestroy {
     { value: 'all', label: 'All Time' }
   ];
 
-  constructor(private store: Store) {}
+  currentTheme: Theme = 'light';
+
+  constructor(
+    private store: Store,
+    public themeService: ThemeService
+  ) {}
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
+    
     this.loadSystemActivity();
     this.setupSubscriptions();
   }
@@ -66,9 +102,31 @@ export class SystemActivityComponent implements OnInit, OnDestroy {
   }
 
   private loadSystemActivity(): void {
+    // Calculate date range from selectedTimeRange
+    let startDate: string | undefined;
+    const now = new Date();
+    
+    if (this.selectedTimeRange !== 'all') {
+      const rangeMap: { [key: string]: number } = {
+        '1h': 1 * 60 * 60 * 1000,
+        '24h': 24 * 60 * 60 * 1000,
+        '7d': 7 * 24 * 60 * 60 * 1000,
+        '30d': 30 * 24 * 60 * 60 * 1000,
+      };
+      const rangeMs = rangeMap[this.selectedTimeRange];
+      if (rangeMs) {
+        const start = new Date(now.getTime() - rangeMs);
+        startDate = start.toISOString();
+      }
+    }
+
     this.store.dispatch(userManagementActions.loadSystemActivity({
       page: this.currentPage + 1,
-      limit: this.pageSize
+      limit: this.pageSize,
+      action: this.selectedAction || undefined,
+      userId: this.selectedUser || undefined,
+      startDate: startDate,
+      endDate: now.toISOString(),
     }));
   }
 

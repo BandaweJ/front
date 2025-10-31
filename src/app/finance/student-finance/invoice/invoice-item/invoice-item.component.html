@@ -1,125 +1,218 @@
-<div class="invoice-item">
-  <div class="invoice-download" *ngIf="invoice && invoice.bills && invoice.bills.length > 0">
-    <button type="button" mat-mini-fab color="primary" class="download-btn"
-      (click)="downloadable ? download() : save()">
-      <span class="material-icons">{{
-        downloadable ? 'download' : 'save'
-        }}</span>
+<div class="invoice-item" 
+     [class.theme-light]="currentTheme === 'light'" 
+     [class.theme-dark]="currentTheme === 'dark'">
+  
+  <!-- Download/Save Button -->
+  <div class="invoice-actions" *ngIf="invoice && invoice.bills && invoice.bills.length > 0">
+    <button 
+      type="button" 
+      mat-mini-fab 
+      color="primary" 
+      class="action-btn"
+      [matTooltip]="downloadable ? 'Download Invoice PDF' : 'Save Invoice'"
+      [disabled]="isDownloading"
+      (click)="downloadable ? download() : save()"
+      [attr.aria-label]="downloadable ? 'Download Invoice' : 'Save Invoice'">
+      <mat-spinner *ngIf="isDownloading" diameter="20"></mat-spinner>
+      <mat-icon *ngIf="!isDownloading">{{ downloadable ? 'download' : 'save' }}</mat-icon>
     </button>
   </div>
-  <div class="school-contact">
-    <img src="../../../assets/jhs_logo.jpg" alt="School logo" class="logo" />
-    <address class="school-address">
-      <span class="address-heading">Junior High School</span>
-      <span class="contact-detail">30588 Lundi Drive, Rhodene, Masvingo</span>
-      <span class="contact-detail">Phone: +263 392 263 293 / +263 78 223 8026</span>
-      <span class="contact-detail">Email:
-        <a href="mailto:info@juniorhighschool.ac.zw">info@juniorhighschool.ac.zw</a></span>
-      <span class="contact-detail">Website:
-        <a href="http://www.juniorhighschool.ac.zw">www.juniorhighschool.ac.zw</a></span>
-    </address>
-  </div>
 
-  <div class="invoice-title">
-    <h1>INVOICE FOR TERM {{ invoice?.enrol?.num }} {{ invoice?.enrol?.year }}</h1>
-    <div class="invoice-number">
-      <span class="invoice-label">Invoice #:</span>
-      <span class="invoice-value">{{ invoice?.invoiceNumber }}</span>
-      <span class="invoice-label">Date:</span>
-      <span class="invoice-value">{{ invoice?.invoiceDate | date }}</span>
-      <span class="invoice-label">Due Date:</span>
-      <span class="invoice-value">{{ invoice?.invoiceDueDate | date }}</span>
+  <!-- Invoice Header with Logo and Contact -->
+  <header class="invoice-header">
+    <div class="school-contact">
+      <img 
+        src="../../../assets/jhs_logo.jpg" 
+        alt="Junior High School Logo" 
+        class="logo"
+        (error)="onImageError($event)">
+      <address class="school-address">
+        <h2 class="school-name">Junior High School</h2>
+        <p class="contact-detail">
+          <mat-icon class="contact-icon">location_on</mat-icon>
+          30588 Lundi Drive, Rhodene, Masvingo
+        </p>
+        <p class="contact-detail">
+          <mat-icon class="contact-icon">phone</mat-icon>
+          <a href="tel:+263392263293">+263 392 263 293</a> / 
+          <a href="tel:+263782238026">+263 78 223 8026</a>
+        </p>
+        <p class="contact-detail">
+          <mat-icon class="contact-icon">email</mat-icon>
+          <a href="mailto:info@juniorhighschool.ac.zw">info@juniorhighschool.ac.zw</a>
+          <span class="contact-separator">|</span>
+          <mat-icon class="contact-icon">language</mat-icon>
+          <a href="http://www.juniorhighschool.ac.zw" target="_blank" rel="noopener noreferrer">
+            www.juniorhighschool.ac.zw
+          </a>
+        </p>
+      </address>
     </div>
-  </div>
+  </header>
 
-  <div class="invoice-summary">
-    <div class="bill-to">
-      <span class="bill-label title">Bill To</span>
-      <span class="bill-label">Name</span>
-      <span class="bill-value">{{ invoice?.student?.surname }} {{ invoice?.student?.name }}</span>
-      <span class="bill-label">Student No</span>
-      <span class="bill-value">{{ invoice?.student?.studentNumber }}</span>
-      <span class="bill-label">Class</span>
-      <span class="bill-value">{{ invoice?.enrol?.name }}</span>
-      <span class="bill-label">Residence</span>
-      <span class="bill-value">{{ invoice?.enrol?.residence }}</span>
-      <span class="bill-label">Phone</span>
-      <span class="bill-value">{{
-        invoice?.student?.cell || 'Student has no phone'
-        }}</span>
-      <span class="bill-label">Email</span>
-      <span class="bill-value">{{
-        invoice?.student?.email || 'Student has no email'
-        }}</span>
+  <!-- Invoice Title Section -->
+  <section class="invoice-title-section">
+    <div class="invoice-title-main">
+      <h1 class="invoice-title">INVOICE</h1>
+      <p class="invoice-term">Term {{ invoice?.enrol?.num }} {{ invoice?.enrol?.year }}</p>
     </div>
-    <div class="bill-to">
-      <span class="summary-label title">Invoice Summary</span>
-      <span class="summary-label">Total Bill</span>
-      <span class="summary-value">{{
-        invoice?.totalBill | currency : 'USD':'symbol':'1.2-2'
-        }}</span>
-      <span class="summary-label">Amount Paid</span>
-      <span class="summary-value">{{
-        invoice?.amountPaidOnInvoice | currency : 'USD':'symbol':'1.2-2'
-        }}</span>
-      <span class="summary-label">Balance Due</span>
-      <span class="summary-value">{{
-        invoice?.balance | currency : 'USD':'symbol':'1.2-2'
-        }}</span>
-      <span class="summary-label">Status</span>
-      <span class="summary-value status">{{ invoice?.status }}</span>
+    <div class="invoice-meta">
+      <div class="meta-item">
+        <span class="meta-label">Invoice #</span>
+        <span class="meta-value">{{ invoice?.invoiceNumber || 'N/A' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Date</span>
+        <span class="meta-value">{{ formatDate(invoice?.invoiceDate) }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Due Date</span>
+        <span class="meta-value">{{ formatDate(invoice?.invoiceDueDate) }}</span>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <table class="invoice-table" *ngIf="invoice">
-    <thead>
-      <tr>
-        <th>Fees Description</th>
-        <th>Amount</th>
-      </tr>
-    </thead>
-    <tr *ngIf="invoice && invoice.balanceBfwd && invoice.balanceBfwd.amount">
-      <td>Balance as at {{ invoice.balanceBfwd.dateCreated | date }}</td>
-      <td>{{ invoice.balanceBfwd.amount | currency }}</td>
-    </tr>
-    <tr *ngFor="let bill of invoice.bills">
-      <td>{{ sharedService.feesNamesToString(bill.fees.name) }}</td>
-      <td>{{ bill.fees.amount | currency }}</td>
-    </tr>
+  <!-- Bill To and Summary Section -->
+  <section class="invoice-info-section">
+    <div class="info-group bill-to-group">
+      <h3 class="info-group-title">Bill To</h3>
+      <dl class="info-list">
+        <div class="info-item">
+          <dt>Name</dt>
+          <dd>{{ invoice?.student?.surname }} {{ invoice?.student?.name }}</dd>
+        </div>
+        <div class="info-item">
+          <dt>Student Number</dt>
+          <dd>{{ invoice?.student?.studentNumber || 'N/A' }}</dd>
+        </div>
+        <div class="info-item">
+          <dt>Class</dt>
+          <dd>{{ invoice?.enrol?.name || 'N/A' }}</dd>
+        </div>
+        <div class="info-item">
+          <dt>Residence</dt>
+          <dd>{{ invoice?.enrol?.residence || 'N/A' }}</dd>
+        </div>
+        <div class="info-item" *ngIf="invoice?.student?.cell">
+          <dt>Phone</dt>
+          <dd><a href="tel:{{ invoice?.student?.cell }}">{{ invoice?.student?.cell }}</a></dd>
+        </div>
+        <div class="info-item" *ngIf="invoice?.student?.email">
+          <dt>Email</dt>
+          <dd><a href="mailto:{{ invoice?.student?.email }}">{{ invoice?.student?.email }}</a></dd>
+        </div>
+      </dl>
+    </div>
 
-    <tr *ngIf="invoice.exemption">
-      <td>
-        Exemption ({{ invoice.exemption.type
-        }}<span *ngIf="invoice.exemption.description">: {{ invoice.exemption.description }}</span>)
-      </td>
-      <td style="color: green">
-        -{{ invoice.exemptedAmount | currency }}
-      </td>
-    </tr>
-    <tr>
-      <td class="total">Total</td>
-      <td class="total">{{ invoice.totalBill | currency }}</td>
-    </tr>
-  </table>
+    <div class="info-group summary-group">
+      <h3 class="info-group-title">Invoice Summary</h3>
+      <dl class="summary-list">
+        <div class="summary-item">
+          <dt>Total Bill</dt>
+          <dd class="amount-value">{{ invoice?.totalBill | currency:'USD':'symbol':'1.2-2' }}</dd>
+        </div>
+        <div class="summary-item">
+          <dt>Amount Paid</dt>
+          <dd class="amount-value">{{ invoice?.amountPaidOnInvoice | currency:'USD':'symbol':'1.2-2' }}</dd>
+        </div>
+        <div class="summary-item">
+          <dt>Balance Due</dt>
+          <dd class="amount-value balance-amount">{{ invoice?.balance | currency:'USD':'symbol':'1.2-2' }}</dd>
+        </div>
+        <div class="summary-item">
+          <dt>Status</dt>
+          <dd>
+            <span class="status-badge" [ngClass]="getStatusClass(invoice?.status || '')">
+              {{ invoice?.status || 'N/A' }}
+            </span>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
 
-  <p class="terms">
-    <span class="terms-label">Terms and Conditions:</span> Payment is due within
-    30 days or before schools open whichever comes first. Please include the
-    Student Number on your payment.
-  </p>
+  <!-- Invoice Items Table -->
+  <section class="invoice-items-section" *ngIf="invoice">
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th class="col-description">Description</th>
+          <th class="col-amount">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Balance Brought Forward -->
+        <tr *ngIf="invoice.balanceBfwd && invoice.balanceBfwd.amount" class="balance-forward-row">
+          <td>
+            <span class="item-label">Balance Brought Forward</span>
+            <span class="item-date">as at {{ formatDate(invoice.balanceBfwd.dateCreated) }}</span>
+          </td>
+          <td class="amount-cell">{{ invoice.balanceBfwd.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+        </tr>
 
-  <h3>Banking Details</h3>
+        <!-- Invoice Items -->
+        <tr *ngFor="let bill of invoice.bills" class="invoice-item-row">
+          <td>
+            <span class="item-label">{{ sharedService.feesNamesToString(bill.fees.name) }}</span>
+          </td>
+          <td class="amount-cell">{{ bill.fees.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+        </tr>
 
-  <div class="banking-details">
-    <span class="banking-label">Account Name</span>
-    <span class="banking-value">JUNIOR HIGH SCHOOL</span>
-    <span class="banking-label">Bank</span>
-    <span class="banking-value">ZB BANK</span>
-    <span class="banking-label">Branch</span>
-    <span class="banking-value">MASVINGO</span>
-    <span class="banking-label">Account Number</span>
-    <span class="banking-value">4564 00321642 405</span>
-  </div>
+        <!-- Exemption -->
+        <tr *ngIf="invoice.exemption" class="exemption-row">
+          <td>
+            <span class="item-label">Exemption</span>
+            <span class="item-description">
+              ({{ invoice.exemption.type }}
+              <span *ngIf="invoice.exemption.description">: {{ invoice.exemption.description }}</span>)
+            </span>
+          </td>
+          <td class="amount-cell exemption-amount">-{{ invoice.exemptedAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+        </tr>
 
-  <p class="footer">Thank you for your business!</p>
+        <!-- Total Row -->
+        <tr class="total-row">
+          <td class="total-label">Total</td>
+          <td class="total-amount">{{ invoice.totalBill | currency:'USD':'symbol':'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Terms and Conditions -->
+  <section class="invoice-terms-section">
+    <h3 class="section-title">Terms and Conditions</h3>
+    <p class="terms-text">
+      Payment is due within 30 days or before schools open, whichever comes first. 
+      Please include the Student Number on your payment.
+    </p>
+  </section>
+
+  <!-- Banking Details -->
+  <section class="banking-section">
+    <h3 class="section-title">Banking Details</h3>
+    <dl class="banking-details">
+      <div class="banking-item">
+        <dt>Account Name</dt>
+        <dd>JUNIOR HIGH SCHOOL</dd>
+      </div>
+      <div class="banking-item">
+        <dt>Bank</dt>
+        <dd>ZB BANK</dd>
+      </div>
+      <div class="banking-item">
+        <dt>Branch</dt>
+        <dd>MASVINGO</dd>
+      </div>
+      <div class="banking-item">
+        <dt>Account Number</dt>
+        <dd class="account-number">4564 00321642 405</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Footer -->
+  <footer class="invoice-footer">
+    <p class="footer-text">Thank you for your business!</p>
+  </footer>
 </div>

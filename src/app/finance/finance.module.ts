@@ -8,14 +8,14 @@ import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { financeReducer } from './store/finance.reducer';
 import { FinanceEffects } from './store/finance.effects';
-import { AddEditFeesComponent } from './fees/add-edit-fees/add-edit-fees.component';
-import { PaymentsComponent } from './payments/payments.component';
-import { StudentFinanceComponent } from './student-finance/student-finance.component';
+// AddEditFeesComponent is dynamically loaded in FeesComponent
+// PaymentsComponent is now standalone and lazy loaded
+// StudentFinanceComponent is now standalone and lazy loaded
 import { StudentsToBillComponent } from './student-finance/students-to-bill/students-to-bill.component';
 import { StudentEnrolmentDetailsComponent } from './student-finance/student-enrolment-details/student-enrolment-details.component';
 import { CurrentEnrolmentComponent } from './student-finance/current-enrolment/current-enrolment.component';
 import { InvoiceComponent } from './student-finance/invoice/invoice.component';
-import { BillingComponent } from './student-finance/billing/billing.component';
+// BillingComponent is dynamically loaded
 import { StudentBalancesComponent } from './student-balances/student-balances.component';
 import { SharedModule } from '../shared/shared.module';
 import { AddEditBalancesComponent } from './student-balances/add-edit-balances/add-edit-balances.component';
@@ -23,11 +23,11 @@ import { EnrolmentModule } from '../enrolment/enrolment.module';
 import { InvoiceItemComponent } from './student-finance/invoice/invoice-item/invoice-item.component';
 import { SearchInvoiceComponent } from './student-finance/invoice/search-invoice/search-invoice.component';
 import { InvoiceListComponent } from './student-finance/invoice/invoice-list/invoice-list.component';
-import { ReceiptItemComponent } from './payments/receipt-item/receipt-item.component';
-import { SearchReceiptComponent } from './payments/search-receipt/search-receipt.component';
-import { FilterReceiptsDialogComponent } from './payments/filter-receipts-dialog/filter-receipts-dialog.component';
-import { ReceiptSummaryCardComponent } from './payments/receipt-item/receipt-summary-card.component/receipt-summary-card.component.component';
-import { AddReceiptDialogComponent } from './payments/add-receipt-dialog/add-receipt-dialog.component';
+// ReceiptItemComponent is now standalone
+// SearchReceiptComponent is now standalone
+// FilterReceiptsDialogComponent is now standalone
+// ReceiptSummaryCardComponent is now standalone
+// AddReceiptDialogComponent is now standalone
 import { StudentFinancialsDashboardComponent } from './student-financials/student-financials-dashboard/student-financials-dashboard.component';
 import { StudentInvoicesComponent } from './student-financials/student-invoices/student-invoices.component';
 import { StudentReceiptsComponent } from './student-financials/student-receipts/student-receipts.component';
@@ -51,29 +51,27 @@ import { ExemptionSummaryByEnrolmentTableComponent } from './reports/exemption-r
 
 @NgModule({
   declarations: [
-    FeesComponent,
-    AddEditFeesComponent,
-    PaymentsComponent,
-    StudentFinanceComponent,
+    // PaymentsComponent is now standalone and lazy loaded
+    // StudentFinanceComponent is now standalone, not declared here
     StudentsToBillComponent,
     StudentEnrolmentDetailsComponent,
     CurrentEnrolmentComponent,
-    InvoiceComponent,
-    BillingComponent,
-    StudentBalancesComponent,
-    AddEditBalancesComponent,
-    InvoiceItemComponent,
-    SearchInvoiceComponent,
-    InvoiceListComponent,
-    ReceiptItemComponent,
-    SearchReceiptComponent,
-    FilterReceiptsDialogComponent,
-    ReceiptSummaryCardComponent,
-    AddReceiptDialogComponent,
-    StudentFinancialsDashboardComponent,
-    StudentInvoicesComponent,
-    StudentReceiptsComponent,
-    StudentPaymentHistoryComponent,
+    // InvoiceComponent is now standalone
+    // BillingComponent is dynamically loaded, not declared here
+    // StudentBalancesComponent is now standalone and lazy loaded
+    // AddEditBalancesComponent is now standalone
+    // InvoiceItemComponent is now standalone
+    // SearchInvoiceComponent is now standalone
+    // InvoiceListComponent is now standalone
+    // ReceiptItemComponent is now standalone
+    // SearchReceiptComponent is now standalone
+    // FilterReceiptsDialogComponent is now standalone
+    // ReceiptSummaryCardComponent is now standalone
+    // AddReceiptDialogComponent is now standalone
+    // StudentFinancialsDashboardComponent is now standalone and lazy loaded
+    // StudentInvoicesComponent is now standalone and lazy loaded
+    // StudentReceiptsComponent is now standalone and lazy loaded
+    // StudentPaymentHistoryComponent is now standalone and lazy loaded
     StudentLedgerReportComponent,
     FeesCollectionReportComponent,
     OutstandingFeesReportComponent,
@@ -101,6 +99,9 @@ import { ExemptionSummaryByEnrolmentTableComponent } from './reports/exemption-r
     EffectsModule.forFeature([FinanceEffects]),
     NgChartsModule,
     DecimalPipe,
+    // Standalone components
+    FeesComponent,
+    // AddEditFeesComponent is dynamically loaded, not imported here
   ],
   exports: [CurrentEnrolmentComponent, StudentEnrolmentDetailsComponent],
 })

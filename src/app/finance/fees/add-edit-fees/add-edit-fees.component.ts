@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
+import { FormControl, FormGroup, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { FeesModel } from '../../models/fees.model';
 import { feesActions } from '../../store/finance.actions';
@@ -10,11 +11,30 @@ import { FeesNames } from '../../enums/fees-names.enum';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { selectErrorMsg, selectIsLoading } from '../../store/finance.selector';
 import { ErrorStateMatcher } from '@angular/material/core';
+import { ThemeService, Theme } from '../../../services/theme.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-add-edit-fees',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './add-edit-fees.component.html',
-  styleUrls: ['./add-edit-fees.component.css'],
+  styleUrls: ['./add-edit-fees.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddEditFeesComponent implements OnInit, OnDestroy {
@@ -30,16 +50,23 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
   };
 
   private destroy$ = new Subject<void>();
+  currentTheme: Theme = 'light';
 
   constructor(
     private store: Store,
     @Inject(MAT_DIALOG_DATA) public data: { mode: 'add' | 'edit', fee?: FeesModel },
     public title: Title,
     public sharedService: SharedService,
-    private dialogRef: MatDialogRef<AddEditFeesComponent>
+    private dialogRef: MatDialogRef<AddEditFeesComponent>,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
+
     this.initializeForm();
     this.setupSubscriptions();
   }

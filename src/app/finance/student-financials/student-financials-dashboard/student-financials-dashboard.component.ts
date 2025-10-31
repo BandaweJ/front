@@ -1,36 +1,56 @@
 // src/app/finance/components/student-financials-dashboard/student-financials-dashboard.component.ts
 
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { filter, tap, takeUntil, map } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Observable, Subscription, combineLatest, Subject } from 'rxjs';
+import { filter, tap, takeUntil, map, switchMap } from 'rxjs/operators';
 import {
-  selectAmountDue,
-  selectErrorMsg,
-  selectIsLoadingFinancials,
+  getStudentLedger,
+  LedgerEntry,
+  selectIsLoading,
+  selectAllInvoices,
+  selectAllNonVoidedReceipts,
 } from '../../store/finance.selector';
-import { receiptActions } from '../../store/finance.actions';
+import {
+  invoiceActions,
+  receiptActions,
+} from '../../store/finance.actions';
 import { User } from 'src/app/auth/models/user.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
 
 @Component({
   selector: 'app-student-financials-dashboard',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatCardModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './student-financials-dashboard.component.html',
-  styleUrls: ['./student-financials-dashboard.component.css'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  styleUrls: ['./student-financials-dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   // Data Observables
   user$: Observable<User | null>;
-  outstandingBalance$: Observable<number | null>;
+  outstandingBalance$: Observable<number>;
   loadingOutstandingBalance$: Observable<boolean>;
-  outstandingBalanceError$: Observable<any>;
   
   // Computed properties
   currentUser$: Observable<User | null>;
   studentNumber$: Observable<string | null>;
+  studentName$: Observable<string | null>;
+  
+  // Theme
+  currentTheme: Theme = 'light';
 
   // Lifecycle Management
   private ngUnsubscribe = new Subject<void>();
@@ -61,24 +81,78 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private store: Store,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private themeService: ThemeService,
+    private cdr: ChangeDetectorRef
   ) {
     this.user$ = this.store.select(selectUser);
-    // Select data from the store
-    this.outstandingBalance$ = this.store.select(selectAmountDue);
-    this.loadingOutstandingBalance$ = this.store.select(
-      selectIsLoadingFinancials
+    
+    // Calculate outstanding balance from store using ledger selector (single source of truth)
+    this.outstandingBalance$ = this.user$.pipe(
+      filter((user): user is User => !!user && !!user.id),
+      switchMap((user) => {
+        return this.store.select(getStudentLedger(user.id)).pipe(
+          map((ledger: LedgerEntry[]) => {
+            if (!ledger || ledger.length === 0) {
+              return 0;
+            }
+            // Return the running balance from the last ledger entry
+            return ledger[ledger.length - 1].runningBalance;
+          })
+        );
+      })
     );
-    this.outstandingBalanceError$ = this.store.select(selectErrorMsg);
+    
+    // Loading state: use general loading state (tracks invoices and receipts)
+    this.loadingOutstandingBalance$ = this.store.select(selectIsLoading);
     
     // Initialize computed properties
     this.currentUser$ = this.user$;
     this.studentNumber$ = this.user$.pipe(
       map(user => user?.id || null)
     );
+    
+    // Get student name from invoices or receipts in the store
+    this.studentName$ = this.user$.pipe(
+      filter((user): user is User => !!user && !!user.id),
+      switchMap((user) => {
+        return combineLatest([
+          this.store.select(selectAllInvoices),
+          this.store.select(selectAllNonVoidedReceipts)
+        ]).pipe(
+          map(([invoices, receipts]) => {
+            // Try to get student name from invoices first
+            const studentInvoice = (invoices || []).find(
+              (inv) => inv.student?.studentNumber === user.id
+            );
+            if (studentInvoice?.student) {
+              return `${studentInvoice.student.name} ${studentInvoice.student.surname}`.trim();
+            }
+            
+            // If not found in invoices, try receipts
+            const studentReceipt = (receipts || []).find(
+              (rec) => rec.student?.studentNumber === user.id
+            );
+            if (studentReceipt?.student) {
+              return `${studentReceipt.student.name} ${studentReceipt.student.surname}`.trim();
+            }
+            
+            return null;
+          })
+        );
+      })
+    );
   }
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
+    
     this.loadUserData();
     this.setupNavigation();
   }
@@ -89,11 +163,12 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
         filter((user) => !!user),
         tap((user) => {
           if (user) {
-            // Dispatch action to fetch outstanding balance
+            // Ensure invoices and receipts are loaded for ledger calculation
             this.store.dispatch(
-              receiptActions.fetchStudentOutstandingBalance({
-                studentNumber: user.id,
-              })
+              invoiceActions.fetchAllInvoices()
+            );
+            this.store.dispatch(
+              receiptActions.fetchAllReceipts()
             );
           }
         }),
@@ -119,9 +194,6 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     if (this.routeSubscription) {
       this.routeSubscription.unsubscribe();
     }
-    
-    // Clear student financials when leaving the dashboard
-    this.store.dispatch(receiptActions.clearStudentFinancials());
   }
 
   // Helper to determine the active tab based on the current URL

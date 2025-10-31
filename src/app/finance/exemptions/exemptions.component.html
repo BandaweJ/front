@@ -1,0 +1,63 @@
+<div class="exemptions-container-wrapper" 
+     [class.theme-light]="currentTheme === 'light'"
+     [class.theme-dark]="currentTheme === 'dark'">
+  
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">money_off</mat-icon>
+        Exemption Management
+      </h1>
+      <p class="page-subtitle">View, create, edit, and manage student exemptions</p>
+    </div>
+    <div class="header-actions" *ngIf="currentView === 'list'">
+      <button mat-raised-button color="primary" (click)="onCreateClick()">
+        <mat-icon>add</mat-icon>
+        Create Exemption
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="exemptions-content">
+    <!-- List View -->
+    <div *ngIf="currentView === 'list'" class="exemptions-list-view">
+      <mat-card class="search-card">
+        <mat-card-content>
+          <app-search-exemption
+            (exemptionSelected)="onExemptionSelected($event)"
+            (filtersChanged)="onFiltersChanged($event)">
+          </app-search-exemption>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Exemptions List -->
+      <div class="exemptions-list-container">
+        <app-exemptions-list
+          [exemptions]="filteredExemptions.length > 0 ? filteredExemptions : exemptions"
+          [selectedExemption]="selectedExemption"
+          [isLoading]="isLoading"
+          (exemptionSelected)="onExemptionSelected($event)"
+          (editExemption)="onEditClick($event)"
+          (deleteExemption)="onDeleteClick($event)">
+        </app-exemptions-list>
+      </div>
+
+      <!-- Selected Exemption Details (if needed in future) -->
+      <!-- Can be expanded to show details in a side panel similar to invoices -->
+    </div>
+
+    <!-- Create/Edit View -->
+    <div *ngIf="currentView === 'create'" class="exemptions-form-view">
+      <app-create-edit-exemption
+        [exemption]="selectedExemption"
+        [student]="selectedExemption?.student || null"
+        (saved)="onExemptionSaved($event)"
+        (cancelled)="onCancelEdit()">
+      </app-create-edit-exemption>
+    </div>
+  </div>
+
+</div>
+

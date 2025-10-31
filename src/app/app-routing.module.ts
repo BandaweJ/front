@@ -22,15 +22,15 @@ import { TeacherViewComponent } from './registration/teachers-list/teacher-view/
 import { StudentViewComponent } from './registration/students-list/student-view/student-view.component';
 import { ClassListsComponent } from './enrolment/terms-classes/class-lists/class-lists.component';
 import { MarksProgressComponent } from './marks/marks-progress/marks-progress.component';
-import { FeesComponent } from './finance/fees/fees.component';
-import { StudentFinanceComponent } from './finance/student-finance/student-finance.component';
-import { StudentBalancesComponent } from './finance/student-balances/student-balances.component';
-import { InvoiceComponent } from './finance/student-finance/invoice/invoice.component';
-import { PaymentsComponent } from './finance/payments/payments.component';
-import { StudentFinancialsDashboardComponent } from './finance/student-financials/student-financials-dashboard/student-financials-dashboard.component';
-import { StudentInvoicesComponent } from './finance/student-financials/student-invoices/student-invoices.component';
-import { StudentReceiptsComponent } from './finance/student-financials/student-receipts/student-receipts.component';
-import { StudentPaymentHistoryComponent } from './finance/student-financials/student-payment-history/student-payment-history.component';
+// FeesComponent is lazy loaded
+// StudentFinanceComponent is lazy loaded
+// StudentBalancesComponent is now standalone and lazy loaded
+// InvoiceComponent is lazy loaded
+// PaymentsComponent is now standalone and lazy loaded
+// StudentFinancialsDashboardComponent is now standalone and lazy loaded
+// StudentInvoicesComponent is now standalone and lazy loaded
+// StudentReceiptsComponent is now standalone and lazy loaded
+// StudentPaymentHistoryComponent is now standalone and lazy loaded
 import { StudentLedgerReportComponent } from './finance/reports/student-ledger-report/student-ledger-report.component';
 import { FeesCollectionReportComponent } from './finance/reports/fees-collection-report/fees-collection-report.component';
 import { OutstandingFeesReportComponent } from './finance/reports/outstanding-fees-report/outstanding-fees-report.component';
@@ -38,7 +38,6 @@ import { AgedDebtorsReportComponent } from './finance/reports/aged-debtors-repor
 import { RevenueRecognitionReportComponent } from './finance/reports/revenue-recognition-report/revenue-recognition-report.component';
 import { EnrollmentBillingReconciliationReportComponent } from './finance/reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component';
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
-import { CreateExemptionComponent } from './finance/create-exemption/create-exemption.component';
 import { ExemptionReportsComponent } from './finance/reports/exemption-reports/exemption-reports/exemption-reports.component';
 // Lazy loaded - removed direct import
 
@@ -70,16 +69,11 @@ const routes: Routes = [
     title: 'Teacher Details',
   },
   {
-    path: 'student-financials', // Route with studentNumber parameter
-    component: StudentFinancialsDashboardComponent,
+    path: 'student-financials',
+    loadComponent: () => import('./finance/student-financials/student-financials-dashboard/student-financials-dashboard.component').then(m => m.StudentFinancialsDashboardComponent),
     canActivate: [AuthGuardService],
-    children: [
-      // Child routes for the tabs
-      { path: '', redirectTo: 'invoices', pathMatch: 'full' },
-      { path: 'invoices', component: StudentInvoicesComponent },
-      { path: 'receipts', component: StudentReceiptsComponent },
-      { path: 'payment-history', component: StudentPaymentHistoryComponent },
-    ],
+    title: 'Student Financials',
+    loadChildren: () => import('./finance/student-financials/student-financials.routes').then(m => m.STUDENT_FINANCIALS_ROUTES),
   },
   {
     path: 'students',
@@ -180,39 +174,39 @@ const routes: Routes = [
   },
   {
     path: 'fees',
-    component: FeesComponent,
+    loadComponent: () => import('./finance/fees/fees.component').then(m => m.FeesComponent),
     canActivate: [AuthGuardService],
     title: 'Manage Fees',
   },
   {
     path: 'balances',
-    component: StudentBalancesComponent,
+    loadComponent: () => import('./finance/student-balances/student-balances.component').then(m => m.StudentBalancesComponent),
     canActivate: [AuthGuardService],
     title: 'Manage Balances',
   },
   {
     path: 'invoice',
-    component: InvoiceComponent,
+    loadComponent: () => import('./finance/student-finance/invoice/invoice.component').then(m => m.InvoiceComponent),
     canActivate: [AuthGuardService],
-    title: 'Invoice',
+    title: 'Invoice Management',
   },
   {
     path: 'student-finance',
-    component: StudentFinanceComponent,
+    loadComponent: () => import('./finance/student-finance/student-finance.component').then(m => m.StudentFinanceComponent),
     canActivate: [AuthGuardService],
     title: 'Individual Student Finance',
   },
   {
     path: 'payments',
-    component: PaymentsComponent,
+    loadComponent: () => import('./finance/payments/payments.component').then(m => m.PaymentsComponent),
     canActivate: [AuthGuardService],
     title: 'Receipting',
   },
   {
     path: 'exemptions',
-    component: CreateExemptionComponent,
+    loadComponent: () => import('./finance/exemptions/exemptions.component').then(m => m.ExemptionsComponent),
     canActivate: [AuthGuardService],
-    title: 'Create Exemption',
+    title: 'Exemption Management',
   },
   {
     canActivate: [AuthGuardService],

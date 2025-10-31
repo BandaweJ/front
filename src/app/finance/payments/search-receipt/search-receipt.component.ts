@@ -1,6 +1,11 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { ReceiptModel } from '../../models/payment.model';
-import { FormControl } from '@angular/forms';
+import { Component, EventEmitter, Output, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatIconModule } from '@angular/material/icon';
+import { MatOptionModule } from '@angular/material/core';
 import {
   debounceTime,
   map,
@@ -12,13 +17,26 @@ import {
 } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { selectAllReceipts } from '../../store/finance.selector';
+import { ReceiptModel } from '../../models/payment.model';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
 
 @Component({
   selector: 'app-search-receipt',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatIconModule,
+    MatOptionModule,
+  ],
   templateUrl: './search-receipt.component.html',
-  styleUrls: ['./search-receipt.component.css'],
+  styleUrls: ['./search-receipt.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchReceiptComponent {
+export class SearchReceiptComponent implements OnInit, OnDestroy {
   @Output() receiptSelected = new EventEmitter<ReceiptModel>();
 
   searchControl = new FormControl('');
@@ -31,8 +49,13 @@ export class SearchReceiptComponent {
 
   private initialReceipts: ReceiptModel[] = []; // Store the initial array for filtering
   private ngUnsubscribe = new Subject<void>(); // Used for unsubscribing observables
+  currentTheme: Theme = 'light';
 
-  constructor(private store: Store) {}
+  constructor(
+    private store: Store,
+    public themeService: ThemeService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     // 1. Subscribe to all receipts from the store once
@@ -46,7 +69,16 @@ export class SearchReceiptComponent {
           (searchTerm) => this.filterReceipts(this.initialReceipts, searchTerm) // Filter the stored list
         )
       );
+      this.cdr.markForCheck();
     });
+
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
 
     // Optionally dispatch an action to load receipts if they are not already in the store
     // this.store.dispatch(loadReceipts()); // Uncomment if you need to trigger loading

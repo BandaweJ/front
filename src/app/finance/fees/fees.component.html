@@ -14,7 +14,7 @@
 </div>
 
 <!-- Main Container -->
-<div class="main-container">
+<div class="main-container" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'" [class.animated-bg-light]="currentTheme === 'light'" [class.animated-bg-dark]="currentTheme === 'dark'">
   <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">

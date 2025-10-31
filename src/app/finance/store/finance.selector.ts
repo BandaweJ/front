@@ -62,6 +62,32 @@ export const selectExemptionsError = createSelector(
   (state: fromFinanceReducer.State) => state.exemptionError
 );
 
+// New exemption selectors
+export const selectAllExemptions = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.allExemptions
+);
+
+export const selectLoadingAllExemptions = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.loadingAllExemptions
+);
+
+export const selectLoadingExemptionById = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.loadingExemptionById
+);
+
+export const selectUpdatingExemption = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.updatingExemption
+);
+
+export const selectDeletingExemption = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.deletingExemption
+);
+
 export const selectFees = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.fees

@@ -13,7 +13,7 @@ import { AddEditSubjectComponent } from './add-edit-subject/add-edit-subject.com
 import { deleteSubjectAction } from '../store/marks.actions';
 import { Title } from '@angular/platform-browser';
 import { takeUntil } from 'rxjs/operators';
-import { ConfirmDeleteDialogComponent } from '../../shared/confirm-delete-dialog/confirm-delete-dialog.component';
+// ConfirmDialogComponent will be lazy loaded
 
 @Component({
   selector: 'app-subjects',
@@ -133,8 +133,9 @@ export class SubjectsComponent implements OnInit, OnDestroy {
     });
   }
 
-  confirmDeleteSubject(subject: SubjectsModel): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+  async confirmDeleteSubject(subject: SubjectsModel): Promise<void> {
+    const { ConfirmDialogComponent } = await import('src/app/shared/confirm-dialog/confirm-dialog.component');
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       maxWidth: '90vw',
       data: {

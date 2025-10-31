@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { Component, EventEmitter, Output, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { select, Store } from '@ngrx/store';
 import {
   debounceTime,
@@ -12,13 +13,30 @@ import {
 } from 'rxjs';
 import { InvoiceModel } from 'src/app/finance/models/invoice.model';
 import { selectAllInvoices } from 'src/app/finance/store/finance.selector';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatOptionModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
 
 @Component({
   selector: 'app-search-invoice',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatOptionModule,
+    MatIconModule,
+  ],
   templateUrl: './search-invoice.component.html',
-  styleUrls: ['./search-invoice.component.css'],
+  styleUrls: ['./search-invoice.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchInvoiceComponent {
+export class SearchInvoiceComponent implements OnInit, OnDestroy {
   @Output() invoiceSelected = new EventEmitter<InvoiceModel>();
 
   searchControl = new FormControl('');
@@ -27,11 +45,25 @@ export class SearchInvoiceComponent {
     select(selectAllInvoices)
   );
   initialInvoices: InvoiceModel[] = [];
+  currentTheme: Theme = 'light';
+  
   private ngUnsubscribe = new Subject<void>();
 
-  constructor(private store: Store) {}
+  constructor(
+    private store: Store,
+    public themeService: ThemeService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
+
     this.invoices$.pipe(takeUntil(this.ngUnsubscribe)).subscribe((invoices) => {
       this.initialInvoices = invoices;
       // Perform initial filtering if needed with an empty search term
@@ -42,6 +74,7 @@ export class SearchInvoiceComponent {
           this.filterInvoices(this.initialInvoices, searchTerm)
         )
       );
+      this.cdr.markForCheck();
     });
   }
 

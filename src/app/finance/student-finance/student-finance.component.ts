@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { take, takeUntil, filter } from 'rxjs/operators';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
 import { StudentsModel } from 'src/app/registration/models/students.model';
@@ -12,13 +14,43 @@ import {
   selectFechInvoiceError,
   selectLoadingInvoice,
 } from '../store/finance.selector';
+import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
+import { ThemeService, Theme } from '../../services/theme.service';
+import { SharedModule } from '../../shared/shared.module';
+import { BillingComponent } from './billing/billing.component';
+import { InvoiceItemComponent } from './invoice/invoice-item/invoice-item.component';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-student-finance',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    SharedModule,
+    BillingComponent,
+    InvoiceItemComponent,
+    MatCardModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+  ],
   templateUrl: './student-finance.component.html',
-  styleUrls: ['./student-finance.component.css'],
+  styleUrls: ['./student-finance.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StudentFinanceComponent implements OnInit {
+export class StudentFinanceComponent implements OnInit, OnDestroy {
   // Simple observables from store
   terms$: Observable<TermsModel[]>;
   invoice$: Observable<InvoiceModel | null>;
@@ -29,7 +61,14 @@ export class StudentFinanceComponent implements OnInit {
   selectedStudentNumber: string | null = null;
   selectedStudent: StudentsModel | null = null;
 
-  constructor(private store: Store) {
+  private destroy$ = new Subject<void>();
+  currentTheme: Theme = 'light';
+
+  constructor(
+    private store: Store,
+    public themeService: ThemeService,
+    private cdr: ChangeDetectorRef
+  ) {
     this.terms$ = this.store.select(selectTerms);
     this.invoice$ = this.store.select(selectedStudentInvoice);
     this.loadingInvoice$ = this.store.select(selectLoadingInvoice);
@@ -37,7 +76,15 @@ export class StudentFinanceComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // No subscriptions needed - using async pipe in template
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   selectedStudentChanged(student: StudentsModel): void {

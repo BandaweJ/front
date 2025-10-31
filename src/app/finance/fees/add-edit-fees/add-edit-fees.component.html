@@ -2,17 +2,17 @@
 <div class="loading-overlay" *ngIf="isLoading$ | async">
   <div class="loading-spinner">
     <mat-spinner diameter="50"></mat-spinner>
-    <p>{{ data ? 'Updating fee...' : 'Adding fee...' }}</p>
+    <p>{{ data.mode === 'edit' ? 'Updating fee...' : 'Adding fee...' }}</p>
   </div>
 </div>
 
 <!-- Dialog Header -->
-<div class="dialog-header">
+<div class="dialog-header" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
   <div class="header-content">
-    <mat-icon class="header-icon">{{ data ? 'edit' : 'add' }}</mat-icon>
+    <mat-icon class="header-icon">{{ data.mode === 'edit' ? 'edit' : 'add' }}</mat-icon>
     <div class="header-text">
-      <h2 class="dialog-title">{{ data ? 'Edit Fee' : 'Add New Fee' }}</h2>
-      <p class="dialog-subtitle">{{ data ? 'Update fee information' : 'Create a new fee entry' }}</p>
+      <h2 class="dialog-title">{{ data.mode === 'edit' ? 'Edit Fee' : 'Add New Fee' }}</h2>
+      <p class="dialog-subtitle">{{ data.mode === 'edit' ? 'Update fee information' : 'Create a new fee entry' }}</p>
     </div>
   </div>
 </div>
@@ -119,7 +119,7 @@
           [disabled]="feesForm.invalid || (isLoading$ | async)"
           (click)="onSubmit()"
           class="submit-button">
-    <mat-icon>{{ data ? 'save' : 'add' }}</mat-icon>
-    {{ data ? 'Update Fee' : 'Add Fee' }}
+    <mat-icon>{{ data.mode === 'edit' ? 'save' : 'add' }}</mat-icon>
+    {{ data.mode === 'edit' ? 'Update Fee' : 'Add Fee' }}
   </button>
 </div>

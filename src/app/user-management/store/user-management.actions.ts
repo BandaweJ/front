@@ -46,7 +46,7 @@ export const userManagementActions = createActionGroup({
     loadUserActivityFailure: props<{ error: string }>(),
 
     // Load System Activity
-    loadSystemActivity: props<{ page?: number; limit?: number }>(),
+    loadSystemActivity: props<{ page?: number; limit?: number; action?: string; userId?: string; startDate?: string; endDate?: string }>(),
     loadSystemActivitySuccess: props<{ activity: UserActivityPaginatedModel }>(),
     loadSystemActivityFailure: props<{ error: string }>(),
 

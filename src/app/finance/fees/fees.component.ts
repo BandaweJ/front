@@ -1,21 +1,36 @@
 import { ROLES } from './../../registration/models/roles.enum';
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { feesActions } from '../store/finance.actions';
 import { selectFees, selectIsLoading } from '../store/finance.selector';
 import { FeesModel } from '../models/fees.model';
-import { MatDialog } from '@angular/material/dialog';
-import { AddEditFeesComponent } from './add-edit-fees/add-edit-fees.component';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+// AddEditFeesComponent is dynamically loaded
 import { SharedService } from 'src/app/shared.service';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { FeesNames } from '../enums/fees-names.enum';
+import { ThemeService, Theme } from '../../services/theme.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-fees',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatCardModule,
+  ],
   templateUrl: './fees.component.html',
-  styleUrls: ['./fees.component.css'],
+  styleUrls: ['./fees.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FeesComponent implements OnInit, OnDestroy {
@@ -35,17 +50,24 @@ export class FeesComponent implements OnInit, OnDestroy {
   optionalServiceFees: FeesModel[] = [];
 
   private destroy$ = new Subject<void>();
+  currentTheme: Theme = 'light';
 
   constructor(
     public title: Title,
     private store: Store,
     private dialog: MatDialog,
-    public sharedService: SharedService
+    public sharedService: SharedService,
+    public themeService: ThemeService
   ) {
     this.store.dispatch(feesActions.fetchFees());
   }
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+    });
+
     this.fees$.pipe(takeUntil(this.destroy$)).subscribe((fees) => {
       this.organizeFeesByCategory(fees);
     });
@@ -130,7 +152,8 @@ export class FeesComponent implements OnInit, OnDestroy {
     return displayNames[feeName] || feeName;
   }
 
-  openAddFeesDialog(): void {
+  async openAddFeesDialog(): Promise<void> {
+    const { AddEditFeesComponent } = await import('./add-edit-fees/add-edit-fees.component');
     const dialogRef = this.dialog.open(AddEditFeesComponent, {
       width: '600px',
       maxWidth: '90vw',
@@ -145,7 +168,8 @@ export class FeesComponent implements OnInit, OnDestroy {
     });
   }
 
-  openEditFeesDialog(fee: FeesModel): void {
+  async openEditFeesDialog(fee: FeesModel): Promise<void> {
+    const { AddEditFeesComponent } = await import('./add-edit-fees/add-edit-fees.component');
     const dialogRef = this.dialog.open(AddEditFeesComponent, {
       width: '600px',
       maxWidth: '90vw',

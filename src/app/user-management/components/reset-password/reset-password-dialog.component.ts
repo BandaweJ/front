@@ -55,7 +55,7 @@ export class ResetPasswordDialogComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.manualPasswordForm = this.fb.group({
-      newPassword: ['', [Validators.required, Validators.minLength(8), this.passwordStrengthValidator]],
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
     }, { validators: this.passwordMatchValidator });
   }
@@ -106,21 +106,43 @@ export class ResetPasswordDialogComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response) => {
-            this.loading = false;
-            this.dialogRef.close(true);
-            this.snackBar.open('Password updated successfully', 'OK', {
-              duration: 3000,
-              verticalPosition: 'top',
-              horizontalPosition: 'center',
-            });
+            // Only show success if we actually got a valid response
+            if (response && response.message) {
+              this.loading = false;
+              this.dialogRef.close(true);
+              this.snackBar.open(response.message || 'Password updated successfully', 'OK', {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              });
+            } else {
+              // Handle unexpected response format
+              this.loading = false;
+              this.snackBar.open('Unexpected response from server', 'Close', {
+                duration: 5000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              });
+            }
           },
           error: (error) => {
             this.loading = false;
-            this.snackBar.open('Failed to update password', 'Close', {
+            // Extract error message from HttpErrorResponse
+            let errorMessage = 'Failed to update password';
+            if (error?.error?.message) {
+              errorMessage = error.error.message;
+            } else if (error?.error?.error) {
+              errorMessage = error.error.error;
+            } else if (error?.message) {
+              errorMessage = error.message;
+            }
+            
+            this.snackBar.open(errorMessage, 'Close', {
               duration: 5000,
               verticalPosition: 'top',
               horizontalPosition: 'center',
             });
+            // Don't close dialog on error so user can try again
           }
         });
     }
@@ -165,9 +187,6 @@ export class ResetPasswordDialogComponent implements OnInit, OnDestroy {
       if (field.errors['minlength']) {
         return `${this.getFieldDisplayName(fieldName)} must be at least ${field.errors['minlength'].requiredLength} characters`;
       }
-      if (field.errors['passwordStrength']) {
-        return 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character';
-      }
       if (field.errors['passwordMismatch']) {
         return 'Passwords do not match';
       }
@@ -181,21 +200,6 @@ export class ResetPasswordDialogComponent implements OnInit, OnDestroy {
       confirmPassword: 'Confirm Password',
     };
     return displayNames[fieldName] || fieldName;
-  }
-
-  private passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (!value) return null;
-
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasLowerCase = /[a-z]/.test(value);
-    const hasNumeric = /[0-9]/.test(value);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-
-    if (!hasUpperCase || !hasLowerCase || !hasNumeric || !hasSpecialChar) {
-      return { passwordStrength: true };
-    }
-    return null;
   }
 
   private passwordMatchValidator(form: FormGroup): ValidationErrors | null {

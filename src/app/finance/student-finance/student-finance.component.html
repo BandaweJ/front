@@ -1,4 +1,8 @@
-<div class="student-finance-container">
+<div class="student-finance-container" 
+     [class.theme-light]="currentTheme === 'light'" 
+     [class.theme-dark]="currentTheme === 'dark'"
+     [class.animated-bg-light]="currentTheme === 'light'"
+     [class.animated-bg-dark]="currentTheme === 'dark'">
   <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">
@@ -124,9 +128,7 @@
                </mat-card-header>
 
                <mat-card-content>
-                 <app-billing
-                   [enrolment]="invoice.enrol">
-                 </app-billing>
+                 <app-billing [enrolment]="invoice.enrol"></app-billing>
                </mat-card-content>
              </mat-card>
 
@@ -141,10 +143,7 @@
                </mat-card-header>
 
                <mat-card-content>
-                 <app-invoice-item
-                   [invoice]="invoice"
-                   [downloadable]="true">
-                 </app-invoice-item>
+                 <app-invoice-item [invoice]="invoice" [downloadable]="true"></app-invoice-item>
                </mat-card-content>
              </mat-card>
            </div>

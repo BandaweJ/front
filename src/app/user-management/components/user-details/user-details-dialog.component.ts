@@ -102,7 +102,7 @@ export class UserDetailsDialogComponent implements OnInit, OnDestroy {
 
     // Pass the current user data when it loads
     this.userDetails$.pipe(takeUntil(this.destroy$)).subscribe(user => {
-      if (user && !resetPasswordDialogRef.componentInstance.data.user) {
+      if (user && resetPasswordDialogRef.componentInstance?.data) {
         resetPasswordDialogRef.componentInstance.data.user = user;
       }
     });

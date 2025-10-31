@@ -71,12 +71,26 @@ export class UserManagementService {
     return this.httpClient.get<UserActivityPaginatedModel>(`${environment.apiUrl}/auth/accounts/${id}/activity`, { params });
   }
 
-  getSystemActivity(page: number = 1, limit: number = 20): Observable<UserActivityPaginatedModel> {
-    const params = new HttpParams()
+  getSystemActivity(page: number = 1, limit: number = 20, action?: string, userId?: string, startDate?: string, endDate?: string): Observable<UserActivityPaginatedModel> {
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.httpClient.get<UserActivityPaginatedModel>(`${this.baseUrl}/activity/system`, { params });
+    if (action) {
+      params = params.set('action', action);
+    }
+    if (userId) {
+      params = params.set('userId', userId);
+    }
+    if (startDate) {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate) {
+      params = params.set('endDate', endDate);
+    }
+
+    // Use the correct backend endpoint at /activity/system
+    return this.httpClient.get<UserActivityPaginatedModel>(`${environment.apiUrl}/activity/system`, { params });
   }
 }
 

@@ -49,6 +49,11 @@ export interface State {
   exemption: ExemptionModel | null;
   exemptionLoading: boolean;
   exemptionError: string | null;
+  allExemptions: ExemptionModel[];
+  loadingAllExemptions: boolean;
+  loadingExemptionById: boolean;
+  updatingExemption: boolean;
+  deletingExemption: boolean;
 }
 
 export const initialState: State = {
@@ -80,6 +85,11 @@ export const initialState: State = {
   exemption: null,
   exemptionLoading: false,
   exemptionError: null,
+  allExemptions: [],
+  loadingAllExemptions: false,
+  loadingExemptionById: false,
+  updatingExemption: false,
+  deletingExemption: false,
 };
 
 export const financeReducer = createReducer(
@@ -487,6 +497,7 @@ export const financeReducer = createReducer(
   on(exemptionActions.createExemptionSuccess, (state, { exemption }) => ({
     ...state,
     exemption: exemption, // Store the newly created exemption
+    allExemptions: [...state.allExemptions, exemption], // Add to allExemptions
     exemptionLoading: false,
     exemptionError: null,
   })),
@@ -497,6 +508,87 @@ export const financeReducer = createReducer(
     exemptionLoading: false,
     exemptionError: error,
     exemption: null, // Clear exemption on error
+  })),
+  
+  // Fetch All Exemptions
+  on(exemptionActions.fetchAllExemptions, (state) => ({
+    ...state,
+    loadingAllExemptions: true,
+    exemptionError: null,
+  })),
+  on(exemptionActions.fetchAllExemptionsSuccess, (state, { exemptions }) => ({
+    ...state,
+    allExemptions: exemptions,
+    loadingAllExemptions: false,
+    exemptionError: null,
+  })),
+  on(exemptionActions.fetchAllExemptionsFailure, (state, { error }) => ({
+    ...state,
+    loadingAllExemptions: false,
+    exemptionError: error,
+  })),
+  
+  // Fetch Exemption By ID
+  on(exemptionActions.fetchExemptionById, (state) => ({
+    ...state,
+    loadingExemptionById: true,
+    exemptionError: null,
+  })),
+  on(exemptionActions.fetchExemptionByIdSuccess, (state, { exemption }) => ({
+    ...state,
+    exemption: exemption,
+    loadingExemptionById: false,
+    exemptionError: null,
+  })),
+  on(exemptionActions.fetchExemptionByIdFailure, (state, { error }) => ({
+    ...state,
+    loadingExemptionById: false,
+    exemptionError: error,
+    exemption: null,
+  })),
+  
+  // Update Exemption
+  on(exemptionActions.updateExemption, (state) => ({
+    ...state,
+    updatingExemption: true,
+    exemptionError: null,
+  })),
+  on(exemptionActions.updateExemptionSuccess, (state, { exemption }) => ({
+    ...state,
+    // Update in allExemptions array if it exists
+    allExemptions: state.allExemptions.map((e) => 
+      e.id === exemption.id ? exemption : e
+    ),
+    // Update current exemption if it's the one being updated
+    exemption: state.exemption?.id === exemption.id ? exemption : state.exemption,
+    updatingExemption: false,
+    exemptionError: null,
+  })),
+  on(exemptionActions.updateExemptionFailure, (state, { error }) => ({
+    ...state,
+    updatingExemption: false,
+    exemptionError: error,
+  })),
+  
+  // Delete Exemption
+  on(exemptionActions.deleteExemption, (state) => ({
+    ...state,
+    deletingExemption: true,
+    exemptionError: null,
+  })),
+  on(exemptionActions.deleteExemptionSuccess, (state, { id }) => ({
+    ...state,
+    // Remove from allExemptions array
+    allExemptions: state.allExemptions.filter((e) => e.id !== id),
+    // Clear current exemption if it's the one being deleted
+    exemption: state.exemption?.id === id ? null : state.exemption,
+    deletingExemption: false,
+    exemptionError: null,
+  })),
+  on(exemptionActions.deleteExemptionFailure, (state, { error }) => ({
+    ...state,
+    deletingExemption: false,
+    exemptionError: error,
   })),
   on(receiptActions.voidReceipt, (state) => ({
     ...state,

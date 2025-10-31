@@ -635,6 +635,132 @@ export class FinanceEffects {
     )
   );
 
+  fetchAllExemptions$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(exemptionActions.fetchAllExemptions),
+      switchMap(({ studentNumber, type, isActive }) =>
+        this.exemptionService.getAllExemptions(studentNumber, type as any, isActive).pipe(
+          map((exemptions) => {
+            return exemptionActions.fetchAllExemptionsSuccess({
+              exemptions: exemptions,
+            });
+          }),
+          catchError((error: HttpErrorResponse) => {
+            let errorMessage = 'An unknown error occurred while fetching exemptions.';
+            if (error.error && error.error.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+              duration: 5000,
+              panelClass: ['error-snackbar'],
+            });
+            return of(
+              exemptionActions.fetchAllExemptionsFailure({ error: errorMessage })
+            );
+          })
+        )
+      )
+    )
+  );
+
+  fetchExemptionById$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(exemptionActions.fetchExemptionById),
+      switchMap(({ id }) =>
+        this.exemptionService.getExemptionById(id).pipe(
+          map((exemption) => {
+            return exemptionActions.fetchExemptionByIdSuccess({
+              exemption: exemption,
+            });
+          }),
+          catchError((error: HttpErrorResponse) => {
+            let errorMessage = 'An unknown error occurred while fetching exemption.';
+            if (error.error && error.error.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+              duration: 5000,
+              panelClass: ['error-snackbar'],
+            });
+            return of(
+              exemptionActions.fetchExemptionByIdFailure({ error: errorMessage })
+            );
+          })
+        )
+      )
+    )
+  );
+
+  updateExemption$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(exemptionActions.updateExemption),
+      switchMap(({ id, exemption }) =>
+        this.exemptionService.updateExemption(id, exemption).pipe(
+          map((updatedExemption) => {
+            this.snackBar.open('Exemption updated successfully!', 'Close', {
+              duration: 3000,
+              panelClass: ['success-snackbar'],
+            });
+            return exemptionActions.updateExemptionSuccess({
+              exemption: updatedExemption,
+            });
+          }),
+          catchError((error: HttpErrorResponse) => {
+            let errorMessage = 'An unknown error occurred while updating exemption.';
+            if (error.error && error.error.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+              duration: 5000,
+              panelClass: ['error-snackbar'],
+            });
+            return of(
+              exemptionActions.updateExemptionFailure({ error: errorMessage })
+            );
+          })
+        )
+      )
+    )
+  );
+
+  deleteExemption$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(exemptionActions.deleteExemption),
+      switchMap(({ id }) =>
+        this.exemptionService.deleteExemption(id).pipe(
+          map(() => {
+            this.snackBar.open('Exemption deleted successfully!', 'Close', {
+              duration: 3000,
+              panelClass: ['success-snackbar'],
+            });
+            return exemptionActions.deleteExemptionSuccess({ id: id });
+          }),
+          catchError((error: HttpErrorResponse) => {
+            let errorMessage = 'An unknown error occurred while deleting exemption.';
+            if (error.error && error.error.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+              duration: 5000,
+              panelClass: ['error-snackbar'],
+            });
+            return of(
+              exemptionActions.deleteExemptionFailure({ error: errorMessage })
+            );
+          })
+        )
+      )
+    )
+  );
+
   voidReceipt$ = createEffect(() =>
     this.actions$.pipe(
       ofType(receiptActions.voidReceipt),

@@ -41,7 +41,7 @@ import { Title } from '@angular/platform-browser';
 import { ExamType } from '../models/examtype.enum';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDeleteDialogComponent } from '../../shared/confirm-delete-dialog/confirm-delete-dialog.component';
+// ConfirmDialogComponent will be lazy loaded
 
 interface MarkFormGroup {
   mark: FormControl<number | null>;
@@ -382,7 +382,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.savingMarks.has(index);
   }
 
-  deleteMark(mark: MarksModel) {
+  async deleteMark(mark: MarksModel): Promise<void> {
     if (!mark.id) {
       this.snackBar.open('Cannot delete: Mark has no ID.', 'Error', {
         duration: 3000,
@@ -390,7 +390,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    const { ConfirmDialogComponent } = await import('src/app/shared/confirm-dialog/confirm-dialog.component');
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: 'Delete Mark',

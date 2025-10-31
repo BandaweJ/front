@@ -65,6 +65,30 @@
         </mat-form-field>
       </div>
 
+      <!-- Account Status Section -->
+      <div class="form-section">
+        <h3 class="section-title">Account Status</h3>
+        
+        <div class="account-status-section">
+          <mat-slide-toggle 
+            formControlName="active" 
+            color="primary"
+            class="status-toggle">
+            <div class="toggle-label">
+              <mat-icon>{{ editUserForm.get('active')?.value ? 'check_circle' : 'cancel' }}</mat-icon>
+              <span class="toggle-text">
+                {{ editUserForm.get('active')?.value ? 'Account Active' : 'Account Inactive' }}
+              </span>
+            </div>
+            <div class="toggle-description">
+              {{ editUserForm.get('active')?.value 
+                ? 'User can sign in and access the system' 
+                : 'User cannot sign in and is soft-deleted' }}
+            </div>
+          </mat-slide-toggle>
+        </div>
+      </div>
+
     </form>
   </mat-dialog-content>
 

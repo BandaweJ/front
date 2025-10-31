@@ -4,40 +4,79 @@ import {
   Input,
   SimpleChanges,
   ViewChild,
-  OnInit, // Import OnInit
-  OnChanges, // Import OnChanges
+  OnInit,
+  OnChanges,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ReceiptModel } from '../../models/payment.model';
 import { Store } from '@ngrx/store';
-import { MatDialog } from '@angular/material/dialog';
-import { MatDialogRef } from '@angular/material/dialog'; // For dialog reference
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { receiptActions } from '../../store/finance.actions';
 import { ReceiptInvoiceAllocationsModel } from '../../models/receipt-invoice-allocations.model';
-import { Observable, take } from 'rxjs';
+import { Observable, take, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ROLES } from 'src/app/registration/models/roles.enum';
-import { ConfirmDeleteDialogComponent } from '../../../confirm-delete-dialog/confirm-delete-dialog.component';
 import { selectAuthUserRole } from 'src/app/auth/store/auth.selectors';
 import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialo/confirmation-dialo.component';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
 
 @Component({
   selector: 'app-receipt-item',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatTooltipModule,
+  ],
   templateUrl: './receipt-item.component.html',
-  styleUrls: ['./receipt-item.component.css'],
+  styleUrls: ['./receipt-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReceiptItemComponent implements OnInit, OnChanges {
+export class ReceiptItemComponent implements OnInit, OnChanges, OnDestroy {
   @Input() receipt!: ReceiptModel;
   @Input() downloadable = false;
 
   balance = '0.00';
   userRole$!: Observable<ROLES | undefined>; // To get the current user's role
+  currentTheme: Theme = 'light';
+  private destroy$ = new Subject<void>();
 
   @ViewChild('receiptContainerRef') receiptContainerRef!: ElementRef;
 
-  constructor(private store: Store, private dialog: MatDialog) {}
+  constructor(
+    private store: Store,
+    private dialog: MatDialog,
+    public themeService: ThemeService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     // Get the user's role from the store on init
     this.userRole$ = this.store.select(selectAuthUserRole);
+
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   printReceipt(): void {
@@ -110,13 +149,16 @@ export class ReceiptItemComponent implements OnInit, OnChanges {
       ) {
         const sum = currentReceipt.allocations.reduce(
           (total: number, allocation: ReceiptInvoiceAllocationsModel) => {
-            return total + +allocation.invoice.balance;
+            const balance = allocation?.invoice?.balance;
+            return total + (balance ? +balance : 0);
           },
           0
         );
         this.balance = sum.toFixed(2);
+        this.cdr.markForCheck();
       } else {
         this.balance = '0.00';
+        this.cdr.markForCheck();
       }
     }
   }

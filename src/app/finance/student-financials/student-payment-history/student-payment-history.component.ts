@@ -1,39 +1,63 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
 import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
 import { Observable, Subscription } from 'rxjs';
-import { filter, take, tap } from 'rxjs/operators';
+import { filter, take, tap, switchMap, takeUntil } from 'rxjs/operators';
 import { PaymentHistoryItem } from '../../models/payment-history.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { User } from 'src/app/auth/models/user.model';
 import { receiptActions, invoiceActions } from '../../store/finance.actions';
 import {
-  selectCombinedPaymentHistory, // This is the new selector we'll create
-  selectIsLoadingFinancials,
-  selectErrorMsg,
-  selectLoadingStudentReceipts,
-  selectLoadStudentReceiptsErr,
+  getStudentLedger,
+  LedgerEntry,
+  selectIsLoading,
 } from '../../store/finance.selector';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
 
 @Component({
   selector: 'app-student-payment-history',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatChipsModule,
+  ],
   templateUrl: './student-payment-history.component.html',
-  styleUrls: ['./student-payment-history.component.css'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  styleUrls: ['./student-payment-history.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentPaymentHistoryComponent implements OnInit, OnDestroy {
   // Data Observables
   user$ = this.store.select(selectUser);
-  paymentHistory$ = this.store.select(selectCombinedPaymentHistory);
-  loading$ = this.store.select(selectLoadingStudentReceipts);
-  error$ = this.store.select(selectLoadStudentReceiptsErr);
-  
+  paymentHistory$: Observable<LedgerEntry[]> = this.user$.pipe(
+    filter((user): user is User => !!user && !!user.id),
+    switchMap((user) => this.store.select(getStudentLedger(user.id)))
+  );
+  loading$ = this.store.select(selectIsLoading);
+  currentTheme: Theme = 'light';
   private userSubscription: Subscription | undefined;
+  private destroy$ = new Subject<void>();
 
   constructor(
-    private store: Store
+    private store: Store,
+    private themeService: ThemeService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
+    
     this.loadPaymentHistory();
   }
 
@@ -44,16 +68,12 @@ export class StudentPaymentHistoryComponent implements OnInit, OnDestroy {
         filter((user): user is User => !!user && !!user.id),
         take(1),
         tap((user) => {
-          // Load both invoices and receipts for payment history
+          // Ensure invoices and receipts are loaded for ledger calculation (single source of truth)
           this.store.dispatch(
-            invoiceActions.fetchStudentInvoices({
-              studentNumber: user.id,
-            })
+            invoiceActions.fetchAllInvoices()
           );
           this.store.dispatch(
-            receiptActions.fetchStudentReceipts({
-              studentNumber: user.id,
-            })
+            receiptActions.fetchAllReceipts()
           );
         })
       )
@@ -63,6 +83,8 @@ export class StudentPaymentHistoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
@@ -90,7 +112,7 @@ export class StudentPaymentHistoryComponent implements OnInit, OnDestroy {
   }
 
   // TrackBy functions for performance
-  trackByTransactionId(index: number, item: PaymentHistoryItem): string {
+  trackByTransactionId(index: number, item: LedgerEntry): string {
     return item.id || `${item.type}-${item.date}-${index}`;
   }
 

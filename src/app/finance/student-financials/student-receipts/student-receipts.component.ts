@@ -1,22 +1,41 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
 import { Observable, Subscription } from 'rxjs';
-import { filter, take, tap } from 'rxjs/operators';
+import { filter, take, tap, takeUntil } from 'rxjs/operators';
 import {
-  selectStudentReceipts, // We'll create this selector
-  selectLoadStudentReceiptsErr, // Reusing general error state
+  selectStudentReceipts,
+  selectLoadStudentReceiptsErr,
+  selectLoadingStudentReceipts,
 } from '../../store/finance.selector';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { User } from 'src/app/auth/models/user.model';
 import { receiptActions } from '../../store/finance.actions';
-import { selectLoadingStudentReceipts } from '../../store/finance.selector';
 import { ReceiptModel } from '../../models/payment.model';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
 
 @Component({
   selector: 'app-student-receipts',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatExpansionModule,
+    MatIconModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+  ],
   templateUrl: './student-receipts.component.html',
-  styleUrls: ['./student-receipts.component.css'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  styleUrls: ['./student-receipts.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentReceiptsComponent implements OnInit, OnDestroy {
   // Data Observables
@@ -24,14 +43,25 @@ export class StudentReceiptsComponent implements OnInit, OnDestroy {
   receipts$ = this.store.select(selectStudentReceipts);
   loading$ = this.store.select(selectLoadingStudentReceipts);
   error$ = this.store.select(selectLoadStudentReceiptsErr);
-
+  currentTheme: Theme = 'light';
   private userSubscription: Subscription | undefined;
+  private destroy$ = new Subject<void>();
 
   constructor(
-    private store: Store
+    private store: Store,
+    private themeService: ThemeService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
+    
     this.loadReceipts();
   }
 
@@ -55,11 +85,11 @@ export class StudentReceiptsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
-    // Optionally, dispatch an action to clear receipts from the store when leaving
-    // this.store.dispatch(financeActions.clearStudentReceipts());
   }
 
   /**

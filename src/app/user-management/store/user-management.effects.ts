@@ -171,8 +171,8 @@ export class UserManagementEffects {
   loadSystemActivity$ = createEffect(() =>
     this.actions$.pipe(
       ofType(userManagementActions.loadSystemActivity),
-      switchMap(({ page, limit }) =>
-        this.userManagementService.getSystemActivity(page, limit).pipe(
+      switchMap(({ page, limit, action, userId, startDate, endDate }) =>
+        this.userManagementService.getSystemActivity(page, limit, action, userId, startDate, endDate).pipe(
           map((activity) => userManagementActions.loadSystemActivitySuccess({ activity })),
           catchError((error) =>
             of(userManagementActions.loadSystemActivityFailure({ error: error.message || 'Failed to load system activity' }))

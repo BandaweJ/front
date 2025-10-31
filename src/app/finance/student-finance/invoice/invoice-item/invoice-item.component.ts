@@ -1,122 +1,117 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { InvoiceModel } from 'src/app/finance/models/invoice.model';
 import { invoiceActions } from 'src/app/finance/store/finance.actions';
 import { SharedService } from 'src/app/shared.service';
-import { ExemptionType } from '../../../enums/exemption-type.enum'; // Import ExemptionType
-import { BillModel } from 'src/app/finance/models/bill.model';
-import { FeesNames } from 'src/app/finance/enums/fees-names.enum';
-
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-invoice-item',
+  standalone: true,
+  imports: [
+    CommonModule,
+    CurrencyPipe,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './invoice-item.component.html',
-  styleUrls: ['./invoice-item.component.css'],
+  styleUrls: ['./invoice-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InvoiceItemComponent {
-  constructor(public sharedService: SharedService, private store: Store) {}
+export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
+  currentTheme: Theme = 'light';
+  isDownloading = false;
+  private destroy$ = new Subject<void>();
 
   @Input() invoice!: InvoiceModel | null;
   @Input() downloadable!: boolean;
 
-  // Add a helper method to determine the display value for the exemption
-  getExemptionDisplayAmount(): number | null {
-    if (!this.invoice || !this.invoice.exemption) {
-      return null;
+  constructor(
+    public sharedService: SharedService,
+    private store: Store,
+    private cdr: ChangeDetectorRef,
+    private themeService: ThemeService
+  ) {}
+
+  ngOnInit(): void {
+    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
+      this.currentTheme = theme;
+      this.cdr.markForCheck();
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['invoice'] || changes['downloadable']) {
+      this.cdr.markForCheck();
     }
+  }
 
-    const exemption = this.invoice.exemption;
-    switch (exemption.type) {
-      case ExemptionType.FIXED_AMOUNT:
-        return exemption.fixedAmount || 0;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-      case ExemptionType.STAFF_SIBLING:
+  save(): void {
+    if (!this.invoice) {
+      return;
+    }
+    this.store.dispatch(invoiceActions.saveInvoice({ invoice: this.invoice }));
+  }
 
-      case ExemptionType.PERCENTAGE:
-        // Calculate percentage of totalBill. Assuming totalBill is the gross amount.
-        // You might need to adjust this logic based on how your backend calculates/applies exemptions.
+  download(): void {
+    if (!this.invoice?.invoiceNumber) {
+      console.warn('Cannot download invoice: Invoice number is missing.');
+      return;
+    }
+    this.isDownloading = true;
+    this.store.dispatch(
+      invoiceActions.downloadInvoice({
+        invoiceNumber: this.invoice.invoiceNumber,
+      })
+    );
+    // Reset loading state after a delay (actual download handled by effect)
+    setTimeout(() => {
+      this.isDownloading = false;
+      this.cdr.markForCheck();
+    }, 2000);
+  }
 
-        return (
-          this.invoice.totalBill * (exemption.percentageAmount! / 100) || 0
-        );
+  getStatusClass(status: string): string {
+    const statusLower = status?.toLowerCase() || '';
+    switch (statusLower) {
+      case 'paid':
+        return 'status-paid';
+      case 'pending':
+      case 'partially paid':
+        return 'status-pending';
+      case 'overdue':
+        return 'status-overdue';
       default:
-        return null;
+        return 'status-default';
     }
   }
 
-  save() {
-    // console.log('called save with invoice ', this.invoice);
-    const invoice = this.invoice;
-    if (invoice) {
-      this.store.dispatch(invoiceActions.saveInvoice({ invoice }));
-    }
+  formatDate(date: Date | string | undefined): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   }
 
-  download() {
-    if (this.invoice && this.invoice.invoiceNumber) {
-      this.store.dispatch(
-        invoiceActions.downloadInvoice({
-          invoiceNumber: this.invoice.invoiceNumber,
-        })
-      );
-    } else {
-      console.warn(
-        'Cannot download invoice: Invoice object or invoice number is missing.'
-      );
-      //
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = '../../../assets/placeholder-logo.png';
     }
-  }
-
-  private _getGrossBillAmount(bills: BillModel[]): number {
-    return bills.reduce((sum, bill) => sum + (bill.fees?.amount || 0), 0);
-  }
-
-  private _calculateExemptionAmount(invoiceData: InvoiceModel): number {
-    if (!invoiceData.exemption || !invoiceData.exemption.type) {
-      return 0;
-    }
-
-    const exemption = invoiceData.exemption;
-    let calculatedAmount = 0;
-
-    switch (exemption.type) {
-      case ExemptionType.FIXED_AMOUNT:
-        if (
-          exemption.fixedAmount !== undefined &&
-          exemption.fixedAmount !== null
-        ) {
-          calculatedAmount = exemption.fixedAmount;
-        }
-        break;
-      case ExemptionType.PERCENTAGE:
-        if (
-          exemption.percentageAmount !== undefined &&
-          exemption.percentageAmount !== null
-        ) {
-          const grossBillAmount = this._getGrossBillAmount(invoiceData.bills);
-          calculatedAmount =
-            grossBillAmount * (exemption.percentageAmount / 100);
-        }
-        break;
-      case ExemptionType.STAFF_SIBLING:
-        let totalFoodFee = 0;
-        let totalOtherFees = 0;
-
-        invoiceData.bills.forEach((bill) => {
-          if (bill.fees) {
-            if (bill.fees.name === FeesNames.foodFee) {
-              totalFoodFee += bill.fees.amount;
-            } else {
-              totalOtherFees += bill.fees.amount;
-            }
-          }
-        });
-
-        calculatedAmount += totalFoodFee * 0.5;
-        calculatedAmount += totalOtherFees;
-        break;
-      default:
-        calculatedAmount = 0;
-    }
-    return calculatedAmount;
   }
 }

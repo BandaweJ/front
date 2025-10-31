@@ -1,4 +1,4 @@
-<div class="financials-dashboard-container">
+<div class="financials-dashboard-container" [class.theme-dark]="currentTheme === 'dark'">
   <!-- Main Content -->
   <div class="dashboard-content">
     <!-- Header Section -->
@@ -6,8 +6,8 @@
       <div class="header-content">
         <div class="welcome-section">
           <h1 class="dashboard-title">Student Financials</h1>
-          <p class="dashboard-subtitle" *ngIf="currentUser$ | async as currentUser">
-            Welcome back, {{ currentUser.username }}
+          <p class="dashboard-subtitle" *ngIf="studentName$ | async as studentName">
+            Welcome back, {{ studentName }}
           </p>
           <p class="student-info" *ngIf="studentNumber$ | async as studentNumber">
             Student Number: {{ studentNumber }}
@@ -24,17 +24,9 @@
                 <span *ngIf="loadingOutstandingBalance$ | async" class="loading-balance">
                   <mat-spinner diameter="24"></mat-spinner>
                 </span>
-                <span *ngIf="(outstandingBalance$ | async) !== null && !(loadingOutstandingBalance$ | async)" 
+                <span *ngIf="!(loadingOutstandingBalance$ | async) && (outstandingBalance$ | async) as balance" 
                       class="balance-value">
-                  {{ outstandingBalance$ | async | currency:'USD':'symbol':'1.2-2' }}
-                </span>
-                <span *ngIf="(outstandingBalanceError$ | async) && !(loadingOutstandingBalance$ | async)"
-                      class="error-message">
-                  Error loading balance
-                </span>
-                <span *ngIf="(outstandingBalance$ | async) === null && !(loadingOutstandingBalance$ | async) && !(outstandingBalanceError$ | async)"
-                      class="no-balance">
-                  No outstanding balance
+                  {{ balance | currency:'USD':'symbol':'1.2-2' }}
                 </span>
               </div>
             </div>
