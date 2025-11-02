@@ -35,7 +35,9 @@ import { fetchStudents } from 'src/app/registration/store/registration.actions';
 import {
   fetchClasses,
   fetchTerms,
+  currentTermActions,
 } from 'src/app/enrolment/store/enrolment.actions';
+import { selectCurrentTerm } from 'src/app/enrolment/store/enrolment.selectors';
 
 @Component({
   selector: 'app-finance-dashboard',
@@ -207,6 +209,7 @@ export class FinanceDashboardComponent
   ngOnInit(): void {
     this.loadData();
     this.setupDataSubscriptions();
+    this.initializeDefaultFilter();
   }
 
   loadData(): void {
@@ -220,6 +223,7 @@ export class FinanceDashboardComponent
       this.store.dispatch(fetchStudents());
       this.store.dispatch(fetchTerms());
       this.store.dispatch(fetchClasses());
+      this.store.dispatch(currentTermActions.fetchCurrentTerm());
     } catch (error) {
       this.handleError('Failed to load financial data');
     }
@@ -245,16 +249,21 @@ export class FinanceDashboardComponent
         error: (error) => this.handleError('Failed to process chart data')
       });
 
-    // Handle filtered and sorted data
-    const filteredAndSortedData$ = combineLatest([
+    // Create filtered data observable (for widgets and tables)
+    const filteredData$ = combineLatest([
       allData$,
       this.filterSubject.asObservable(),
+    ]).pipe(
+      map(([data, filters]) => this.applyFilters(data, filters)),
+      takeUntil(this.ngUnsubscribe)
+    );
+
+    // Handle filtered and sorted data (for tables)
+    const filteredAndSortedData$ = combineLatest([
+      filteredData$,
       this.sortSubject.asObservable(),
     ]).pipe(
-      map(([data, filters, sort]) => {
-        let filteredData = this.applyFilters(data, filters);
-        return this.applySorting(filteredData, sort);
-      }),
+      map(([filteredData, sort]) => this.applySorting(filteredData, sort)),
       tap((data) => {
         this.invoicesDataSource.data = data.filter(
           (item) => item.type === 'Invoice'
@@ -271,15 +280,15 @@ export class FinanceDashboardComponent
       error: (error) => this.handleError('Failed to filter and sort data')
     });
 
-    // Setup summary observables
-    this.totalInvoices$ = allData$.pipe(
+    // Setup summary observables (using filtered data)
+    this.totalInvoices$ = filteredData$.pipe(
       map((data) =>
         data
           .filter((item) => item.type === 'Invoice')
           .reduce((acc, item) => acc + +item.amount, 0)
       )
     );
-    this.totalPayments$ = allData$.pipe(
+    this.totalPayments$ = filteredData$.pipe(
       map((data) =>
         data
           .filter((item) => item.type === 'Payment')
@@ -291,8 +300,8 @@ export class FinanceDashboardComponent
       this.totalPayments$,
     ]).pipe(map(([invoices, payments]) => invoices - payments));
 
-    // Additional financial metrics
-    this.averageInvoiceAmount$ = allData$.pipe(
+    // Additional financial metrics (using filtered data)
+    this.averageInvoiceAmount$ = filteredData$.pipe(
       map((data) => {
         const invoices = data.filter((item) => item.type === 'Invoice');
         return invoices.length > 0 
@@ -301,7 +310,7 @@ export class FinanceDashboardComponent
       })
     );
 
-    this.averagePaymentAmount$ = allData$.pipe(
+    this.averagePaymentAmount$ = filteredData$.pipe(
       map((data) => {
         const payments = data.filter((item) => item.type === 'Payment');
         return payments.length > 0 
@@ -319,7 +328,7 @@ export class FinanceDashboardComponent
       })
     );
 
-    this.totalTransactions$ = allData$.pipe(
+    this.totalTransactions$ = filteredData$.pipe(
       map((data) => data.length)
     );
   }
@@ -407,8 +416,29 @@ export class FinanceDashboardComponent
   }
 
   onClearFilters(): void {
-    this.filterSubject.next({});
+    // Reset to default filter (current term)
+    this.initializeDefaultFilter();
     this.sortSubject.next('dateDesc');
+  }
+
+  private initializeDefaultFilter(): void {
+    // Subscribe to current term and set default filter
+    this.store
+      .pipe(
+        select(selectCurrentTerm),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe((currentTerm) => {
+        if (currentTerm) {
+          // Format term as "num year" to match enrolTerm format in FinanceDataModel
+          const enrolTerm = `${currentTerm.num} ${currentTerm.year}`;
+          this.filterSubject.next({ enrolTerm });
+        } else {
+          // If no current term, use empty filter
+          this.filterSubject.next({});
+        }
+        this.cdr.markForCheck();
+      });
   }
 
   onSortChange(sortValue: string): void {
@@ -434,6 +464,8 @@ export class FinanceDashboardComponent
         return false;
       if (filters.minAmount && item.amount < filters.minAmount) return false;
       if (filters.maxAmount && item.amount > filters.maxAmount) return false;
+      if (filters.enrolTerm && item.enrolTerm !== filters.enrolTerm)
+        return false;
       return true;
     });
   }

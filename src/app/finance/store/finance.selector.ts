@@ -607,6 +607,10 @@ export const selectAllCombinedFinanceData = createSelector(
           receiptAmountPaid: receipt.amountPaid,
           receiptApproved: receipt.approved,
           receiptServedBy: receipt.servedBy,
+          enrolId: receipt.enrol?.id,
+          enrolAcademicYear: receipt.enrol?.year,
+          enrolTerm: receipt.enrol ? `${receipt.enrol.num} ${receipt.enrol.year}` : undefined,
+          enrolClass: receipt.enrol?.name,
         });
       });
     }
