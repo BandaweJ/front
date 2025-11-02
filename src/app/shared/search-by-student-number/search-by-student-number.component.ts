@@ -4,18 +4,35 @@ import {
   Output,
   EventEmitter,
   OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Observable, of, Subject } from 'rxjs';
 import { startWith, debounceTime, map, takeUntil } from 'rxjs/operators';
 import { StudentsModel } from '../../registration/models/students.model';
 import { Store, select } from '@ngrx/store';
 import { selectStudents } from '../../registration/store/registration.selectors';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatOptionModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-student-search',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatOptionModule,
+  ],
   templateUrl: './search-by-student-number.component.html',
   styleUrls: ['./search-by-student-number.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentSearchComponent implements OnInit, OnDestroy {
   @Output() studentSelected = new EventEmitter<StudentsModel>();
@@ -28,7 +45,10 @@ export class StudentSearchComponent implements OnInit, OnDestroy {
   initialStudents: StudentsModel[] = [];
   private ngUnsubscribe = new Subject<void>();
 
-  constructor(private store: Store) {}
+  constructor(
+    private store: Store,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.students$.pipe(takeUntil(this.ngUnsubscribe)).subscribe((students) => {
@@ -41,6 +61,7 @@ export class StudentSearchComponent implements OnInit, OnDestroy {
           this.filterStudents(this.initialStudents, searchTerm)
         )
       );
+      this.cdr.markForCheck();
     });
   }
 

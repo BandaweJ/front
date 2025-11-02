@@ -32,10 +32,10 @@ import { StudentFinancialsDashboardComponent } from './student-financials/studen
 import { StudentInvoicesComponent } from './student-financials/student-invoices/student-invoices.component';
 import { StudentReceiptsComponent } from './student-financials/student-receipts/student-receipts.component';
 import { StudentPaymentHistoryComponent } from './student-financials/student-payment-history/student-payment-history.component';
-import { StudentLedgerReportComponent } from './reports/student-ledger-report/student-ledger-report.component';
+// StudentLedgerReportComponent is now standalone and lazy loaded
 import { FeesCollectionReportComponent } from './reports/fees-collection-report/fees-collection-report.component';
 import { NgChartsModule } from 'ng2-charts';
-import { OutstandingFeesReportComponent } from './reports/outstanding-fees-report/outstanding-fees-report.component';
+// OutstandingFeesReportComponent is now standalone and lazy loaded
 import { AgedDebtorsReportComponent } from './reports/aged-debtors-report/aged-debtors-report.component';
 import { RevenueRecognitionReportComponent } from './reports/revenue-recognition-report/revenue-recognition-report.component';
 import { EnrollmentBillingReconciliationReportComponent } from './reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component';
@@ -72,12 +72,12 @@ import { ExemptionSummaryByEnrolmentTableComponent } from './reports/exemption-r
     // StudentInvoicesComponent is now standalone and lazy loaded
     // StudentReceiptsComponent is now standalone and lazy loaded
     // StudentPaymentHistoryComponent is now standalone and lazy loaded
-    StudentLedgerReportComponent,
+    // StudentLedgerReportComponent is now standalone and lazy loaded
+    // OutstandingFeesReportComponent is now standalone and lazy loaded
     FeesCollectionReportComponent,
-    OutstandingFeesReportComponent,
-    AgedDebtorsReportComponent,
+    // AgedDebtorsReportComponent is now standalone and lazy-loaded
     RevenueRecognitionReportComponent,
-    EnrollmentBillingReconciliationReportComponent,
+    // EnrollmentBillingReconciliationReportComponent is now standalone and lazy-loaded
     CreateExemptionComponent,
     ExemptionReportsComponent,
     ExemptionReportFiltersComponent,

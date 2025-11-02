@@ -31,12 +31,13 @@ import { MarksProgressComponent } from './marks/marks-progress/marks-progress.co
 // StudentInvoicesComponent is now standalone and lazy loaded
 // StudentReceiptsComponent is now standalone and lazy loaded
 // StudentPaymentHistoryComponent is now standalone and lazy loaded
-import { StudentLedgerReportComponent } from './finance/reports/student-ledger-report/student-ledger-report.component';
+// StudentLedgerReportComponent is now standalone and lazy loaded
+// OutstandingFeesReportComponent is now standalone and lazy loaded
 import { FeesCollectionReportComponent } from './finance/reports/fees-collection-report/fees-collection-report.component';
-import { OutstandingFeesReportComponent } from './finance/reports/outstanding-fees-report/outstanding-fees-report.component';
-import { AgedDebtorsReportComponent } from './finance/reports/aged-debtors-report/aged-debtors-report.component';
+// OutstandingFeesReportComponent is now standalone and lazy loaded
+// AgedDebtorsReportComponent is now standalone and lazy-loaded
 import { RevenueRecognitionReportComponent } from './finance/reports/revenue-recognition-report/revenue-recognition-report.component';
-import { EnrollmentBillingReconciliationReportComponent } from './finance/reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component';
+// EnrollmentBillingReconciliationReportComponent is now standalone and lazy-loaded
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 import { ExemptionReportsComponent } from './finance/reports/exemption-reports/exemption-reports/exemption-reports.component';
 // Lazy loaded - removed direct import
@@ -211,7 +212,7 @@ const routes: Routes = [
   {
     canActivate: [AuthGuardService],
     path: 'student-ledger',
-    component: StudentLedgerReportComponent,
+    loadComponent: () => import('./finance/reports/student-ledger-report/student-ledger-report.component').then(m => m.StudentLedgerReportComponent),
     title: 'Student Ledger Reports',
   },
   {
@@ -223,7 +224,7 @@ const routes: Routes = [
   {
     canActivate: [AuthGuardService],
     path: 'outstanding-fees',
-    component: OutstandingFeesReportComponent,
+    loadComponent: () => import('./finance/reports/outstanding-fees-report/outstanding-fees-report.component').then(m => m.OutstandingFeesReportComponent),
     title: 'Outstanding Fees Report',
   },
   {
@@ -235,13 +236,14 @@ const routes: Routes = [
   {
     canActivate: [AuthGuardService],
     path: 'aged-debtors',
-    component: AgedDebtorsReportComponent,
+    loadComponent: () => import('./finance/reports/aged-debtors-report/aged-debtors-report.component').then(m => m.AgedDebtorsReportComponent),
     title: 'Aged Debtors Report',
   },
   {
     canActivate: [AuthGuardService],
     path: 'enrollment-billing-reconciliation',
-    component: EnrollmentBillingReconciliationReportComponent,
+    loadComponent: () => import('./finance/reports/enrollment-billing-reconciliation-report/enrollment-billing-reconciliation-report.component').then(m => m.EnrollmentBillingReconciliationReportComponent),
+    title: 'Enrollment vs. Billing Reconciliation',
   },
   {
     canActivate: [AuthGuardService],
@@ -254,6 +256,12 @@ const routes: Routes = [
     loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
     canActivate: [AuthGuardService],
     title: 'User Management',
+  },
+  {
+    path: 'system/roles',
+    loadComponent: () => import('./system/roles-permissions/roles-permissions.component').then(m => m.RolesPermissionsComponent),
+    canActivate: [AuthGuardService],
+    title: 'Roles & Permissions',
   },
   {
     path: '', // Default route for the root path
