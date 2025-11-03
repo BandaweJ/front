@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, combineLatest, Subject } from 'rxjs';
-import { filter, tap, takeUntil, map, switchMap, startWith } from 'rxjs/operators';
+import { filter, tap, takeUntil, map, switchMap, startWith, distinctUntilChanged, pairwise } from 'rxjs/operators';
 import {
   getStudentLedger,
   LedgerEntry,
@@ -94,15 +94,32 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
       filter((user): user is User => !!user && !!user.id),
       switchMap((user) => {
         // Combine loading state with data to ensure we wait for data to load
+        // The key is to wait until isLoading becomes false (after it was true), indicating a fetch completed
         return combineLatest([
           this.store.select(selectIsLoading),
           this.store.select(selectAllInvoices),
           this.store.select(selectAllNonVoidedReceipts),
-          this.store.select(getStudentLedger(user.id)),
         ]).pipe(
-          // Only calculate if not loading (wait for fetch to complete)
-          filter(([isLoading]) => !isLoading),
-          map(([_, __, ___, ledger]: [boolean, any, any, LedgerEntry[]]) => {
+          // Use pairwise to track loading state changes
+          // This allows us to detect when isLoading goes from true to false (fetch completed)
+          pairwise(),
+          // Only process when loading completed (went from true to false)
+          filter(([[prevLoading], [currLoading]]) => {
+            // If loading changed from true to false, that means a fetch completed
+            return prevLoading === true && currLoading === false;
+          }),
+          // Extract the current (non-loading) state with invoices and receipts
+          map(([[prevLoading, prevInvoices, prevReceipts], [currLoading, currInvoices, currReceipts]]) => 
+            [currInvoices, currReceipts] as [any, any]
+          ),
+          // Use distinctUntilChanged to avoid unnecessary recalculations
+          distinctUntilChanged((prev, curr) => 
+            prev[0]?.length === curr[0]?.length && 
+            prev[1]?.length === curr[1]?.length
+          ),
+          // Switch to the ledger selector once we know data is loaded
+          switchMap(() => this.store.select(getStudentLedger(user.id))),
+          map((ledger: LedgerEntry[]) => {
             if (!ledger || ledger.length === 0) {
               return 0;
             }
@@ -110,7 +127,9 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
             return ledger[ledger.length - 1].runningBalance;
           }),
           // Start with null to indicate loading state
-          startWith(null as number | null)
+          startWith(null as number | null),
+          // Use distinctUntilChanged to prevent unnecessary recalculations
+          distinctUntilChanged()
         );
       })
     );
