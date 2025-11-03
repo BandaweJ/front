@@ -226,20 +226,24 @@ export class EnrollmentBillingReconciliationReportComponent
   private setupErrorHandling(): void {
     this.error$
       .pipe(
-        filter((error): error is string => error !== null && error !== undefined),
+        filter((error): error is string => error !== null && error !== undefined && error !== ''),
         map(error => {
           // Handle different error formats
-          if (typeof error === 'string') {
+          if (typeof error === 'string' && error.trim()) {
             return error;
           }
           if (error && typeof error === 'object' && 'message' in error) {
-            return (error as any).message;
+            const message = (error as any).message;
+            return message && message.trim() ? message : 'An error occurred while loading the reconciliation report';
           }
           return 'An error occurred while loading the reconciliation report';
         }),
         takeUntil(this.destroy$)
       )
       .subscribe(errorMsg => {
+        if (!errorMsg || !errorMsg.trim()) {
+          return; // Don't show snackbar for empty messages
+        }
         this.hasError = true;
         this.errorMessage = errorMsg;
         this.cdr.markForCheck();
@@ -248,6 +252,8 @@ export class EnrollmentBillingReconciliationReportComponent
   }
   
   private setupDataFlow(): void {
+    let isInitialLoad = true;
+    
     // Subscribe to form value changes to update filters
     this.filterForm.valueChanges
       .pipe(
@@ -290,12 +296,17 @@ export class EnrollmentBillingReconciliationReportComponent
       .subscribe((filters) => {
         if (filters) {
           this.filters$$.next(filters);
+          isInitialLoad = false; // Mark that we've had a valid filter
         } else {
-          this.snackBar.open(
-            'Please select a term to generate the report.',
-            'Dismiss',
-            { duration: 3000 }
-          );
+          // Only show snackbar if this is not the initial load
+          if (!isInitialLoad) {
+            this.snackBar.open(
+              'Please select a term to generate the report.',
+              'Dismiss',
+              { duration: 3000 }
+            );
+          }
+          isInitialLoad = false; // Mark as no longer initial load
         }
       });
     

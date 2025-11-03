@@ -233,20 +233,24 @@ export class AgedDebtorsReportComponent implements OnInit, OnDestroy {
   private setupErrorHandling(): void {
     this.error$
       .pipe(
-        filter((error): error is string => error !== null && error !== undefined),
+        filter((error): error is string => error !== null && error !== undefined && error !== ''),
         map(error => {
           // Handle different error formats
-          if (typeof error === 'string') {
+          if (typeof error === 'string' && error.trim()) {
             return error;
           }
           if (error && typeof error === 'object' && 'message' in error) {
-            return (error as any).message;
+            const message = (error as any).message;
+            return message && message.trim() ? message : 'An error occurred while loading the aged debtors report';
           }
           return 'An error occurred while loading the aged debtors report';
         }),
         takeUntil(this.destroy$)
       )
       .subscribe(errorMsg => {
+        if (!errorMsg || !errorMsg.trim()) {
+          return; // Don't show snackbar for empty messages
+        }
         this.hasError = true;
         this.errorMessage = errorMsg;
         this.cdr.markForCheck();
