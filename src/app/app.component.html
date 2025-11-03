@@ -1,12 +1,15 @@
 <mat-toolbar color="primary" class="toolbar">
-  <ng-container *ngIf="isLoggedIn$ | async as isLoggedInState">
-    <mat-icon (click)="sidenav.toggle(); isSidenavCollapsed = false"
-      *ngIf="isLoggedInState && isScreenSmall">menu</mat-icon>
-  </ng-container>
-  <span class="toolbar-brand">
-    <img src="assets/jhs_logo.jpg" alt="JHS Logo">
-    <h1>Junior High School</h1>
-  </span>
+  <div class="toolbar-left">
+    <ng-container *ngIf="isLoggedIn$ | async as isLoggedInState">
+      <mat-icon (click)="sidenav.toggle(); isSidenavCollapsed = false"
+        *ngIf="isLoggedInState && isScreenSmall" class="menu-toggle-icon">menu</mat-icon>
+    </ng-container>
+    <span class="toolbar-brand">
+      <img src="assets/jhs_logo.jpg" alt="JHS Logo">
+      <h1 class="school-name-full">Junior High School</h1>
+      <h1 class="school-name-abbr">JHS</h1>
+    </span>
+  </div>
 
   <div class="toolbar-actions">
     <button mat-icon-button (click)="themeService.toggleTheme()" 
