@@ -66,7 +66,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   public enrolmentLoaded$: Observable<boolean>;
   
   // Amount owed calculated from store (single source of truth)
-  public amountOwed$: Observable<number>;
+  // Can be null while data is loading
+  public amountOwed$: Observable<number | null>;
 
   public lineChartData: ChartConfiguration<'line'>['data'] = {
     datasets: [],

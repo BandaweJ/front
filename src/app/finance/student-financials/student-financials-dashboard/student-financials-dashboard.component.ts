@@ -41,7 +41,8 @@ import { ThemeService, Theme } from 'src/app/services/theme.service';
 export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   // Data Observables
   user$: Observable<User | null>;
-  outstandingBalance$: Observable<number>;
+  // Can be null while data is loading
+  outstandingBalance$: Observable<number | null>;
   loadingOutstandingBalance$: Observable<boolean>;
   
   // Computed properties
