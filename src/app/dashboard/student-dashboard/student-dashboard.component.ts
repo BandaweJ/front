@@ -11,6 +11,7 @@ import {
   switchMap,
   take,
   tap,
+  startWith,
 } from 'rxjs';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { MarksModel } from 'src/app/marks/models/marks.model';
@@ -44,6 +45,9 @@ import {
 import {
   getStudentLedger,
   LedgerEntry,
+  selectAllInvoices,
+  selectAllNonVoidedReceipts,
+  selectIsLoading,
 } from 'src/app/finance/store/finance.selector';
 
 @Component({
@@ -126,17 +130,28 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     );
     
     // Calculate amount owed from store using ledger selector (single source of truth)
+    // Wait for data to be loaded before calculating to avoid race conditions
     this.amountOwed$ = (this.store.select(selectUser) as Observable<User | null>).pipe(
       filter((user): user is User => !!user && !!user.id),
       switchMap((user) => {
-        return this.store.select(getStudentLedger(user.id)).pipe(
-          map((ledger: LedgerEntry[]) => {
+        // Combine loading state with data to ensure we wait for data to load
+        return combineLatest([
+          this.store.select(selectIsLoading),
+          this.store.select(selectAllInvoices),
+          this.store.select(selectAllNonVoidedReceipts),
+          this.store.select(getStudentLedger(user.id)),
+        ]).pipe(
+          // Only calculate if not loading (wait for fetch to complete)
+          filter(([isLoading]) => !isLoading),
+          map(([_, __, ___, ledger]: [boolean, any, any, LedgerEntry[]]) => {
             if (!ledger || ledger.length === 0) {
               return 0;
             }
             // Return the running balance from the last ledger entry
             return ledger[ledger.length - 1].runningBalance;
-          })
+          }),
+          // Start with null to indicate loading state
+          startWith(null as number | null)
         );
       })
     );

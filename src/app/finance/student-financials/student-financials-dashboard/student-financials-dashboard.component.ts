@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, combineLatest, Subject } from 'rxjs';
-import { filter, tap, takeUntil, map, switchMap } from 'rxjs/operators';
+import { filter, tap, takeUntil, map, switchMap, startWith } from 'rxjs/operators';
 import {
   getStudentLedger,
   LedgerEntry,
@@ -88,17 +88,28 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     this.user$ = this.store.select(selectUser);
     
     // Calculate outstanding balance from store using ledger selector (single source of truth)
+    // Wait for data to be loaded before calculating to avoid race conditions
     this.outstandingBalance$ = this.user$.pipe(
       filter((user): user is User => !!user && !!user.id),
       switchMap((user) => {
-        return this.store.select(getStudentLedger(user.id)).pipe(
-          map((ledger: LedgerEntry[]) => {
+        // Combine loading state with data to ensure we wait for data to load
+        return combineLatest([
+          this.store.select(selectIsLoading),
+          this.store.select(selectAllInvoices),
+          this.store.select(selectAllNonVoidedReceipts),
+          this.store.select(getStudentLedger(user.id)),
+        ]).pipe(
+          // Only calculate if not loading (wait for fetch to complete)
+          filter(([isLoading]) => !isLoading),
+          map(([_, __, ___, ledger]: [boolean, any, any, LedgerEntry[]]) => {
             if (!ledger || ledger.length === 0) {
               return 0;
             }
             // Return the running balance from the last ledger entry
             return ledger[ledger.length - 1].runningBalance;
-          })
+          }),
+          // Start with null to indicate loading state
+          startWith(null as number | null)
         );
       })
     );
