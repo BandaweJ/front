@@ -1,16 +1,15 @@
-/* src/app/finance/reports/aged-debtors-report/aged-debtors-report.component.scss */
 
 .aged-debtors-container {
   max-width: 1600px;
   margin: 20px auto;
   padding: 20px;
   min-height: 100vh;
-  color: var(--text-primary, rgba(0, 0, 0, 0.87));
+  color: var(--text-primary, rgba(0, 0, 0, .87));
   background: var(--background, #fafafa);
   
   &.theme-dark {
     background: var(--background, #121212);
-    color: var(--text-primary, rgba(255, 255, 255, 0.87));
+    color: var(--text-primary, rgba(255, 255, 255, .87));
   }
 }
 
@@ -19,13 +18,13 @@
   margin: 0 auto;
   padding: 24px;
   background: var(--surface, #ffffff);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
   border-radius: 12px;
   transition: box-shadow 0.3s ease;
   animation: fadeIn 0.3s ease;
   
   &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
   }
   
   .theme-dark & {
@@ -38,17 +37,16 @@
   }
 }
 
-// Header Section
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 2px solid rgba(0, 0, 0, .08);
   
   .theme-dark & {
-    border-bottom-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(255, 255, 255, .08);
   }
 }
 
@@ -100,7 +98,7 @@
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
   }
   
   mat-card-content {
@@ -196,47 +194,32 @@
   
   &.current {
     border-left: 4px solid #4caf50;
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
-    
-    .theme-dark & {
-      background: linear-gradient(135deg, rgba(102, 187, 106, 0.15) 0%, rgba(102, 187, 106, 0.08) 100%);
-    }
+    background: linear-gradient(135deg, rgba(76, 175, 80, .1), rgba(76, 175, 80, .05));
+    .theme-dark & { background: linear-gradient(135deg, rgba(102, 187, 106, .15), rgba(102, 187, 106, .08)); }
   }
   
   &.overdue-1-30 {
     border-left: 4px solid #ff9800;
-    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 152, 0, 0.05) 100%);
-    
-    .theme-dark & {
-      background: linear-gradient(135deg, rgba(255, 183, 77, 0.15) 0%, rgba(255, 183, 77, 0.08) 100%);
-    }
+    background: linear-gradient(135deg, rgba(255, 152, 0, .1), rgba(255, 152, 0, .05));
+    .theme-dark & { background: linear-gradient(135deg, rgba(255, 183, 77, .15), rgba(255, 183, 77, .08)); }
   }
   
   &.overdue-31-60 {
     border-left: 4px solid #ff6f00;
-    background: linear-gradient(135deg, rgba(255, 111, 0, 0.1) 0%, rgba(255, 111, 0, 0.05) 100%);
-    
-    .theme-dark & {
-      background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 152, 0, 0.08) 100%);
-    }
+    background: linear-gradient(135deg, rgba(255, 111, 0, .1), rgba(255, 111, 0, .05));
+    .theme-dark & { background: linear-gradient(135deg, rgba(255, 152, 0, .15), rgba(255, 152, 0, .08)); }
   }
   
   &.overdue-61-90 {
     border-left: 4px solid #ff5722;
-    background: linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(255, 87, 34, 0.05) 100%);
-    
-    .theme-dark & {
-      background: linear-gradient(135deg, rgba(255, 112, 67, 0.15) 0%, rgba(255, 112, 67, 0.08) 100%);
-    }
+    background: linear-gradient(135deg, rgba(255, 87, 34, .1), rgba(255, 87, 34, .05));
+    .theme-dark & { background: linear-gradient(135deg, rgba(255, 112, 67, .15), rgba(255, 112, 67, .08)); }
   }
   
   &.overdue-90plus {
     border-left: 4px solid #d32f2f;
-    background: linear-gradient(135deg, rgba(211, 47, 47, 0.1) 0%, rgba(211, 47, 47, 0.05) 100%);
-    
-    .theme-dark & {
-      background: linear-gradient(135deg, rgba(229, 115, 115, 0.15) 0%, rgba(229, 115, 115, 0.08) 100%);
-    }
+    background: linear-gradient(135deg, rgba(211, 47, 47, .1), rgba(211, 47, 47, .05));
+    .theme-dark & { background: linear-gradient(135deg, rgba(229, 115, 115, .15), rgba(229, 115, 115, .08)); }
   }
   
   &.critical {
@@ -272,7 +255,6 @@
   color: var(--text-primary);
 }
 
-// Filter Section
 .filter-section {
   margin-bottom: 24px;
   animation: slideDown 0.3s ease;
@@ -284,14 +266,13 @@
   gap: 16px;
   margin-bottom: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, rgba(33, 150, 243, 0.05) 0%, rgba(33, 150, 243, 0.02) 100%);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, rgba(33, 150, 243, .05), rgba(33, 150, 243, .02));
+  border: 1px solid rgba(0, 0, 0, .08);
   border-radius: 8px;
   align-items: flex-end;
-  
   .theme-dark & {
-    background: linear-gradient(135deg, rgba(100, 181, 246, 0.1) 0%, rgba(100, 181, 246, 0.05) 100%);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: linear-gradient(135deg, rgba(100, 181, 246, .1), rgba(100, 181, 246, .05));
+    border-color: rgba(255, 255, 255, .08);
   }
 }
 
@@ -319,10 +300,10 @@
   align-items: center;
   margin: 32px 0 16px 0;
   padding-bottom: 12px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 2px solid rgba(0, 0, 0, .12);
   
   .theme-dark & {
-    border-bottom-color: rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(255, 255, 255, .12);
   }
   
   h4 {
@@ -345,12 +326,12 @@
   .section-count {
     color: var(--text-secondary);
     font-size: 0.9em;
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(0, 0, 0, .05);
     padding: 4px 12px;
     border-radius: 12px;
     
     .theme-dark & {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, .1);
     }
   }
 }
@@ -377,13 +358,13 @@
 .mat-header-cell,
 .table-header-cell {
   font-weight: 600;
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: rgba(0, 0, 0, .02);
   color: var(--text-primary);
   padding: 16px;
   font-size: 0.9em;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 2px solid rgba(0, 0, 0, .12);
   text-align: left;
   
   &:last-child {
@@ -391,9 +372,9 @@
   }
   
   .theme-dark & {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, .05);
     color: var(--text-primary);
-    border-bottom-color: rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(255, 255, 255, .12);
   }
 }
 
@@ -403,7 +384,7 @@
   color: var(--text-secondary);
   padding: 14px 16px;
   text-align: left;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, .08);
   
   &:last-child {
     text-align: right;
@@ -412,7 +393,7 @@
   
   .theme-dark & {
     color: var(--text-secondary);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(255, 255, 255, .08);
   }
   
   // Status classes
@@ -466,23 +447,22 @@
   transition: background-color 0.2s ease;
   
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(0, 0, 0, .04);
     
     .theme-dark & {
-      background-color: rgba(255, 255, 255, 0.04);
+      background-color: rgba(255, 255, 255, .04);
     }
   }
 }
 
 .mat-row:nth-child(even) {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: rgba(0, 0, 0, .02);
   
   .theme-dark & {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgba(255, 255, 255, .02);
   }
 }
 
-// Status Classes
 .status-critical {
   color: #d32f2f;
   font-weight: bold;
@@ -510,7 +490,6 @@
   }
 }
 
-// Loading State
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -534,7 +513,6 @@
   }
 }
 
-// Error State
 .error-state {
   display: flex;
   flex-direction: column;
@@ -547,15 +525,14 @@
 }
 
 .error-card {
-  background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(244, 67, 54, .1), rgba(244, 67, 54, .05));
   border-left: 4px solid #f44336;
   border-radius: 8px;
   padding: 24px;
   margin-bottom: 24px;
   width: 100%;
-  
   .theme-dark & {
-    background: linear-gradient(135deg, rgba(239, 83, 80, 0.2) 0%, rgba(239, 83, 80, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(239, 83, 80, .2), rgba(239, 83, 80, .1));
     border-left-color: #ef5350;
   }
 }
@@ -581,7 +558,6 @@
   }
 }
 
-// No Data State
 .no-data-state {
   display: flex;
   flex-direction: column;
@@ -619,31 +595,20 @@
   }
 }
 
-// Suggestion Box
 .suggestion-box {
   margin-top: 24px;
   padding: 16px;
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(255, 193, 7, .1), rgba(255, 193, 7, .05));
   border-radius: 8px;
   border-left: 4px solid var(--accent-gold, #ffc107);
   display: flex;
   align-items: flex-start;
   gap: 12px;
   max-width: 600px;
-  
-  mat-icon {
-    color: var(--accent-gold, #ffc107);
-    margin-top: 2px;
-  }
-  
-  p {
-    margin: 0;
-    text-align: left;
-    color: var(--text-primary);
-  }
-  
+  mat-icon { color: var(--accent-gold, #ffc107); margin-top: 2px; }
+  p { margin: 0; text-align: left; color: var(--text-primary); }
   .theme-dark & {
-    background: linear-gradient(135deg, rgba(255, 179, 0, 0.15) 0%, rgba(255, 179, 0, 0.08) 100%);
+    background: linear-gradient(135deg, rgba(255, 179, 0, .15), rgba(255, 179, 0, .08));
     border-left-color: var(--accent-gold, #ffb300);
   }
 }
@@ -651,14 +616,13 @@
 // Divider
 mat-divider {
   margin: 24px 0;
-  border-color: rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, .12);
   
   .theme-dark & {
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, .12);
   }
 }
 
-// Animations
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -692,14 +656,11 @@ mat-divider {
   }
 }
 
-// Print-only elements (hidden on screen)
 .print-only {
   display: none;
 }
 
-// Print Styles
 @media print {
-  // Hide screen-only elements
   .header-actions,
   .filter-section,
   .filter-actions-print,
@@ -712,185 +673,61 @@ mat-divider {
     display: none !important;
   }
   
-  // Show print-only elements
   .print-only {
     display: block !important;
   }
   
-  // Page setup
   @page {
     size: A4;
     margin: 15mm 10mm 20mm 10mm;
-    
-    @top-center {
-      content: "Aged Debtors Report";
-      font-size: 10pt;
-      color: #666;
-    }
-    
-    @bottom-center {
-      content: "Page " counter(page) " of " counter(pages);
-      font-size: 10pt;
-      color: #666;
-    }
+    @top-center { content: "Aged Debtors Report"; font-size: 10pt; color: #666; }
+    @bottom-center { content: "Page " counter(page) " of " counter(pages); font-size: 10pt; color: #666; }
   }
   
-  // Reset container - allow full height for multi-page printing
-  html,
-  body {
-    height: auto !important;
-    min-height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    background: white !important;
-    color: black !important;
+  html, body {
+    height: auto !important; min-height: auto !important; max-height: none !important;
+    overflow: visible !important; background: white !important; color: black !important;
   }
   
   .aged-debtors-container {
-    padding: 0;
-    margin: 0;
-    max-width: 100%;
-    min-height: auto !important;
-    height: auto !important;
-    background: white !important;
-    color: black !important;
-    overflow: visible !important;
+    padding: 0; margin: 0; max-width: 100%; min-height: auto !important; height: auto !important;
+    background: white !important; color: black !important; overflow: visible !important;
   }
   
   .aged-debtors-card {
-    box-shadow: none;
-    padding: 0;
-    border: none;
-    background: white !important;
-    page-break-inside: auto; // Allow card to break across pages
-    min-height: auto !important;
-    height: auto !important;
+    box-shadow: none; padding: 0; border: none; background: white !important;
+    page-break-inside: auto; min-height: auto !important; height: auto !important;
   }
   
-  // Print Header
-  .print-header {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #000;
-    page-break-after: avoid;
-    page-break-inside: avoid;
-  }
+  .print-header { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #000; page-break-after: avoid; page-break-inside: avoid; }
   
-  .print-header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
-  }
+  .print-header-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+  .print-logo-section { display: flex; align-items: center; gap: 15px; flex: 1; }
+  .print-logo { max-width: 80px; max-height: 80px; object-fit: contain; }
+  .print-school-info { flex: 1; }
+  .print-school-name { margin: 0 0 5px 0; font-size: 18pt; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 1px; }
+  .print-school-address { margin: 0; font-size: 9pt; color: #333; }
+  .print-report-info { text-align: right; flex: 1; }
+  .print-report-title { margin: 0 0 8px 0; font-size: 20pt; font-weight: 700; color: #000; text-transform: uppercase; }
+  .print-report-date, .print-report-filters { margin: 4px 0; font-size: 9pt; color: #333; }
   
-  .print-logo-section {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
-  }
-  
-  .print-logo {
-    max-width: 80px;
-    max-height: 80px;
-    object-fit: contain;
-  }
-  
-  .print-school-info {
-    flex: 1;
-  }
-  
-  .print-school-name {
-    margin: 0 0 5px 0;
-    font-size: 18pt;
-    font-weight: 700;
-    color: #000;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  
-  .print-school-address {
-    margin: 0;
-    font-size: 9pt;
-    color: #333;
-  }
-  
-  .print-report-info {
-    text-align: right;
-    flex: 1;
-  }
-  
-  .print-report-title {
-    margin: 0 0 8px 0;
-    font-size: 20pt;
-    font-weight: 700;
-    color: #000;
-    text-transform: uppercase;
-  }
-  
-  .print-report-date,
-  .print-report-filters {
-    margin: 4px 0;
-    font-size: 9pt;
-    color: #333;
-  }
-  
-  // Card Header
   .card-header {
-    border-bottom: 2px solid #000;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    page-break-after: avoid;
-    
-    .title-section h2 {
-      font-size: 16pt;
-      color: #000;
-      
-      mat-icon {
-        display: none;
-      }
-    }
+    border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; page-break-after: avoid;
+    .title-section h2 { font-size: 16pt; color: #000; mat-icon { display: none; } }
   }
   
-  // Summary Cards - Stack vertically in print
-  .summary-cards {
-    display: block;
-    margin-bottom: 15px;
-    page-break-inside: avoid;
-  }
-  
+  .summary-cards { display: block; margin-bottom: 15px; page-break-inside: avoid; }
   .summary-card {
-    margin-bottom: 10px;
-    page-break-inside: avoid;
-    border: 1px solid #ccc;
-    background: #f9f9f9 !important;
-    
-    mat-card-content {
-      padding: 10px !important;
-    }
+    margin-bottom: 10px; page-break-inside: avoid; border: 1px solid #ccc; background: #f9f9f9 !important;
+    mat-card-content { padding: 10px !important; }
   }
-  
-  .summary-icon {
-    display: none;
-  }
-  
+  .summary-icon { display: none; }
   .summary-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    .summary-label {
-      font-weight: 600;
-      color: #000;
-    }
-    
-    .summary-value {
-      font-size: 12pt;
-      color: #000 !important;
-    }
+    display: flex; justify-content: space-between; align-items: center;
+    .summary-label { font-weight: 600; color: #000; }
+    .summary-value { font-size: 12pt; color: #000 !important; }
   }
   
-  // Age Buckets - Stack vertically in print
   .age-buckets {
     display: block;
     margin-bottom: 15px;
@@ -919,7 +756,6 @@ mat-divider {
     color: #000 !important;
   }
   
-  // Section Headers
   .section-header {
     border-bottom: 1px solid #000;
     padding-bottom: 8px;
@@ -946,24 +782,22 @@ mat-divider {
     }
   }
   
-  // Tables - allow page breaks
   .table-container {
     max-height: none !important;
     height: auto !important;
     overflow: visible !important;
     margin-bottom: 15px;
-    page-break-inside: auto; // Allow tables to break across pages
-    display: block; // Ensure proper flow
+    page-break-inside: auto;
+    display: block;
   }
   
   .full-width-table {
     width: 100%;
     border-collapse: collapse;
-    display: table !important; // Ensure table display
-    page-break-inside: auto; // Allow table to break across pages
+    display: table !important;
+    page-break-inside: auto;
   }
   
-  // Ensure mat-table elements don't restrict height
   mat-table {
     display: table !important;
     width: 100% !important;
@@ -1011,8 +845,8 @@ mat-divider {
   
   .mat-row,
   .table-row {
-    page-break-inside: avoid; // Don't break inside a single row
-    page-break-after: auto; // Allow breaks after rows
+    page-break-inside: avoid;
+    page-break-after: auto;
     border-bottom: 1px solid #ccc;
     
     &:nth-child(even) {
@@ -1035,13 +869,12 @@ mat-divider {
     margin: 15px 0;
   }
   
-  // Print Footer
   .print-footer {
     margin-top: 20px;
     padding-top: 10px;
     border-top: 1px solid #000;
     page-break-inside: avoid;
-    position: relative; // Changed from fixed to allow content flow
+    position: relative;
     background: white;
   }
   
@@ -1062,14 +895,12 @@ mat-divider {
     content: counter(page);
   }
   
-  // Prevent page breaks inside important sections
   .card-header,
   .section-header {
     page-break-after: avoid;
     page-break-inside: avoid;
   }
   
-  // Allow page breaks between table rows if needed
   .table-container {
     page-break-inside: auto;
     
@@ -1083,37 +914,19 @@ mat-divider {
     }
   }
   
-  // Hide icons in print (replace with text where needed)
   mat-icon {
     display: none !important;
   }
   
-  // Ensure tables don't break awkwardly - but allow multi-page flow
   table {
-    page-break-inside: auto; // Allow table to break across pages
-    
-    thead {
-      display: table-header-group;
-      page-break-after: avoid;
-    }
-    
-    tfoot {
-      display: table-footer-group;
-      page-break-inside: avoid;
-    }
-    
-    tbody {
-      display: table-row-group;
-    }
-    
-    tr {
-      page-break-inside: avoid; // Don't break inside a row
-      page-break-after: auto; // Allow breaks after rows
-    }
+    page-break-inside: auto;
+    thead { display: table-header-group; page-break-after: avoid; }
+    tfoot { display: table-footer-group; page-break-inside: avoid; }
+    tbody { display: table-row-group; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
   }
 }
 
-// Responsive Design
 @media (max-width: 768px) {
   .filter-field {
     min-width: unset;
@@ -1135,4 +948,5 @@ mat-divider {
     grid-template-columns: 1fr;
   }
 }
+
 
