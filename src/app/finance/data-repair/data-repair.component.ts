@@ -38,11 +38,22 @@ interface AuditResult {
     totalAllocations: number;
     shouldHaveReversed: number;
   }>;
+  invoicesWithDeletedBalanceBfwd: Array<{
+    invoiceId: number;
+    invoiceNumber: string;
+    studentNumber: string;
+    balanceId: number | null;
+    totalBill: number;
+    calculatedTotalBill: number;
+    possibleBalanceBfwdAmount: number;
+    note: string;
+  }>;
   summary: {
     totalInvoices: number;
     invoicesWithIssues: number;
     totalReceipts: number;
     voidedReceiptsWithIssues: number;
+    invoicesWithDeletedBalanceBfwd: number;
   };
 }
 
@@ -102,6 +113,13 @@ export class DataRepairComponent implements OnInit, OnDestroy {
     'amountPaid',
     'totalAllocations',
     'shouldHaveReversed',
+  ];
+  displayedColumnsDeletedBalanceBfwd = [
+    'invoiceNumber',
+    'studentNumber',
+    'totalBill',
+    'calculatedTotalBill',
+    'possibleBalanceBfwdAmount',
   ];
 
   constructor(
