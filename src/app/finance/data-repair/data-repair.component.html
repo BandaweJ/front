@@ -59,6 +59,22 @@
           </button>
           <button
             mat-raised-button
+            color="accent"
+            (click)="repairUnallocatedReceiptAmounts()"
+            [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport || !auditResult">
+            <mat-icon>payment</mat-icon>
+            Repair Unallocated Receipt Amounts
+          </button>
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="repairUnrecordedCredits()"
+            [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport || !auditResult">
+            <mat-icon>account_balance_wallet</mat-icon>
+            Repair Unrecorded Credits
+          </button>
+          <button
+            mat-raised-button
             color="warn"
             (click)="repairAll()"
             [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport || !auditResult">
@@ -104,6 +120,18 @@
             <div class="stat-item" *ngIf="auditResult.summary.invoicesWithDeletedBalanceBfwd > 0">
               <span class="stat-label">Invoices with Deleted Balance Brought Forward:</span>
               <span class="stat-value warning">{{ auditResult.summary.invoicesWithDeletedBalanceBfwd }}</span>
+            </div>
+            <div class="stat-item" *ngIf="auditResult.summary.receiptsWithUnallocatedAmounts > 0">
+              <span class="stat-label">Receipts with Unallocated Amounts:</span>
+              <span class="stat-value error">{{ auditResult.summary.receiptsWithUnallocatedAmounts }}</span>
+            </div>
+            <div class="stat-item" *ngIf="auditResult.summary.unrecordedCredits > 0">
+              <span class="stat-label">Unrecorded Credits:</span>
+              <span class="stat-value error">{{ auditResult.summary.unrecordedCredits }}</span>
+            </div>
+            <div class="stat-item" *ngIf="auditResult.summary.anomalyAllocations > 0">
+              <span class="stat-label">Anomaly Allocations:</span>
+              <span class="stat-value error">{{ auditResult.summary.anomalyAllocations }}</span>
             </div>
           </div>
         </div>
@@ -257,8 +285,132 @@
           </mat-card-content>
         </mat-card>
 
+        <!-- Receipts with Unallocated Amounts -->
+        <mat-card *ngIf="auditResult.receiptsWithUnallocatedAmounts && auditResult.receiptsWithUnallocatedAmounts.length > 0" class="issue-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="warn">warning</mat-icon>
+              Receipts with Unallocated Amounts ({{ auditResult.receiptsWithUnallocatedAmounts.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="info-note">
+              These receipts have amounts that were not allocated to any invoice. 
+              Use "Repair Unallocated Receipt Amounts" to allocate them to invoices.
+            </p>
+            <table mat-table [dataSource]="auditResult.receiptsWithUnallocatedAmounts" class="issues-table">
+              <ng-container matColumnDef="receiptNumber">
+                <th mat-header-cell *matHeaderCellDef>Receipt #</th>
+                <td mat-cell *matCellDef="let item">{{ item.receiptNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="studentNumber">
+                <th mat-header-cell *matHeaderCellDef>Student #</th>
+                <td mat-cell *matCellDef="let item">{{ item.studentNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amountPaid">
+                <th mat-header-cell *matHeaderCellDef>Amount Paid</th>
+                <td mat-cell *matCellDef="let item">{{ item.amountPaid | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="totalAllocations">
+                <th mat-header-cell *matHeaderCellDef>Total Allocations</th>
+                <td mat-cell *matCellDef="let item">{{ item.totalAllocations | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="unallocatedAmount">
+                <th mat-header-cell *matHeaderCellDef>Unallocated Amount</th>
+                <td mat-cell *matCellDef="let item" class="error">{{ item.unallocatedAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsUnallocated"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsUnallocated"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Unrecorded Credits -->
+        <mat-card *ngIf="auditResult.unrecordedCredits && auditResult.unrecordedCredits.length > 0" class="issue-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="warn">warning</mat-icon>
+              Unrecorded Credits ({{ auditResult.unrecordedCredits.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="info-note">
+              These student credits exist but have no ReceiptCreditEntity link. 
+              Use "Repair Unrecorded Credits" to link them to receipts.
+            </p>
+            <table mat-table [dataSource]="auditResult.unrecordedCredits" class="issues-table">
+              <ng-container matColumnDef="studentNumber">
+                <th mat-header-cell *matHeaderCellDef>Student #</th>
+                <td mat-cell *matCellDef="let item">{{ item.studentNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="creditAmount">
+                <th mat-header-cell *matHeaderCellDef>Credit Amount</th>
+                <td mat-cell *matCellDef="let item">{{ item.creditAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="receiptCreditsCount">
+                <th mat-header-cell *matHeaderCellDef>Receipt Credits Count</th>
+                <td mat-cell *matCellDef="let item">{{ item.receiptCreditsCount }}</td>
+              </ng-container>
+              <ng-container matColumnDef="note">
+                <th mat-header-cell *matHeaderCellDef>Note</th>
+                <td mat-cell *matCellDef="let item">{{ item.note }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsUnrecordedCredits"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsUnrecordedCredits"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Anomaly Allocations -->
+        <mat-card *ngIf="auditResult.anomalyAllocations && auditResult.anomalyAllocations.length > 0" class="issue-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="warn">warning</mat-icon>
+              Anomaly Allocations ({{ auditResult.anomalyAllocations.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="info-note">
+              These allocations have anomalies such as over-allocation, allocations to voided invoices/receipts, 
+              or student mismatches. Review and fix manually.
+            </p>
+            <table mat-table [dataSource]="auditResult.anomalyAllocations" class="issues-table">
+              <ng-container matColumnDef="allocationType">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let item">{{ item.allocationType }}</td>
+              </ng-container>
+              <ng-container matColumnDef="receiptNumber">
+                <th mat-header-cell *matHeaderCellDef>Receipt #</th>
+                <td mat-cell *matCellDef="let item">{{ item.receiptNumber || 'N/A' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                <td mat-cell *matCellDef="let item">{{ item.invoiceNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="studentNumber">
+                <th mat-header-cell *matHeaderCellDef>Student #</th>
+                <td mat-cell *matCellDef="let item">{{ item.studentNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amountApplied">
+                <th mat-header-cell *matHeaderCellDef>Amount Applied</th>
+                <td mat-cell *matCellDef="let item">{{ item.amountApplied | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="issue">
+                <th mat-header-cell *matHeaderCellDef>Issue</th>
+                <td mat-cell *matCellDef="let item" class="error">{{ item.issue }}</td>
+              </ng-container>
+              <ng-container matColumnDef="note">
+                <th mat-header-cell *matHeaderCellDef>Note</th>
+                <td mat-cell *matCellDef="let item">{{ item.note }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsAnomalyAllocations"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsAnomalyAllocations"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
         <!-- No Issues -->
-        <div *ngIf="auditResult.summary.invoicesWithIssues === 0 && auditResult.summary.voidedReceiptsWithIssues === 0 && (!auditResult.summary.invoicesWithDeletedBalanceBfwd || auditResult.summary.invoicesWithDeletedBalanceBfwd === 0)" class="no-issues">
+        <div *ngIf="auditResult.summary.invoicesWithIssues === 0 && auditResult.summary.voidedReceiptsWithIssues === 0 && (!auditResult.summary.invoicesWithDeletedBalanceBfwd || auditResult.summary.invoicesWithDeletedBalanceBfwd === 0) && (!auditResult.summary.receiptsWithUnallocatedAmounts || auditResult.summary.receiptsWithUnallocatedAmounts === 0) && (!auditResult.summary.unrecordedCredits || auditResult.summary.unrecordedCredits === 0) && (!auditResult.summary.anomalyAllocations || auditResult.summary.anomalyAllocations === 0)" class="no-issues">
           <mat-icon color="primary">check_circle</mat-icon>
           <p>No data integrity issues found!</p>
         </div>

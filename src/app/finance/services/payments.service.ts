@@ -158,7 +158,24 @@ export class PaymentsService {
   }
 
   repairMissingCreditAllocations(dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post(`${this.baseURL}repair/missing-credit-allocations`, { dryRun });
+    return this.httpClient.post<any>(
+      `${this.baseURL}repair/missing-credit-allocations`,
+      { dryRun }
+    );
+  }
+
+  repairUnallocatedReceiptAmounts(dryRun: boolean = true): Observable<any> {
+    return this.httpClient.post<any>(
+      `${this.baseURL}repair/unallocated-receipt-amounts`,
+      { dryRun }
+    );
+  }
+
+  repairUnrecordedCredits(dryRun: boolean = true): Observable<any> {
+    return this.httpClient.post<any>(
+      `${this.baseURL}repair/unrecorded-credits`,
+      { dryRun }
+    );
   }
 
   repairAllData(dryRun: boolean = true): Observable<any> {

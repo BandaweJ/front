@@ -48,12 +48,42 @@ interface AuditResult {
     possibleBalanceBfwdAmount: number;
     note: string;
   }>;
+  receiptsWithUnallocatedAmounts: Array<{
+    receiptId: number;
+    receiptNumber: string;
+    studentNumber: string;
+    amountPaid: number;
+    totalAllocations: number;
+    unallocatedAmount: number;
+  }>;
+  unrecordedCredits: Array<{
+    studentCreditId: number;
+    studentNumber: string;
+    creditAmount: number;
+    receiptCreditsCount: number;
+    note: string;
+  }>;
+  anomalyAllocations: Array<{
+    allocationId: number;
+    allocationType: 'receipt' | 'credit';
+    receiptId?: number;
+    receiptNumber?: string;
+    invoiceId: number;
+    invoiceNumber: string;
+    studentNumber: string;
+    amountApplied: number;
+    issue: string;
+    note: string;
+  }>;
   summary: {
     totalInvoices: number;
     invoicesWithIssues: number;
     totalReceipts: number;
     voidedReceiptsWithIssues: number;
     invoicesWithDeletedBalanceBfwd: number;
+    receiptsWithUnallocatedAmounts: number;
+    unrecordedCredits: number;
+    anomalyAllocations: number;
   };
 }
 
@@ -120,6 +150,28 @@ export class DataRepairComponent implements OnInit, OnDestroy {
     'totalBill',
     'calculatedTotalBill',
     'possibleBalanceBfwdAmount',
+  ];
+  displayedColumnsUnallocated = [
+    'receiptNumber',
+    'studentNumber',
+    'amountPaid',
+    'totalAllocations',
+    'unallocatedAmount',
+  ];
+  displayedColumnsUnrecordedCredits = [
+    'studentNumber',
+    'creditAmount',
+    'receiptCreditsCount',
+    'note',
+  ];
+  displayedColumnsAnomalyAllocations = [
+    'allocationType',
+    'receiptNumber',
+    'invoiceNumber',
+    'studentNumber',
+    'amountApplied',
+    'issue',
+    'note',
   ];
 
   constructor(
@@ -212,6 +264,60 @@ export class DataRepairComponent implements OnInit, OnDestroy {
       });
   }
 
+  repairUnallocatedReceiptAmounts(): void {
+    this.loadingRepair = true;
+    this.paymentsService
+      .repairUnallocatedReceiptAmounts(this.dryRun)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result: RepairResult) => {
+          this.loadingRepair = false;
+          const message = this.dryRun
+            ? `Would fix ${result.fixed} unallocated receipt amounts (dry run)`
+            : `Fixed ${result.fixed} unallocated receipt amounts`;
+          this.snackBar.open(message, 'Close', { duration: 5000 });
+          if (!this.dryRun) {
+            this.runAudit(); // Refresh audit after repair
+          }
+        },
+        error: (error) => {
+          this.loadingRepair = false;
+          this.snackBar.open(
+            `Error repairing unallocated receipt amounts: ${error.message}`,
+            'Close',
+            { duration: 5000 }
+          );
+        },
+      });
+  }
+
+  repairUnrecordedCredits(): void {
+    this.loadingRepair = true;
+    this.paymentsService
+      .repairUnrecordedCredits(this.dryRun)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result: RepairResult) => {
+          this.loadingRepair = false;
+          const message = this.dryRun
+            ? `Would fix ${result.fixed} unrecorded credits (dry run)`
+            : `Fixed ${result.fixed} unrecorded credits`;
+          this.snackBar.open(message, 'Close', { duration: 5000 });
+          if (!this.dryRun) {
+            this.runAudit(); // Refresh audit after repair
+          }
+        },
+        error: (error) => {
+          this.loadingRepair = false;
+          this.snackBar.open(
+            `Error repairing unrecorded credits: ${error.message}`,
+            'Close',
+            { duration: 5000 }
+          );
+        },
+      });
+  }
+
   repairAll(): void {
     this.loadingRepair = true;
     this.paymentsService
@@ -223,9 +329,11 @@ export class DataRepairComponent implements OnInit, OnDestroy {
           const balanceFixed = result.balanceRepairs?.fixed || 0;
           const voidedFixed = result.voidedReceiptRepairs?.fixed || 0;
           const creditAllocFixed = result.missingCreditAllocationRepairs?.fixed || 0;
+          const unallocatedFixed = result.unallocatedReceiptAmountsRepairs?.fixed || 0;
+          const unrecordedFixed = result.unrecordedCreditsRepairs?.fixed || 0;
           const message = this.dryRun
-            ? `Would fix ${balanceFixed} balances, ${voidedFixed} voided receipts, and ${creditAllocFixed} missing credit allocations (dry run)`
-            : `Fixed ${balanceFixed} balances, ${voidedFixed} voided receipts, and ${creditAllocFixed} missing credit allocations`;
+            ? `Would fix ${balanceFixed} balances, ${voidedFixed} voided receipts, ${creditAllocFixed} missing credit allocations, ${unallocatedFixed} unallocated receipt amounts, and ${unrecordedFixed} unrecorded credits (dry run)`
+            : `Fixed ${balanceFixed} balances, ${voidedFixed} voided receipts, ${creditAllocFixed} missing credit allocations, ${unallocatedFixed} unallocated receipt amounts, and ${unrecordedFixed} unrecorded credits`;
           this.snackBar.open(message, 'Close', { duration: 5000 });
           if (!this.dryRun) {
             this.auditResult = result.audit; // Update audit result
