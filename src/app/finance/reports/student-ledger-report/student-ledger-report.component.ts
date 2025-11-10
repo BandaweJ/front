@@ -219,14 +219,22 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
           };
         }
 
-        const debits = ledger.filter(e => e.direction === 'out').reduce((sum, e) => sum + e.amount, 0);
-        const credits = ledger.filter(e => e.direction === 'in').reduce((sum, e) => sum + e.amount, 0);
+        // Only count Invoice and Payment types for balance calculation
+        // Allocations are already included in receipt amounts, so exclude them to avoid double-counting
+        const debits = ledger
+          .filter(e => e.direction === 'out' && e.type === 'Invoice')
+          .reduce((sum, e) => sum + e.amount, 0);
+        const credits = ledger
+          .filter(e => e.direction === 'in' && e.type === 'Payment')
+          .reduce((sum, e) => sum + e.amount, 0);
         const dates = ledger.map(e => new Date(e.date)).sort((a, b) => a.getTime() - b.getTime());
         
+        // netBalance = debits - credits (amount owed)
+        // Positive value means student owes money, negative means credit balance
         return {
           totalDebits: debits,
           totalCredits: credits,
-          netBalance: credits - debits,
+          netBalance: debits - credits,
           transactionCount: ledger.length,
           oldestTransaction: dates[0] || null,
           newestTransaction: dates[dates.length - 1] || null,
