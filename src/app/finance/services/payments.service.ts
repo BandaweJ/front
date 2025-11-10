@@ -181,4 +181,15 @@ export class PaymentsService {
   repairAllData(dryRun: boolean = true): Observable<any> {
     return this.httpClient.post(`${this.baseURL}repair/all`, { dryRun });
   }
+
+  repairStudentData(studentNumber: string, dryRun: boolean = true): Observable<any> {
+    return this.httpClient.post(`${this.baseURL}repair/student/${studentNumber}`, { dryRun });
+  }
+
+  repairSelectedStudentsData(studentNumbers: string[], dryRun: boolean = true): Observable<any> {
+    return this.httpClient.post(`${this.baseURL}repair/selected-students`, {
+      studentNumbers,
+      dryRun
+    });
+  }
 }

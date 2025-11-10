@@ -139,3 +139,212 @@
   }
 }
 
+// Student-by-Student Repair Section
+.student-repair-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+  }
+
+  .section-description {
+    margin-bottom: 1.5rem;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 0.95rem;
+  }
+
+  .student-selection {
+    margin-bottom: 2rem;
+
+    .selection-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 4px;
+
+      .selection-count {
+        margin-left: auto;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.7);
+      }
+    }
+
+    .search-field {
+      margin-bottom: 1rem;
+
+      .full-width {
+        width: 100%;
+      }
+
+      .search-results-count {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: rgba(0, 0, 0, 0.6);
+        text-align: right;
+      }
+    }
+
+    .loading-students {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem;
+      justify-content: center;
+    }
+
+    .students-list {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      padding: 0.5rem;
+
+      .no-results {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        text-align: center;
+        color: rgba(0, 0, 0, 0.6);
+
+        mat-icon {
+          font-size: 3rem;
+          width: 3rem;
+          height: 3rem;
+          margin-bottom: 1rem;
+          opacity: 0.5;
+        }
+
+        p {
+          margin: 0;
+          font-size: 1rem;
+        }
+      }
+
+      .student-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .student-info {
+          flex: 1;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          .student-name {
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.87);
+          }
+
+          .student-number {
+            color: #2196f3;
+            font-size: 0.875rem;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .repair-action {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+
+      button {
+        mat-icon {
+          margin-right: 0.5rem;
+        }
+      }
+    }
+  }
+
+  .student-repair-results {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(33, 150, 243, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid #2196f3;
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    .result-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+
+      .summary-item {
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 4px;
+
+        strong {
+          display: block;
+          margin-bottom: 0.25rem;
+          color: rgba(0, 0, 0, 0.7);
+          font-size: 0.875rem;
+        }
+      }
+    }
+
+    .individual-results {
+      margin-top: 1.5rem;
+
+      h5 {
+        margin-bottom: 1rem;
+      }
+
+      .results-table {
+        width: 100%;
+        background: white;
+        border-radius: 4px;
+        overflow: hidden;
+
+        th {
+          background: rgba(0, 0, 0, 0.05);
+          font-weight: 600;
+        }
+
+        .success-icon {
+          color: #4caf50;
+        }
+
+        .error-icon {
+          color: #f44336;
+        }
+
+        .error-list {
+          color: #f44336;
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+}
+

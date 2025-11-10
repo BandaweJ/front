@@ -4,12 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { PaymentsService } from '../services/payments.service';
+import { StudentsService } from 'src/app/registration/services/students.service';
+import { StudentsModel } from 'src/app/registration/models/students.model';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -107,6 +111,8 @@ interface RepairResult {
     MatTooltipModule,
     MatCheckboxModule,
     MatSnackBarModule,
+    MatInputModule,
+    MatFormFieldModule,
   ],
   templateUrl: './data-repair.component.html',
   styleUrls: ['./data-repair.component.scss'],
@@ -121,7 +127,16 @@ export class DataRepairComponent implements OnInit, OnDestroy {
   loadingVerification = false;
   loadingReport = false;
   loadingRepair = false;
+  loadingStudents = false;
+  loadingStudentRepair = false;
   dryRun = true;
+
+  // Student selection
+  students: StudentsModel[] = [];
+  selectedStudents: Set<string> = new Set();
+  studentRepairResult: any = null;
+  studentResultsDataSource = new MatTableDataSource<any>([]);
+  searchTerm: string = '';
 
   displayedColumnsBalance = [
     'invoiceNumber',
@@ -176,10 +191,116 @@ export class DataRepairComponent implements OnInit, OnDestroy {
 
   constructor(
     private paymentsService: PaymentsService,
+    private studentsService: StudentsService,
     private snackBar: MatSnackBar
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadStudents();
+  }
+
+  loadStudents(): void {
+    this.loadingStudents = true;
+    this.studentsService
+      .getAllStudents()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (students) => {
+          this.students = students;
+          this.loadingStudents = false;
+        },
+        error: (error) => {
+          this.loadingStudents = false;
+          this.snackBar.open(
+            `Error loading students: ${error.message}`,
+            'Close',
+            { duration: 5000 }
+          );
+        },
+      });
+  }
+
+  toggleStudentSelection(studentNumber: string): void {
+    if (this.selectedStudents.has(studentNumber)) {
+      this.selectedStudents.delete(studentNumber);
+    } else {
+      this.selectedStudents.add(studentNumber);
+    }
+  }
+
+  selectAllStudents(): void {
+    this.students.forEach((student) => {
+      this.selectedStudents.add(student.studentNumber);
+    });
+  }
+
+  deselectAllStudents(): void {
+    this.selectedStudents.clear();
+  }
+
+  repairSelectedStudents(): void {
+    if (this.selectedStudents.size === 0) {
+      this.snackBar.open('Please select at least one student', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    this.loadingStudentRepair = true;
+    this.studentRepairResult = null;
+    const studentNumbers = Array.from(this.selectedStudents);
+
+    this.paymentsService
+      .repairSelectedStudentsData(studentNumbers, this.dryRun)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          this.studentRepairResult = result;
+          if (result.studentResults && result.studentResults.length > 0) {
+            this.studentResultsDataSource.data = result.studentResults;
+          }
+          this.loadingStudentRepair = false;
+          const message = this.dryRun
+            ? `Would repair ${result.studentsProcessed} students (dry run). ${result.studentsFixed} would be fixed, ${result.studentsWithErrors} with errors.`
+            : `Repaired ${result.studentsProcessed} students. ${result.studentsFixed} fixed, ${result.studentsWithErrors} with errors.`;
+          this.snackBar.open(message, 'Close', { duration: 5000 });
+          if (!this.dryRun) {
+            this.runAudit(); // Refresh audit after repair
+          }
+        },
+        error: (error) => {
+          this.loadingStudentRepair = false;
+          this.snackBar.open(
+            `Error repairing selected students: ${error.message}`,
+            'Close',
+            { duration: 5000 }
+          );
+        },
+      });
+  }
+
+  isStudentSelected(studentNumber: string): boolean {
+    return this.selectedStudents.has(studentNumber);
+  }
+
+  get filteredStudents(): StudentsModel[] {
+    if (!this.searchTerm || this.searchTerm.trim() === '') {
+      return this.students;
+    }
+
+    const searchLower = this.searchTerm.toLowerCase().trim();
+    return this.students.filter(
+      (student) =>
+        student.name.toLowerCase().includes(searchLower) ||
+        student.surname.toLowerCase().includes(searchLower) ||
+        student.studentNumber.toLowerCase().includes(searchLower) ||
+        `${student.name} ${student.surname}`.toLowerCase().includes(searchLower)
+    );
+  }
+
+  onSearchChange(searchTerm: string): void {
+    this.searchTerm = searchTerm;
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
