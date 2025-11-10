@@ -4,6 +4,7 @@ import { BalancesModel } from './balances.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { InvoiceStatus } from '../enums/invoice-status.enum';
 import { ReceiptInvoiceAllocationsModel } from './receipt-invoice-allocations.model';
+import { CreditInvoiceAllocationModel } from './credit-invoice-allocation.model';
 import { ExemptionModel } from './exemption.model';
 
 export interface InvoiceModel {
@@ -18,6 +19,7 @@ export interface InvoiceModel {
   invoiceDate: Date;
   invoiceDueDate: Date;
   allocations: ReceiptInvoiceAllocationsModel[];
+  creditAllocations?: CreditInvoiceAllocationModel[]; // Credit allocations (overpayments applied to invoices)
   // NEW: Fields for tracking payments and status specific to THIS invoice
   amountPaidOnInvoice: number; // Tracks how much has been paid directly towards THIS invoice
   status: InvoiceStatus; // The current status of THIS invoice

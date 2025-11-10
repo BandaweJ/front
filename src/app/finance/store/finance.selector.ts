@@ -343,7 +343,12 @@ export const getStudentLedger = (studentNumber: string) =>
         });
 
         // Add allocations as separate entries for detailed history
+        // Skip allocations with null invoices (deleted invoices)
         receipt.allocations.forEach((allocation) => {
+          // Skip if invoice is null (deleted invoice but allocation still exists)
+          if (!allocation.invoice) {
+            return;
+          }
           ledgerEntries.push({
             id: `ALLOC-${allocation.id}`,
             type: 'Allocation',
@@ -354,6 +359,27 @@ export const getStudentLedger = (studentNumber: string) =>
             relatedDocNumber: allocation.invoice.invoiceNumber,
           });
         });
+      });
+
+      // 2.5. Process Credit Allocations (overpayments applied to invoices)
+      studentInvoices.forEach((invoice) => {
+        if (invoice.creditAllocations && invoice.creditAllocations.length > 0) {
+          invoice.creditAllocations.forEach((creditAllocation) => {
+            // Skip if invoice is null (deleted invoice but allocation still exists)
+            if (!creditAllocation.invoice) {
+              return;
+            }
+            ledgerEntries.push({
+              id: `CREDIT-ALLOC-${creditAllocation.id}`,
+              type: 'Allocation',
+              date: new Date(creditAllocation.allocationDate),
+              description: `Allocated from Student Credit to Invoice #${creditAllocation.invoice.invoiceNumber}`,
+              amount: +creditAllocation.amountApplied,
+              direction: 'in',
+              relatedDocNumber: creditAllocation.invoice.invoiceNumber,
+            });
+          });
+        }
       });
 
       // 3. Sort all entries chronologically

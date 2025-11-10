@@ -162,15 +162,15 @@
             <div class="ledger-table-container mat-elevation-z2">
               <table mat-table [dataSource]="ledger" class="full-width-table">
                 <ng-container matColumnDef="date">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-                  <td mat-cell *matCellDef="let element">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-date">Date</th>
+                  <td mat-cell *matCellDef="let element" class="mat-column-date">
                     {{ element.date | date:'shortDate' }}
                   </td>
                 </ng-container>
 
                 <ng-container matColumnDef="type">
-                  <th mat-header-cell *matHeaderCellDef>Type</th>
-                  <td mat-cell *matCellDef="let element" class="type-cell">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-type">Type</th>
+                  <td mat-cell *matCellDef="let element" class="mat-column-type type-cell">
                     <mat-icon [color]="element.direction === 'in' ? 'primary' : 'warn'" class="type-icon">
                       {{ getTransactionIcon(element.type) }}
                     </mat-icon>
@@ -179,22 +179,22 @@
                 </ng-container>
 
                 <ng-container matColumnDef="description">
-                  <th mat-header-cell *matHeaderCellDef>Description</th>
-                  <td mat-cell *matCellDef="let element" class="description-cell">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-description">Description</th>
+                  <td mat-cell *matCellDef="let element" class="mat-column-description description-cell">
                     {{ element.description }}
                   </td>
                 </ng-container>
 
                 <ng-container matColumnDef="amount">
-                  <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
-                  <td mat-cell *matCellDef="let element" [class]="getTransactionDirectionClass(element.direction)" class="text-right">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-amount text-right">Amount</th>
+                  <td mat-cell *matCellDef="let element" [class]="getTransactionDirectionClass(element.direction)" class="mat-column-amount text-right">
                     {{ element.amount | currency:'USD':'symbol':'1.2-2' }}
                   </td>
                 </ng-container>
 
                 <ng-container matColumnDef="runningBalance">
-                  <th mat-header-cell *matHeaderCellDef class="text-right">Running Balance</th>
-                  <td mat-cell *matCellDef="let element" [class]="getBalanceClass(element.runningBalance)" class="text-right">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-runningBalance text-right">Running Balance</th>
+                  <td mat-cell *matCellDef="let element" [class]="getBalanceClass(element.runningBalance)" class="mat-column-runningBalance text-right">
                     {{ element.runningBalance | currency:'USD':'symbol':'1.2-2' }}
                   </td>
                 </ng-container>

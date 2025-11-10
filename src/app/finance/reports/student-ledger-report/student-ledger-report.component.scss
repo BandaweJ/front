@@ -360,7 +360,54 @@
 
 .full-width-table {
   width: 100%;
-  min-width: 800px;
+  min-width: 1000px;
+  table-layout: auto;
+  
+  // Set column widths to prevent truncation
+  .mat-column-date {
+    width: 120px;
+    min-width: 120px;
+  }
+  
+  .mat-column-type {
+    width: 140px;
+    min-width: 140px;
+    
+    // Ensure proper vertical alignment for type column
+    &.mat-cell {
+      vertical-align: middle;
+      padding: 12px 16px;
+    }
+    
+    &.mat-header-cell {
+      vertical-align: middle;
+    }
+  }
+  
+  .mat-column-description {
+    width: 350px;
+    min-width: 300px;
+    max-width: 400px;
+  }
+  
+  .mat-column-amount {
+    width: 130px;
+    min-width: 130px;
+  }
+  
+  .mat-column-runningBalance {
+    width: 150px;
+    min-width: 150px;
+  }
+  
+  // Ensure consistent row heights and vertical alignment
+  .mat-row {
+    min-height: 48px;
+    
+    .mat-cell {
+      vertical-align: middle;
+    }
+  }
 }
 
 .mat-header-cell {
@@ -386,6 +433,7 @@
   font-size: 0.9em;
   color: var(--text-secondary);
   padding: 12px 16px;
+  vertical-align: middle; // Ensure all cells are vertically centered
   
   &.text-right {
     text-align: right;
@@ -399,12 +447,24 @@
 .type-cell {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 8px;
+  min-height: 40px; // Ensure minimum height for consistent row height
+  line-height: 1.5;
   
   .type-icon {
     font-size: 20px;
     width: 20px;
     height: 20px;
+    flex-shrink: 0; // Prevent icon from shrinking
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  span {
+    flex: 0 1 auto; // Allow text to shrink if needed
+    white-space: nowrap;
   }
 }
 
@@ -417,6 +477,13 @@
 
 .ledger-row {
   transition: background-color 0.2s ease;
+  height: auto; // Allow row to adjust to content
+  min-height: 48px; // Ensure minimum row height for consistency
+  
+  // Ensure all cells in the row are aligned (Material table uses mat-cell)
+  .mat-cell {
+    vertical-align: middle;
+  }
   
   &:hover {
     background-color: rgba(0, 0, 0, 0.04);

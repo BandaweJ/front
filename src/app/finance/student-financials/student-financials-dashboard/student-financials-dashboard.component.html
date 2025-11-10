@@ -21,13 +21,16 @@
             <div class="balance-details">
               <h3 class="balance-label">Outstanding Balance</h3>
               <div class="balance-amount">
-                <span *ngIf="loadingOutstandingBalance$ | async" class="loading-balance">
-                  <mat-spinner diameter="24"></mat-spinner>
-                </span>
-                <span *ngIf="!(loadingOutstandingBalance$ | async) && (outstandingBalance$ | async) as balance" 
-                      class="balance-value">
-                  {{ balance | currency:'USD':'symbol':'1.2-2' }}
-                </span>
+                <ng-container *ngIf="outstandingBalance$ | async as balance; else loadingBalance">
+                  <span class="balance-value">
+                    {{ balance | currency:'USD':'symbol':'1.2-2' }}
+                  </span>
+                </ng-container>
+                <ng-template #loadingBalance>
+                  <span class="loading-balance">
+                    <mat-spinner diameter="24"></mat-spinner>
+                  </span>
+                </ng-template>
               </div>
             </div>
           </div>

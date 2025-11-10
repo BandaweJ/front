@@ -122,10 +122,10 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Load initial data
+    // Load initial data (students only - invoices and receipts are loaded by dashboard)
     this.store.dispatch(fetchStudents());
-    this.store.dispatch(invoiceActions.fetchAllInvoices());
-    this.store.dispatch(receiptActions.fetchAllReceipts());
+    // Note: Invoices and receipts are loaded by FinanceDashboardComponent (for reception/director/auditor)
+    // or StudentFinancialsDashboardComponent (for students). Data should already be available.
 
     // Subscribe to theme changes
     this.themeService.theme$
@@ -156,11 +156,14 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
 
   private setupDataFlow(): void {
     // Create ledger observable from selected student
+    // Wait for invoices and receipts to be loaded (from dashboard)
     this.rawLedger$ = this.selectedStudent$.pipe(
       switchMap(student => {
         if (!student) {
           return of([]);
         }
+        // Get the ledger directly - data should already be loaded by dashboard
+        // The selector will return data immediately if available
         return this.store.select(getStudentLedger(student.studentNumber)).pipe(
           catchError(error => {
             console.error('Error loading ledger:', error);
@@ -250,15 +253,7 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
     this.hasError = false;
     this.errorMessage = '';
     this.cdr.markForCheck();
-    
-    if (student) {
-      // Show success message
-      this.snackBar.open(
-        `Loading ledger for ${student.name} ${student.surname}`,
-        'Dismiss',
-        { duration: 2000 }
-      );
-    }
+    // No snackbar - data should already be loaded by dashboard
   }
 
   onRetry(): void {

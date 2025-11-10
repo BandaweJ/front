@@ -112,18 +112,35 @@
                 <div class="allocations-list">
                   <div *ngFor="let allocation of receipt.allocations; trackBy: trackByAllocationId" 
                        class="allocation-item">
-                    <div class="allocation-content">
-                      <div class="allocation-info">
-                        <mat-icon class="allocation-icon">receipt_long</mat-icon>
-                        <div class="allocation-details">
-                          <span class="allocation-invoice">Invoice #{{ allocation.invoice.invoiceNumber }}</span>
-                          <span class="allocation-date">{{ allocation.allocationDate | date:'MMM dd, yyyy' }}</span>
+                    <!-- Skip allocations with null invoices (deleted invoices) -->
+                    <ng-container *ngIf="allocation.invoice; else deletedInvoice">
+                      <div class="allocation-content">
+                        <div class="allocation-info">
+                          <mat-icon class="allocation-icon">receipt_long</mat-icon>
+                          <div class="allocation-details">
+                            <span class="allocation-invoice">Invoice #{{ allocation.invoice.invoiceNumber }}</span>
+                            <span class="allocation-date">{{ allocation.allocationDate | date:'MMM dd, yyyy' }}</span>
+                          </div>
+                        </div>
+                        <div class="allocation-amount">
+                          {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
                         </div>
                       </div>
-                      <div class="allocation-amount">
-                        {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
+                    </ng-container>
+                    <ng-template #deletedInvoice>
+                      <div class="allocation-content allocation-deleted">
+                        <div class="allocation-info">
+                          <mat-icon class="allocation-icon">warning</mat-icon>
+                          <div class="allocation-details">
+                            <span class="allocation-invoice">Invoice (Deleted)</span>
+                            <span class="allocation-date">{{ allocation.allocationDate | date:'MMM dd, yyyy' }}</span>
+                          </div>
+                        </div>
+                        <div class="allocation-amount">
+                          {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
+                        </div>
                       </div>
-                    </div>
+                    </ng-template>
                   </div>
                 </div>
               </div>
