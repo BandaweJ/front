@@ -1,8 +1,9 @@
 <div class="invoice-item" 
      [class.theme-light]="currentTheme === 'light'" 
-     [class.theme-dark]="currentTheme === 'dark'">
+     [class.theme-dark]="currentTheme === 'dark'"
+     [class.voided-invoice]="invoice?.isVoided">
   
-  <!-- Download/Save Button -->
+  <!-- Download/Save/Void Buttons -->
   <div class="invoice-actions" *ngIf="invoice && invoice.bills && invoice.bills.length > 0">
     <button 
       type="button" 
@@ -15,6 +16,16 @@
       [attr.aria-label]="downloadable ? 'Download Invoice' : 'Save Invoice'">
       <mat-spinner *ngIf="isDownloading" diameter="20"></mat-spinner>
       <mat-icon *ngIf="!isDownloading">{{ downloadable ? 'download' : 'save' }}</mat-icon>
+    </button>
+    <button 
+      *ngIf="!invoice.isVoided && ((userRole$ | async) === 'auditor' || (userRole$ | async) === 'director' || (userRole$ | async) === 'reception')" 
+      type="button" 
+      mat-mini-fab 
+      color="warn"
+      class="action-btn void-btn" 
+      (click)="voidInvoice()" 
+      matTooltip="Void Invoice">
+      <mat-icon>cancel</mat-icon>
     </button>
   </div>
 
@@ -49,6 +60,13 @@
       </address>
     </div>
   </header>
+
+  <!-- Void Overlay -->
+  <div *ngIf="invoice?.isVoided" class="void-overlay">
+    <span class="void-text">VOIDED</span>
+    <span class="void-reason" *ngIf="invoice?.voidedBy">By: {{ invoice?.voidedBy }}</span>
+    <span class="void-date" *ngIf="invoice?.voidedAt">On: {{ invoice?.voidedAt | date:'short' }}</span>
+  </div>
 
   <!-- Invoice Title Section -->
   <section class="invoice-title-section">

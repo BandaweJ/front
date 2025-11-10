@@ -43,6 +43,11 @@ $table-header-dark: #263238;
 
   // Professional border accent
   border-top: 4px solid var(--primary-blue, $primary-blue);
+
+  &.voided-invoice {
+    opacity: 0.7;
+    border-left: 6px solid $error-red;
+  }
 }
 
 // Actions Button
@@ -629,4 +634,49 @@ $table-header-dark: #263238;
       print-color-adjust: exact;
     }
   }
+}
+
+// Void Overlay Styles
+.void-overlay {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%) rotate(-25deg);
+  z-index: 10;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.95);
+  border: 4px dashed $error-red;
+  padding: 2rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 8px 24px rgba(244, 67, 54, 0.3);
+
+  .theme-dark & {
+    background: rgba(30, 30, 30, 0.95);
+  }
+}
+
+.void-text {
+  font-size: 3rem;
+  font-weight: 900;
+  color: $error-red;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.void-reason,
+.void-date {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $error-red;
+}
+
+.void-btn {
+  background-color: $error-red !important;
+  color: white !important;
 }

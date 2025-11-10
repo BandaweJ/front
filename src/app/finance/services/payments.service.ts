@@ -128,4 +128,40 @@ export class PaymentsService {
       {}
     );
   }
+
+  voidInvoice(invoiceId: number): Observable<InvoiceModel> {
+    return this.httpClient.patch<InvoiceModel>(
+      `${this.baseURL}invoice/void/${invoiceId}`,
+      {}
+    );
+  }
+
+  // Data Repair Service Methods
+  auditDataIntegrity(): Observable<any> {
+    return this.httpClient.get(`${this.baseURL}repair/audit`);
+  }
+
+  verifyAmountPaidOnInvoice(): Observable<any> {
+    return this.httpClient.get(`${this.baseURL}repair/verify-amount-paid`);
+  }
+
+  generateRepairReport(): Observable<any> {
+    return this.httpClient.get(`${this.baseURL}repair/report`);
+  }
+
+  repairInvoiceBalances(dryRun: boolean = true): Observable<any> {
+    return this.httpClient.post(`${this.baseURL}repair/balances`, { dryRun });
+  }
+
+  repairVoidedReceipts(dryRun: boolean = true): Observable<any> {
+    return this.httpClient.post(`${this.baseURL}repair/voided-receipts`, { dryRun });
+  }
+
+  repairMissingCreditAllocations(dryRun: boolean = true): Observable<any> {
+    return this.httpClient.post(`${this.baseURL}repair/missing-credit-allocations`, { dryRun });
+  }
+
+  repairAllData(dryRun: boolean = true): Observable<any> {
+    return this.httpClient.post(`${this.baseURL}repair/all`, { dryRun });
+  }
 }

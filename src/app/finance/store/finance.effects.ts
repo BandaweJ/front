@@ -785,6 +785,29 @@ export class FinanceEffects {
     )
   );
 
+  voidInvoice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.voidInvoice),
+      mergeMap(({ invoiceId }) =>
+        this.paymentsService.voidInvoice(invoiceId).pipe(
+          map((invoice) => {
+            this.snackBar.open('Invoice voided successfully!', 'Close', {
+              duration: 3000,
+            });
+            return invoiceActions.voidInvoiceSuccess({ invoice });
+          }),
+          catchError((error) => {
+            console.error('Error voiding invoice:', error);
+            const errorMessage =
+              error.error?.message || 'Failed to void invoice.';
+            this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+            return of(invoiceActions.voidInvoiceFailure({ error }));
+          })
+        )
+      )
+    )
+  );
+
   // billStudent$ effect removed - bills are now updated locally only
   // The user will save the entire invoice later using the save button
 }

@@ -25,4 +25,9 @@ export interface InvoiceModel {
 
   // NEW: Exemption property
   exemption?: ExemptionModel; // An invoice might have an associated exemption, make it optional
+
+  // Fields for voiding - invoices should NOT be deleted, only voided
+  isVoided?: boolean;
+  voidedAt?: Date;
+  voidedBy?: string; // E.g., email or ID of the user who voided it
 }

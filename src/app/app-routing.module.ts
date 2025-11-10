@@ -252,6 +252,12 @@ const routes: Routes = [
     title: 'Revenue Recognition',
   },
   {
+    canActivate: [AuthGuardService],
+    path: 'data-repair',
+    loadComponent: () => import('./finance/data-repair/data-repair.component').then(m => m.DataRepairComponent),
+    title: 'Data Repair & Integrity',
+  },
+  {
     path: 'user-management',
     loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
     canActivate: [AuthGuardService],

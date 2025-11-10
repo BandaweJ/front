@@ -1,0 +1,359 @@
+<div class="data-repair-container">
+  <mat-card class="repair-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>build</mat-icon>
+        Data Repair & Integrity
+      </mat-card-title>
+      <mat-card-subtitle>
+        Audit and repair historical data inconsistencies
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Controls -->
+      <div class="controls-section">
+        <mat-checkbox [(ngModel)]="dryRun" [disabled]="loadingRepair">
+          Dry Run (Preview changes without applying)
+        </mat-checkbox>
+        <div class="action-buttons">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="runAudit()"
+            [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport">
+            <mat-icon>search</mat-icon>
+            Run Audit
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="verifyAmountPaid()"
+            [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport">
+            <mat-icon>verified</mat-icon>
+            Verify Amount Paid
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="generateReport()"
+            [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport">
+            <mat-icon>description</mat-icon>
+            Generate Report
+          </button>
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="repairBalances()"
+            [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport || !auditResult">
+            <mat-icon>balance</mat-icon>
+            Repair Balances
+          </button>
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="repairVoidedReceipts()"
+            [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport || !auditResult">
+            <mat-icon>receipt</mat-icon>
+            Repair Voided Receipts
+          </button>
+          <button
+            mat-raised-button
+            color="warn"
+            (click)="repairAll()"
+            [disabled]="loadingAudit || loadingRepair || loadingVerification || loadingReport || !auditResult">
+            <mat-icon>settings</mat-icon>
+            Repair All
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div *ngIf="loadingAudit || loadingRepair || loadingVerification || loadingReport" class="loading-section">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>
+          <span *ngIf="loadingAudit">Running audit...</span>
+          <span *ngIf="loadingVerification">Verifying amount paid...</span>
+          <span *ngIf="loadingReport">Generating report...</span>
+          <span *ngIf="loadingRepair">Repairing data...</span>
+        </p>
+      </div>
+
+      <!-- Audit Results -->
+      <div *ngIf="auditResult && !loadingAudit" class="results-section">
+        <!-- Summary -->
+        <div class="summary-card">
+          <h3>Summary</h3>
+          <div class="summary-stats">
+            <div class="stat-item">
+              <span class="stat-label">Total Invoices:</span>
+              <span class="stat-value">{{ auditResult.summary.totalInvoices }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Invoices with Issues:</span>
+              <span class="stat-value error">{{ auditResult.summary.invoicesWithIssues }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Total Receipts:</span>
+              <span class="stat-value">{{ auditResult.summary.totalReceipts }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Voided Receipts with Issues:</span>
+              <span class="stat-value error">{{ auditResult.summary.voidedReceiptsWithIssues }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Balance Issues -->
+        <mat-card *ngIf="auditResult.invoicesWithBalanceIssues.length > 0" class="issue-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="warn">warning</mat-icon>
+              Invoices with Balance Issues ({{ auditResult.invoicesWithBalanceIssues.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <table mat-table [dataSource]="auditResult.invoicesWithBalanceIssues" class="issues-table">
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                <td mat-cell *matCellDef="let item">{{ item.invoiceNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="studentNumber">
+                <th mat-header-cell *matHeaderCellDef>Student #</th>
+                <td mat-cell *matCellDef="let item">{{ item.studentNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="expectedBalance">
+                <th mat-header-cell *matHeaderCellDef>Expected Balance</th>
+                <td mat-cell *matCellDef="let item">{{ item.expectedBalance | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actualBalance">
+                <th mat-header-cell *matHeaderCellDef>Actual Balance</th>
+                <td mat-cell *matCellDef="let item">{{ item.actualBalance | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="difference">
+                <th mat-header-cell *matHeaderCellDef>Difference</th>
+                <td mat-cell *matCellDef="let item" class="error">{{ item.difference | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsBalance"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsBalance"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Missing Credit Allocations -->
+        <mat-card *ngIf="auditResult.invoicesWithMissingCreditAllocations.length > 0" class="issue-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="warn">warning</mat-icon>
+              Invoices with Missing Credit Allocations ({{ auditResult.invoicesWithMissingCreditAllocations.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <table mat-table [dataSource]="auditResult.invoicesWithMissingCreditAllocations" class="issues-table">
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                <td mat-cell *matCellDef="let item">{{ item.invoiceNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="studentNumber">
+                <th mat-header-cell *matHeaderCellDef>Student #</th>
+                <td mat-cell *matCellDef="let item">{{ item.studentNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amountPaidOnInvoice">
+                <th mat-header-cell *matHeaderCellDef>Amount Paid</th>
+                <td mat-cell *matCellDef="let item">{{ item.amountPaidOnInvoice | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="totalReceiptAllocations">
+                <th mat-header-cell *matHeaderCellDef>Receipt Allocations</th>
+                <td mat-cell *matCellDef="let item">{{ item.totalReceiptAllocations | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="missingCreditAmount">
+                <th mat-header-cell *matHeaderCellDef>Missing Credit</th>
+                <td mat-cell *matCellDef="let item" class="error">{{ item.missingCreditAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsCredit"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsCredit"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Voided Receipts with Issues -->
+        <mat-card *ngIf="auditResult.voidedReceiptsWithIncompleteReversals.length > 0" class="issue-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="warn">warning</mat-icon>
+              Voided Receipts with Incomplete Reversals ({{ auditResult.voidedReceiptsWithIncompleteReversals.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <table mat-table [dataSource]="auditResult.voidedReceiptsWithIncompleteReversals" class="issues-table">
+              <ng-container matColumnDef="receiptNumber">
+                <th mat-header-cell *matHeaderCellDef>Receipt #</th>
+                <td mat-cell *matCellDef="let item">{{ item.receiptNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="studentNumber">
+                <th mat-header-cell *matHeaderCellDef>Student #</th>
+                <td mat-cell *matCellDef="let item">{{ item.studentNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amountPaid">
+                <th mat-header-cell *matHeaderCellDef>Amount Paid</th>
+                <td mat-cell *matCellDef="let item">{{ item.amountPaid | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="totalAllocations">
+                <th mat-header-cell *matHeaderCellDef>Total Allocations</th>
+                <td mat-cell *matCellDef="let item">{{ item.totalAllocations | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="shouldHaveReversed">
+                <th mat-header-cell *matHeaderCellDef>Should Reverse</th>
+                <td mat-cell *matCellDef="let item" class="error">{{ item.shouldHaveReversed | currency:'USD':'symbol':'1.2-2' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsVoided"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsVoided"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- No Issues -->
+        <div *ngIf="auditResult.summary.invoicesWithIssues === 0 && auditResult.summary.voidedReceiptsWithIssues === 0" class="no-issues">
+          <mat-icon color="primary">check_circle</mat-icon>
+          <p>No data integrity issues found!</p>
+        </div>
+      </div>
+
+      <!-- Verification Results -->
+      <div *ngIf="verificationResult && !loadingVerification" class="results-section">
+        <mat-card class="issue-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="primary">verified</mat-icon>
+              Amount Paid Verification Results
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="summary-card">
+              <h4>Summary</h4>
+              <div class="summary-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Total Invoices:</span>
+                  <span class="stat-value">{{ verificationResult.summary.totalInvoices }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Invoices with Mismatches:</span>
+                  <span class="stat-value error">{{ verificationResult.summary.invoicesWithMismatches }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Amount Paid Too High:</span>
+                  <span class="stat-value error">{{ verificationResult.summary.invoicesWithAmountPaidTooHigh }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Amount Paid Too Low:</span>
+                  <span class="stat-value error">{{ verificationResult.summary.invoicesWithAmountPaidTooLow }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Total Difference:</span>
+                  <span class="stat-value error">{{ verificationResult.summary.totalDifference | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="verificationResult.invoicesWithMismatchedAmountPaid.length > 0">
+              <h4>Invoices with Mismatches</h4>
+              <table mat-table [dataSource]="verificationResult.invoicesWithMismatchedAmountPaid" class="issues-table">
+                <ng-container matColumnDef="invoiceNumber">
+                  <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                  <td mat-cell *matCellDef="let item">{{ item.invoiceNumber }}</td>
+                </ng-container>
+                <ng-container matColumnDef="studentNumber">
+                  <th mat-header-cell *matHeaderCellDef>Student #</th>
+                  <td mat-cell *matCellDef="let item">{{ item.studentNumber }}</td>
+                </ng-container>
+                <ng-container matColumnDef="amountPaidOnInvoice">
+                  <th mat-header-cell *matHeaderCellDef>Amount Paid</th>
+                  <td mat-cell *matCellDef="let item">{{ item.amountPaidOnInvoice | currency:'USD':'symbol':'1.2-2' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="calculatedAmountPaid">
+                  <th mat-header-cell *matHeaderCellDef>Calculated Amount</th>
+                  <td mat-cell *matCellDef="let item">{{ item.calculatedAmountPaid | currency:'USD':'symbol':'1.2-2' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="difference">
+                  <th mat-header-cell *matHeaderCellDef>Difference</th>
+                  <td mat-cell *matCellDef="let item" [class]="item.isAmountPaidTooHigh ? 'error' : 'warning'">
+                    {{ item.difference | currency:'USD':'symbol':'1.2-2' }}
+                    ({{ item.isAmountPaidTooHigh ? 'Too High' : 'Too Low' }})
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="['invoiceNumber', 'studentNumber', 'amountPaidOnInvoice', 'calculatedAmountPaid', 'difference']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['invoiceNumber', 'studentNumber', 'amountPaidOnInvoice', 'calculatedAmountPaid', 'difference']"></tr>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Repair Report -->
+      <div *ngIf="repairReport && !loadingReport" class="results-section">
+        <mat-card class="issue-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="primary">description</mat-icon>
+              Detailed Repair Report
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="summary-card">
+              <h4>Summary</h4>
+              <div class="summary-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Total Issues:</span>
+                  <span class="stat-value error">{{ repairReport.summary.totalIssues }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Invoices Affected:</span>
+                  <span class="stat-value">{{ repairReport.summary.totalInvoicesAffected }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Receipts Affected:</span>
+                  <span class="stat-value">{{ repairReport.summary.totalReceiptsAffected }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Net Balance Change:</span>
+                  <span class="stat-value" [class]="repairReport.summary.estimatedBalanceChanges.netBalanceChange > 0 ? 'error' : 'success'">
+                    {{ repairReport.summary.estimatedBalanceChanges.netBalanceChange | currency:'USD':'symbol':'1.2-2' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="repairReport.balanceRepairs.repairs.length > 0">
+              <h4>Balance Repairs ({{ repairReport.balanceRepairs.totalIssues }})</h4>
+              <table mat-table [dataSource]="repairReport.balanceRepairs.repairs" class="issues-table">
+                <ng-container matColumnDef="invoiceNumber">
+                  <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                  <td mat-cell *matCellDef="let item">{{ item.invoiceNumber }}</td>
+                </ng-container>
+                <ng-container matColumnDef="studentNumber">
+                  <th mat-header-cell *matHeaderCellDef>Student #</th>
+                  <td mat-cell *matCellDef="let item">{{ item.studentNumber }}</td>
+                </ng-container>
+                <ng-container matColumnDef="currentBalance">
+                  <th mat-header-cell *matHeaderCellDef>Current Balance</th>
+                  <td mat-cell *matCellDef="let item">{{ item.currentBalance | currency:'USD':'symbol':'1.2-2' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="expectedBalance">
+                  <th mat-header-cell *matHeaderCellDef>Expected Balance</th>
+                  <td mat-cell *matCellDef="let item">{{ item.expectedBalance | currency:'USD':'symbol':'1.2-2' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="verificationStatus">
+                  <th mat-header-cell *matHeaderCellDef>Verification Status</th>
+                  <td mat-cell *matCellDef="let item" [class]="item.amountPaidVerified ? 'success' : 'warning'">
+                    {{ item.verificationStatus }}
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="['invoiceNumber', 'studentNumber', 'currentBalance', 'expectedBalance', 'verificationStatus']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['invoiceNumber', 'studentNumber', 'currentBalance', 'expectedBalance', 'verificationStatus']"></tr>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

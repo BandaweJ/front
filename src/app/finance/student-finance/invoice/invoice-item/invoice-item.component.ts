@@ -8,9 +8,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, Observable } from 'rxjs';
+import { takeUntil, take, map } from 'rxjs/operators';
+import { selectAuthUserRole } from 'src/app/auth/store/auth.selectors';
+import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialo/confirmation-dialo.component';
+import { MatDialogRef } from '@angular/material/dialog';
 @Component({
   selector: 'app-invoice-item',
   standalone: true,
@@ -21,6 +25,7 @@ import { takeUntil } from 'rxjs/operators';
     MatIconModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
   ],
   templateUrl: './invoice-item.component.html',
   styleUrls: ['./invoice-item.component.scss'],
@@ -30,6 +35,7 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
   currentTheme: Theme = 'light';
   isDownloading = false;
   private destroy$ = new Subject<void>();
+  userRole$: Observable<string | null>;
 
   @Input() invoice!: InvoiceModel | null;
   @Input() downloadable!: boolean;
@@ -38,8 +44,13 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
     public sharedService: SharedService,
     private store: Store,
     private cdr: ChangeDetectorRef,
-    private themeService: ThemeService
-  ) {}
+    private themeService: ThemeService,
+    private dialog: MatDialog
+  ) {
+    this.userRole$ = this.store.select(selectAuthUserRole).pipe(
+      map(role => role ?? null)
+    );
+  }
 
   ngOnInit(): void {
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
@@ -113,5 +124,37 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
     if (img) {
       img.src = '../../../assets/placeholder-logo.png';
     }
+  }
+
+  voidInvoice(): void {
+    // Check if the invoice is already voided
+    if (this.invoice?.isVoided) {
+      console.warn('Invoice is already voided. Cannot void again.');
+      return;
+    }
+
+    // Open confirmation dialog
+    const dialogRef: MatDialogRef<ConfirmationDialogComponent> = this.dialog.open(ConfirmationDialogComponent, {
+      width: '300px',
+      data: {
+        title: 'Confirm Void',
+        message:
+          'Are you sure you want to void this invoice? This action cannot be undone.',
+        confirmText: 'Void',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((result) => {
+        if (result && this.invoice?.id) {
+          // User confirmed, dispatch the void action
+          this.store.dispatch(
+            invoiceActions.voidInvoice({ invoiceId: this.invoice.id })
+          );
+        }
+      });
   }
 }

@@ -21,6 +21,7 @@ export interface FinanceDataModel {
   invoiceDueDate?: Date; // invoiceModel.invoiceDueDate (ISO string)
   invoiceTotalBill?: number; // invoiceModel.totalBill (if type is 'Invoice')
   invoiceBalance?: number; // invoiceModel.balance (if type is 'Invoice')
+  invoiceIsVoided?: boolean; // invoiceModel.isVoided (if type is 'Invoice')
 
   // --- Receipt-Specific Details ---
   receiptNumber?: string; // receiptModel.receiptNumber (present if type is 'Payment')

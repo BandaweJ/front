@@ -213,10 +213,12 @@ export const selectCombinedPaymentHistory = createSelector(
   ): PaymentHistoryItem[] => {
     const history: PaymentHistoryItem[] = [];
 
-    // 1. Add Invoices as 'debits' or 'charges'
+    // 1. Add Invoices as 'debits' or 'charges' (filter out voided invoices)
     if (invoices) {
-      invoices.forEach((invoice) => {
-        history.push({
+      invoices
+        .filter((invoice) => !invoice.isVoided) // Filter out voided invoices
+        .forEach((invoice) => {
+          history.push({
           id: `INV-${invoice.invoiceNumber}`, // Unique ID for this history item
           type: 'Invoice',
           date: new Date(invoice.invoiceDate),
@@ -291,7 +293,10 @@ export const getStudentLedger = (studentNumber: string) =>
       const ledgerEntries: PaymentHistoryItem[] = [];
 
       // Filter invoices for the specific student
+      // Filter out voided invoices
       const studentInvoices = (allInvoices || []).filter(
+        (inv) => !inv.isVoided
+      ).filter(
         (inv) => inv.student?.studentNumber === studentNumber
       );
 
@@ -563,30 +568,33 @@ export const selectAllCombinedFinanceData = createSelector(
   (invoices: InvoiceModel[], receipts: ReceiptModel[]): FinanceDataModel[] => {
     const combined: FinanceDataModel[] = [];
 
-    // Map Invoices to FinanceDataModel
+    // Map Invoices to FinanceDataModel (filter out voided invoices)
     if (invoices) {
-      invoices.forEach((invoice) => {
-        combined.push({
-          id: invoice.invoiceNumber,
-          transactionDate: invoice.invoiceDate,
-          amount: invoice.totalBill,
-          type: 'Invoice',
-          description: `Term ${invoice.enrol.num} ${invoice.enrol.year} Invoice For ${invoice.student.surname} ${invoice.student.name} Enrolled in ${invoice.enrol.name} as a ${invoice.enrol.residence}`,
-          date: invoice.invoiceDate,
-          studentId: invoice.student.studentNumber,
-          studentName: invoice.student.surname + invoice.student.name,
-          status: invoice.status,
-          invoiceNumber: invoice.invoiceNumber,
-          invoiceDate: invoice.invoiceDate,
-          invoiceDueDate: invoice.invoiceDueDate,
-          invoiceTotalBill: invoice.totalBill,
-          invoiceBalance: invoice.balance,
-          enrolId: invoice.enrol.id,
-          enrolAcademicYear: invoice.enrol.year,
-          enrolTerm: invoice.enrol.num + ' ' + invoice.enrol.year,
-          enrolClass: invoice.enrol.name,
+      invoices
+        .filter((invoice) => !invoice.isVoided) // Filter out voided invoices
+        .forEach((invoice) => {
+          combined.push({
+            id: invoice.invoiceNumber,
+            transactionDate: invoice.invoiceDate,
+            amount: invoice.totalBill,
+            type: 'Invoice',
+            description: `Term ${invoice.enrol.num} ${invoice.enrol.year} Invoice For ${invoice.student.surname} ${invoice.student.name} Enrolled in ${invoice.enrol.name} as a ${invoice.enrol.residence}`,
+            date: invoice.invoiceDate,
+            studentId: invoice.student.studentNumber,
+            studentName: invoice.student.surname + invoice.student.name,
+            status: invoice.status,
+            invoiceNumber: invoice.invoiceNumber,
+            invoiceDate: invoice.invoiceDate,
+            invoiceDueDate: invoice.invoiceDueDate,
+            invoiceTotalBill: invoice.totalBill,
+            invoiceBalance: invoice.balance,
+            enrolId: invoice.enrol.id,
+            enrolAcademicYear: invoice.enrol.year,
+            enrolTerm: invoice.enrol.num + ' ' + invoice.enrol.year,
+            enrolClass: invoice.enrol.name,
+            invoiceIsVoided: false, // Already filtered, so always false
+          });
         });
-      });
     }
 
     // Map Receipts to FinanceDataModel (now including all non-voided receipts)
@@ -665,6 +673,11 @@ export const selectAllStudentsOverallBalances = createSelector(
     sortedCombinedData.forEach((t) => {
       const studentId = t.studentId;
       if (!studentId) return;
+
+      // Skip voided invoices
+      if (t.type === 'Invoice' && t.invoiceIsVoided) {
+        return;
+      }
 
       let currentBalance = studentBalances.get(studentId) || 0;
       const amount = parseFloat(String(t.amount)) || 0;
@@ -882,8 +895,9 @@ export const getAgedDebtorsReport = (filters: AgedDebtorsReportFilters) =>
       const asOfDate = filters.asOfDate || new Date();
       let filteredInvoices: InvoiceModel[] = [];
 
+      // Filter out voided invoices and invoices with balance > 0
       let invoicesWithBalance = (allInvoices || []).filter(
-        (inv) => inv.balance > 0
+        (inv) => !inv.isVoided && inv.balance > 0
       );
 
       if (selectedTerm) {
@@ -1050,7 +1064,8 @@ export const getRevenueRecognitionReport = (
         return { asOfDate: new Date(), reportData: [] };
       }
 
-      const termInvoices = allInvoices.filter((invoice) => {
+      // Filter out voided invoices
+      const termInvoices = allInvoices.filter((invoice) => !invoice.isVoided).filter((invoice) => {
         return (
           invoice.enrol?.num === selectedTerm.num &&
           invoice.enrol?.year === selectedTerm.year

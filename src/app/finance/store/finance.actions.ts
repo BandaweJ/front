@@ -71,6 +71,11 @@ export const invoiceActions = createActionGroup({
 
     updateInvoiceEnrolment: props<{ enrol: EnrolsModel }>(),
     clearInvoice: emptyProps(), // Add a clear action for when selection changes
+
+    // --- NEW ACTIONS FOR VOIDING INVOICES ---
+    'Void Invoice': props<{ invoiceId: number }>(), // Request to void an invoice
+    'Void Invoice Success': props<{ invoice: InvoiceModel }>(), // Voiding successful, provide updated invoice
+    'Void Invoice Failure': props<{ error: HttpErrorResponse }>(), // Voiding failed
   },
 });
 

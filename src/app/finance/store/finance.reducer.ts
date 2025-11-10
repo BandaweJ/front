@@ -607,5 +607,34 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.message,
+  })),
+  // Void Invoice Reducers
+  on(invoiceActions.voidInvoice, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(invoiceActions.voidInvoiceSuccess, (state, { invoice }) => ({
+    ...state,
+    isLoading: false,
+    // Update invoice in all relevant arrays
+    allInvoices: state.allInvoices.map((inv) =>
+      inv.id === invoice.id ? invoice : inv
+    ),
+    termInvoices: state.termInvoices.map((inv) =>
+      inv.id === invoice.id ? invoice : inv
+    ),
+    studentInvoices: state.studentInvoices.map((inv) =>
+      inv.id === invoice.id ? invoice : inv
+    ),
+    selectedStudentInvoice:
+      state.selectedStudentInvoice?.id === invoice.id
+        ? invoice
+        : state.selectedStudentInvoice,
+  })),
+  on(invoiceActions.voidInvoiceFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
   }))
 );

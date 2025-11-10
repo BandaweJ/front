@@ -346,6 +346,12 @@
                 class="menu-text">Revenue
                 Recognition</span>
             </button>
+
+            <!-- Data Repair -->
+            <button mat-button routerLink="/data-repair" routerLinkActive="active"
+              *ngIf="role === 'auditor' || role === 'director' || role === 'reception'">
+              <mat-icon>build</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Data Repair</span>
+            </button>
           </div>
         </mat-expansion-panel>
 
