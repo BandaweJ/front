@@ -219,8 +219,9 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
           };
         }
 
-        // Only count Invoice and Payment types for balance calculation
-        // Allocations are already included in receipt amounts, so exclude them to avoid double-counting
+        // Count Invoice types for debits and Payment types for credits
+        // Use full payment amounts (money received) to match the running balance calculation
+        // This accounts for both allocated amounts and any overpayments (credits)
         const debits = ledger
           .filter(e => e.direction === 'out' && e.type === 'Invoice')
           .reduce((sum, e) => sum + e.amount, 0);

@@ -360,14 +360,21 @@ export const getStudentLedger = (studentNumber: string) =>
       ledgerEntries.sort((a, b) => a.date.getTime() - b.date.getTime());
 
       // 4. Calculate running balance
+      // Full payment amounts reduce the balance (money received)
+      // Allocations are for display/tracking only (showing which invoice received the payment)
+      // This ensures the balance reflects actual cash flow: invoices - payments
       let currentRunningBalance = 0;
       const ledgerWithRunningBalance: LedgerEntry[] = ledgerEntries.map(
         (entry) => {
           if (entry.type === 'Invoice') {
             currentRunningBalance += entry.amount;
           } else if (entry.type === 'Payment') {
+            // Full payment amount reduces balance (money received)
+            // This accounts for both allocated amounts and any overpayments (credits)
             currentRunningBalance -= entry.amount;
           }
+          // Allocation entries are for display only - they don't affect the running balance
+          // because the full payment amount was already subtracted above
           return { ...entry, runningBalance: currentRunningBalance };
         }
       );
