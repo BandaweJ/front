@@ -46,6 +46,8 @@ import {
   getStudentLedger,
   LedgerEntry,
   selectInvoicesAndReceiptsLoaded,
+  selectStudentBalance,
+  selectStudentInvoicesAndReceiptsLoaded,
 } from 'src/app/finance/store/finance.selector';
 
 @Component({
@@ -128,27 +130,23 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       map((enrolment) => (enrolment ? enrolment.student : null))
     );
     
-    // Calculate amount owed from store using ledger selector (single source of truth)
-    // Data should already be loaded by the component's ngOnInit (dispatches fetchAllInvoices/fetchAllReceipts)
+    // Calculate amount owed using student-specific invoices and receipts (more efficient)
+    // Data should already be loaded by the component's ngOnInit (dispatches fetchStudentInvoices/fetchStudentReceipts)
     this.amountOwed$ = (this.store.select(selectUser) as Observable<User | null>).pipe(
       filter((user): user is User => !!user && !!user.id),
-      switchMap((user) => {
-        // Combine ledger data with loading state to ensure we emit even when data is empty
+      switchMap(() => {
+        // Use student-specific balance selector (uses studentInvoices and studentReceipts)
         return combineLatest([
-          this.store.select(getStudentLedger(user.id)),
-          this.store.select(selectInvoicesAndReceiptsLoaded).pipe(startWith(false)),
+          this.store.select(selectStudentBalance),
+          this.store.select(selectStudentInvoicesAndReceiptsLoaded).pipe(startWith(false)),
         ]).pipe(
-          map(([ledger, dataLoaded]) => {
+          map(([balance, dataLoaded]) => {
             // If data hasn't loaded yet, return null to show loading
             if (!dataLoaded) {
               return null;
             }
-            // If ledger is empty, return 0 (no balance)
-            if (!ledger || ledger.length === 0) {
-              return 0;
-            }
-            // Return the running balance from the last ledger entry
-            return ledger[ledger.length - 1].runningBalance;
+            // Return the calculated balance (already handles empty case)
+            return balance;
           }),
           // Use distinctUntilChanged to prevent unnecessary recalculations
           distinctUntilChanged()
@@ -176,12 +174,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                 studentNumber,
               })
             );
-            // Ensure invoices and receipts are loaded for ledger calculation
+            // Fetch only this student's invoices and receipts (more efficient than fetching all)
             this.store.dispatch(
-              invoiceActions.fetchAllInvoices()
+              invoiceActions.fetchStudentInvoices({
+                studentNumber,
+              })
             );
             this.store.dispatch(
-              receiptActions.fetchAllReceipts()
+              receiptActions.fetchStudentReceipts({
+                studentNumber,
+              })
             );
             this.store.dispatch(
               studentDashboardActions.fetchStudentDashboardSummary({

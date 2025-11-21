@@ -16,6 +16,8 @@ import {
   selectAllInvoices,
   selectAllNonVoidedReceipts,
   selectInvoicesAndReceiptsLoaded,
+  selectStudentBalance,
+  selectStudentInvoicesAndReceiptsLoaded,
 } from '../../store/finance.selector';
 import {
   invoiceActions,
@@ -89,27 +91,23 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   ) {
     this.user$ = this.store.select(selectUser);
     
-    // Calculate outstanding balance from store using ledger selector (single source of truth)
-    // Data should already be loaded by loadUserData() (dispatches fetchAllInvoices/fetchAllReceipts)
+    // Calculate outstanding balance using student-specific invoices and receipts (more efficient)
+    // Data should already be loaded by loadUserData() (dispatches fetchStudentInvoices/fetchStudentReceipts)
     this.outstandingBalance$ = this.user$.pipe(
       filter((user): user is User => !!user && !!user.id),
-      switchMap((user) => {
-        // Combine ledger data with loading state to ensure we emit even when data is empty
+      switchMap(() => {
+        // Use student-specific balance selector (uses studentInvoices and studentReceipts)
         return combineLatest([
-          this.store.select(getStudentLedger(user.id)),
-          this.store.select(selectInvoicesAndReceiptsLoaded).pipe(startWith(false)),
+          this.store.select(selectStudentBalance),
+          this.store.select(selectStudentInvoicesAndReceiptsLoaded).pipe(startWith(false)),
         ]).pipe(
-          map(([ledger, dataLoaded]) => {
+          map(([balance, dataLoaded]) => {
             // If data hasn't loaded yet, return null to show spinner
             if (!dataLoaded) {
               return null;
             }
-            // If ledger is empty, return 0 (no balance)
-            if (!ledger || ledger.length === 0) {
-              return 0;
-            }
-            // Return the running balance from the last ledger entry
-            return ledger[ledger.length - 1].runningBalance;
+            // Return the calculated balance (already handles empty case)
+            return balance;
           }),
           // Use distinctUntilChanged to prevent unnecessary recalculations
           distinctUntilChanged()
@@ -117,12 +115,10 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
       })
     );
     
-    // Loading state: show loading if data isn't loaded yet OR if isLoading is true
-    this.loadingOutstandingBalance$ = combineLatest([
-      this.store.select(selectIsLoading).pipe(startWith(false)),
-      this.store.select(selectInvoicesAndReceiptsLoaded).pipe(startWith(false)),
-    ]).pipe(
-      map(([isLoading, dataLoaded]) => isLoading || !dataLoaded)
+    // Loading state: show loading if student invoices/receipts aren't loaded yet
+    this.loadingOutstandingBalance$ = this.store.select(selectStudentInvoicesAndReceiptsLoaded).pipe(
+      map((dataLoaded) => !dataLoaded),
+      startWith(true) // Start with loading state
     );
     
     // Initialize computed properties
@@ -179,17 +175,19 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   loadUserData(): void {
     this.user$
       .pipe(
-        filter((user) => !!user),
+        filter((user): user is User => !!user && !!user.id),
         tap((user) => {
-          if (user) {
-            // Ensure invoices and receipts are loaded for ledger calculation
-            this.store.dispatch(
-              invoiceActions.fetchAllInvoices()
-            );
-            this.store.dispatch(
-              receiptActions.fetchAllReceipts()
-            );
-          }
+          // Fetch only this student's invoices and receipts (more efficient than fetching all)
+          this.store.dispatch(
+            invoiceActions.fetchStudentInvoices({
+              studentNumber: user.id,
+            })
+          );
+          this.store.dispatch(
+            receiptActions.fetchStudentReceipts({
+              studentNumber: user.id,
+            })
+          );
         }),
         takeUntil(this.ngUnsubscribe)
       )

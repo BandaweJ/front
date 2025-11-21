@@ -202,6 +202,51 @@ export const selectStudentReceipts = createSelector(
 );
 // --- MODIFICATION END ---
 
+// Selector to check if student invoices and receipts are loaded
+export const selectStudentInvoicesAndReceiptsLoaded = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => {
+    // Data is considered loaded if:
+    // 1. Not currently loading student invoices or receipts
+    // 2. AND both studentInvoices and studentReceipts are arrays (they always are, but this ensures they exist)
+    return !state.loadingStudentInvoices && !state.loadingStudentReceipts && 
+           Array.isArray(state.studentInvoices) && Array.isArray(state.studentReceipts);
+  }
+);
+
+// Selector to calculate student balance using only student invoices and receipts
+// Uses the same cash-flow algorithm as the ledger: invoices add to balance, receipts subtract from balance
+export const selectStudentBalance = createSelector(
+  selectStudentInvoices,
+  selectStudentReceipts,
+  (studentInvoices: InvoiceModel[] | null, studentReceipts: ReceiptModel[] | null): number => {
+    if (!studentInvoices && !studentReceipts) {
+      return 0;
+    }
+
+    let balance = 0;
+
+    // Filter out voided invoices
+    const validInvoices = (studentInvoices || []).filter((inv) => !inv.isVoided);
+    
+    // Add invoice amounts (debits)
+    validInvoices.forEach((invoice) => {
+      const totalBill = Number(invoice.totalBill || 0);
+      balance += totalBill;
+    });
+
+    // Subtract receipt amounts (credits)
+    // Note: studentReceipts are already filtered for non-voided by the selector
+    const validReceipts = studentReceipts || [];
+    validReceipts.forEach((receipt) => {
+      const amountPaid = Number(receipt.amountPaid || 0);
+      balance -= amountPaid;
+    });
+
+    return balance;
+  }
+);
+
 export const selectLoadingStudentInvoices = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.loadingStudentInvoices
