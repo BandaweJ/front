@@ -41,10 +41,12 @@ export interface State {
 
   studentInvoices: InvoiceModel[];
   loadingStudentInvoices: boolean;
+  studentInvoicesLoaded: boolean; // Track if invoices have been fetched at least once
   loadStudentReceiptsErr: string;
 
   studentReceipts: ReceiptModel[];
   loadingStudentReceipts: boolean;
+  studentReceiptsLoaded: boolean; // Track if receipts have been fetched at least once
   loadStudentInvoicesErr: string;
 
   exemption: ExemptionModel | null;
@@ -79,9 +81,11 @@ export const initialState: State = {
 
   studentInvoices: [],
   loadingStudentInvoices: false,
+  studentInvoicesLoaded: false,
   loadStudentInvoicesErr: '',
   studentReceipts: [],
   loadingStudentReceipts: false,
+  studentReceiptsLoaded: false,
   loadStudentReceiptsErr: '',
 
   exemption: null,
@@ -460,6 +464,7 @@ export const financeReducer = createReducer(
       ...state,
       studentReceipts,
       loadingStudentReceipts: false,
+      studentReceiptsLoaded: true, // Mark as loaded after successful fetch
     })
   ),
   on(receiptActions.fetchStudentReceiptsFail, (state, { error }) => ({
@@ -478,6 +483,7 @@ export const financeReducer = createReducer(
       ...state,
       studentInvoices,
       loadingStudentInvoices: false,
+      studentInvoicesLoaded: true, // Mark as loaded after successful fetch
     })
   ),
   on(invoiceActions.fetchStudentInvoicesFail, (state, { error }) => ({
