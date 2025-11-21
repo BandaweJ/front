@@ -2,7 +2,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import {
+  combineLatest,
+  distinctUntilChanged,
   filter,
+  map,
   Observable,
   Subscription,
   switchMap,

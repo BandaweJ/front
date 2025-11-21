@@ -7,8 +7,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, Subject } from 'rxjs';
-import { filter, tap, takeUntil, take, switchMap } from 'rxjs/operators';
+import { Observable, Subscription, Subject, combineLatest } from 'rxjs';
+import { filter, tap, takeUntil, take, switchMap, map } from 'rxjs/operators';
 import {
   getStudentLedger,
   LedgerEntry,
