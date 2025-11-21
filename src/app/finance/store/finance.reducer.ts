@@ -26,6 +26,7 @@ export interface State {
   loadingInvoice: boolean;
   errorMessage: string;
   selectedStudentInvoice: InvoiceModel | null;
+  invoiceWarning: { message: string; voidedInvoiceNumber?: string; voidedAt?: Date; voidedBy?: string } | null;
   fetchInvoiceError: string;
   generateEmptyInvoiceErr: string;
   balance: BalancesModel | null;
@@ -63,6 +64,7 @@ export const initialState: State = {
   loadingInvoice: false,
   errorMessage: '',
   selectedStudentInvoice: {} as InvoiceModel,
+  invoiceWarning: null,
   fetchInvoiceError: '',
   generateEmptyInvoiceErr: '',
   balance: null,
@@ -170,18 +172,21 @@ export const financeReducer = createReducer(
     ...state,
     loadingInvoice: true,
     fetchInvoiceError: '',
+    invoiceWarning: null,
     selectedStudentInvoice: {} as InvoiceModel,
   })),
-  on(invoiceActions.fetchInvoiceSuccess, (state, { invoice }) => ({
+  on(invoiceActions.fetchInvoiceSuccess, (state, { invoice, warning }) => ({
     ...state,
     loadingInvoice: false,
     fetchInvoiceError: '',
     selectedStudentInvoice: invoice,
+    invoiceWarning: warning || null,
   })),
   on(invoiceActions.fetchInvoiceFail, (state, { error }) => ({
     ...state,
     loadingInvoice: false,
     fetchInvoiceError: error.message,
+    invoiceWarning: null,
     selectedStudentInvoice: {} as InvoiceModel,
   })),
   on(balancesActions.saveBalance, (state) => ({
@@ -228,10 +233,17 @@ export const financeReducer = createReducer(
     }
 
     // Calculate the new total bill from the new bills
-    const newTotalBill = bills.reduce(
-      (sum, bill) => sum + Number(bill.fees.amount || 0),
-      0
-    );
+    // Validate that all bills have fees with amounts
+    const newTotalBill = bills.reduce((sum, bill) => {
+      if (!bill.fees || bill.fees.amount === undefined) {
+        console.warn('Bill missing fees or amount in reducer', {
+          billId: bill.id,
+          feeId: bill.fees?.id,
+        });
+        return sum;
+      }
+      return sum + Number(bill.fees.amount);
+    }, 0);
 
     return {
       ...state,

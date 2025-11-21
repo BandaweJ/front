@@ -253,9 +253,9 @@ const routes: Routes = [
   },
   {
     canActivate: [AuthGuardService],
-    path: 'data-repair',
-    loadComponent: () => import('./finance/data-repair/data-repair.component').then(m => m.DataRepairComponent),
-    title: 'Data Repair & Integrity',
+    path: 'student-reconciliation',
+    loadComponent: () => import('./finance/reports/student-reconciliation/student-reconciliation.component').then(m => m.StudentReconciliationComponent),
+    title: 'Student Finance Reconciliation',
   },
   {
     path: 'user-management',

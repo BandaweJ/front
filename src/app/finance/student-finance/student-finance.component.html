@@ -113,6 +113,19 @@
     </button>
   </div>
 
+  <!-- Warning State -->
+  <div *ngIf="(invoiceWarning$ | async) as warning" class="warning-container" style="margin: 16px; padding: 16px; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; display: flex; align-items: center; gap: 12px;">
+    <mat-icon style="color: #856404;">warning</mat-icon>
+    <div style="flex: 1;">
+      <strong style="color: #856404; display: block; margin-bottom: 4px;">Warning</strong>
+      <p style="color: #856404; margin: 0;">{{ warning.message }}</p>
+      <p *ngIf="warning.voidedAt" style="color: #856404; margin: 4px 0 0 0; font-size: 0.875rem;">
+        Voided on: {{ warning.voidedAt | date:'short' }}
+        <span *ngIf="warning.voidedBy"> by {{ warning.voidedBy }}</span>
+      </p>
+    </div>
+  </div>
+
          <!-- Main Content -->
          <div *ngIf="!(loadingInvoice$ | async) && !(error$ | async)" class="main-content">
            <!-- Show side-by-side layout only when there's an invoice -->

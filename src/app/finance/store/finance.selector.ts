@@ -169,6 +169,11 @@ export const selectFechInvoiceError = createSelector(
   (state: fromFinanceReducer.State) => state.fetchInvoiceError
 );
 
+export const selectInvoiceWarning = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.invoiceWarning
+);
+
 export const selectStudentInvoices = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.studentInvoices
@@ -248,8 +253,12 @@ export const selectCombinedPaymentHistory = createSelector(
         });
 
         // 3. Add Allocations from Receipts as separate events if desired
-        if (receipt.allocations) {
+        if (receipt.allocations && Array.isArray(receipt.allocations)) {
           receipt.allocations.forEach((allocation) => {
+            // Skip if allocation or invoice is null
+            if (!allocation || !allocation.invoice) {
+              return;
+            }
             history.push({
               id: `ALLOC-${allocation.receiptId}-${allocation.invoice.invoiceNumber}`, // Unique ID
               type: 'Allocation',
@@ -344,39 +353,139 @@ export const getStudentLedger = (studentNumber: string) =>
 
         // Add allocations as separate entries for detailed history
         // Skip allocations with null invoices (deleted invoices)
-        receipt.allocations.forEach((allocation) => {
-          // Skip if invoice is null (deleted invoice but allocation still exists)
-          if (!allocation.invoice) {
-            return;
-          }
-          ledgerEntries.push({
-            id: `ALLOC-${allocation.id}`,
-            type: 'Allocation',
-            date: new Date(allocation.allocationDate),
-            description: `Allocated from Receipt #${receipt.receiptNumber} to Invoice #${allocation.invoice.invoiceNumber}`,
-            amount: +allocation.amountApplied,
-            direction: 'in',
-            relatedDocNumber: allocation.invoice.invoiceNumber,
+        if (receipt.allocations && Array.isArray(receipt.allocations) && receipt.allocations.length > 0) {
+          receipt.allocations.forEach((allocation) => {
+            if (!allocation) {
+              return;
+            }
+            
+            // Ensure receiptId is set from the parent receipt if missing
+            // This handles cases where TypeORM doesn't include the FK in JSON
+            if (!allocation.receiptId && receipt.id) {
+              allocation.receiptId = receipt.id;
+            }
+            
+            // Try to get invoice from allocation, or look it up from invoices list
+            // PRIORITY: Use the invoice object directly from allocation if available
+            // This works even for voided invoices (which aren't in allInvoices)
+            let allocationInvoice: InvoiceModel | undefined = undefined;
+            
+            // Method 1: Check if invoice is directly loaded on the allocation (HIGHEST PRIORITY)
+            // This is the most reliable because the backend loads 'allocations.invoice'
+            // It works even if the invoice is voided (voided invoices aren't in allInvoices)
+            if (allocation.invoice) {
+              // Use the invoice object if it has an id (even if voided or incomplete)
+              if (allocation.invoice.id) {
+                allocationInvoice = allocation.invoice;
+                // Set invoiceId if missing
+                if (!allocation.invoiceId) {
+                  allocation.invoiceId = allocation.invoice.id;
+                }
+                // Use the invoice directly - don't need to look it up
+              }
+            }
+            
+            // Method 2: Find invoice by checking if any invoice has this allocation in its allocations array
+            // This works for non-voided invoices in allInvoices
+            // (Same approach as credit allocations)
+            if (!allocationInvoice && allInvoices) {
+              allocationInvoice = allInvoices.find(inv => 
+                inv.allocations && Array.isArray(inv.allocations) &&
+                inv.allocations.some(alloc => alloc.id === allocation.id)
+              );
+              
+              // If found via this method, set the invoiceId for future reference
+              if (allocationInvoice && !allocation.invoiceId) {
+                allocation.invoiceId = allocationInvoice.id;
+              }
+            }
+            
+            // Method 3: Try to find by invoiceId if available (fallback)
+            if (!allocationInvoice && allInvoices && allocation.invoiceId) {
+              allocationInvoice = allInvoices.find(inv => inv.id === allocation.invoiceId);
+            }
+            
+            // Skip if we still can't find the invoice
+            // This could mean:
+            // 1. The invoice relation wasn't loaded by the backend (data issue)
+            // 2. The invoice was deleted but allocation still exists (data integrity issue)
+            // Note: If invoice is voided, it should still be loaded on the allocation object
+            if (!allocationInvoice || !allocationInvoice.invoiceNumber) {
+              // Only log warning if we have enough context to debug
+              // Don't spam console if data just isn't loaded yet
+              if (allInvoices && allInvoices.length > 0) {
+                // Check if allocation has invoice object but it's voided
+                const hasVoidedInvoice = allocation.invoice && allocation.invoice.isVoided;
+                
+                console.warn('Receipt allocation without invoice found:', {
+                  allocationId: allocation.id,
+                  receiptId: allocation.receiptId || receipt.id,
+                  receiptNumber: receipt.receiptNumber,
+                  hasInvoiceId: !!allocation.invoiceId,
+                  invoiceId: allocation.invoiceId,
+                  hasInvoiceObject: !!allocation.invoice,
+                  invoiceIsVoided: hasVoidedInvoice,
+                  invoiceObjectKeys: allocation.invoice ? Object.keys(allocation.invoice) : [],
+                  allInvoicesCount: allInvoices.length,
+                  // If invoice exists but is voided, we should still show the allocation
+                  // but mark it appropriately
+                });
+                
+                // If the invoice object exists (even if voided or incomplete), we can still use it
+                // This handles cases where voided invoices aren't in allInvoices
+                if (allocation.invoice && allocation.invoice.id) {
+                  allocationInvoice = allocation.invoice;
+                  if (!allocation.invoiceId) {
+                    allocation.invoiceId = allocation.invoice.id;
+                  }
+                } else {
+                  return; // Skip if we truly can't find the invoice
+                }
+              } else {
+                return; // Skip if invoices aren't loaded yet
+              }
+            }
+            
+            ledgerEntries.push({
+              id: `ALLOC-${allocation.id}`,
+              type: 'Allocation',
+              date: new Date(allocation.allocationDate),
+              description: `Allocated from Receipt #${receipt.receiptNumber} to Invoice #${allocationInvoice.invoiceNumber}`,
+              amount: +allocation.amountApplied,
+              direction: 'in',
+              relatedDocNumber: allocationInvoice.invoiceNumber,
+            });
           });
-        });
+        } else if (receipt.allocations && Array.isArray(receipt.allocations) && receipt.allocations.length === 0) {
+          // Log if receipt has empty allocations array - this might indicate allocations weren't created
+          console.debug('Receipt has empty allocations array:', {
+            receiptId: receipt.id,
+            receiptNumber: receipt.receiptNumber,
+            amountPaid: receipt.amountPaid,
+          });
+        }
       });
 
       // 2.5. Process Credit Allocations (overpayments applied to invoices)
       studentInvoices.forEach((invoice) => {
         if (invoice.creditAllocations && invoice.creditAllocations.length > 0) {
           invoice.creditAllocations.forEach((creditAllocation) => {
-            // Skip if invoice is null (deleted invoice but allocation still exists)
-            if (!creditAllocation.invoice) {
+            // Use the parent invoice if creditAllocation.invoice is not loaded
+            // (This can happen when credit allocations are loaded as part of the invoice)
+            const allocationInvoice = creditAllocation.invoice || invoice;
+            
+            if (!allocationInvoice || !allocationInvoice.invoiceNumber) {
               return;
             }
+            
             ledgerEntries.push({
               id: `CREDIT-ALLOC-${creditAllocation.id}`,
               type: 'Allocation',
               date: new Date(creditAllocation.allocationDate),
-              description: `Allocated from Student Credit to Invoice #${creditAllocation.invoice.invoiceNumber}`,
+              description: `Allocated from Student Credit to Invoice #${allocationInvoice.invoiceNumber}`,
               amount: +creditAllocation.amountApplied,
               direction: 'in',
-              relatedDocNumber: creditAllocation.invoice.invoiceNumber,
+              relatedDocNumber: allocationInvoice.invoiceNumber,
             });
           });
         }

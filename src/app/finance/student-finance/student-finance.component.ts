@@ -13,6 +13,7 @@ import {
   selectedStudentInvoice,
   selectFechInvoiceError,
   selectLoadingInvoice,
+  selectInvoiceWarning,
 } from '../store/finance.selector';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { ThemeService, Theme } from '../../services/theme.service';
@@ -56,6 +57,7 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
   invoice$: Observable<InvoiceModel | null>;
   loadingInvoice$: Observable<boolean>;
   error$: Observable<string | null>;
+  invoiceWarning$: Observable<{ message: string; voidedInvoiceNumber?: string; voidedAt?: Date; voidedBy?: string } | null>;
   
   selectedTerm: TermsModel | null = null;
   selectedStudentNumber: string | null = null;
@@ -73,6 +75,7 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
     this.invoice$ = this.store.select(selectedStudentInvoice);
     this.loadingInvoice$ = this.store.select(selectLoadingInvoice);
     this.error$ = this.store.select(selectFechInvoiceError);
+    this.invoiceWarning$ = this.store.select(selectInvoiceWarning);
   }
 
   ngOnInit(): void {

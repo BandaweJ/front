@@ -124,11 +124,11 @@
                 </div>
               </div>
 
-              <!-- Allocations Section -->
+              <!-- Receipt Allocations Section -->
               <div *ngIf="invoice.allocations && invoice.allocations.length > 0" class="allocations-section">
                 <h4 class="section-title">
                   <mat-icon class="section-icon">payments</mat-icon>
-                  Payments Applied
+                  Payments Applied (from Receipts)
                 </h4>
                 <div class="allocations-list">
                   <div *ngFor="let allocation of invoice.allocations; trackBy: trackByAllocationId" 
@@ -143,6 +143,31 @@
                       </div>
                       <div class="allocation-amount">
                         {{ allocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Credit Allocations Section -->
+              <div *ngIf="invoice.creditAllocations && invoice.creditAllocations.length > 0" class="allocations-section">
+                <h4 class="section-title">
+                  <mat-icon class="section-icon">account_balance_wallet</mat-icon>
+                  Credit Applied (from Overpayments)
+                </h4>
+                <div class="allocations-list">
+                  <div *ngFor="let creditAllocation of invoice.creditAllocations; trackBy: trackByAllocationId" 
+                       class="allocation-item">
+                    <div class="allocation-content">
+                      <div class="allocation-info">
+                        <mat-icon class="allocation-icon">account_balance_wallet</mat-icon>
+                        <div class="allocation-details">
+                          <span class="allocation-receipt">Student Credit Applied</span>
+                          <span class="allocation-date">{{ creditAllocation.allocationDate | date:'MMM dd, yyyy' }}</span>
+                        </div>
+                      </div>
+                      <div class="allocation-amount">
+                        {{ creditAllocation.amountApplied | currency:'USD':'symbol':'1.2-2' }}
                       </div>
                     </div>
                   </div>

@@ -3,7 +3,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRe
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable, combineLatest, Subject, of, EMPTY } from 'rxjs';
-import { map, startWith, catchError, tap, takeUntil, filter, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { map, startWith, catchError, tap, takeUntil, filter, switchMap, debounceTime, distinctUntilChanged, take } from 'rxjs/operators';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import {
   getStudentLedger,
@@ -249,11 +249,27 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
 
   onStudentSelected(student: StudentsModel | null): void {
     this.selectedStudent = student;
-    this.selectedStudent$.next(student);
     this.hasError = false;
     this.errorMessage = '';
-    this.cdr.markForCheck();
-    // No snackbar - data should already be loaded by dashboard
+    
+    if (student) {
+      // Ensure invoices and receipts are loaded before selecting student
+      // This ensures data is available on first selection
+      this.store.dispatch(invoiceActions.fetchAllInvoices());
+      this.store.dispatch(receiptActions.fetchAllReceipts());
+      
+      // Emit student selection after a brief delay to allow data to load
+      // The selector will handle empty data gracefully
+      setTimeout(() => {
+        if (this.selectedStudent === student) {
+          this.selectedStudent$.next(student);
+          this.cdr.markForCheck();
+        }
+      }, 300);
+    } else {
+      this.selectedStudent$.next(null);
+      this.cdr.markForCheck();
+    }
   }
 
   onRetry(): void {

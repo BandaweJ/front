@@ -32,4 +32,7 @@ export interface InvoiceModel {
   isVoided?: boolean;
   voidedAt?: Date;
   voidedBy?: string; // E.g., email or ID of the user who voided it
+
+  // Legacy flag for historical invoices that may have data inconsistencies
+  isLegacy?: boolean;
 }

@@ -41,7 +41,7 @@ export const invoiceActions = createActionGroup({
   source: 'Student Finance Component',
   events: {
     fetchInvoice: props<{ studentNumber: string; num: number; year: number }>(),
-    fetchInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
+    fetchInvoiceSuccess: props<{ invoice: InvoiceModel; warning?: { message: string; voidedInvoiceNumber?: string; voidedAt?: Date; voidedBy?: string } }>(),
     fetchInvoiceFail: props<{ error: HttpErrorResponse }>(),
 
     // --- AMENDED downloadInvoice action ---

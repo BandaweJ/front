@@ -347,11 +347,14 @@
                 Recognition</span>
             </button>
 
-            <!-- Data Repair -->
-            <button mat-button routerLink="/data-repair" routerLinkActive="active"
-              *ngIf="role === 'auditor' || role === 'director' || role === 'reception'">
-              <mat-icon>build</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Data Repair</span>
+            <!-- Student Reconciliation -->
+            <button mat-button routerLink="/student-reconciliation" routerLinkActive="active"
+              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              <mat-icon>sync</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Student
+                Reconciliation</span>
             </button>
+
           </div>
         </mat-expansion-panel>
 

@@ -150,9 +150,10 @@ export class FinanceEffects {
         this.paymentsService
           .getInvoice(data.studentNumber, data.num, data.year)
           .pipe(
-            map((invoice) => {
+            map((response) => {
               return invoiceActions.fetchInvoiceSuccess({
-                invoice,
+                invoice: response.invoice,
+                warning: response.warning,
               });
             }),
             catchError((error: HttpErrorResponse) => {
@@ -405,7 +406,7 @@ export class FinanceEffects {
         this.paymentsService.saveInvoice(data.invoice).pipe(
           tap((invoice) =>
             this.snackBar.open(
-              'Invoice saved successfully' + invoice.invoiceNumber,
+              `Invoice ${invoice.invoiceNumber} saved successfully`,
               'OK',
               {
                 duration: 3000,
@@ -413,9 +414,27 @@ export class FinanceEffects {
                 horizontalPosition: 'center',
               }
             )
-          ), // Log service success
+          ),
           map((invoice) => invoiceActions.saveInvoiceSuccess({ invoice })),
           catchError((error: HttpErrorResponse) => {
+            // Extract user-friendly error message
+            let errorMessage = 'Failed to save invoice.';
+            if (error.error?.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            } else if (error.error && typeof error.error === 'string') {
+              errorMessage = error.error;
+            }
+
+            // Show error message to user
+            this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+              duration: 5000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+              panelClass: ['error-snackbar'],
+            });
+
             return of(
               invoiceActions.saveInvoiceFail({
                 ...error,
@@ -481,7 +500,7 @@ export class FinanceEffects {
           .pipe(
             tap((receipt) =>
               this.snackBar.open(
-                'Receipt saved successfully' + receipt.receiptNumber,
+                `Receipt ${receipt.receiptNumber} saved successfully`,
                 'OK',
                 {
                   duration: 3000,
@@ -489,9 +508,27 @@ export class FinanceEffects {
                   horizontalPosition: 'center',
                 }
               )
-            ), // Log service success
+            ),
             map((receipt) => receiptActions.saveReceiptSuccess({ receipt })),
             catchError((error: HttpErrorResponse) => {
+              // Extract user-friendly error message
+              let errorMessage = 'Failed to create receipt.';
+              if (error.error?.message) {
+                errorMessage = error.error.message;
+              } else if (error.message) {
+                errorMessage = error.message;
+              } else if (error.error && typeof error.error === 'string') {
+                errorMessage = error.error;
+              }
+
+              // Show error message to user
+              this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+                duration: 5000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+                panelClass: ['error-snackbar'],
+              });
+
               return of(
                 receiptActions.saveReceiptFail({
                   ...error,

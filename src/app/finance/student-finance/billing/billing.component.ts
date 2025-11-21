@@ -476,24 +476,46 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     const findFee = (namePart: string) =>
       this.fees.find((fee) => fee.name.includes(namePart));
     const findBillByFeeName = (billsArray: BillModel[], namePart: string) =>
-      billsArray.find((bill) => bill.fees.name.includes(namePart));
+      billsArray.find((bill) => bill.fees?.name.includes(namePart));
 
     const addBillToInitial = (
       bill: BillModel | undefined,
       fee: FeesModel | undefined
     ) => {
-      if (bill && fee && student) {
-        // Use enrolment from current enrolment, invoice, or bill
-        const enrol = this.enrolment || this.currentInvoice?.enrol || bill.enrol;
-        if (enrol) {
-          initialToBill.push({
-            ...bill,
-            fees: fee,
-            student: student,
-            enrol: enrol,
-          });
-        }
+      if (!bill || !student) {
+        return;
       }
+      const enrol = this.enrolment || this.currentInvoice?.enrol || bill.enrol;
+      if (!enrol) {
+        return;
+      }
+
+      // Always prefer the fee from this.fees (fetched from backend) to ensure it has all properties including amount
+      // If fee parameter is provided, use it; otherwise try to find it in this.fees by ID; fallback to bill.fees
+      let resolvedFee: FeesModel | undefined = fee;
+      if (!resolvedFee && bill.fees?.id) {
+        resolvedFee = this.fees.find((f) => f.id === bill.fees.id);
+      }
+      if (!resolvedFee) {
+        resolvedFee = bill.fees;
+      }
+
+      // Validate that the fee has an amount before adding the bill
+      if (!resolvedFee || resolvedFee.amount === undefined) {
+        console.warn('Skipping bill without fee amount', {
+          billId: bill.id,
+          feeId: resolvedFee?.id,
+          feeName: resolvedFee?.name,
+        });
+        return;
+      }
+
+      initialToBill.push({
+        ...bill,
+        fees: resolvedFee,
+        student,
+        enrol,
+      });
     };
 
     // New Comer (O Level)
@@ -607,9 +629,12 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
     this.academicSettingsForm.patchValue(formUpdates, { emitEvent: false });
     // Filter initialToBill to ensure unique fees (in case deskFee logic caused temporary duplicates)
-    this.toBill = Array.from(new Set(initialToBill.map((b) => b.fees.id))).map(
-      (id) => initialToBill.find((b) => b.fees.id === id)!
-    );
+    this.toBill = Array.from(
+      new Set(initialToBill.map((b) => b.fees?.id)),
+    )
+      .filter((id): id is number => !!id)
+      .map((id) => initialToBill.find((b) => b.fees?.id === id)!)
+      .filter((bill) => !!bill);
 
     // Ensure academic level controls are properly toggled based on determined level
     this.toggleAcademicLevelControls(determinedLevel);
@@ -724,7 +749,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       // This is crucial to avoid removing deskFee if ALevelNewComer is still true
       if (
         !this.aLevelNewComer.value &&
-        this.toBill.some((b) => b.fees.name.includes('deskFee'))
+        this.toBill.some((b) => b.fees?.name.includes('deskFee'))
       ) {
         this.removeFeeFromToBill(this.findFee('deskFee'));
       }
@@ -749,7 +774,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       // Handle deskFee: remove if ALevelNewComer was true AND OLevelNewComer is false
       if (
         !this.oLevelNewComer.value &&
-        this.toBill.some((b) => b.fees.name.includes('deskFee'))
+        this.toBill.some((b) => b.fees?.name.includes('deskFee'))
       ) {
         this.removeFeeFromToBill(this.findFee('deskFee'));
       }
@@ -783,6 +808,19 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
    * @param fee The FeesModel to add.
    */
   addFeeToToBill(fee: FeesModel | undefined): void {
+    if (!fee?.id) {
+      return;
+    }
+    
+    // Validate that fee has amount property
+    if (fee.amount === undefined || fee.amount === null) {
+      console.warn('Cannot add fee without amount to bill', {
+        feeId: fee.id,
+        feeName: fee.name,
+      });
+      return;
+    }
+    
     // Use currentInvoice.student for editing existing invoices, or enrolment.student for new invoices
     const student = this.currentInvoice?.student || this.enrolment?.student;
     const enrol = this.currentInvoice?.enrol || this.enrolment;
@@ -793,7 +831,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
     // Check if a bill with this fee ID is already in `toBill`
     const existingBillIndex = this.toBill.findIndex(
-      (b) => b.fees.id === fee.id
+      (b) => b.fees?.id === fee.id
     );
 
     if (existingBillIndex === -1) {
@@ -816,7 +854,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     const billToRemoveIndex = this.toBill.findIndex(
-      (b) => b.fees.id === fee.id
+      (b) => b.fees?.id === fee.id
     );
     if (billToRemoveIndex !== -1) {
       this.toBill.splice(billToRemoveIndex, 1);
@@ -906,7 +944,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   // `isSelected` remains for UI display logic (e.g., to indicate what's already on the invoice)
   isSelected(fee: FeesModel): boolean {
     return this.selectedBills.some(
-      (selectedBill) => selectedBill.fees.id === fee.id
+      (selectedBill) => selectedBill.fees?.id === fee.id
     );
   }
 

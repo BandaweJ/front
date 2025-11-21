@@ -1,11 +1,18 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable, timeout, catchError, throwError } from 'rxjs';
 import { InvoiceModel } from '../models/invoice.model';
+import { InvoiceResponseModel } from '../models/invoice-response.model';
 import { environment } from 'src/environments/environment';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
 import { PaymentMethods } from '../enums/payment-methods.enum';
+import {
+  CreditTransactionModel,
+  CreditTransactionSummaryModel,
+  CreditActivityReportModel,
+  CreditTransactionQueryParams,
+} from '../models/credit-transaction.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsService {
@@ -16,24 +23,26 @@ export class PaymentsService {
     studentNumber: string,
     num: number,
     year: number
-  ): Observable<InvoiceModel> {
+  ): Observable<InvoiceResponseModel> {
     return this.httpClient
-      .get<InvoiceModel>(
+      .get<InvoiceResponseModel>(
         `${this.baseURL}invoice/${studentNumber}/${num}/${year}`
       )
       .pipe(
         timeout(30000), // 30 second timeout
-        map((invoice) => {
+        map((response) => {
           // Ensure balanceBfwd and its amount exist and convert if it's a string
           if (
-            invoice.balanceBfwd &&
-            typeof invoice.balanceBfwd.amount === 'string'
+            response.invoice.balanceBfwd &&
+            typeof response.invoice.balanceBfwd.amount === 'string'
           ) {
-            invoice.balanceBfwd.amount = parseFloat(invoice.balanceBfwd.amount);
+            response.invoice.balanceBfwd.amount = parseFloat(
+              response.invoice.balanceBfwd.amount
+            );
           }
           // Apply similar conversions for other numeric fields if needed
           // ...
-          return invoice;
+          return response;
         }),
         catchError((error) => {
           return throwError(() => error);
@@ -58,11 +67,16 @@ export class PaymentsService {
   }
 
   saveInvoice(invoice: InvoiceModel): Observable<InvoiceModel> {
-    // console.log(invoice);
-    return this.httpClient.post<InvoiceModel>(
-      `${this.baseURL}invoice`,
-      invoice
-    );
+    try {
+      const payload = this.normalizeInvoice(invoice);
+
+      return this.httpClient.post<InvoiceModel>(
+        `${this.baseURL}invoice`,
+        payload
+      );
+    } catch (error) {
+      return throwError(() => error);
+    }
   }
   downloadInvoice(invoiceNumber: string): Observable<HttpResponse<Blob>> {
     return this.httpClient.get(
@@ -136,60 +150,118 @@ export class PaymentsService {
     );
   }
 
-  // Data Repair Service Methods
-  auditDataIntegrity(): Observable<any> {
-    return this.httpClient.get(`${this.baseURL}repair/audit`);
-  }
+  // Credit Transaction History
+  getCreditTransactions(
+    studentNumber: string,
+    query?: CreditTransactionQueryParams,
+  ): Observable<CreditTransactionModel[]> {
+    let params = new HttpParams();
+    if (query?.startDate) {
+      params = params.set('startDate', query.startDate);
+    }
+    if (query?.endDate) {
+      params = params.set('endDate', query.endDate);
+    }
+    if (query?.transactionType) {
+      params = params.set('transactionType', query.transactionType);
+    }
+    if (query?.performedBy) {
+      params = params.set('performedBy', query.performedBy);
+    }
 
-  verifyAmountPaidOnInvoice(): Observable<any> {
-    return this.httpClient.get(`${this.baseURL}repair/verify-amount-paid`);
-  }
-
-  generateRepairReport(): Observable<any> {
-    return this.httpClient.get(`${this.baseURL}repair/report`);
-  }
-
-  repairInvoiceBalances(dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post(`${this.baseURL}repair/balances`, { dryRun });
-  }
-
-  repairVoidedReceipts(dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post(`${this.baseURL}repair/voided-receipts`, { dryRun });
-  }
-
-  repairMissingCreditAllocations(dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post<any>(
-      `${this.baseURL}repair/missing-credit-allocations`,
-      { dryRun }
+    return this.httpClient.get<CreditTransactionModel[]>(
+      `${this.baseURL}credit-transactions/${studentNumber}`,
+      { params },
     );
   }
 
-  repairUnallocatedReceiptAmounts(dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post<any>(
-      `${this.baseURL}repair/unallocated-receipt-amounts`,
-      { dryRun }
+  getCreditTransactionSummary(
+    studentNumber: string,
+    startDate?: string,
+    endDate?: string,
+  ): Observable<CreditTransactionSummaryModel> {
+    let params = new HttpParams();
+    if (startDate) {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate) {
+      params = params.set('endDate', endDate);
+    }
+
+    return this.httpClient.get<CreditTransactionSummaryModel>(
+      `${this.baseURL}credit-transactions/${studentNumber}/summary`,
+      { params },
     );
   }
 
-  repairUnrecordedCredits(dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post<any>(
-      `${this.baseURL}repair/unrecorded-credits`,
-      { dryRun }
+  getCreditActivityReport(
+    startDate?: string,
+    endDate?: string,
+  ): Observable<CreditActivityReportModel> {
+    let params = new HttpParams();
+    if (startDate) {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate) {
+      params = params.set('endDate', endDate);
+    }
+
+    return this.httpClient.get<CreditActivityReportModel>(
+      `${this.baseURL}credit-activity-report`,
+      { params },
     );
   }
 
-  repairAllData(dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post(`${this.baseURL}repair/all`, { dryRun });
-  }
+  private normalizeInvoice(invoice: InvoiceModel): InvoiceModel {
+    if (!invoice.student?.studentNumber) {
+      throw new Error(
+        'Invoice is missing student information. Please select a student and try again.'
+      );
+    }
 
-  repairStudentData(studentNumber: string, dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post(`${this.baseURL}repair/student/${studentNumber}`, { dryRun });
-  }
+    if (!invoice.enrol?.id) {
+      throw new Error(
+        'Invoice is missing enrolment information. Please select a class/term and try again.'
+      );
+    }
 
-  repairSelectedStudentsData(studentNumbers: string[], dryRun: boolean = true): Observable<any> {
-    return this.httpClient.post(`${this.baseURL}repair/selected-students`, {
-      studentNumbers,
-      dryRun
-    });
+    if (!invoice.bills || invoice.bills.length === 0) {
+      throw new Error(
+        'Invoice must have at least one bill. Please add fees before saving.'
+      );
+    }
+
+    const normalizedBills =
+      invoice.bills?.map((bill, index) => {
+        if (!bill.fees || bill.fees.amount === undefined || bill.fees.amount === null) {
+          throw new Error(
+            `Bill #${index + 1} is missing fee details. Please ensure every fee has an amount.`
+          );
+        }
+
+        const student = bill.student || invoice.student;
+        if (!student?.studentNumber) {
+          throw new Error(`Bill #${index + 1} is missing student information.`);
+        }
+
+        const enrol = bill.enrol || invoice.enrol;
+        if (!enrol?.id) {
+          throw new Error(`Bill #${index + 1} is missing enrolment information.`);
+        }
+
+        return {
+          ...bill,
+          student,
+          enrol,
+          fees: bill.fees,
+        };
+      }) || [];
+
+    return {
+      ...invoice,
+      student: invoice.student,
+      enrol: invoice.enrol,
+      bills: normalizedBills,
+    };
   }
 }
