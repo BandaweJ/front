@@ -229,6 +229,18 @@ canvas {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.loading-amount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  height: 24px;
+}
+
+.loading-amount mat-spinner {
+  display: inline-block;
+}
+
 .loading-spinner {
   font-weight: 600;
   color: #3498db;
