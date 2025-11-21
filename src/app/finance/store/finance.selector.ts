@@ -202,6 +202,17 @@ export const selectStudentReceipts = createSelector(
 );
 // --- MODIFICATION END ---
 
+// Loading state selectors (must be declared before selectors that use them)
+export const selectLoadingStudentInvoices = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.loadingStudentInvoices
+);
+
+export const selectLoadingStudentReceipts = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.loadingStudentReceipts
+);
+
 // Selector to check if student invoices and receipts are loaded
 // Data is considered loaded when both are not loading
 export const selectStudentInvoicesAndReceiptsLoaded = createSelector(
@@ -243,16 +254,6 @@ export const selectStudentBalance = createSelector(
 
     return balance;
   }
-);
-
-export const selectLoadingStudentInvoices = createSelector(
-  financeState,
-  (state: fromFinanceReducer.State) => state.loadingStudentInvoices
-);
-
-export const selectLoadingStudentReceipts = createSelector(
-  financeState,
-  (state: fromFinanceReducer.State) => state.loadingStudentReceipts
 );
 
 export const selectLoadStudentInvoicesErr = createSelector(
