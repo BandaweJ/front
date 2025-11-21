@@ -100,7 +100,7 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
       switchMap(() => {
         // Combine balance with loading states - display balance as soon as data is available
         return combineLatest([
-          this.store.select(selectStudentBalance),
+          this.store.select(selectStudentBalance).pipe(startWith(0)),
           this.store.select(selectLoadingStudentInvoices).pipe(startWith(true)),
           this.store.select(selectLoadingStudentReceipts).pipe(startWith(true)),
         ]).pipe(
