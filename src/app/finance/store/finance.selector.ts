@@ -203,14 +203,12 @@ export const selectStudentReceipts = createSelector(
 // --- MODIFICATION END ---
 
 // Selector to check if student invoices and receipts are loaded
+// Data is considered loaded when both are not loading
 export const selectStudentInvoicesAndReceiptsLoaded = createSelector(
-  financeState,
-  (state: fromFinanceReducer.State) => {
-    // Data is considered loaded if:
-    // 1. Not currently loading student invoices or receipts
-    // 2. AND both have been fetched at least once (tracked by loaded flags)
-    return !state.loadingStudentInvoices && !state.loadingStudentReceipts && 
-           state.studentInvoicesLoaded && state.studentReceiptsLoaded;
+  selectLoadingStudentInvoices,
+  selectLoadingStudentReceipts,
+  (loadingInvoices: boolean, loadingReceipts: boolean) => {
+    return !loadingInvoices && !loadingReceipts;
   }
 );
 

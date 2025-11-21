@@ -48,6 +48,8 @@ import {
   selectInvoicesAndReceiptsLoaded,
   selectStudentBalance,
   selectStudentInvoicesAndReceiptsLoaded,
+  selectLoadingStudentInvoices,
+  selectLoadingStudentReceipts,
 } from 'src/app/finance/store/finance.selector';
 
 @Component({
@@ -135,17 +137,18 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.amountOwed$ = (this.store.select(selectUser) as Observable<User | null>).pipe(
       filter((user): user is User => !!user && !!user.id),
       switchMap(() => {
-        // Use student-specific balance selector (uses studentInvoices and studentReceipts)
+        // Combine balance with loading states - display balance as soon as data is available
         return combineLatest([
           this.store.select(selectStudentBalance),
-          this.store.select(selectStudentInvoicesAndReceiptsLoaded).pipe(startWith(false)),
+          this.store.select(selectLoadingStudentInvoices).pipe(startWith(true)),
+          this.store.select(selectLoadingStudentReceipts).pipe(startWith(true)),
         ]).pipe(
-          map(([balance, dataLoaded]) => {
-            // If data hasn't loaded yet, return null to show loading
-            if (!dataLoaded) {
+          map(([balance, loadingInvoices, loadingReceipts]) => {
+            // If either is still loading, return null to show loading
+            if (loadingInvoices || loadingReceipts) {
               return null;
             }
-            // Return the calculated balance (already handles empty case)
+            // Return the calculated balance as soon as both are done loading
             return balance;
           }),
           // Use distinctUntilChanged to prevent unnecessary recalculations
