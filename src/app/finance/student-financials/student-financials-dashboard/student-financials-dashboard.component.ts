@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, combineLatest, Subject } from 'rxjs';
-import { filter, tap, takeUntil, map, switchMap, distinctUntilChanged, startWith } from 'rxjs/operators';
+import { filter, tap, takeUntil, take, map, switchMap, distinctUntilChanged, startWith } from 'rxjs/operators';
 import {
   getStudentLedger,
   LedgerEntry,
@@ -176,8 +176,11 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     this.user$
       .pipe(
         filter((user): user is User => !!user && !!user.id),
+        // Take only the first emission to prevent multiple dispatches
+        take(1),
         tap((user) => {
           // Fetch only this student's invoices and receipts (more efficient than fetching all)
+          // This will only run once when the component initializes
           this.store.dispatch(
             invoiceActions.fetchStudentInvoices({
               studentNumber: user.id,
@@ -188,8 +191,7 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
               studentNumber: user.id,
             })
           );
-        }),
-        takeUntil(this.ngUnsubscribe)
+        })
       )
       .subscribe({
         error: (error) => console.error('Failed to load user data:', error)
