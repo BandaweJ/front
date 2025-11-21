@@ -102,22 +102,20 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     this.outstandingBalance$ = this.user$.pipe(
       filter((user): user is User => !!user && !!user.id),
       switchMap(() => {
-        // Combine balance with loading states - display balance as soon as data is available
+        // Combine balance with data arrays - display balance as soon as data is available
         return combineLatest([
-          this.store.select(selectStudentBalance),
-          this.store.select(selectLoadingStudentInvoices),
-          this.store.select(selectLoadingStudentReceipts),
-          this.store.select(selectStudentInvoices),
-          this.store.select(selectStudentReceipts),
+          this.store.select(selectStudentBalance).pipe(startWith(0)),
+          this.store.select(selectStudentInvoices).pipe(startWith([])),
+          this.store.select(selectStudentReceipts).pipe(startWith([])),
+          this.store.select(selectLoadingStudentInvoices).pipe(startWith(true)),
+          this.store.select(selectLoadingStudentReceipts).pipe(startWith(true)),
         ]).pipe(
-          startWith([0, true, true, null, null] as [number, boolean, boolean, InvoiceModel[] | null, ReceiptModel[] | null]), // Initial state: balance=0, loading=true, data=null
-          map(([balance, loadingInvoices, loadingReceipts, invoices, receipts]): number | null => {
-            // If either is still loading, return null to show spinner
+          map(([balance, invoices, receipts, loadingInvoices, loadingReceipts]): number | null => {
+            // If still loading, return null to show spinner
             if (loadingInvoices || loadingReceipts) {
               return null;
             }
-            // Return the calculated balance as soon as both are done loading
-            // Even if arrays are empty, we still return the balance (which will be 0)
+            // Once loading is complete, return the balance (even if arrays are empty, balance will be 0)
             return balance;
           }),
           // Use distinctUntilChanged to prevent unnecessary recalculations
