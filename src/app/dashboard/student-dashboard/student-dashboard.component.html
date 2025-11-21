@@ -86,17 +86,10 @@
 
           <div class="data-item amount-owed">
             <label>Total Amount Owed:</label>
-            <ng-container *ngIf="amountOwed$ | async as amountOwed; else loadingAmount">
-              <span [class.positive]="amountOwed <= 0"
-                [class.negative]="amountOwed > 0">
-                {{ amountOwed | currency:'USD':'symbol':'1.2-2' }}
-              </span>
-            </ng-container>
-            <ng-template #loadingAmount>
-              <span class="loading-amount">
-                <mat-spinner diameter="16" mode="indeterminate"></mat-spinner>
-              </span>
-            </ng-template>
+            <span [class.positive]="(amountOwed$ | async) ?? 0 <= 0"
+              [class.negative]="(amountOwed$ | async) ?? 0 > 0">
+              {{ (amountOwed$ | async) ?? 0 | currency:'USD':'symbol':'1.2-2' }}
+            </span>
           </div>
 
           <div

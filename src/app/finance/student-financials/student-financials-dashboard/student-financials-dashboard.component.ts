@@ -7,8 +7,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, combineLatest, Subject } from 'rxjs';
-import { filter, tap, takeUntil, take, map, switchMap, distinctUntilChanged, startWith } from 'rxjs/operators';
+import { Observable, Subscription, Subject } from 'rxjs';
+import { filter, tap, takeUntil, take, switchMap } from 'rxjs/operators';
 import {
   getStudentLedger,
   LedgerEntry,
@@ -17,11 +17,6 @@ import {
   selectAllNonVoidedReceipts,
   selectInvoicesAndReceiptsLoaded,
   selectStudentBalance,
-  selectStudentInvoicesAndReceiptsLoaded,
-  selectLoadingStudentInvoices,
-  selectLoadingStudentReceipts,
-  selectStudentInvoices,
-  selectStudentReceipts,
 } from '../../store/finance.selector';
 import {
   invoiceActions,
@@ -30,8 +25,6 @@ import {
 import { User } from 'src/app/auth/models/user.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
-import { InvoiceModel } from '../../models/invoice.model';
-import { ReceiptModel } from '../../models/payment.model';
 
 @Component({
   selector: 'app-student-financials-dashboard',
@@ -50,9 +43,7 @@ import { ReceiptModel } from '../../models/payment.model';
 export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   // Data Observables
   user$: Observable<User | null>;
-  // Can be null while data is loading
-  outstandingBalance$: Observable<number | null>;
-  loadingOutstandingBalance$: Observable<boolean>;
+  outstandingBalance$: Observable<number>;
   
   // Computed properties
   currentUser$: Observable<User | null>;
@@ -99,38 +90,13 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     
     // Calculate outstanding balance using student-specific invoices and receipts (more efficient)
     // Data should already be loaded by loadUserData() (dispatches fetchStudentInvoices/fetchStudentReceipts)
+    // Simply use the selector - value will display when it becomes available
     this.outstandingBalance$ = this.user$.pipe(
       filter((user): user is User => !!user && !!user.id),
-      switchMap(() => {
-        // Combine balance with data arrays - display balance as soon as data is available
-        return combineLatest([
-          this.store.select(selectStudentBalance).pipe(startWith(0)),
-          this.store.select(selectStudentInvoices).pipe(startWith([])),
-          this.store.select(selectStudentReceipts).pipe(startWith([])),
-          this.store.select(selectLoadingStudentInvoices).pipe(startWith(true)),
-          this.store.select(selectLoadingStudentReceipts).pipe(startWith(true)),
-        ]).pipe(
-          map(([balance, invoices, receipts, loadingInvoices, loadingReceipts]): number | null => {
-            // If still loading, return null to show spinner
-            if (loadingInvoices || loadingReceipts) {
-              return null;
-            }
-            // Once loading is complete, return the balance (even if arrays are empty, balance will be 0)
-            return balance;
-          }),
-          // Use distinctUntilChanged to prevent unnecessary recalculations
-          distinctUntilChanged()
-        );
-      })
+      switchMap(() => this.store.select(selectStudentBalance))
     );
     
-    // Loading state: show loading if either invoices or receipts are loading
-    this.loadingOutstandingBalance$ = combineLatest([
-      this.store.select(selectLoadingStudentInvoices).pipe(startWith(true)),
-      this.store.select(selectLoadingStudentReceipts).pipe(startWith(true)),
-    ]).pipe(
-      map(([loadingInvoices, loadingReceipts]) => loadingInvoices || loadingReceipts)
-    );
+    // No loading state needed - value will display when available
     
     // Initialize computed properties
     this.currentUser$ = this.user$;

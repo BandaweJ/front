@@ -2,17 +2,13 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import {
-  combineLatest,
-  distinctUntilChanged,
   filter,
-  map,
   Observable,
   Subscription,
   switchMap,
   take,
   tap,
 } from 'rxjs';
-import { startWith } from 'rxjs/operators';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { MarksModel } from 'src/app/marks/models/marks.model';
 import { studentMarksActions } from 'src/app/marks/store/marks.actions';
@@ -47,11 +43,6 @@ import {
   LedgerEntry,
   selectInvoicesAndReceiptsLoaded,
   selectStudentBalance,
-  selectStudentInvoicesAndReceiptsLoaded,
-  selectLoadingStudentInvoices,
-  selectLoadingStudentReceipts,
-  selectStudentInvoices,
-  selectStudentReceipts,
 } from 'src/app/finance/store/finance.selector';
 
 @Component({
@@ -70,8 +61,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   public enrolmentLoaded$: Observable<boolean>;
   
   // Amount owed calculated from store (single source of truth)
-  // Can be null while data is loading
-  public amountOwed$: Observable<number | null>;
+  // Value will display when it becomes available
+  public amountOwed$: Observable<number>;
 
   public lineChartData: ChartConfiguration<'line'>['data'] = {
     datasets: [],
@@ -136,29 +127,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     
     // Calculate amount owed using student-specific invoices and receipts (more efficient)
     // Data should already be loaded by the component's ngOnInit (dispatches fetchStudentInvoices/fetchStudentReceipts)
+    // Simply use the selector - value will display when it becomes available
     this.amountOwed$ = (this.store.select(selectUser) as Observable<User | null>).pipe(
       filter((user): user is User => !!user && !!user.id),
-      switchMap(() => {
-        // Combine balance with data arrays - display balance as soon as data is available
-        return combineLatest([
-          this.store.select(selectStudentBalance).pipe(startWith(0)),
-          this.store.select(selectStudentInvoices).pipe(startWith([])),
-          this.store.select(selectStudentReceipts).pipe(startWith([])),
-          this.store.select(selectLoadingStudentInvoices).pipe(startWith(true)),
-          this.store.select(selectLoadingStudentReceipts).pipe(startWith(true)),
-        ]).pipe(
-          map(([balance, invoices, receipts, loadingInvoices, loadingReceipts]): number | null => {
-            // If still loading, return null to show spinner
-            if (loadingInvoices || loadingReceipts) {
-              return null;
-            }
-            // Once loading is complete, return the balance (even if arrays are empty, balance will be 0)
-            return balance;
-          }),
-          // Use distinctUntilChanged to prevent unnecessary recalculations
-          distinctUntilChanged()
-        );
-      })
+      switchMap(() => this.store.select(selectStudentBalance))
     );
   }
 
