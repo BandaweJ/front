@@ -147,8 +147,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           this.store.select(selectStudentInvoices),
           this.store.select(selectStudentReceipts),
         ]).pipe(
-          startWith([0, true, true, null, null]), // Initial state: balance=0, loading=true, data=null
-          map(([balance, loadingInvoices, loadingReceipts, invoices, receipts]) => {
+          startWith([0, true, true, null, null] as [number, boolean, boolean, any, any]), // Initial state: balance=0, loading=true, data=null
+          map(([balance, loadingInvoices, loadingReceipts, invoices, receipts]): number | null => {
             // If either is still loading, return null to show loading
             if (loadingInvoices || loadingReceipts) {
               return null;

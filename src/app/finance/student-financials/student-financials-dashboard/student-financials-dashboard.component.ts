@@ -30,6 +30,8 @@ import {
 import { User } from 'src/app/auth/models/user.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { InvoiceModel } from '../../models/invoice.model';
+import { ReceiptModel } from '../../models/payment.model';
 
 @Component({
   selector: 'app-student-financials-dashboard',
@@ -108,8 +110,8 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
           this.store.select(selectStudentInvoices),
           this.store.select(selectStudentReceipts),
         ]).pipe(
-          startWith([0, true, true, null, null]), // Initial state: balance=0, loading=true, data=null
-          map(([balance, loadingInvoices, loadingReceipts, invoices, receipts]) => {
+          startWith([0, true, true, null, null] as [number, boolean, boolean, InvoiceModel[] | null, ReceiptModel[] | null]), // Initial state: balance=0, loading=true, data=null
+          map(([balance, loadingInvoices, loadingReceipts, invoices, receipts]): number | null => {
             // If either is still loading, return null to show spinner
             if (loadingInvoices || loadingReceipts) {
               return null;
