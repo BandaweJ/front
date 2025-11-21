@@ -20,6 +20,8 @@ import {
   selectStudentInvoicesAndReceiptsLoaded,
   selectLoadingStudentInvoices,
   selectLoadingStudentReceipts,
+  selectStudentInvoices,
+  selectStudentReceipts,
 } from '../../store/finance.selector';
 import {
   invoiceActions,
@@ -100,16 +102,20 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
       switchMap(() => {
         // Combine balance with loading states - display balance as soon as data is available
         return combineLatest([
-          this.store.select(selectStudentBalance).pipe(startWith(0)),
-          this.store.select(selectLoadingStudentInvoices).pipe(startWith(true)),
-          this.store.select(selectLoadingStudentReceipts).pipe(startWith(true)),
+          this.store.select(selectStudentBalance),
+          this.store.select(selectLoadingStudentInvoices),
+          this.store.select(selectLoadingStudentReceipts),
+          this.store.select(selectStudentInvoices),
+          this.store.select(selectStudentReceipts),
         ]).pipe(
-          map(([balance, loadingInvoices, loadingReceipts]) => {
+          startWith([0, true, true, null, null]), // Initial state: balance=0, loading=true, data=null
+          map(([balance, loadingInvoices, loadingReceipts, invoices, receipts]) => {
             // If either is still loading, return null to show spinner
             if (loadingInvoices || loadingReceipts) {
               return null;
             }
             // Return the calculated balance as soon as both are done loading
+            // Even if arrays are empty, we still return the balance (which will be 0)
             return balance;
           }),
           // Use distinctUntilChanged to prevent unnecessary recalculations
