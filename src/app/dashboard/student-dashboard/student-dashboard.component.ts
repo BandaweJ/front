@@ -12,6 +12,7 @@ import {
   take,
   tap,
 } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { MarksModel } from 'src/app/marks/models/marks.model';
 import { studentMarksActions } from 'src/app/marks/store/marks.actions';
@@ -44,6 +45,7 @@ import {
 import {
   getStudentLedger,
   LedgerEntry,
+  selectInvoicesAndReceiptsLoaded,
 } from 'src/app/finance/store/finance.selector';
 
 @Component({
@@ -131,10 +133,17 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.amountOwed$ = (this.store.select(selectUser) as Observable<User | null>).pipe(
       filter((user): user is User => !!user && !!user.id),
       switchMap((user) => {
-        // Get the ledger directly - data should already be loaded
-        // The selector will return data immediately if available
-        return this.store.select(getStudentLedger(user.id)).pipe(
-          map((ledger: LedgerEntry[]) => {
+        // Combine ledger data with loading state to ensure we emit even when data is empty
+        return combineLatest([
+          this.store.select(getStudentLedger(user.id)),
+          this.store.select(selectInvoicesAndReceiptsLoaded).pipe(startWith(false)),
+        ]).pipe(
+          map(([ledger, dataLoaded]) => {
+            // If data hasn't loaded yet, return null to show loading
+            if (!dataLoaded) {
+              return null;
+            }
+            // If ledger is empty, return 0 (no balance)
             if (!ledger || ledger.length === 0) {
               return 0;
             }

@@ -98,6 +98,21 @@ export const selectIsLoading = createSelector(
   (state: fromFinanceReducer.State) => state.isLoading
 );
 
+// Selector to check if invoices and receipts are loaded (not just loading state)
+// We need to track if data has been fetched at least once
+// Since initial state has empty arrays, we check if isLoading is false (meaning fetch completed)
+export const selectInvoicesAndReceiptsLoaded = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => {
+    // Data is considered loaded if:
+    // 1. isLoading is false (no fetch in progress)
+    // 2. AND both allInvoices and allReceipts are arrays (they always are, but this ensures they exist)
+    // Note: We can't distinguish between "never fetched" and "fetched but empty" with just this,
+    // but if isLoading is false, it means at least one fetch cycle has completed
+    return !state.isLoading && Array.isArray(state.allInvoices) && Array.isArray(state.allReceipts);
+  }
+);
+
 export const selectErrorMsg = createSelector(
   financeState,
   (state: fromFinanceReducer.State) => state.errorMessage

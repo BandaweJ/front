@@ -8,13 +8,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, combineLatest, Subject } from 'rxjs';
-import { filter, tap, takeUntil, map, switchMap, distinctUntilChanged } from 'rxjs/operators';
+import { filter, tap, takeUntil, map, switchMap, distinctUntilChanged, startWith } from 'rxjs/operators';
 import {
   getStudentLedger,
   LedgerEntry,
   selectIsLoading,
   selectAllInvoices,
   selectAllNonVoidedReceipts,
+  selectInvoicesAndReceiptsLoaded,
 } from '../../store/finance.selector';
 import {
   invoiceActions,
@@ -93,10 +94,17 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     this.outstandingBalance$ = this.user$.pipe(
       filter((user): user is User => !!user && !!user.id),
       switchMap((user) => {
-        // Get the ledger directly - data should already be loaded
-        // The selector will return data immediately if available
-        return this.store.select(getStudentLedger(user.id)).pipe(
-          map((ledger: LedgerEntry[]) => {
+        // Combine ledger data with loading state to ensure we emit even when data is empty
+        return combineLatest([
+          this.store.select(getStudentLedger(user.id)),
+          this.store.select(selectInvoicesAndReceiptsLoaded).pipe(startWith(false)),
+        ]).pipe(
+          map(([ledger, dataLoaded]) => {
+            // If data hasn't loaded yet, return null to show spinner
+            if (!dataLoaded) {
+              return null;
+            }
+            // If ledger is empty, return 0 (no balance)
             if (!ledger || ledger.length === 0) {
               return 0;
             }
@@ -109,8 +117,13 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
       })
     );
     
-    // Loading state: use general loading state (tracks invoices and receipts)
-    this.loadingOutstandingBalance$ = this.store.select(selectIsLoading);
+    // Loading state: show loading if data isn't loaded yet OR if isLoading is true
+    this.loadingOutstandingBalance$ = combineLatest([
+      this.store.select(selectIsLoading).pipe(startWith(false)),
+      this.store.select(selectInvoicesAndReceiptsLoaded).pipe(startWith(false)),
+    ]).pipe(
+      map(([isLoading, dataLoaded]) => isLoading || !dataLoaded)
+    );
     
     // Initialize computed properties
     this.currentUser$ = this.user$;
