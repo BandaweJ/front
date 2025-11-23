@@ -270,6 +270,12 @@ const routes: Routes = [
     title: 'Roles & Permissions',
   },
   {
+    path: 'system/academic',
+    loadComponent: () => import('./system/academic-settings/academic-settings.component').then(m => m.AcademicSettingsComponent),
+    canActivate: [AuthGuardService],
+    title: 'Academic Settings',
+  },
+  {
     path: '', // Default route for the root path
     redirectTo: 'signin',
     pathMatch: 'full',

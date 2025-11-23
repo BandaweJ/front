@@ -1,0 +1,210 @@
+<div class="academic-settings-container" [class.theme-dark]="currentTheme === 'dark'">
+  <mat-card class="settings-card">
+    <mat-card-header class="card-header">
+      <h2>
+        <mat-icon>school</mat-icon>
+        Academic Settings
+      </h2>
+      <p>Configure academic year, terms, enrollment rules, and grading systems</p>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-tab-group [(selectedIndex)]="selectedTab">
+        <!-- Academic Year & Terms Tab -->
+        <mat-tab label="Academic Year & Terms">
+          <div class="tab-content">
+            <form [formGroup]="academicSettingsForm" (ngSubmit)="onSaveAcademicSettings()">
+              <div class="form-section">
+                <h3>
+                  <mat-icon>calendar_today</mat-icon>
+                  Academic Year Configuration
+                </h3>
+                
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Academic Year Start Date</mat-label>
+                    <input matInput type="date" formControlName="academicYearStart" required>
+                    <mat-icon matPrefix>event</mat-icon>
+                    <mat-error *ngIf="academicSettingsForm.get('academicYearStart')?.hasError('required')">
+                      Start date is required
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Academic Year End Date</mat-label>
+                    <input matInput type="date" formControlName="academicYearEnd" required>
+                    <mat-icon matPrefix>event</mat-icon>
+                    <mat-error *ngIf="academicSettingsForm.get('academicYearEnd')?.hasError('required')">
+                      End date is required
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="form-section">
+                <h3>
+                  <mat-icon>date_range</mat-icon>
+                  Term Configuration
+                </h3>
+                
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Default Number of Terms per Year</mat-label>
+                  <input matInput type="number" formControlName="defaultTermCount" min="1" max="4" required>
+                  <mat-icon matPrefix>numbers</mat-icon>
+                  <mat-hint>Typically 3 terms per academic year</mat-hint>
+                  <mat-error *ngIf="academicSettingsForm.get('defaultTermCount')?.hasError('required')">
+                    Term count is required
+                  </mat-error>
+                  <mat-error *ngIf="academicSettingsForm.get('defaultTermCount')?.hasError('min') || 
+                                   academicSettingsForm.get('defaultTermCount')?.hasError('max')">
+                    Must be between 1 and 4
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-slide-toggle formControlName="allowTermOverlap" color="primary">
+                  Allow Term Date Overlap
+                  <mat-icon matTooltip="Allow terms to have overlapping dates">info</mat-icon>
+                </mat-slide-toggle>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="form-section">
+                <h3>
+                  <mat-icon>people</mat-icon>
+                  Enrollment Rules
+                </h3>
+                
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Minimum Enrollment Age</mat-label>
+                    <input matInput type="number" formControlName="minimumEnrollmentAge" min="0" max="25">
+                    <mat-icon matPrefix>child_care</mat-icon>
+                    <mat-hint>Minimum age for student enrollment</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Maximum Enrollment Age</mat-label>
+                    <input matInput type="number" formControlName="maximumEnrollmentAge" min="0" max="25">
+                    <mat-icon matPrefix>elderly</mat-icon>
+                    <mat-hint>Maximum age for student enrollment</mat-hint>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="warn" type="button" (click)="onResetAcademicSettings()">
+                  <mat-icon>refresh</mat-icon>
+                  Reset to Defaults
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="academicSettingsForm.invalid || isLoading">
+                  <mat-icon>save</mat-icon>
+                  Save Academic Settings
+                </button>
+              </div>
+            </form>
+          </div>
+        </mat-tab>
+
+        <!-- Grading System Tab -->
+        <mat-tab label="Grading System">
+          <div class="tab-content">
+            <form [formGroup]="gradingSettingsForm" (ngSubmit)="onSaveGradingSettings()">
+              <div class="form-section">
+                <h3>
+                  <mat-icon>grade</mat-icon>
+                  Grade Scale Configuration
+                </h3>
+                
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Grade Scale</mat-label>
+                  <mat-select formControlName="gradeScale" required>
+                    <mat-option *ngFor="let scale of gradeScales" [value]="scale.value">
+                      {{ scale.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>assessment</mat-icon>
+                  <mat-error *ngIf="gradingSettingsForm.get('gradeScale')?.hasError('required')">
+                    Grade scale is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="form-section">
+                <h3>
+                  <mat-icon>check_circle</mat-icon>
+                  Grade Thresholds
+                </h3>
+                
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Passing Grade</mat-label>
+                    <input matInput type="number" formControlName="passingGrade" min="0" max="100" required>
+                    <mat-icon matPrefix>check</mat-icon>
+                    <mat-hint>Minimum grade to pass</mat-hint>
+                    <mat-error *ngIf="gradingSettingsForm.get('passingGrade')?.hasError('required')">
+                      Passing grade is required
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Excellent Grade</mat-label>
+                    <input matInput type="number" formControlName="excellentGrade" min="0" max="100" required>
+                    <mat-icon matPrefix>star</mat-icon>
+                    <mat-hint>Minimum grade for excellent performance</mat-hint>
+                    <mat-error *ngIf="gradingSettingsForm.get('excellentGrade')?.hasError('required')">
+                      Excellent grade is required
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="form-section">
+                <h3>
+                  <mat-icon>visibility</mat-icon>
+                  Grade Visibility
+                </h3>
+                
+                <mat-slide-toggle formControlName="showGradesToStudents" color="primary">
+                  Show Grades to Students
+                </mat-slide-toggle>
+
+                <mat-slide-toggle formControlName="showGradesToParents" color="primary">
+                  Show Grades to Parents
+                </mat-slide-toggle>
+
+                <mat-slide-toggle formControlName="allowGradeOverrides" color="primary">
+                  Allow Grade Overrides
+                  <mat-icon matTooltip="Allow administrators to override calculated grades">info</mat-icon>
+                </mat-slide-toggle>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="warn" type="button" (click)="onResetGradingSettings()">
+                  <mat-icon>refresh</mat-icon>
+                  Reset to Defaults
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="gradingSettingsForm.invalid || isLoading">
+                  <mat-icon>save</mat-icon>
+                  Save Grading Settings
+                </button>
+              </div>
+            </form>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+
+      <!-- Loading Overlay -->
+      <div *ngIf="isLoading" class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
