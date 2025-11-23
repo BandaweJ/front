@@ -11,6 +11,7 @@ export interface State {
   attendanceSummary: AttendanceSummary | null;
   isLoading: boolean;
   errorMessage: string;
+  lastMarkedAttendance: AttendanceRecord | null; // Track last marked attendance for success feedback
 }
 
 export const initialState: State = {
@@ -21,6 +22,7 @@ export const initialState: State = {
   attendanceSummary: null,
   isLoading: false,
   errorMessage: '',
+  lastMarkedAttendance: null,
 };
 
 export const attendanceReducer = createReducer(
@@ -113,6 +115,8 @@ export const attendanceReducer = createReducer(
   on(attendanceActions.markAttendanceSuccess, (state, { attendance }) => ({
     ...state,
     isLoading: false,
+    errorMessage: '',
+    lastMarkedAttendance: attendance, // Store last marked attendance for success feedback
     classAttendance: state.classAttendance.map(record =>
       record.studentNumber === attendance.studentNumber ? attendance : record
     ),

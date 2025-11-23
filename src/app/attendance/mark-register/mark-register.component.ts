@@ -8,7 +8,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, combineLatest } from 'rxjs';
-import { takeUntil, tap, map, startWith } from 'rxjs/operators';
+import { takeUntil, tap, map, startWith, distinctUntilChanged } from 'rxjs/operators';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
@@ -95,6 +95,29 @@ export class MarkRegisterComponent implements OnInit, OnDestroy {
             duration: 5000,
             panelClass: ['error-snackbar']
           });
+        }
+      })
+    ).subscribe();
+
+    // Handle success messages when attendance is marked
+    let previousMarkedId: number | null = null;
+    this.store.select((state: any) => state.attendance?.lastMarkedAttendance).pipe(
+      takeUntil(this.destroy$),
+      tap((lastMarked: any) => {
+        if (lastMarked && lastMarked.id !== previousMarkedId) {
+          previousMarkedId = lastMarked.id;
+          const status = lastMarked.present ? 'Present' : 'Absent';
+          const studentName = lastMarked.name || lastMarked.studentNumber;
+          this.snackBar.open(
+            `✓ ${studentName} marked as ${status}`,
+            'Close',
+            {
+              duration: 2000,
+              panelClass: ['success-snackbar'],
+              horizontalPosition: 'end',
+              verticalPosition: 'top'
+            }
+          );
         }
       })
     ).subscribe();
