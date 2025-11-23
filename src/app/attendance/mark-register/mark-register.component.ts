@@ -107,7 +107,12 @@ export class MarkRegisterComponent implements OnInit, OnDestroy {
         if (lastMarked && lastMarked.id !== previousMarkedId) {
           previousMarkedId = lastMarked.id;
           const status = lastMarked.present ? 'Present' : 'Absent';
-          const studentName = lastMarked.name || lastMarked.studentNumber;
+          // Use full student name (surname + name) or fallback to student number
+          // Note: 'name' is the student's first name, 'surname' is the surname
+          // 'className' is the class name (e.g., "4 Blue"), so we avoid using just 'name'
+          const studentName = (lastMarked.surname && lastMarked.name)
+            ? `${lastMarked.surname}, ${lastMarked.name}`
+            : lastMarked.surname || lastMarked.name || lastMarked.studentNumber;
           this.snackBar.open(
             `✓ ${studentName} marked as ${status}`,
             'Close',
