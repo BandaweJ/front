@@ -134,6 +134,17 @@
         </div>
       </div>
       <div class="card-content">
+        <div class="export-button-container" *ngIf="attendanceReports$ | async">
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="exportToPDF()"
+            class="export-button"
+          >
+            <mat-icon>picture_as_pdf</mat-icon>
+            Export to PDF
+          </button>
+        </div>
         <div class="reports-container-inner">
           <div class="date-section" *ngFor="let date of getSortedDates(reports)">
             <div class="date-header">

@@ -4,7 +4,12 @@ import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
+import { takeUntil, tap, take } from 'rxjs/operators';
+import jsPDF from 'jspdf';
+import { applyPlugin } from 'jspdf-autotable';
+
+// Apply the plugin to jsPDF
+applyPlugin(jsPDF);
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
@@ -193,6 +198,174 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
   calculateAttendanceRate(summary: AttendanceSummary | null): number {
     if (!summary || summary.totalRecords === 0) return 0;
     return Math.round((summary.presentCount / summary.totalRecords) * 100);
+  }
+
+  exportToPDF(): void {
+    // Get current reports and summary
+    let reports: AttendanceReport | null = null;
+    let summary: AttendanceSummary | null = null;
+    let className = '';
+    let termInfo = '';
+
+    // Get current values synchronously
+    this.attendanceReports$.pipe(take(1)).subscribe(data => {
+      reports = data;
+    });
+    this.attendanceSummary$.pipe(take(1)).subscribe(data => {
+      summary = data;
+    });
+
+    if (!reports || Object.keys(reports).length === 0) {
+      this.snackBar.open('No reports available to export. Please generate reports first.', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // Get class and term info
+    className = this.clas?.value || 'Unknown Class';
+    const term: TermsModel = this.term?.value;
+    if (term) {
+      termInfo = `Term ${term.num}, ${term.year}`;
+    }
+
+    // Create PDF (cast to any to access autoTable method)
+    const doc = new jsPDF('landscape', 'mm', 'a4') as any;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    let yPosition = margin;
+
+    // Header
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Attendance Report', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 8;
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Class: ${className}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 6;
+    doc.text(termInfo, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 6;
+
+    // Summary section
+    if (summary) {
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Summary', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const summaryData = [
+        ['Total Records', summary.totalRecords.toString()],
+        ['Present', summary.presentCount.toString()],
+        ['Absent', summary.absentCount.toString()],
+        ['Attendance Rate', `${this.calculateAttendanceRate(summary)}%`]
+      ];
+
+      doc.autoTable({
+        startY: yPosition,
+        head: [['Metric', 'Value']],
+        body: summaryData,
+        theme: 'grid',
+        headStyles: { fillColor: [66, 139, 202], textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 10 },
+        margin: { left: margin, right: margin },
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 10;
+    }
+
+    // Attendance records by date
+    const sortedDates = this.getSortedDates(reports);
+    
+    sortedDates.forEach((date, dateIndex) => {
+      // Check if we need a new page
+      if (yPosition > pageHeight - 60) {
+        doc.addPage();
+        yPosition = margin;
+      }
+
+      const records = reports![date];
+      const formattedDate = this.formatDate(date);
+
+      // Date header
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(formattedDate, margin, yPosition);
+      yPosition += 8;
+
+      // Prepare table data
+      const tableData = records.map((record, index) => [
+        (index + 1).toString(),
+        record.studentNumber || '',
+        record.surname || '',
+        record.name || '',
+        record.gender || '',
+        record.present ? 'Present' : 'Absent'
+      ]);
+
+      // Create table
+      doc.autoTable({
+        startY: yPosition,
+        head: [['#', 'Student Number', 'Surname', 'Name', 'Gender', 'Status']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [66, 139, 202], textColor: 255, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 9 },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        columnStyles: {
+          0: { cellWidth: 15 }, // #
+          1: { cellWidth: 40 }, // Student Number
+          2: { cellWidth: 50 }, // Surname
+          3: { cellWidth: 50 }, // Name
+          4: { cellWidth: 30 }, // Gender
+          5: { cellWidth: 35 } // Status
+        },
+        margin: { left: margin, right: margin },
+        didParseCell: (data: any) => {
+          // Color code status column
+          if (data.column.index === 5) {
+            if (data.cell.text[0] === 'Present') {
+              data.cell.styles.fillColor = [76, 175, 80];
+              data.cell.styles.textColor = 255;
+            } else if (data.cell.text[0] === 'Absent') {
+              data.cell.styles.fillColor = [244, 67, 54];
+              data.cell.styles.textColor = 255;
+            }
+          }
+        }
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 10;
+    });
+
+    // Footer
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(
+        `Page ${i} of ${totalPages} | Generated on ${new Date().toLocaleDateString()}`,
+        pageWidth / 2,
+        pageHeight - 10,
+        { align: 'center' }
+      );
+    }
+
+    // Generate filename
+    const fileName = `Attendance_Report_${className}_${termInfo.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+    // Save PDF
+    doc.save(fileName);
+
+    this.snackBar.open('PDF exported successfully', 'Close', {
+      duration: 2000,
+      panelClass: ['success-snackbar']
+    });
   }
 }
 

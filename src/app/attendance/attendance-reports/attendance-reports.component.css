@@ -519,6 +519,19 @@
   margin: 0;
 }
 
+/* Export Button */
+.export-button-container {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* Loading State */
 .loading-container {
   display: flex;
