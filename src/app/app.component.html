@@ -62,12 +62,6 @@
               <mat-icon>family_restroom</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Parents</span>
             </button>
-            
-            <!-- User Management (Admin Only) -->
-            <button mat-button *ngIf="role === 'admin'" routerLink="/user-management" routerLinkActive="active">
-              <mat-icon>admin_panel_settings</mat-icon>
-              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">User Management</span>
-            </button>
           </div>
         </mat-expansion-panel>
 
