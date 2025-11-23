@@ -40,7 +40,6 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
   errorMsg$!: Observable<string>;
   
   destroy$ = new Subject<void>();
-  selectedDateRange: { start: Date | null; end: Date | null } = { start: null, end: null };
 
   constructor(
     public title: Title,
@@ -66,8 +65,6 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
     this.reportsForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
-      startDate: new FormControl('', [Validators.required]),
-      endDate: new FormControl('', [Validators.required]),
     });
   }
 
@@ -101,14 +98,6 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
     return this.reportsForm.get('clas');
   }
 
-  get startDate() {
-    return this.reportsForm.get('startDate');
-  }
-
-  get endDate() {
-    return this.reportsForm.get('endDate');
-  }
-
   generateReports(): void {
     if (this.reportsForm.invalid) {
       this.markFormGroupTouched();
@@ -117,13 +106,12 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
 
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
-    const startDate = this.startDate?.value;
-    const endDate = this.endDate?.value;
-
     const num = term.num;
     const year = term.year;
 
-    this.selectedDateRange = { start: startDate, end: endDate };
+    // Use term's startDate and endDate
+    const startDate = term.startDate ? new Date(term.startDate).toISOString().split('T')[0] : undefined;
+    const endDate = term.endDate ? new Date(term.endDate).toISOString().split('T')[0] : undefined;
 
     // Generate both reports and summary
     this.store.dispatch(
@@ -131,8 +119,8 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
         className: name,
         termNum: num,
         year,
-        startDate: startDate ? startDate.toISOString().split('T')[0] : undefined,
-        endDate: endDate ? endDate.toISOString().split('T')[0] : undefined
+        startDate,
+        endDate
       })
     );
 
@@ -163,21 +151,9 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
   private getFieldDisplayName(controlName: string): string {
     const fieldNames: { [key: string]: string } = {
       term: 'Term',
-      clas: 'Class',
-      startDate: 'Start Date',
-      endDate: 'End Date'
+      clas: 'Class'
     };
     return fieldNames[controlName] || controlName;
-  }
-
-  getDateRangeErrorMessage(): string {
-    const startDate = this.startDate?.value;
-    const endDate = this.endDate?.value;
-    
-    if (startDate && endDate && startDate > endDate) {
-      return 'Start date must be before end date';
-    }
-    return '';
   }
 
   getSortedDates(reports: AttendanceReport | null): string[] {

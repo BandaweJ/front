@@ -19,7 +19,7 @@
           <mat-icon class="section-icon">filter_list</mat-icon>
           <div class="header-text">
             <h2 class="section-title">Generate Reports</h2>
-            <p class="section-subtitle">Select class, term, and date range to generate attendance reports</p>
+            <p class="section-subtitle">Select class and term to generate attendance reports</p>
           </div>
         </div>
       </div>
@@ -57,30 +57,6 @@
               </mat-form-field>
             </div>
             <div class="form-field">
-              <mat-form-field appearance="outline">
-                <mat-label>Start Date</mat-label>
-                <input matInput [matDatepicker]="startPicker" formControlName="startDate">
-                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-                <mat-hint>Select start date for report</mat-hint>
-                <mat-error *ngIf="startDate?.invalid && startDate?.touched">
-                  {{ getFormErrorMessage('startDate') }}
-                </mat-error>
-              </mat-form-field>
-            </div>
-            <div class="form-field">
-              <mat-form-field appearance="outline">
-                <mat-label>End Date</mat-label>
-                <input matInput [matDatepicker]="endPicker" formControlName="endDate">
-                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                <mat-datepicker #endPicker></mat-datepicker>
-                <mat-hint>Select end date for report</mat-hint>
-                <mat-error *ngIf="endDate?.invalid && endDate?.touched">
-                  {{ getFormErrorMessage('endDate') }}
-                </mat-error>
-              </mat-form-field>
-            </div>
-            <div class="form-field">
               <button
                 mat-raised-button
                 type="submit"
@@ -92,10 +68,6 @@
                 Generate Reports
               </button>
             </div>
-          </div>
-          <div class="date-range-error" *ngIf="getDateRangeErrorMessage()">
-            <mat-icon>warning</mat-icon>
-            <span>{{ getDateRangeErrorMessage() }}</span>
           </div>
         </form>
       </div>
@@ -240,7 +212,7 @@
       <div class="empty-content">
         <mat-icon class="empty-icon">assessment</mat-icon>
         <h2>No Reports Generated</h2>
-        <p>Select a class, term, and date range to generate attendance reports.</p>
+        <p>Select a class and term to generate attendance reports.</p>
       </div>
     </div>
   </div>
