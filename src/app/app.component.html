@@ -125,11 +125,6 @@
           </mat-expansion-panel-header>
           <!-- Attendance Content -->
           <div class="sidenav-container">
-            <!-- Attendance Register -->
-            <button mat-button routerLink="/registers" routerLinkActive="active">
-              <mat-icon>book</mat-icon>
-              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Registers</span>
-            </button>
             <!-- Mark Attendance Register -->
             <button mat-button *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'"
               routerLink="/mark-register" routerLinkActive="active">

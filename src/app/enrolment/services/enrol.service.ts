@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EnrolsModel } from '../models/enrols.model';
 import { EnrolStats } from '../models/enrol-stats.model';
-import { RegisterModel } from '../../attendance/models/register.model';
 import { environment } from 'src/environments/environment';
 import { StudentsSummary } from '../models/students-summary.model';
 

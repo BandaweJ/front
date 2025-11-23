@@ -21,10 +21,8 @@ import {
   selectEnrols,
   selectTerms,
 } from 'src/app/enrolment/store/enrolment.selectors';
-import { RegisterModel } from '../models/register.model';
-import { markRegisterActions, attendanceActions } from '../store/attendance.actions';
+import { attendanceActions } from '../store/attendance.actions';
 import { 
-  selectAttendances, 
   selectClassAttendance, 
   selectAttendanceLoading, 
   selectAttendanceError 
@@ -41,7 +39,6 @@ export class MarkRegisterComponent implements OnInit, OnDestroy {
   terms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
   registerForm!: FormGroup;
-  attendances$!: Observable<RegisterModel[]>;
   classAttendance$!: Observable<AttendanceRecord[]>;
   isLoading$!: Observable<boolean>;
   errorMsg$!: Observable<string>;
@@ -81,7 +78,6 @@ export class MarkRegisterComponent implements OnInit, OnDestroy {
   private setupObservables(): void {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
-    this.attendances$ = this.store.select(selectAttendances);
     this.classAttendance$ = this.store.select(selectClassAttendance);
     this.isLoading$ = this.store.select(selectAttendanceLoading);
     this.errorMsg$ = this.store.select(selectAttendanceError);

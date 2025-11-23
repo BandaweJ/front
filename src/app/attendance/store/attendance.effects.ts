@@ -1,5 +1,5 @@
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { markRegisterActions, attendanceActions } from './attendance.actions';
+import { attendanceActions } from './attendance.actions';
 import { AttendanceService } from '../services/attendance.service';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -12,77 +12,7 @@ export class AttendanceEffects {
     private attendanceService: AttendanceService
   ) {}
 
-  fetchTodayRegisterByClass$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(markRegisterActions.fetchTodayRegisterByClass),
-      switchMap((data) =>
-        this.attendanceService
-          .getTodayRegisterByClass(data.name, data.num, data.year)
-          .pipe(
-            map((attendances: any[]) => {
-              return markRegisterActions.fetchTodayRegisterByClassSuccess({
-                attendances,
-              });
-            }),
-            catchError((error: HttpErrorResponse) =>
-              of(
-                markRegisterActions.fetchTodayRegisterByClassFail({
-                  ...error,
-                })
-              )
-            )
-          )
-      )
-    )
-  );
-
-  fetchDayRegisterByClass$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(markRegisterActions.fetchDayRegisterByClass),
-      switchMap((data) =>
-        this.attendanceService
-          .getTodayRegisterByClass(data.name, data.num, data.year)
-          .pipe(
-            map((attendances: any[]) => {
-              return markRegisterActions.fetchDayRegisterByClassSuccess({
-                attendances,
-              });
-            }),
-            catchError((error: HttpErrorResponse) =>
-              of(
-                markRegisterActions.fetchDayRegisterByClassFail({
-                  ...error,
-                })
-              )
-            )
-          )
-      )
-    )
-  );
-
-  markRegister$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(markRegisterActions.markRegister),
-      switchMap((data) =>
-        this.attendanceService.markRegister(data.attendance, data.present).pipe(
-          map((attendance: any) => {
-            return markRegisterActions.markRegiterSuccess({
-              attendance,
-            });
-          }),
-          catchError((error: HttpErrorResponse) =>
-            of(
-              markRegisterActions.markRegisterFail({
-                ...error,
-              })
-            )
-          )
-        )
-      )
-    )
-  );
-
-  // New attendance effects
+  // Attendance effects
   getClassAttendance$ = createEffect(() =>
     this.actions$.pipe(
       ofType(attendanceActions.getClassAttendance),

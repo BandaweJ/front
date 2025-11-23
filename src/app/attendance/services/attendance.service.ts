@@ -116,26 +116,4 @@ export class AttendanceService {
     return this.http.get<AttendanceSummary>(`${this.apiUrl}/summary/${className}/${termNum}/${year}`);
   }
 
-  // Legacy methods for backward compatibility
-  getTodayRegisterByClass(
-    name: string,
-    num: number,
-    year: number
-  ): Observable<AttendanceRecord[]> {
-    return this.getClassAttendance(name, num, year);
-  }
-
-  markRegister(
-    attendance: any,
-    present: boolean
-  ): Observable<AttendanceRecord> {
-    return this.markAttendance({
-      studentNumber: attendance.student?.studentNumber || attendance.studentNumber,
-      className: attendance.name || attendance.className,
-      termNum: attendance.num || attendance.termNum,
-      year: attendance.year,
-      present,
-      date: attendance.date ? new Date(attendance.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-    });
-  }
 }
