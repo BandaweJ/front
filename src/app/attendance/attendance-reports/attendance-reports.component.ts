@@ -3,8 +3,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil, tap, take } from 'rxjs/operators';
+import { Observable, Subject, firstValueFrom, combineLatest } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
 import jsPDF from 'jspdf';
 import { applyPlugin } from 'jspdf-autotable';
 
@@ -200,20 +200,11 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
     return Math.round((summary.presentCount / summary.totalRecords) * 100);
   }
 
-  exportToPDF(): void {
-    // Get current reports and summary
-    let reports: AttendanceReport | null = null;
-    let summary: AttendanceSummary | null = null;
-    let className = '';
-    let termInfo = '';
-
-    // Get current values synchronously
-    this.attendanceReports$.pipe(take(1)).subscribe(data => {
-      reports = data;
-    });
-    this.attendanceSummary$.pipe(take(1)).subscribe(data => {
-      summary = data;
-    });
+  async exportToPDF(): Promise<void> {
+    // Get current reports and summary asynchronously
+    const [reports, summary] = await firstValueFrom(
+      combineLatest([this.attendanceReports$, this.attendanceSummary$])
+    );
 
     if (!reports || Object.keys(reports).length === 0) {
       this.snackBar.open('No reports available to export. Please generate reports first.', 'Close', {
@@ -224,11 +215,9 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
     }
 
     // Get class and term info
-    className = this.clas?.value || 'Unknown Class';
-    const term: TermsModel = this.term?.value;
-    if (term) {
-      termInfo = `Term ${term.num}, ${term.year}`;
-    }
+    const className = this.clas?.value || 'Unknown Class';
+    const term: TermsModel | null = this.term?.value;
+    const termInfo = term ? `Term ${term.num}, ${term.year}` : '';
 
     // Create PDF (cast to any to access autoTable method)
     const doc = new jsPDF('landscape', 'mm', 'a4') as any;
