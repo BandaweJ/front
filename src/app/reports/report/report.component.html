@@ -1,6 +1,6 @@
 <mat-card class="report" id="{{ report.studentNumber }}" #content>
   <button
-    *ngIf="role === 'student' || role ==='parent' || role === 'reception' || role === 'admin' || role === 'director'"
+    *ngIf="canDownloadReport$ | async"
     type="button" mat-mini-fab color="accent" class="download-btn" (click)="download()">
     <span class="material-icons">file_download</span>
   </button>
@@ -82,7 +82,7 @@
     <div class="comment-section headmaster-comment-section">
       <h3 class="underline">Head's Comment</h3>
       <form [formGroup]="commentForm" class="head-comment-form">
-        <mat-form-field *ngIf="role !== 'student' && (!report.report.headComment || editState)" appearance="outline"
+        <mat-form-field *ngIf="(canEditCommentAndNotStudent$ | async) && (!report.report.headComment || editState)" appearance="outline"
           class="full-width-textarea">
           <mat-label>Type Headmaster's Comment here</mat-label>
           <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="3" cdkAutosizeMaxRows="7" formControlName="comment"
@@ -90,18 +90,18 @@
           <mat-error *ngIf="commentForm.get('comment')?.hasError('required')">Comment is required</mat-error>
         </mat-form-field>
 
-        <p *ngIf="role !== 'student' && report.report.headComment && !editState" class="displayed-head-comment">
+        <p *ngIf="(canEditCommentAndNotStudent$ | async) && report.report.headComment && !editState" class="displayed-head-comment">
           {{ report.report.headComment }}
           <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleEditState()">
             <mat-icon>edit</mat-icon>
           </button>
         </p>
 
-        <p *ngIf="role === 'student'" class="student-view-head-comment">
+        <p *ngIf="isStudent$ | async" class="student-view-head-comment">
           {{ report.report.headComment || 'No Headmaster\'s comment yet.' }}
         </p>
 
-        <p class="missing-comment-cue" *ngIf="role !== 'student' && !report.report.headComment && !editState">
+        <p class="missing-comment-cue" *ngIf="(canEditCommentAndNotStudent$ | async) && !report.report.headComment && !editState">
           No Headmaster's comment entered. Click the field to add.
         </p>
 

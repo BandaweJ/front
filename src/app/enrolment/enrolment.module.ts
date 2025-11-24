@@ -37,6 +37,12 @@ import { EnrolService } from './services/enrol.service';
     StoreModule.forFeature('enrol', enrolmentReducer),
     EffectsModule.forFeature([EnrolmentEffects]),
   ],
+  exports: [
+    TermsComponent,
+    ClassesComponent,
+    AddEditClassComponent,
+    AddEditTermComponent,
+  ],
   // exports: [EnrolService]
 })
 export class EnrolmentModule {}

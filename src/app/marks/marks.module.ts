@@ -38,5 +38,9 @@ import { SharedModule } from '../shared/shared.module';
     EffectsModule.forFeature(MarksEffects),
     EffectsModule.forFeature(MarkSheetEffects),
   ],
+  exports: [
+    SubjectsComponent,
+    AddEditSubjectComponent,
+  ],
 })
 export class MarksModule {}

@@ -21,7 +21,8 @@ import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { viewReportsActions } from '../store/reports.actions';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
-import { take } from 'rxjs/operators'; // Import take operator for saveReports
+import { take, map } from 'rxjs/operators'; // Import take operator for saveReports
+import { RoleAccessService } from 'src/app/services/role-access.service';
 
 @Component({
   selector: 'app-reports',
@@ -40,6 +41,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
   mode!: 'generate' | 'view';
   isLoading$ = this.store.select(selectIsLoading); // This is crucial for the spinner
   currentEnrolment!: EnrolsModel;
+  
+  // Role-based access observables
+  isStudent$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.student, role))
+  );
+  canGenerateReports$ = this.roleAccess.canGenerateReports$();
+  canSaveReports$ = this.roleAccess.canSaveReports$();
 
   // Analytics properties
   totalStudents = 0;
@@ -51,7 +59,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
-  constructor(private store: Store) {
+  constructor(
+    private store: Store,
+    private roleAccess: RoleAccessService
+  ) {
     this.store.dispatch(fetchTerms());
     this.store.dispatch(fetchClasses());
 

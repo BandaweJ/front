@@ -143,14 +143,44 @@
     </ng-template>
   </div>
 
-  <div class="marks-graph-container">
-    <h3>Student Performance Over Time - All Subjects</h3>
-    <div style="display: block;">
-      <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType">
-      </canvas>
+  <div class="continuous-analytics-container">
+    <h3>Continuous Assessment Insights</h3>
+    <div *ngIf="caLoading" class="loading-spinner">
+      Loading analytics...
     </div>
-    <p *ngIf="!(lineChartData.datasets && lineChartData.datasets.length > 0)" class="no-data-message">
-      No marks data available for this student across subjects and terms.
-    </p>
+    <ng-container *ngIf="!caLoading && caAnalytics as analytics">
+      <div class="analytics-cards">
+        <div class="analytics-card">
+          <label>Average Score</label>
+          <span>{{ analytics.averageScore | number: '1.0-1' }}%</span>
+        </div>
+        <div class="analytics-card">
+          <label>Total Assessments</label>
+          <span>{{ analytics.totalEntries }}</span>
+        </div>
+      </div>
+
+      <div class="subject-averages-card" *ngIf="analytics.subjectAverages?.length">
+        <h4>Average by Subject</h4>
+        <div class="subject-average" *ngFor="let subject of analytics.subjectAverages">
+          <span>{{ subject.subject }}</span>
+          <span>{{ subject.average | number:'1.0-1' }}%</span>
+        </div>
+      </div>
+
+      <div class="recent-assessments-card" *ngIf="analytics.recentAssessments?.length">
+        <h4>Recent Assessments</h4>
+        <div class="recent-assessment" *ngFor="let entry of analytics.recentAssessments">
+          <div>
+            <div class="topic">{{ entry.topicOrSkill }}</div>
+            <div class="meta">{{ entry.assessmentDate | date:'mediumDate' }} • {{ entry.assessmentType }}</div>
+          </div>
+          <div class="score-pill">{{ entry.score }}<span *ngIf="entry.maxScore"> / {{ entry.maxScore }}</span></div>
+        </div>
+      </div>
+    </ng-container>
+    <div *ngIf="!caLoading && !caAnalytics?.totalEntries" class="no-data-message">
+      No continuous assessment data available yet.
+    </div>
   </div>
 </div>

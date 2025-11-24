@@ -22,11 +22,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { receiptActions } from '../../store/finance.actions';
 import { ReceiptInvoiceAllocationsModel } from '../../models/receipt-invoice-allocations.model';
 import { Observable, take, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs/operators';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { selectAuthUserRole } from 'src/app/auth/store/auth.selectors';
 import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialo/confirmation-dialo.component';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { RoleAccessService } from 'src/app/services/role-access.service';
 
 @Component({
   selector: 'app-receipt-item',
@@ -49,6 +50,7 @@ export class ReceiptItemComponent implements OnInit, OnChanges, OnDestroy {
 
   balance = '0.00';
   userRole$!: Observable<ROLES | undefined>; // To get the current user's role
+  canVoidReceipt$!: Observable<boolean>; // Observable for void receipt permission
   currentTheme: Theme = 'light';
   private destroy$ = new Subject<void>();
 
@@ -58,12 +60,16 @@ export class ReceiptItemComponent implements OnInit, OnChanges, OnDestroy {
     private store: Store,
     private dialog: MatDialog,
     public themeService: ThemeService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private roleAccess: RoleAccessService
   ) {}
 
   ngOnInit(): void {
     // Get the user's role from the store on init
     this.userRole$ = this.store.select(selectAuthUserRole);
+    
+    // Set up canVoidReceipt$ observable using permission check
+    this.canVoidReceipt$ = this.roleAccess.canVoidReceipt$();
 
     // Subscribe to theme changes
     this.themeService.theme$

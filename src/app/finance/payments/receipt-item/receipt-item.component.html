@@ -25,7 +25,7 @@
       <mat-icon>print</mat-icon>
     </button>
     <button 
-      *ngIf="!receipt.isVoided && ((userRole$ | async) === 'auditor' || (userRole$ | async) === 'director')" 
+      *ngIf="!receipt.isVoided && (canVoidReceipt$ | async)" 
       type="button" 
       mat-mini-fab 
       color="warn"

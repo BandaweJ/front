@@ -1,7 +1,7 @@
 <div class="invoice-container-wrapper" 
      [class.theme-light]="currentTheme === 'light'"
      [class.theme-dark]="currentTheme === 'dark'"
-     *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+     *ngIf="canAccessBilling$ | async">
   
   <!-- Header Section -->
   <div class="header-section">
@@ -84,7 +84,7 @@
 </div>
 
 <!-- Unauthorized Access -->
-<div class="invoice-container-wrapper" *ngIf="role !== 'reception' && role !== 'auditor' && role !== 'director'">
+<div class="invoice-container-wrapper" *ngIf="!(canAccessBilling$ | async)">
   <mat-card>
     <mat-card-content>
       <div class="empty-state">

@@ -201,7 +201,7 @@
               <td mat-cell *matCellDef="let row" class="action-cell">
                 <div class="action-buttons">
                   <button 
-                    *ngIf="(role$ | async)?.role === 'admin'" 
+                    *ngIf="isAdmin$ | async" 
                     mat-icon-button 
                     color="primary"
                     (click)="showCurrentEnrol(row)" 

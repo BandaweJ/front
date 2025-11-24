@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Store, select } from '@ngrx/store';
-import { ChartConfiguration, ChartOptions } from 'chart.js';
+import { Store } from '@ngrx/store';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -13,13 +12,6 @@ import {
   tap,
 } from 'rxjs';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
-import { MarksModel } from 'src/app/marks/models/marks.model';
-import { studentMarksActions } from 'src/app/marks/store/marks.actions';
-import {
-  selectStudentMarks,
-  selectStudentMarksLoaded, // IMPORT NEW SELECTOR
-  selectStudentMarksLoading, // IMPORT NEW SELECTOR
-} from 'src/app/marks/store/marks.selectors'; // Adjust path
 import { StudentDashboardSummary } from '../models/student-dashboard-summary';
 import {
   selectStudentDashboardLoaded,
@@ -41,12 +33,8 @@ import {
   invoiceActions,
   receiptActions,
 } from 'src/app/finance/store/finance.actions';
-import {
-  getStudentLedger,
-  LedgerEntry,
-  selectInvoicesAndReceiptsLoaded,
-  selectStudentBalance,
-} from 'src/app/finance/store/finance.selector';
+import { selectStudentBalance } from 'src/app/finance/store/finance.selector';
+import { ContinuousAssessmentService, ContinuousAssessmentAnalytics } from 'src/app/marks/continuous-assessment/continuous-assessment.service';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -67,55 +55,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // Value will display when it becomes available
   public amountOwed$: Observable<number>;
 
-  public lineChartData: ChartConfiguration<'line'>['data'] = {
-    datasets: [],
-    labels: [],
-  };
-  public lineChartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        title: {
-          display: true,
-          text: 'Score (%)',
-        },
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Term & Exam Type',
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top',
-      },
-      tooltip: {
-        callbacks: {
-          label: (context) => {
-            let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
-            }
-            if (context.parsed.y !== null) {
-              label += context.parsed.y + '%';
-            }
-            return label;
-          },
-        },
-      },
-    },
-  };
-  public lineChartType: 'line' = 'line';
+  public caAnalytics: ContinuousAssessmentAnalytics | null = null;
+  public caLoading = false;
 
   private subscriptions: Subscription = new Subscription();
 
-  constructor(private store: Store) {
+  constructor(private store: Store, private caService: ContinuousAssessmentService) {
     this.dashboardSummary$ = this.store.select(selectStudentDashboardSummary);
     this.summaryLoading$ = this.store.select(selectStudentDashboardLoading);
     this.summaryLoaded$ = this.store.select(selectStudentDashboardLoaded);
@@ -138,7 +83,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Separate subscription for fetching student marks
     this.subscriptions.add(
       (this.store.select(selectUser) as Observable<User | null>)
         .pipe(
@@ -151,11 +95,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           tap((user) => {
             const studentNumber = user.id;
 
-            this.store.dispatch(
-              studentMarksActions.fetchStudentMarks({
-                studentNumber,
-              })
-            );
             // Fetch only this student's invoices and receipts (more efficient than fetching all)
             this.store.dispatch(
               invoiceActions.fetchStudentInvoices({
@@ -177,21 +116,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                 studentNumber,
               })
             );
+            this.loadContinuousAssessmentAnalytics(studentNumber);
           })
         )
         .subscribe()
-    );
-    // Subscription for processing marks and updating the chart (reacts to state changes)
-    this.subscriptions.add(
-      this.store
-        .select(selectStudentMarks)
-        .pipe(
-          // The chart should update whenever marks data changes (including initial empty state after fetch)
-          map((marks) => this.processMarksForGraph(marks))
-        )
-        .subscribe(({ labels, datasets }) => {
-          this.lineChartData = { labels, datasets };
-        })
     );
 
     // REVISED Dashboard Summary & Enrolment Data Fetching (already good, just including for completeness)
@@ -249,73 +177,17 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  private processMarksForGraph(marks: MarksModel[]) {
-    const marksBySubject: { [subjectName: string]: MarksModel[] } = {};
-    const uniqueTermLabels = new Set<string>();
-
-    marks.forEach((mark) => {
-      const subjectName = mark.subject.name;
-      if (!marksBySubject[subjectName]) {
-        marksBySubject[subjectName] = [];
-      }
-      marksBySubject[subjectName].push(mark);
-      uniqueTermLabels.add(this.getTermExamLabel(mark));
+  private loadContinuousAssessmentAnalytics(studentNumber: string) {
+    this.caLoading = true;
+    this.caService.getStudentAnalytics(studentNumber).subscribe({
+      next: (analytics) => {
+        this.caAnalytics = analytics;
+        this.caLoading = false;
+      },
+      error: () => {
+        this.caLoading = false;
+      },
     });
-
-    const sortedUniqueLabels = Array.from(uniqueTermLabels).sort((a, b) => {
-      const parseLabel = (label: string) => {
-        const match = label.match(/Term (\d+) (\d{4})/);
-        if (match) {
-          return { num: parseInt(match[1]), year: parseInt(match[2]) };
-        }
-        return { num: 0, year: 0 };
-      };
-
-      const aParsed = parseLabel(a);
-      const bParsed = parseLabel(b);
-
-      if (aParsed.year !== bParsed.year) {
-        return aParsed.year - bParsed.year;
-      }
-      return aParsed.num - bParsed.num;
-    });
-
-    const datasets: ChartConfiguration<'line'>['data']['datasets'] = [];
-
-    Object.keys(marksBySubject).forEach((subjectName) => {
-      const subjectMarks = marksBySubject[subjectName];
-      const dataForSubject: (number | null)[] = new Array(
-        sortedUniqueLabels.length
-      ).fill(null);
-
-      subjectMarks.forEach((mark) => {
-        const label = this.getTermExamLabel(mark);
-        const index = sortedUniqueLabels.indexOf(label);
-        if (
-          index !== -1 &&
-          mark.mark !== null &&
-          typeof mark.mark === 'number'
-        ) {
-          dataForSubject[index] = mark.mark;
-        }
-      });
-
-      datasets.push({
-        data: dataForSubject,
-        label: subjectName,
-        fill: false,
-        tension: 0.3,
-        pointRadius: 5,
-        pointHoverRadius: 8,
-      });
-    });
-
-    return { labels: sortedUniqueLabels, datasets };
-  }
-
-  private getTermExamLabel(mark: MarksModel): string {
-    const termLabel = `Term ${mark.num} ${mark.year}`;
-    return mark.examType ? `${termLabel} (${mark.examType})` : termLabel;
   }
 
   ngOnDestroy(): void {

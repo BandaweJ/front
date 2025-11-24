@@ -6,13 +6,21 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, Subject, of } from 'rxjs';
+import { takeUntil, map, shareReplay, catchError } from 'rxjs/operators';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Store } from '@ngrx/store';
 import { selectIsLoggedIn, selectUser } from './auth/store/auth.selectors';
 import { checkAuthStatus } from './auth/store/auth.actions';
 import { ThemeService, Theme } from './services/theme.service';
+import { RoleAccessService } from './services/role-access.service';
+import { ROLES } from './registration/models/roles.enum';
+import { SystemSettingsService, SystemSettings } from './system/services/system-settings.service';
+import { Title } from '@angular/platform-browser';
+import { MatDialog } from '@angular/material/dialog';
+import { Router, NavigationEnd } from '@angular/router';
+import { MessagingService } from './messaging/services/messaging.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +31,11 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'Junior High School';
   
   currentTheme: Theme = 'light';
+  
+  // School information from system settings
+  schoolName$!: Observable<string>;
+  schoolLogo$!: Observable<string>;
+  schoolNameAbbr$!: Observable<string>;
 
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
@@ -36,6 +49,64 @@ export class AppComponent implements OnInit, OnDestroy {
   role!: string;
   isLoggedIn$: Observable<boolean>; // Simulate logged-in state, typically from an auth service
   isLoggedInStatus!: boolean; // Store the actual boolean status for TS logic
+  
+  // Messaging unread count
+  totalUnreadCount = 0;
+
+  // Role-based access observables - these update when role changes
+  canAccessRegistration$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception))
+  );
+  canAccessEnrolment$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.doesNotHaveRole(role, ROLES.student, ROLES.parent))
+  );
+  canAccessAttendance$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.teacher, ROLES.hod))
+  );
+  canAccessMarks$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.teacher, ROLES.hod))
+  );
+  canAccessResultsAnalysis$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.teacher, ROLES.hod, ROLES.director))
+  );
+  canAccessBilling$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.director, ROLES.auditor))
+  );
+  canAccessReceipting$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
+  );
+  canAccessFinancialReports$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.auditor, ROLES.director))
+  );
+  canAccessSystemAdmin$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.admin, role))
+  );
+  canAccessClassLists$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception, ROLES.teacher, ROLES.hod, ROLES.auditor, ROLES.director))
+  );
+  canAccessStudentBalances$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.reception, role))
+  );
+  canAccessExemptions$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
+  );
+  canAccessRevenueRecognition$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
+  );
+  canAccessFeesCollection$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
+  );
+  
+  // Helper methods for specific role checks
+  isAdmin$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.admin, role))
+  );
+  isReception$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.reception, role))
+  );
+  isStudent$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.student, role))
+  );
 
   private destroy$ = new Subject<void>();
 
@@ -43,7 +114,13 @@ export class AppComponent implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     private media: MediaMatcher,
     private store: Store,
-    public themeService: ThemeService  // Made public for template access
+    public themeService: ThemeService,  // Made public for template access
+    public roleAccess: RoleAccessService,  // Made public for template access
+    public router: Router,  // Made public for template access
+    private systemSettingsService: SystemSettingsService,
+    private titleService: Title,
+    private dialog: MatDialog,
+    private messagingService: MessagingService
   ) {
     this.mobileQuery = media.matchMedia('(max-width: 767px)');
     this._mobileQueryListener = () => {
@@ -58,6 +135,56 @@ export class AppComponent implements OnInit, OnDestroy {
     // Subscribe to theme changes
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
       this.currentTheme = theme;
+    });
+    
+    // Load system settings and initialize school information observables
+    const settings$ = this.systemSettingsService.getSettings().pipe(
+      catchError(error => {
+        console.error('Error loading system settings:', error);
+        // Return default settings on error
+        return of({
+          schoolName: 'Junior High School',
+          schoolLogo: 'assets/jhs_logo.jpg',
+        } as SystemSettings);
+      }),
+      shareReplay(1) // Cache the result to avoid multiple HTTP calls
+    );
+    
+    // Initialize school information observables
+    this.schoolName$ = settings$.pipe(
+      map(settings => settings.schoolName || 'Junior High School')
+    );
+    
+    this.schoolLogo$ = settings$.pipe(
+      map(settings => settings.schoolLogo || 'assets/jhs_logo.jpg')
+    );
+    
+    this.schoolNameAbbr$ = settings$.pipe(
+      map(settings => {
+        const name = settings.schoolName || 'Junior High School';
+        // Generate abbreviation from school name (first letters of each word)
+        return name
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase())
+          .join('')
+          .substring(0, 3) || 'JHS';
+      })
+    );
+    
+    // Update page title and apply school colors
+    settings$.pipe(takeUntil(this.destroy$)).subscribe(settings => {
+      const schoolName = settings.schoolName || 'Junior High School';
+      this.title = schoolName;
+      this.titleService.setTitle(schoolName);
+      
+      // Apply school colors to theme
+      if (settings.primaryColor || settings.accentColor || settings.warnColor) {
+        this.themeService.applySchoolColors({
+          primaryColor: settings.primaryColor,
+          accentColor: settings.accentColor,
+          warnColor: settings.warnColor,
+        });
+      }
     });
     
     this.store.dispatch(checkAuthStatus());
@@ -109,5 +236,10 @@ export class AppComponent implements OnInit, OnDestroy {
       // Only manage isSidenavCollapsed on large screens (for side mode)
       this.isSidenavCollapsed = !isOpen;
     }
+  }
+
+  openCalendar(): void {
+    // Navigate to calendar route or open calendar dialog
+    this.router.navigate(['/calendar']);
   }
 }

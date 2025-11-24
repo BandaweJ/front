@@ -12,7 +12,10 @@ import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 import { selectIsLoading } from '../store/reports.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
-import { Subscription } from 'rxjs'; // Import Subscription
+import { Subscription, combineLatest } from 'rxjs'; // Import Subscription
+import { map } from 'rxjs/operators';
+import { RoleAccessService } from 'src/app/services/role-access.service';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 
 // pdfMake.vfs = pdfFonts.pdfMake.vfs; // Commented out as per original
 
@@ -28,10 +31,28 @@ export class ReportComponent implements OnInit {
   role = ''; // Initialize role
   isLoading$ = this.store.select(selectIsLoading);
   studentNumber = '';
+  
+  // Permission-based access observables
+  canDownloadReport$ = this.roleAccess.canDownloadReport$();
+  canEditComment$ = this.roleAccess.canEditReportComment$();
+  isStudent$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.student, role))
+  );
+  
+  // Combined observables for template use
+  canEditCommentAndNotStudent$ = combineLatest([
+    this.isStudent$,
+    this.canEditComment$
+  ]).pipe(
+    map(([isStudent, canEdit]) => !isStudent && canEdit)
+  );
 
   private userSubscription: Subscription | undefined; // Declare subscription
 
-  constructor(private store: Store) {}
+  constructor(
+    private store: Store,
+    private roleAccess: RoleAccessService
+  ) {}
 
   commentForm!: FormGroup;
 

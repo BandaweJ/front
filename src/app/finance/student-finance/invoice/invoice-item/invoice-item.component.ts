@@ -15,6 +15,8 @@ import { takeUntil, take, map } from 'rxjs/operators';
 import { selectAuthUserRole } from 'src/app/auth/store/auth.selectors';
 import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialo/confirmation-dialo.component';
 import { MatDialogRef } from '@angular/material/dialog';
+import { RoleAccessService } from 'src/app/services/role-access.service';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 @Component({
   selector: 'app-invoice-item',
   standalone: true,
@@ -36,6 +38,7 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
   isDownloading = false;
   private destroy$ = new Subject<void>();
   userRole$: Observable<string | null>;
+  canVoidInvoice$!: Observable<boolean>; // Observable for void invoice permission
 
   @Input() invoice!: InvoiceModel | null;
   @Input() downloadable!: boolean;
@@ -45,11 +48,15 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
     private store: Store,
     private cdr: ChangeDetectorRef,
     private themeService: ThemeService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private roleAccess: RoleAccessService
   ) {
     this.userRole$ = this.store.select(selectAuthUserRole).pipe(
       map(role => role ?? null)
     );
+    
+    // Set up canVoidInvoice$ observable using permission check
+    this.canVoidInvoice$ = this.roleAccess.canVoidInvoice$();
   }
 
   ngOnInit(): void {

@@ -34,6 +34,11 @@ export class AuthEffects {
         this.authService.signin(credentials.signinData).pipe(
           map((resp) => {
             const user: User = jwt_decode(resp.accessToken);
+            
+            // Add permissions to user object from login response
+            if (resp.permissions) {
+              user.permissions = resp.permissions;
+            }
 
             localStorage.setItem('token', resp.accessToken);
 
@@ -121,7 +126,12 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(logout), // Still an individual action
         tap(() => {
+          // Clear all authentication-related data from localStorage
           localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('jhs_session');
+          // Note: We keep 'theme' and 'jhs-theme' as they are user preferences, not auth data
+          // We keep 'rememberUsername' as it's a convenience feature
           this.router.navigateByUrl('/signin');
         })
       ),
@@ -140,6 +150,8 @@ export class AuthEffects {
             authStatus.user &&
             authStatus.accessToken
           ) {
+            // Note: Permissions are not stored in JWT, so they won't be available on page refresh
+            // They will be empty array until user logs in again or we fetch them separately
             this.router.navigateByUrl('/dashboard');
             return signinActions.signinSuccess({
               // Use grouped action for dispatch

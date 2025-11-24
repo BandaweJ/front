@@ -18,7 +18,7 @@
       <mat-icon *ngIf="!isDownloading">{{ downloadable ? 'download' : 'save' }}</mat-icon>
     </button>
     <button 
-      *ngIf="!invoice.isVoided && ((userRole$ | async) === 'auditor' || (userRole$ | async) === 'director' || (userRole$ | async) === 'reception')" 
+      *ngIf="!invoice.isVoided && (canVoidInvoice$ | async)" 
       type="button" 
       mat-mini-fab 
       color="warn"

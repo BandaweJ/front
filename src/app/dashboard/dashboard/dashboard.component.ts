@@ -10,6 +10,8 @@ import { selectCurrentTerm } from 'src/app/enrolment/store/enrolment.selectors';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 
 import { currentTermActions } from '../../enrolment/store/enrolment.actions';
+import { RoleAccessService } from 'src/app/services/role-access.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,6 +26,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   currentTerm$ = this.store.select(selectCurrentTerm);
 
   role!: ROLES; // Role is now directly used, but could be an observable if needed
+  
+  // Role-based access observables
+  canAccessTeachersDashboard$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.teacher, ROLES.admin, ROLES.hod))
+  );
+  canAccessFinanceDashboard$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.auditor, ROLES.director))
+  );
+  canAccessStudentDashboard$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.student, role))
+  );
 
   currentTermNum!: number;
   currentTermYear!: number;
@@ -33,7 +46,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     public title: Title,
-    private router: Router
+    private router: Router,
+    private roleAccess: RoleAccessService
   ) {
     // Initial dispatches based on user role when user data is available
     this.user$

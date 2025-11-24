@@ -13,10 +13,16 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
+import { Subject, Observable, of } from 'rxjs';
+import { takeUntil, catchError } from 'rxjs/operators';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { Title } from '@angular/platform-browser';
+import { EnrolmentModule } from 'src/app/enrolment/enrolment.module';
+import { MarksModule } from 'src/app/marks/marks.module';
+import { GradingSystemService, GradingSystem, GradeThresholds } from '../services/grading-system.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-academic-settings',
@@ -36,6 +42,9 @@ import { Title } from '@angular/platform-browser';
     MatTabsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatTableModule,
+    EnrolmentModule,
+    MarksModule,
   ],
   templateUrl: './academic-settings.component.html',
   styleUrls: ['./academic-settings.component.scss'],
@@ -47,6 +56,20 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
   currentTheme: Theme = 'light';
   selectedTab = 0;
   isLoading = false;
+  
+  // Grading systems data
+  gradingSystems: GradingSystem[] = [];
+  oLevelGrading: GradingSystem | null = null;
+  aLevelGrading: GradingSystem | null = null;
+  
+  // Forms for grade thresholds
+  oLevelForm!: FormGroup;
+  aLevelForm!: FormGroup;
+  
+  // Table columns for grade thresholds
+  displayedColumns: string[] = ['grade', 'threshold', 'description'];
+  oLevelThresholdsDataSource = new MatTableDataSource<{grade: string, threshold: number, description: string}>([]);
+  aLevelThresholdsDataSource = new MatTableDataSource<{grade: string, threshold: number, description: string}>([]);
   
   private destroy$ = new Subject<void>();
 
@@ -65,7 +88,8 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private themeService: ThemeService,
     private title: Title,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private gradingSystemService: GradingSystemService
   ) {
     this.academicSettingsForm = this.fb.group({
       academicYearStart: ['', Validators.required],
@@ -84,6 +108,33 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
       showGradesToParents: [true],
       allowGradeOverrides: [false],
     });
+
+    // Initialize grade threshold forms
+    this.initializeGradeThresholdForms();
+  }
+
+  private initializeGradeThresholdForms(): void {
+    // O Level form
+    this.oLevelForm = this.fb.group({
+      aStar: [90, [Validators.required, Validators.min(0), Validators.max(100)]],
+      a: [70, [Validators.required, Validators.min(0), Validators.max(100)]],
+      b: [60, [Validators.required, Validators.min(0), Validators.max(100)]],
+      c: [50, [Validators.required, Validators.min(0), Validators.max(100)]],
+      d: [40, [Validators.required, Validators.min(0), Validators.max(100)]],
+      e: [35, [Validators.required, Validators.min(0), Validators.max(100)]],
+      failGrade: ['U', Validators.required],
+    });
+
+    // A Level form
+    this.aLevelForm = this.fb.group({
+      aStar: [90, [Validators.required, Validators.min(0), Validators.max(100)]],
+      a: [75, [Validators.required, Validators.min(0), Validators.max(100)]],
+      b: [65, [Validators.required, Validators.min(0), Validators.max(100)]],
+      c: [50, [Validators.required, Validators.min(0), Validators.max(100)]],
+      d: [40, [Validators.required, Validators.min(0), Validators.max(100)]],
+      e: [35, [Validators.required, Validators.min(0), Validators.max(100)]],
+      failGrade: ['F', Validators.required],
+    });
   }
 
   ngOnInit(): void {
@@ -97,6 +148,66 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
       });
 
     this.loadSettings();
+    this.loadGradingSystems();
+  }
+
+  loadGradingSystems(): void {
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    this.gradingSystemService.getAllGradingSystems()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          console.error('Error loading grading systems:', error);
+          this.snackBar.open('Failed to load grading systems', 'Close', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          return of([]);
+        })
+      )
+      .subscribe((systems: GradingSystem[]) => {
+        this.gradingSystems = systems;
+        
+        // Find O Level and A Level systems
+        this.oLevelGrading = systems.find(s => s.level === 'O Level') || null;
+        this.aLevelGrading = systems.find(s => s.level === 'A Level') || null;
+
+        // Populate forms with existing data
+        if (this.oLevelGrading) {
+          this.oLevelForm.patchValue({
+            aStar: this.oLevelGrading.gradeThresholds.aStar,
+            a: this.oLevelGrading.gradeThresholds.a,
+            b: this.oLevelGrading.gradeThresholds.b,
+            c: this.oLevelGrading.gradeThresholds.c,
+            d: this.oLevelGrading.gradeThresholds.d,
+            e: this.oLevelGrading.gradeThresholds.e,
+            failGrade: this.oLevelGrading.failGrade,
+          });
+        }
+
+        if (this.aLevelGrading) {
+          this.aLevelForm.patchValue({
+            aStar: this.aLevelGrading.gradeThresholds.aStar,
+            a: this.aLevelGrading.gradeThresholds.a,
+            b: this.aLevelGrading.gradeThresholds.b,
+            c: this.aLevelGrading.gradeThresholds.c,
+            d: this.aLevelGrading.gradeThresholds.d,
+            e: this.aLevelGrading.gradeThresholds.e,
+            failGrade: this.aLevelGrading.failGrade,
+          });
+        }
+
+        // Update table data sources
+        this.oLevelThresholdsDataSource.data = this.getGradeThresholdsData('O Level');
+        this.aLevelThresholdsDataSource.data = this.getGradeThresholdsData('A Level');
+
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      });
   }
 
   ngOnDestroy(): void {
@@ -180,6 +291,130 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
       showGradesToParents: true,
       allowGradeOverrides: false,
     });
+  }
+
+  onSaveOLevelGrading(): void {
+    if (this.oLevelForm.invalid) {
+      this.snackBar.open('Please fill in all grade thresholds correctly', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    const formValue = this.oLevelForm.value;
+    const gradeThresholds: GradeThresholds = {
+      aStar: formValue.aStar,
+      a: formValue.a,
+      b: formValue.b,
+      c: formValue.c,
+      d: formValue.d,
+      e: formValue.e,
+    };
+
+    const operation = this.oLevelGrading
+      ? this.gradingSystemService.updateGradingSystem('O Level', gradeThresholds, formValue.failGrade)
+      : this.gradingSystemService.saveGradingSystem('O Level', gradeThresholds, formValue.failGrade);
+
+    operation
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          console.error('Error saving O Level grading:', error);
+          this.snackBar.open('Failed to save O Level grading system', 'Close', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          return of(null);
+        })
+      )
+      .subscribe((result) => {
+        if (result) {
+          this.snackBar.open('O Level grading system saved successfully', 'Close', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+          this.loadGradingSystems(); // Reload to get updated data
+          this.oLevelThresholdsDataSource.data = this.getGradeThresholdsData('O Level');
+        }
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      });
+  }
+
+  onSaveALevelGrading(): void {
+    if (this.aLevelForm.invalid) {
+      this.snackBar.open('Please fill in all grade thresholds correctly', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    const formValue = this.aLevelForm.value;
+    const gradeThresholds: GradeThresholds = {
+      aStar: formValue.aStar,
+      a: formValue.a,
+      b: formValue.b,
+      c: formValue.c,
+      d: formValue.d,
+      e: formValue.e,
+    };
+
+    const operation = this.aLevelGrading
+      ? this.gradingSystemService.updateGradingSystem('A Level', gradeThresholds, formValue.failGrade)
+      : this.gradingSystemService.saveGradingSystem('A Level', gradeThresholds, formValue.failGrade);
+
+    operation
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          console.error('Error saving A Level grading:', error);
+          this.snackBar.open('Failed to save A Level grading system', 'Close', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          return of(null);
+        })
+      )
+      .subscribe((result) => {
+        if (result) {
+          this.snackBar.open('A Level grading system saved successfully', 'Close', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+          this.loadGradingSystems(); // Reload to get updated data
+          this.aLevelThresholdsDataSource.data = this.getGradeThresholdsData('A Level');
+        }
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      });
+  }
+
+  getGradeThresholdsData(level: 'O Level' | 'A Level'): Array<{grade: string, threshold: number, description: string}> {
+    const grading = level === 'O Level' ? this.oLevelGrading : this.aLevelGrading;
+    if (!grading) return [];
+
+    const thresholds = grading.gradeThresholds;
+    return [
+      { grade: 'A*', threshold: thresholds.aStar, description: 'Excellent' },
+      { grade: 'A', threshold: thresholds.a, description: 'Very Good' },
+      { grade: 'B', threshold: thresholds.b, description: 'Good' },
+      { grade: 'C', threshold: thresholds.c, description: 'Satisfactory' },
+      { grade: 'D', threshold: thresholds.d, description: 'Pass' },
+      { grade: 'E', threshold: thresholds.e, description: 'Marginal Pass' },
+      { grade: grading.failGrade, threshold: 0, description: 'Fail' },
+    ];
   }
 }
 

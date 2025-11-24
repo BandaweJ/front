@@ -142,6 +142,15 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
     title: 'Mark Sheets',
   },
+  {
+    path: 'marks/continuous',
+    loadComponent: () =>
+      import('./marks/continuous-assessment/continuous-assessment.component').then(
+        (m) => m.ContinuousAssessmentComponent,
+      ),
+    canActivate: [AuthGuardService],
+    title: 'Continuous Assessment',
+  },
 
   {
     path: 'reports',
@@ -274,6 +283,48 @@ const routes: Routes = [
     loadComponent: () => import('./system/academic-settings/academic-settings.component').then(m => m.AcademicSettingsComponent),
     canActivate: [AuthGuardService],
     title: 'Academic Settings',
+  },
+  {
+    path: 'system/settings',
+    loadComponent: () => import('./system/system-settings/system-settings.component').then(m => m.SystemSettingsComponent),
+    canActivate: [AuthGuardService],
+    title: 'System Settings',
+  },
+  {
+    path: 'system/audit',
+    loadComponent: () => import('./system/audit-logs/audit-logs.component').then(m => m.AuditLogsComponent),
+    canActivate: [AuthGuardService],
+    title: 'Audit Logs',
+  },
+  {
+    path: 'system/analytics',
+    loadComponent: () => import('./system/analytics/analytics.component').then(m => m.AnalyticsComponent),
+    canActivate: [AuthGuardService],
+    title: 'Analytics & Reports',
+  },
+  {
+    path: 'system/integrations',
+    loadComponent: () => import('./system/integrations/integrations.component').then(m => m.IntegrationsComponent),
+    canActivate: [AuthGuardService],
+    title: 'Integrations',
+  },
+  {
+    path: 'calendar',
+    loadComponent: () => import('./system/calendar/calendar.component').then(m => m.CalendarComponent),
+    canActivate: [AuthGuardService],
+    title: 'Calendar',
+  },
+  {
+    path: 'messaging',
+    loadComponent: () => import('./messaging/messaging.component').then(m => m.MessagingComponent),
+    canActivate: [AuthGuardService],
+    title: 'Messages',
+  },
+  {
+    path: 'messaging/:id',
+    loadComponent: () => import('./messaging/messaging.component').then(m => m.MessagingComponent),
+    canActivate: [AuthGuardService],
+    title: 'Messages',
   },
   {
     path: '', // Default route for the root path

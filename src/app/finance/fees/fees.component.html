@@ -29,7 +29,7 @@
   <!-- Main Card -->
   <div class="main-card">
     <!-- Management Section -->
-    <div class="management-section" *ngIf="role === 'auditor' || role === 'reception' || role === 'admin'">
+    <div class="management-section" *ngIf="canManageFees$ | async">
       <div class="section-header">
         <mat-icon class="section-icon">settings</mat-icon>
         <h3>Fee Management</h3>
@@ -65,7 +65,7 @@
                 <div class="fee-description">{{ fee.description }}</div>
               </div>
               <div class="fee-amount">${{ fee.amount }}</div>
-              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
                 <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -87,7 +87,7 @@
                 <div class="fee-description">{{ fee.description }}</div>
               </div>
               <div class="fee-amount">${{ fee.amount }}</div>
-              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
                 <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -109,7 +109,7 @@
                 <div class="fee-description">{{ fee.description }}</div>
               </div>
               <div class="fee-amount">${{ fee.amount }}</div>
-              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
                 <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -140,7 +140,7 @@
                 <div class="fee-description">{{ fee.description }}</div>
               </div>
               <div class="fee-amount">${{ fee.amount }}</div>
-              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
                 <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -162,7 +162,7 @@
                 <div class="fee-description">{{ fee.description }}</div>
               </div>
               <div class="fee-amount">${{ fee.amount }}</div>
-              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
                 <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -184,7 +184,7 @@
                 <div class="fee-description">{{ fee.description }}</div>
               </div>
               <div class="fee-amount">${{ fee.amount }}</div>
-              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
                 <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -214,7 +214,7 @@
                 <div class="fee-description">{{ fee.description }}</div>
               </div>
               <div class="fee-amount">${{ fee.amount }}</div>
-              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
                 <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -244,7 +244,7 @@
                 <div class="fee-description">{{ fee.description }}</div>
               </div>
               <div class="fee-amount">${{ fee.amount }}</div>
-              <div class="fee-actions" *ngIf="role === 'reception' || role === 'admin'">
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
                 <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
                   <mat-icon>edit</mat-icon>
                 </button>

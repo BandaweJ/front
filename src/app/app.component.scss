@@ -105,6 +105,46 @@ mat-toolbar {
   flex-shrink: 0; // Prevent actions from shrinking
 }
 
+// Messages button
+.messages-btn {
+  color: white;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    transition: all 0.3s ease;
+  }
+
+  &:hover mat-icon {
+    color: $accent-gold;
+    transform: scale(1.1);
+  }
+
+  .unread-badge-toolbar {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: #f44336;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+    line-height: 14px;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+}
+
 // Theme toggle button
 .theme-toggle-btn {
   color: white;

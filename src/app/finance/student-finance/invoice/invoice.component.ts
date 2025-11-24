@@ -11,7 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs/operators';
 import { invoiceActions } from '../../store/finance.actions';
 import { InvoiceModel } from '../../models/invoice.model';
 import { selectTermInvoices } from '../../store/finance.selector';
@@ -21,6 +21,8 @@ import { fetchTerms } from 'src/app/enrolment/store/enrolment.actions';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { RoleAccessService } from 'src/app/services/role-access.service';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 
 @Component({
   selector: 'app-invoice',
@@ -48,6 +50,9 @@ export class InvoiceComponent implements OnInit, OnDestroy {
   invoices$ = this.store.select(selectTermInvoices);
   invoice: InvoiceModel | null = null;
   currentTheme: Theme = 'light';
+  canAccessBilling$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.director, ROLES.auditor))
+  );
   
   private destroy$ = new Subject<void>();
 
@@ -55,7 +60,8 @@ export class InvoiceComponent implements OnInit, OnDestroy {
     private store: Store,
     public sharedService: SharedService,
     public themeService: ThemeService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private roleAccess: RoleAccessService
   ) {
     this.store.dispatch(fetchTerms());
   }

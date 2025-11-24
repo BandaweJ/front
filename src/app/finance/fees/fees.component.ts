@@ -11,12 +11,14 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { SharedService } from 'src/app/shared.service';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { Observable, Subject, takeUntil } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { FeesNames } from '../enums/fees-names.enum';
 import { ThemeService, Theme } from '../../services/theme.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
+import { RoleAccessService } from '../../services/role-access.service';
 
 @Component({
   selector: 'app-fees',
@@ -38,6 +40,7 @@ export class FeesComponent implements OnInit, OnDestroy {
   isLoading$ = this.store.select(selectIsLoading);
   user$ = this.store.select(selectUser);
   role!: ROLES;
+  canManageFees$ = this.roleAccess.canManageFees$();
 
   // Organized fee categories
   oLevelDayFees: FeesModel[] = [];
@@ -57,7 +60,8 @@ export class FeesComponent implements OnInit, OnDestroy {
     private store: Store,
     private dialog: MatDialog,
     public sharedService: SharedService,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private roleAccess: RoleAccessService
   ) {
     this.store.dispatch(feesActions.fetchFees());
   }

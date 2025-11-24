@@ -5,13 +5,24 @@
         *ngIf="isLoggedInState && isScreenSmall" class="menu-toggle-icon">menu</mat-icon>
     </ng-container>
     <span class="toolbar-brand">
-      <img src="assets/jhs_logo.jpg" alt="JHS Logo">
-      <h1 class="school-name-full">Junior High School</h1>
-      <h1 class="school-name-abbr">JHS</h1>
+      <img [src]="schoolLogo$ | async" [alt]="(schoolName$ | async) + ' Logo'">
+      <h1 class="school-name-full">{{ schoolName$ | async }}</h1>
+      <h1 class="school-name-abbr">{{ schoolNameAbbr$ | async }}</h1>
     </span>
   </div>
 
   <div class="toolbar-actions">
+    <button mat-icon-button (click)="router.navigate(['/messaging'])" 
+            matTooltip="Messages"
+            class="messages-btn">
+      <mat-icon>message</mat-icon>
+      <span *ngIf="totalUnreadCount > 0" class="unread-badge-toolbar">{{ totalUnreadCount > 99 ? '99+' : totalUnreadCount }}</span>
+    </button>
+    <button mat-icon-button (click)="openCalendar()" 
+            matTooltip="View Calendar"
+            class="calendar-btn">
+      <mat-icon>calendar_today</mat-icon>
+    </button>
     <button mat-icon-button (click)="themeService.toggleTheme()" 
             [matTooltip]="(currentTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode')"
             class="theme-toggle-btn">
@@ -37,7 +48,7 @@
         </button>
 
         <!-- Registration -->
-        <mat-expansion-panel *ngIf="role === 'admin' || role === 'reception'">
+        <mat-expansion-panel *ngIf="canAccessRegistration$ | async">
           <!-- Registration Header -->
           <mat-expansion-panel-header>
             <mat-panel-title>
@@ -66,7 +77,7 @@
         </mat-expansion-panel>
 
         <!-- Enrolment -->
-        <mat-expansion-panel *ngIf="role !== 'student' && role !== 'parent'">
+        <mat-expansion-panel *ngIf="canAccessEnrolment$ | async">
           <!-- Enrolment Header -->
           <mat-expansion-panel-header>
             <mat-panel-title>
@@ -77,31 +88,31 @@
           <!-- Enrolment Content -->
           <div class="sidenav-container">
             <!-- Classes -->
-            <button mat-button *ngIf="role === 'admin'" routerLink="/classes" routerLinkActive="active">
+            <button mat-button *ngIf="isAdmin$ | async" routerLink="/classes" routerLinkActive="active">
               <mat-icon>class</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Classes</span>
             </button>
             <!-- Terms -->
-            <button mat-button *ngIf="role === 'admin' || role === 'reception'" routerLink="/terms"
+            <button mat-button *ngIf="canAccessRegistration$ | async" routerLink="/terms"
               routerLinkActive="active">
               <mat-icon>date_range</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Terms</span>
             </button>
             <!-- Enrol Students -->
-            <button mat-button *ngIf="role === 'admin' || role === 'reception'" routerLink="/enrol"
+            <button mat-button *ngIf="canAccessRegistration$ | async" routerLink="/enrol"
               routerLinkActive="active">
               <mat-icon>add_task</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Enrol</span>
             </button>
             <!-- Class Lists -->
             <button mat-button
-              *ngIf="role === 'admin' || role === 'reception' || role === 'teacher' || role === 'hod' || role === 'auditor' || role === 'director'"
+              *ngIf="canAccessClassLists$ | async"
               routerLink="/class-lists" routerLinkActive="active">
               <mat-icon>list_alt</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Class Lists</span>
             </button>
             <!-- Migrate Class -->
-            <button mat-button *ngIf="role === 'admin'" routerLink="/migrate-class" routerLinkActive="active">
+            <button mat-button *ngIf="isAdmin$ | async" routerLink="/migrate-class" routerLinkActive="active">
               <mat-icon>redo</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Migrate Class</span>
             </button>
@@ -109,7 +120,7 @@
         </mat-expansion-panel>
 
         <!-- Attendance -->
-        <mat-expansion-panel *ngIf="role === 'admin' || role === 'teacher' || role === 'hod'">
+        <mat-expansion-panel *ngIf="canAccessAttendance$ | async">
           <!-- Attendance Header -->
           <mat-expansion-panel-header>
             <mat-panel-title>
@@ -120,13 +131,13 @@
           <!-- Attendance Content -->
           <div class="sidenav-container">
             <!-- Mark Attendance Register -->
-            <button mat-button *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'"
+            <button mat-button *ngIf="canAccessAttendance$ | async"
               routerLink="/mark-register" routerLinkActive="active">
               <mat-icon>edit_note</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Mark Register</span>
             </button>
             <!-- Attendance Reports -->
-            <button mat-button *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'"
+            <button mat-button *ngIf="canAccessAttendance$ | async"
               routerLink="/attendance-reports" routerLinkActive="active">
               <mat-icon>assessment</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Attendance Reports</span>
@@ -136,7 +147,7 @@
         </mat-expansion-panel>
 
         <!-- Marks -->
-        <mat-expansion-panel *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
+        <mat-expansion-panel *ngIf="canAccessMarks$ | async">
           <!-- Marks Header -->
           <mat-expansion-panel-header>
             <mat-panel-title>
@@ -147,7 +158,7 @@
           <!-- Marks Content -->
           <div class="sidenav-container">
             <!-- Subjects -->
-            <button mat-button *ngIf="role === 'admin'" routerLink="/subjects" routerLinkActive="active">
+            <button mat-button *ngIf="isAdmin$ | async" routerLink="/subjects" routerLinkActive="active">
               <mat-icon>subject</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Subjects</span>
             </button>
@@ -160,6 +171,11 @@
             <button mat-button routerLink="/marks-progress" routerLinkActive="active">
               <mat-icon>trending_up</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Marks Progress</span>
+            </button>
+            <!-- Continuous Assessment -->
+            <button mat-button routerLink="/marks/continuous" routerLinkActive="active">
+              <mat-icon>fact_check</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Continuous Assessment</span>
             </button>
             <!-- Teacher's Comments -->
             <button mat-button routerLink="/teachers-comments" routerLinkActive="active">
@@ -190,7 +206,7 @@
         </mat-expansion-panel>
 
         <!-- Results Analysis -->
-        <mat-expansion-panel *ngIf="role === 'admin' || role ==='teacher' || role === 'hod' || role === 'director'">
+        <mat-expansion-panel *ngIf="canAccessResultsAnalysis$ | async">
           <!-- Results Analysis Header -->
           <mat-expansion-panel-header>
             <mat-panel-title>
@@ -233,39 +249,39 @@
             </button>
 
             <!-- Payments / Receipting -->
-            <button mat-button routerLink="/payments" routerLinkActive="active" *ngIf="role === 'auditor' || role === 'director'">
+            <button mat-button routerLink="/payments" routerLinkActive="active" *ngIf="canAccessReceipting$ | async">
               <mat-icon>payments</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Receipting</span>
             </button>
 
             <!-- Student Financials -->
-            <button mat-button routerLink="/student-financials" routerLinkActive="active" *ngIf="role === 'student'">
+            <button mat-button routerLink="/student-financials" routerLinkActive="active" *ngIf="isStudent$ | async">
               <mat-icon>receipt</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Financials</span>
             </button>
 
             <!-- Billing / Invoicing -->
-            <button mat-button routerLink="/student-finance" routerLinkActive="active" *ngIf="role === 'reception' || role === 'director' || role === 'auditor'">
+            <button mat-button routerLink="/student-finance" routerLinkActive="active" *ngIf="canAccessBilling$ | async">
               <mat-icon>request_quote</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Billing</span>
             </button>
 
             <!-- Invoices List -->
             <button mat-button routerLink="/invoice" routerLinkActive="active"
-              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              *ngIf="canAccessBilling$ | async">
               <mat-icon>receipt</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Invoices</span>
             </button>
 
             <!-- Exemptions -->
             <button mat-button routerLink="/exemptions" routerLinkActive="active"
-              *ngIf="role === 'auditor' || role === 'director'">
+              *ngIf="canAccessExemptions$ | async">
               <mat-icon>money_off</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Exemptions</span>
             </button>
 
             <!-- Student Balances -->
-            <button mat-button routerLink="/balances" routerLinkActive="active" *ngIf="role === 'reception'">
+            <button mat-button routerLink="/balances" routerLinkActive="active" *ngIf="canAccessStudentBalances$ | async">
               <mat-icon>account_balance_wallet</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Balances</span>
             </button>
@@ -273,7 +289,7 @@
         </mat-expansion-panel>
 
         <!-- Financial Reports -->
-        <mat-expansion-panel *ngIf="role=== 'reception' || role === 'auditor' || role === 'director'">
+        <mat-expansion-panel *ngIf="canAccessFinancialReports$ | async">
           <!-- Financial Reports Header -->
           <mat-expansion-panel-header>
             <mat-panel-title>
@@ -285,21 +301,21 @@
           <div class="sidenav-container">
             <!-- Student Ledgers -->
             <button mat-button routerLink="/student-ledger" routerLinkActive="active"
-              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              *ngIf="canAccessFinancialReports$ | async">
               <mat-icon>account_balance_wallet</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Student Ledgers</span>
             </button>
 
             <!-- Fees Collection -->
             <button mat-button routerLink="/fees-collection" routerLinkActive="active"
-              *ngIf="role === 'auditor' || role === 'director'">
+              *ngIf="canAccessFeesCollection$ | async">
               <mat-icon>payments</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Fees
                 Collection</span>
             </button>
 
             <!-- Outstanding Fees -->
             <button mat-button routerLink="/outstanding-fees" routerLinkActive="active"
-              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              *ngIf="canAccessFinancialReports$ | async">
               <mat-icon>money_off</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Outstanding
                 Fees</span>
@@ -307,14 +323,14 @@
 
             <!-- Exemptions -->
             <button mat-button routerLink="/exemption-reports" routerLinkActive="active"
-              *ngIf="role === 'auditor' || role === 'director'">
+              *ngIf="canAccessExemptions$ | async">
               <mat-icon>assignment_turned_in</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Exemptions</span>
             </button>
 
             <!-- Aged Debtors -->
             <button mat-button routerLink="/aged-debtors" routerLinkActive="active"
-              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              *ngIf="canAccessFinancialReports$ | async">
               <mat-icon>trending_down</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Aged
                 Debtors</span>
@@ -322,7 +338,7 @@
 
             <!-- Enrolment vs Billing Reconciliation -->
             <button mat-button routerLink="/enrollment-billing-reconciliation" routerLinkActive="active"
-              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              *ngIf="canAccessFinancialReports$ | async">
               <mat-icon>compare_arrows</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Enrolment
                 vs Billing</span>
@@ -330,7 +346,7 @@
 
             <!-- Revenue Recognition -->
             <button mat-button routerLink="/revenue-recognition" routerLinkActive="active"
-              *ngIf="role === 'auditor' || role === 'director'">
+              *ngIf="canAccessRevenueRecognition$ | async">
               <mat-icon>analytics</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Revenue
                 Recognition</span>
@@ -338,7 +354,7 @@
 
             <!-- Student Reconciliation -->
             <button mat-button routerLink="/student-reconciliation" routerLinkActive="active"
-              *ngIf="role === 'reception' || role === 'auditor' || role === 'director'">
+              *ngIf="canAccessFinancialReports$ | async">
               <mat-icon>sync</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Student
                 Reconciliation</span>
@@ -348,7 +364,7 @@
         </mat-expansion-panel>
 
         <!-- System Administration (Admin Only) -->
-        <mat-expansion-panel *ngIf="role === 'admin'">
+        <mat-expansion-panel *ngIf="canAccessSystemAdmin$ | async">
           <!-- System Administration Header -->
           <mat-expansion-panel-header>
             <mat-panel-title>
@@ -392,12 +408,6 @@
             <button mat-button routerLink="/system/analytics" routerLinkActive="active">
               <mat-icon>insights</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Analytics & Reports</span>
-            </button>
-
-            <!-- Backup & Restore -->
-            <button mat-button routerLink="/system/backup" routerLinkActive="active">
-              <mat-icon>backup</mat-icon>
-              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Backup & Restore</span>
             </button>
 
             <!-- Integration Settings -->

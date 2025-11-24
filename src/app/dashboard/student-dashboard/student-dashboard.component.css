@@ -1,97 +1,87 @@
 /* student-dashboard.component.css */
 
-.marks-graph-container {
-  width: 100%;
-  max-width: 1000px;
-  margin: 2rem auto;
+/* Continuous assessment analytics */
+.continuous-analytics-container {
+  background: #fff;
+  border-radius: 16px;
   padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.continuous-analytics-container h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.analytics-cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.analytics-card {
+  flex: 1;
+  min-width: 180px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
   color: white;
-  position: relative;
-  overflow: hidden;
-}
-
-.marks-graph-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  z-index: 0;
-}
-
-.marks-graph-container > * {
-  position: relative;
-  z-index: 1;
-}
-
-.marks-graph-container h3 {
-  text-align: center;
-  color: white;
-  margin-bottom: 2rem;
-  font-size: 2rem;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  background: linear-gradient(45deg, #ffffff, #f0f0f0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Styles for the chart canvas itself */
-canvas {
-  display: block;
-  width: 100% !important;
-  height: 400px !important;
-  background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
 }
 
-/* Styles for the "No marks data available" message */
-.marks-graph-container p {
-  text-align: center;
-  color: #757575; /* Lighter gray for informational text */
-  font-style: italic;
-  margin-top: 30px;
-  padding: 15px;
-  border: 1px dashed #bdbdbd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+.analytics-card label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .marks-graph-container {
-    margin: 15px 10px; /* Reduce side margins on smaller screens */
-    padding: 15px;
-  }
-
-  .marks-graph-container h3 {
-    font-size: 1.4em;
-    margin-bottom: 20px;
-  }
-
-  canvas {
-    height: 300px !important; /* Adjust height for smaller screens */
-  }
+.analytics-card span {
+  font-size: 2rem;
+  font-weight: 700;
 }
 
-@media (max-width: 480px) {
-  .marks-graph-container {
-    margin: 10px 5px;
-    padding: 10px;
-  }
+.subject-averages-card,
+.recent-assessments-card {
+  margin-top: 1.5rem;
+  background: #f8f9ff;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
 
-  canvas {
-    height: 250px !important; /* Further adjust height for very small screens */
-  }
+.subject-average {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.recent-assessment {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.recent-assessment .topic {
+  font-weight: 600;
+}
+
+.recent-assessment .meta {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.score-pill {
+  background: #e8f4ff;
+  color: #1976d2;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
 }
 
 .student-dashboard-main-container {
@@ -273,18 +263,6 @@ canvas {
     padding: 1.5rem;
   }
   
-  .marks-graph-container {
-    margin: 1rem auto;
-    padding: 1.5rem;
-  }
-  
-  .marks-graph-container h3 {
-    font-size: 1.5rem;
-  }
-  
-  canvas {
-    height: 300px !important;
-  }
 }
 
 @media (max-width: 480px) {
@@ -297,23 +275,6 @@ canvas {
     padding: 1rem;
   }
   
-  .marks-graph-container {
-    padding: 1rem;
-  }
-  
-  .marks-graph-container h3 {
-    font-size: 1.3rem;
-  }
-  
-  canvas {
-    height: 250px !important;
-  }
-}
-
-/* Inherited from previous answers for the graph container */
-.marks-graph-container {
-  /* ... (existing styles for the graph container) ... */
-  margin: 0 auto; /* Adjust margin if needed to align with new layout */
 }
 
 .outstanding-container {

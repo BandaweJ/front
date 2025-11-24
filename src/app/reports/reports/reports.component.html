@@ -27,7 +27,7 @@
   </div>
 
   <!-- Main Card -->
-  <div class="main-card" *ngIf="role !== 'student'">
+  <div class="main-card" *ngIf="!(isStudent$ | async)">
     <!-- Form Section -->
     <div class="form-section">
       <div class="form-header">
@@ -76,14 +76,14 @@
 
         <div class="action-buttons">
           <button mat-flat-button type="button" class="generate-button" 
-                  [disabled]="reportsForm.invalid || !(role === 'teacher' || role === 'admin' || role === 'hod')"
+                  [disabled]="reportsForm.invalid || !(canGenerateReports$ | async)"
                   (click)="generate()">
             <mat-icon>add_circle</mat-icon>
             <span>Generate</span>
           </button>
           
           <button mat-flat-button type="button" class="save-button" 
-                  [disabled]="reportsForm.invalid || (reports$ | async)?.length === 0 || role !== 'admin'"
+                  [disabled]="reportsForm.invalid || (reports$ | async)?.length === 0 || !(canSaveReports$ | async)"
                   (click)="saveReports()">
             <mat-icon>save</mat-icon>
             <span>Save</span>
@@ -170,7 +170,7 @@
         <p>No reports found for the selected criteria. Please generate or view reports using the form above.</p>
         <div class="no-reports-actions">
           <button mat-flat-button class="generate-button" 
-                  [disabled]="reportsForm.invalid || !(role === 'teacher' || role === 'admin' || role === 'hod')"
+                  [disabled]="reportsForm.invalid || !(canGenerateReports$ | async)"
                   (click)="generate()">
             <mat-icon>add_circle</mat-icon>
             <span>Generate Reports</span>
@@ -186,7 +186,7 @@
   </div>
 
   <!-- Student Reports Section -->
-  <div class="student-reports-section" *ngIf="role === 'student'">
+  <div class="student-reports-section" *ngIf="isStudent$ | async">
     <app-student-report-cards></app-student-report-cards>
   </div>
 </div>

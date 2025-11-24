@@ -6,4 +6,5 @@ export interface User {
   id: string;
   iat: number;
   exp: number;
+  permissions?: string[]; // Permissions assigned to the user's role
 }

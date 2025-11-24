@@ -38,6 +38,8 @@ import { SharedService } from 'src/app/shared.service';
 import { CurrentEnrolmentComponent } from '../../finance/student-finance/current-enrolment/current-enrolment.component';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { User } from 'src/app/auth/models/user.model';
+import { RoleAccessService } from 'src/app/services/role-access.service';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 
 @Component({
   selector: 'app-terms-classes',
@@ -52,6 +54,9 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
   errorMsg$!: Observable<string>;
   role$!: Observable<User | null>;
   isLoading = false;
+  isAdmin$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.admin, role))
+  );
   
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
@@ -71,7 +76,8 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
     public title: Title,
-    public sharedService: SharedService
+    public sharedService: SharedService,
+    private roleAccess: RoleAccessService
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
