@@ -49,7 +49,7 @@ export class SharedService {
     }
   }
 
-  feesNamesToString(feesName: FeesNames) {
+  feesNamesToString(feesName: FeesNames): string {
     switch (feesName) {
       case FeesNames.aLevelApplicationFee:
         return 'A Level Application Fee';
@@ -75,6 +75,16 @@ export class SharedService {
         return 'O Level Day Tuition';
       case FeesNames.transportFee:
         return 'Transport Fee';
+      case FeesNames.groomingFee:
+        return 'Grooming Fee';
+      case FeesNames.brokenFurnitureFee:
+        return 'Broken Furniture Fee';
+      case FeesNames.lostBooksFee:
+        return 'Lost Books Fee';
+      case FeesNames.miscellaneousCharge:
+        return 'Miscellaneous Charge';
+      default:
+        return feesName;
     }
   }
 }

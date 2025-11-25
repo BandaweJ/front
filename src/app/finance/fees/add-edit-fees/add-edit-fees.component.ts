@@ -148,7 +148,11 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'A Level Fees',
       [FeesNames.developmentFee]: 'O Level Fees',
       [FeesNames.foodFee]: 'Optional Services',
-      [FeesNames.transportFee]: 'Optional Services'
+      [FeesNames.transportFee]: 'Optional Services',
+      [FeesNames.groomingFee]: 'Miscellaneous Charges',
+      [FeesNames.brokenFurnitureFee]: 'Miscellaneous Charges',
+      [FeesNames.lostBooksFee]: 'Miscellaneous Charges',
+      [FeesNames.miscellaneousCharge]: 'Miscellaneous Charges'
     };
     return categories[feeName] || 'General';
   }
@@ -166,7 +170,11 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'Science fee for A Level students doing science subjects',
       [FeesNames.developmentFee]: 'Development fee for O Level students',
       [FeesNames.foodFee]: 'Optional fee for day scholars who eat at school',
-      [FeesNames.transportFee]: 'Optional fee for day scholars who use school transport'
+      [FeesNames.transportFee]: 'Optional fee for day scholars who use school transport',
+      [FeesNames.groomingFee]: 'Fee for student grooming and appearance standards',
+      [FeesNames.brokenFurnitureFee]: 'Fee for broken or damaged school furniture replacement',
+      [FeesNames.lostBooksFee]: 'Fee for lost or damaged textbooks replacement',
+      [FeesNames.miscellaneousCharge]: 'General miscellaneous charge for various incidents'
     };
     return descriptions[feeName] || 'General fee description';
   }
@@ -184,7 +192,11 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'a-level',
       [FeesNames.developmentFee]: 'o-level',
       [FeesNames.foodFee]: 'optional',
-      [FeesNames.transportFee]: 'optional'
+      [FeesNames.transportFee]: 'optional',
+      [FeesNames.groomingFee]: 'miscellaneous',
+      [FeesNames.brokenFurnitureFee]: 'miscellaneous',
+      [FeesNames.lostBooksFee]: 'miscellaneous',
+      [FeesNames.miscellaneousCharge]: 'miscellaneous'
     };
     return classes[feeName] || 'general';
   }

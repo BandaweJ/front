@@ -151,7 +151,11 @@ export class FeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'A Level Science Fee',
       [FeesNames.developmentFee]: 'Development Fee',
       [FeesNames.foodFee]: 'Food Fee',
-      [FeesNames.transportFee]: 'Transport Fee'
+      [FeesNames.transportFee]: 'Transport Fee',
+      [FeesNames.groomingFee]: 'Grooming Fee',
+      [FeesNames.brokenFurnitureFee]: 'Broken Furniture Fee',
+      [FeesNames.lostBooksFee]: 'Lost Books Fee',
+      [FeesNames.miscellaneousCharge]: 'Miscellaneous Charge'
     };
     return displayNames[feeName] || feeName;
   }
