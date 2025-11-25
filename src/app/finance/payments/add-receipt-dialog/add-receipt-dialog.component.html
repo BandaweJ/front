@@ -63,9 +63,9 @@
 
       <!-- Payment Form Compact -->
       <form [formGroup]="addReceiptForm" class="receipt-form-compact">
-        <div class="form-row-compact">
+        <div class="form-row">
           <!-- Amount Paid -->
-          <mat-form-field appearance="outline" class="amount-field">
+          <mat-form-field appearance="outline" class="form-field-compact">
             <mat-label>Amount Paid</mat-label>
             <mat-icon matPrefix class="prefix-icon">attach_money</mat-icon>
             <input 
@@ -93,7 +93,7 @@
           </mat-form-field>
 
           <!-- Payment Method -->
-          <mat-form-field appearance="outline" class="payment-method-field">
+          <mat-form-field appearance="outline" class="form-field-compact">
             <mat-label>Payment Method</mat-label>
             <mat-icon matPrefix class="prefix-icon">credit_card</mat-icon>
             <mat-select formControlName="paymentMethod" required>
