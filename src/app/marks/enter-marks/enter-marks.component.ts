@@ -4,16 +4,18 @@ import {
   OnInit,
   ViewChild,
   OnDestroy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, combineLatest } from 'rxjs';
+import { Observable, Subject, combineLatest, BehaviorSubject } from 'rxjs';
 import {
   map,
   startWith,
   takeUntil,
   debounceTime,
   distinctUntilChanged,
+  switchMap,
 } from 'rxjs/operators';
 import { ClassesModel } from '../../enrolment/models/classes.model';
 import { TermsModel } from '../../enrolment/models/terms.model';
@@ -41,6 +43,7 @@ import { Title } from '@angular/platform-browser';
 import { ExamType } from '../models/examtype.enum';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { AIService } from '../../ai/ai.service';
 // ConfirmDialogComponent will be lazy loaded
 
 interface MarkFormGroup {
@@ -72,7 +75,24 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
-  commentOptions: string[] = [
+  // AI-generated comments per student index
+  commentOptions: Map<number, string[]> = new Map();
+  loadingComments: Set<number> = new Set(); // Track which comments are being generated
+  
+  // Subject to trigger autocomplete updates when AI comments are ready
+  private commentUpdates: Map<number, BehaviorSubject<string[]>> = new Map();
+  
+  // Track saved marks for visual feedback
+  savedMarks: Set<number> = new Set();
+  
+  // Track last saved values to prevent duplicate saves
+  private lastSavedValues: Map<number, { mark: number | null, comment: string | null }> = new Map();
+  
+  // Debounce timers for saving
+  private saveTimers: Map<number, any> = new Map();
+
+  // Default fallback comments
+  defaultCommentOptions: string[] = [
     'Excellent effort',
     'Good work, keep it up',
     'Needs to improve concentration',
@@ -133,7 +153,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     private store: Store,
     public title: Title,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private aiService: AIService,
+    private cdr: ChangeDetectorRef
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
@@ -169,6 +191,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         this.maxValue = marks.length;
         this.updateMarksFormArray(marks);
         this.updateProgressBar();
+        
+        // Clear save tracking when new data is loaded
+        this.clearSaveTracking();
       });
 
     this.enrolForm = new FormGroup({
@@ -240,9 +265,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // This method will be called from the template
-  private _filterComments(value: string): string[] {
+  private _filterComments(value: string, comments: string[] = this.getDefaultComments()): string[] {
     const filterValue = value.toLowerCase();
-    return this.commentOptions.filter((option) =>
+    return comments.filter((option) =>
       option.toLowerCase().includes(filterValue)
     );
   }
@@ -253,9 +278,54 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   getFilteredCommentOptions(index: number): Observable<string[]> {
     const commentControl = this.getCommentControl(index);
-    return commentControl.valueChanges.pipe(
-      startWith(commentControl.value || ''), // Initialize with current value
-      map((value) => this._filterComments(value || ''))
+    
+    // Get or create the comment update subject for this index
+    if (!this.commentUpdates.has(index)) {
+      this.commentUpdates.set(index, new BehaviorSubject<string[]>([]));
+    }
+    
+    const commentUpdateSubject = this.commentUpdates.get(index)!;
+    
+    return combineLatest([
+      commentControl.valueChanges.pipe(startWith(commentControl.value || '')),
+      commentUpdateSubject.asObservable()
+    ]).pipe(
+      map(([inputValue, availableComments]) => {
+        console.log(`🔍 getFilteredCommentOptions for index ${index}:`, {
+          inputValue,
+          availableComments,
+          isLoading: this.loadingComments.has(index),
+          hasAIComments: this.commentOptions.has(index),
+          aiComments: this.commentOptions.get(index)
+        });
+        
+        // If AI comments are being generated, show loading message
+        if (this.loadingComments.has(index)) {
+          console.log(`⏳ Showing loading for index ${index}`);
+          return ['Generating AI comments...'];
+        }
+        
+        // If AI comments exist, use them
+        if (this.commentOptions.has(index)) {
+          const aiComments = this.commentOptions.get(index)!;
+          const filtered = this._filterComments(inputValue || '', aiComments);
+          console.log(`🤖 Using AI comments for index ${index}:`, filtered);
+          return filtered;
+        }
+        
+        // If no mark has been entered yet, show empty array (no suggestions)
+        const markControl = this.getMarkControl(index);
+        if (!markControl.value || markControl.value <= 0) {
+          console.log(`❌ No mark entered for index ${index}`);
+          return [];
+        }
+        
+        // Only show default comments if AI generation hasn't been triggered
+        // This prevents showing defaults while waiting for AI
+        const defaultComments = this.getDefaultComments().slice(0, 3);
+        console.log(`📝 Using default comments for index ${index}:`, defaultComments);
+        return defaultComments;
+      })
     );
   }
 
@@ -337,33 +407,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   saveMark(markModel: MarksModel, index: number) {
     const formGroup = this.getMarkFormGroup(index);
 
-    if (formGroup.valid) {
-      // Add to saving set
-      this.savingMarks.add(index);
-
-      const updatedMark: MarksModel = {
-        ...markModel,
-        mark: formGroup.value.mark!,
-        comment: formGroup.value.comment!,
-        examType: this.examTypeControl?.value,
-        year: this.termControl?.value.year,
-        num: this.termControl?.value.num,
-      };
-
-      this.store.dispatch(saveMarkAction({ mark: updatedMark }));
-      
-      // Simulate a brief delay to show saving state
-      setTimeout(() => {
-        this.savingMarks.delete(index);
-        this.snackBar.open('Mark saved successfully!', 'Dismiss', {
-          duration: 2000,
-        });
-      }, 500);
-
-      formGroup.markAsPristine();
-      formGroup.markAsUntouched();
-      formGroup.updateValueAndValidity(); // Ensure validity is re-evaluated after state change
-    } else {
+    if (!formGroup.valid) {
       formGroup.markAllAsTouched();
       this.snackBar.open(
         'Please enter a valid mark (0-100) and comment for this row.',
@@ -375,7 +419,98 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         formGroup.controls.mark.errors,
         formGroup.controls.comment.errors
       );
+      return;
     }
+
+    const currentMark = formGroup.value.mark;
+    const currentComment = formGroup.value.comment;
+    
+    // Ensure we have valid values
+    if (currentMark == null || currentComment == null) {
+      console.log(`⚠️ Invalid values for index ${index}: mark=${currentMark}, comment=${currentComment}`);
+      return;
+    }
+    
+    // Check if values have actually changed since last save
+    const lastSaved = this.lastSavedValues.get(index);
+    if (lastSaved && 
+        lastSaved.mark === currentMark && 
+        lastSaved.comment === currentComment) {
+      console.log(`⏭️ Skipping duplicate save for index ${index} - values unchanged`);
+      return;
+    }
+
+    // Clear any existing save timer for this index
+    if (this.saveTimers.has(index)) {
+      clearTimeout(this.saveTimers.get(index));
+    }
+
+    // Debounce the save operation
+    const saveTimer = setTimeout(() => {
+      this.performSave(markModel, index, currentMark, currentComment);
+      this.saveTimers.delete(index);
+    }, 150); // 150ms debounce
+
+    this.saveTimers.set(index, saveTimer);
+  }
+
+  private performSave(markModel: MarksModel, index: number, mark: number | null, comment: string | null) {
+    // Double-check that we're not already saving this mark
+    if (this.savingMarks.has(index)) {
+      console.log(`⏭️ Already saving mark for index ${index}, skipping`);
+      return;
+    }
+
+    // Add to saving set
+    this.savingMarks.add(index);
+
+    // Ensure we have valid values before saving
+    if (mark == null || comment == null) {
+      console.log(`⚠️ Cannot save - invalid values for index ${index}: mark=${mark}, comment=${comment}`);
+      this.savingMarks.delete(index);
+      return;
+    }
+
+    const updatedMark: MarksModel = {
+      ...markModel,
+      mark: mark,
+      comment: comment,
+      examType: this.examTypeControl?.value,
+      year: this.termControl?.value.year,
+      num: this.termControl?.value.num,
+    };
+
+    console.log(`💾 Saving mark for index ${index}:`, { mark, comment });
+
+    this.store.dispatch(saveMarkAction({ mark: updatedMark }));
+    
+    // Store the saved values to prevent duplicates
+    this.lastSavedValues.set(index, { mark, comment });
+    
+    // Show success feedback after a brief delay to indicate saving
+    setTimeout(() => {
+      this.savingMarks.delete(index);
+      this.savedMarks.add(index);
+      
+      // Remove saved indicator after 2 seconds
+      setTimeout(() => {
+        this.savedMarks.delete(index);
+      }, 2000);
+      
+      // Optional: Show snackbar for first few saves
+      if (this.savedMarks.size <= 3) {
+        this.snackBar.open('Mark saved successfully!', 'Dismiss', {
+          duration: 1500,
+        });
+      }
+      
+      console.log(`✅ Mark saved successfully for index ${index}`);
+    }, 300);
+
+    const formGroup = this.getMarkFormGroup(index);
+    formGroup.markAsPristine();
+    formGroup.markAsUntouched();
+    formGroup.updateValueAndValidity(); // Ensure validity is re-evaluated after state change
   }
 
   isSavingMark(index: number): boolean {
@@ -424,8 +559,250 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     return subject.code;
   }
 
+  /**
+   * Handle mark input blur event to generate AI comments
+   */
+  onMarkBlur(markModel: MarksModel, index: number) {
+    const formGroup = this.getMarkFormGroup(index);
+    const markValue = formGroup.get('mark')?.value;
+
+    if (markValue !== null && markValue !== undefined && markValue >= 0) {
+      // Clear existing comments if mark changed significantly
+      this.clearCommentsIfMarkChanged(index, markValue);
+      
+      // Generate new AI comments
+      this.generateCommentsForMark(markValue, index, markModel);
+    } else {
+      // Clear comments if mark is invalid
+      this.commentOptions.delete(index);
+      this.loadingComments.delete(index);
+    }
+  }
+
+  /**
+   * Clear existing comments if the mark has changed significantly
+   */
+  private clearCommentsIfMarkChanged(index: number, newMark: number) {
+    if (this.commentOptions.has(index)) {
+      // Clear comments to force regeneration for new mark
+      this.commentOptions.delete(index);
+    }
+  }
+
+  /**
+   * Generate AI comments for a specific mark
+   */
+  private generateCommentsForMark(mark: number, index: number, markModel: MarksModel) {
+    // Don't generate if already loading or if we already have comments for this mark
+    if (this.loadingComments.has(index)) {
+      return;
+    }
+
+    this.loadingComments.add(index);
+
+    // Immediately trigger change detection to show loading state
+    this.getCommentControl(index).updateValueAndValidity();
+
+    // Get subject and student level from current selection
+    const subject = this.subjectControl?.value?.name;
+    const className = this.classControl?.value;
+    const studentLevel = className?.includes('A Level') ? 'A Level' : 'O Level';
+
+    const request = {
+      mark: mark,
+      maxMark: 100, // Assuming marks are out of 100
+      subject: subject,
+      studentLevel: studentLevel
+    };
+
+    this.aiService.generateComments(request).subscribe({
+      next: (comments) => {
+        this.commentOptions.set(index, comments);
+        this.loadingComments.delete(index);
+        
+        // Trigger the comment update subject to refresh autocomplete
+        const commentUpdateSubject = this.commentUpdates.get(index);
+        if (commentUpdateSubject) {
+          commentUpdateSubject.next(comments);
+        }
+        
+        // Force the form control to emit a value change to refresh autocomplete
+        const commentControl = this.getCommentControl(index);
+        const currentValue = commentControl.value || '';
+        commentControl.setValue(currentValue);
+        commentControl.updateValueAndValidity();
+        
+        // Trigger change detection
+        this.cdr.detectChanges();
+        
+        // Try to focus and open the autocomplete after a short delay
+        setTimeout(() => {
+          this.openAutocompleteForIndex(index);
+        }, 100);
+        
+        // Show success feedback
+        console.log(`✅ Generated ${comments.length} AI comments for mark ${mark}:`, comments);
+        console.log(`📋 Comment options now available for index ${index}:`, this.commentOptions.get(index));
+      },
+      error: (error) => {
+        console.error('Failed to generate AI comments:', error);
+        this.loadingComments.delete(index);
+        
+        // Use fallback comments on error
+        const fallbackComments = this.getDefaultComments();
+        this.commentOptions.set(index, fallbackComments);
+        
+        // Trigger the comment update subject to refresh autocomplete
+        const commentUpdateSubject = this.commentUpdates.get(index);
+        if (commentUpdateSubject) {
+          commentUpdateSubject.next(fallbackComments);
+        }
+        
+        // Force the form control to emit a value change to refresh autocomplete
+        const commentControl = this.getCommentControl(index);
+        const currentValue = commentControl.value || '';
+        commentControl.setValue(currentValue);
+        commentControl.updateValueAndValidity();
+        
+        // Trigger change detection
+        this.cdr.detectChanges();
+        
+        // Try to focus and open the autocomplete after a short delay
+        setTimeout(() => {
+          this.openAutocompleteForIndex(index);
+        }, 100);
+        
+        // Show user-friendly error message
+        this.snackBar.open('AI comments unavailable, using default suggestions', 'Dismiss', {
+          duration: 3000,
+        });
+      }
+    });
+  }
+
+  /**
+   * Check if comments are being generated for a specific student
+   */
+  isGeneratingComments(index: number): boolean {
+    return this.loadingComments.has(index);
+  }
+
+  /**
+   * Get default comments as fallback
+   */
+  private getDefaultComments(): string[] {
+    return [
+      'Excellent effort',
+      'Good work, keep it up',
+      'Shows potential',
+      'Needs improvement',
+      'Keep practicing'
+    ];
+  }
+
+  /**
+   * Display function for autocomplete options
+   */
+  displayCommentOption(option: string): string {
+    return option === 'Generating AI comments...' ? '' : option;
+  }
+
+  /**
+   * Handle comment input focus event
+   */
+  onCommentInputFocus(index: number) {
+    // If we have AI comments ready, trigger the update to ensure autocomplete shows them
+    if (this.commentOptions.has(index) && !this.loadingComments.has(index)) {
+      const commentUpdateSubject = this.commentUpdates.get(index);
+      if (commentUpdateSubject) {
+        const comments = this.commentOptions.get(index)!;
+        commentUpdateSubject.next(comments);
+      }
+    }
+  }
+
+  /**
+   * Check if a mark is currently being saved
+   */
+  isMarkSaving(index: number): boolean {
+    return this.savingMarks.has(index);
+  }
+
+  /**
+   * Check if a mark was recently saved (shows success indicator)
+   */
+  isMarkSaved(index: number): boolean {
+    return this.savedMarks.has(index);
+  }
+
+  /**
+   * Clear all save tracking when switching contexts (e.g., different class/subject)
+   */
+  private clearSaveTracking() {
+    // Clear all timers
+    this.saveTimers.forEach(timer => clearTimeout(timer));
+    this.saveTimers.clear();
+    
+    // Clear tracking data
+    this.lastSavedValues.clear();
+    this.savedMarks.clear();
+    this.savingMarks.clear();
+    
+    console.log('🧹 Cleared save tracking data');
+  }
+
+  /**
+   * Programmatically open autocomplete for a specific index
+   */
+  private openAutocompleteForIndex(index: number) {
+    try {
+      // Find the comment input element for this row
+      const commentInputs = document.querySelectorAll('input[formControlName="comment"]');
+      const commentInput = commentInputs[index] as HTMLInputElement;
+      
+      if (commentInput) {
+        // Focus the input first
+        commentInput.focus();
+        
+        // Dispatch input event to trigger autocomplete
+        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+        commentInput.dispatchEvent(inputEvent);
+        
+        // Also dispatch focus event
+        const focusEvent = new Event('focus', { bubbles: true, cancelable: true });
+        commentInput.dispatchEvent(focusEvent);
+        
+        // Trigger a click to ensure autocomplete opens
+        setTimeout(() => {
+          commentInput.click();
+        }, 50);
+        
+        console.log(`🎯 Attempted to open autocomplete for row ${index}`);
+      } else {
+        console.warn(`Could not find comment input for row ${index}`);
+      }
+    } catch (error) {
+      console.warn('Error opening autocomplete:', error);
+    }
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    // Clean up comment update subjects
+    this.commentUpdates.forEach(subject => {
+      subject.complete();
+    });
+    this.commentUpdates.clear();
+    
+    // Clean up save timers
+    this.saveTimers.forEach(timer => {
+      clearTimeout(timer);
+    });
+    this.saveTimers.clear();
+    
+    // Clean up tracking maps
+    this.lastSavedValues.clear();
   }
 }
