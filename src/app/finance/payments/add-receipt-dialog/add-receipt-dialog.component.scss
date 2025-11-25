@@ -163,7 +163,7 @@ $border-dark: #424242;
 
 // Dialog Content
 .dialog-content {
-  padding: 2rem 2.5rem;
+  padding: 1.5rem 1rem;
   overflow-y: auto;
   flex: 1;
   display: flex;
@@ -174,8 +174,8 @@ $border-dark: #424242;
 
 // Search Section
 .search-section {
-  width: 100%;
-  margin: 0 1rem 0.75rem 1rem;
+  width: calc(100% - 1rem);
+  margin: 0 0.5rem 0.75rem 0.5rem;
 }
 
 // Student Info & Balance Compact
@@ -185,7 +185,8 @@ $border-dark: #424242;
   justify-content: space-between;
   gap: 1.5rem;
   padding: 0.875rem 1.25rem;
-  margin: 0 1rem;
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
   background: var(--surface, $surface-light);
   border-radius: 8px;
   border-left: 3px solid $primary-blue;
@@ -292,7 +293,8 @@ $border-dark: #424242;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  margin: 0 1rem;
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
   background: rgba($accent-gold, 0.1);
   border-left: 3px solid $accent-gold;
   border-radius: 6px;
@@ -326,7 +328,8 @@ $border-dark: #424242;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin: 0 1rem;
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
 }
 
 .form-row {
@@ -391,7 +394,8 @@ $border-dark: #424242;
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  margin: 0 1rem;
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
   text-align: center;
   color: var(--text-secondary, $text-secondary-light);
   
@@ -602,7 +606,7 @@ $border-dark: #424242;
   }
   
   .dialog-content {
-    padding: 1.5rem 2rem;
+    padding: 1.25rem 0.75rem;
   }
   
   .dialog-actions {
@@ -615,7 +619,8 @@ $border-dark: #424242;
   .suggestions-compact,
   .receipt-form-compact,
   .empty-state-compact {
-    margin: 0 0.5rem;
+    margin: 0 0.25rem;
+    width: calc(100% - 0.5rem);
   }
   
   .balance-display {
