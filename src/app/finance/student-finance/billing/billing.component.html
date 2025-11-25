@@ -86,6 +86,18 @@
               <div class="control-cell"></div>
             </div>
 
+            <div class="grid-row" *ngIf="showMiscellaneousCharges">
+              <div class="label-cell">Miscellaneous Charges</div>
+              <div class="control-cell">
+                <mat-checkbox formControlName="groomingFee" color="primary">Grooming Fee</mat-checkbox>
+                <mat-checkbox formControlName="brokenFurnitureFee" color="primary">Broken Furniture</mat-checkbox>
+              </div>
+              <div class="control-cell">
+                <mat-checkbox formControlName="lostBooksFee" color="primary">Lost Books</mat-checkbox>
+                <mat-checkbox formControlName="miscellaneousCharge" color="primary">Other Charges</mat-checkbox>
+              </div>
+            </div>
+
           </div>
         </form>
       </div>

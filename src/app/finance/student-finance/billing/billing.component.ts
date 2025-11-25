@@ -71,6 +71,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
   academicLevel!: 'O Level' | 'A Level'; // Tracks currently selected academic level for UI logic
   showTransportFoodOptions: boolean = false; // Controls visibility of transport/food section
+  showMiscellaneousCharges: boolean = true; // Controls visibility of miscellaneous charges section
 
   academicSettingsForm!: FormGroup;
   accommodationOptions = Object.values(Residence); // Use Object.values for enum strings
@@ -155,6 +156,35 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     return this.academicSettingsForm.get('transportOption') as FormControl;
   }
 
+  // Miscellaneous charges getters
+  get groomingFee(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('groomingFee') as FormControl;
+  }
+
+  get brokenFurnitureFee(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('brokenFurnitureFee') as FormControl;
+  }
+
+  get lostBooksFee(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('lostBooksFee') as FormControl;
+  }
+
+  get miscellaneousCharge(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('miscellaneousCharge') as FormControl;
+  }
+
   ngOnInit(): void {
     // Subscribe to theme changes
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
@@ -181,6 +211,11 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       aLevelAccommodationType: [null, Validators.required],
       foodOption: [false],
       transportOption: [false],
+      // Miscellaneous charges
+      groomingFee: [false],
+      brokenFurnitureFee: [false],
+      lostBooksFee: [false],
+      miscellaneousCharge: [false],
     });
   }
 
@@ -334,6 +369,51 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
           this.addFeeToToBill(transportFee);
         } else {
           this.removeFeeFromToBill(transportFee);
+        }
+      })
+    );
+
+    // Miscellaneous charges subscriptions
+    this.subscriptions.push(
+      this.groomingFee.valueChanges.subscribe((value) => {
+        const groomingFee = this.findFee('groomingFee');
+        if (value) {
+          this.addFeeToToBill(groomingFee);
+        } else {
+          this.removeFeeFromToBill(groomingFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.brokenFurnitureFee.valueChanges.subscribe((value) => {
+        const brokenFurnitureFee = this.findFee('brokenFurnitureFee');
+        if (value) {
+          this.addFeeToToBill(brokenFurnitureFee);
+        } else {
+          this.removeFeeFromToBill(brokenFurnitureFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.lostBooksFee.valueChanges.subscribe((value) => {
+        const lostBooksFee = this.findFee('lostBooksFee');
+        if (value) {
+          this.addFeeToToBill(lostBooksFee);
+        } else {
+          this.removeFeeFromToBill(lostBooksFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.miscellaneousCharge.valueChanges.subscribe((value) => {
+        const miscellaneousCharge = this.findFee('miscellaneousCharge');
+        if (value) {
+          this.addFeeToToBill(miscellaneousCharge);
+        } else {
+          this.removeFeeFromToBill(miscellaneousCharge);
         }
       })
     );
@@ -625,6 +705,35 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     if (transportBill) {
       formUpdates['transportOption'] = true;
       addBillToInitial(transportBill, transportFee);
+    }
+
+    // Miscellaneous charges (checkboxes)
+    const groomingBill = findBillByFeeName(bills, 'groomingFee');
+    const groomingFee = findFee('groomingFee');
+    if (groomingBill) {
+      formUpdates['groomingFee'] = true;
+      addBillToInitial(groomingBill, groomingFee);
+    }
+
+    const brokenFurnitureBill = findBillByFeeName(bills, 'brokenFurnitureFee');
+    const brokenFurnitureFee = findFee('brokenFurnitureFee');
+    if (brokenFurnitureBill) {
+      formUpdates['brokenFurnitureFee'] = true;
+      addBillToInitial(brokenFurnitureBill, brokenFurnitureFee);
+    }
+
+    const lostBooksBill = findBillByFeeName(bills, 'lostBooksFee');
+    const lostBooksFee = findFee('lostBooksFee');
+    if (lostBooksBill) {
+      formUpdates['lostBooksFee'] = true;
+      addBillToInitial(lostBooksBill, lostBooksFee);
+    }
+
+    const miscellaneousBill = findBillByFeeName(bills, 'miscellaneousCharge');
+    const miscellaneousFee = findFee('miscellaneousCharge');
+    if (miscellaneousBill) {
+      formUpdates['miscellaneousCharge'] = true;
+      addBillToInitial(miscellaneousBill, miscellaneousFee);
     }
 
     this.academicSettingsForm.patchValue(formUpdates, { emitEvent: false });
