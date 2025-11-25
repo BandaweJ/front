@@ -332,13 +332,36 @@ $border-dark: #424242;
   width: calc(100% - 1rem);
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+// Compact form row for monetary inputs
+.form-row-compact {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+// Compact form fields for monetary data
+.amount-field {
+  width: 180px; // Enough for amounts like $99,999.99
+  min-width: 150px;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+.payment-method-field {
+  width: 200px; // Enough for payment methods like "Credit Card", "Bank Transfer"
+  min-width: 160px;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    min-width: unset;
   }
 }
 
