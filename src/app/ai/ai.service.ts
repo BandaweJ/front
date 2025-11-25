@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface CommentGenerationRequest {
   mark: number;
@@ -20,7 +21,7 @@ export interface CommentGenerationResponse {
   providedIn: 'root'
 })
 export class AIService {
-  private readonly baseUrl = 'http://localhost:3000/ai'; // Update for production
+  private readonly baseUrl = `${environment.apiUrl}/ai`;
 
   constructor(private http: HttpClient) {}
 
