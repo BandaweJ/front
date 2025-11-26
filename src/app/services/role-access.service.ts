@@ -251,7 +251,9 @@ export class RoleAccessService {
   canVoidInvoice$(): Observable<boolean> {
     return this.hasPermission$(
       PERMISSIONS.FINANCE.VOID_INVOICE,
-      [ROLES.auditor, ROLES.director, ROLES.reception]
+      // Reception should NOT be able to void invoices. Only auditor and director
+      // are allowed as role fallbacks when explicit permissions are not loaded.
+      [ROLES.auditor, ROLES.director]
     );
   }
 

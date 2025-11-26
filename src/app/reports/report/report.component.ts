@@ -5,9 +5,10 @@ import { Store } from '@ngrx/store';
 import {
   downloadReportActions,
   saveHeadCommentActions,
+  saveTeacherCommentActions,
 } from '../store/reports.actions';
 
-import { HeadCommentModel } from '../models/comment.model';
+import { HeadCommentModel, TeacherCommentModel } from '../models/comment.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 import { selectIsLoading } from '../store/reports.selectors';
@@ -28,6 +29,7 @@ export class ReportComponent implements OnInit {
   @Input()
   report!: ReportsModel;
   editState = false;
+  teacherEditState = false;
   role = ''; // Initialize role
   isLoading$ = this.store.select(selectIsLoading);
   studentNumber = '';
@@ -55,6 +57,7 @@ export class ReportComponent implements OnInit {
   ) {}
 
   commentForm!: FormGroup;
+  teacherCommentControl: FormControl = new FormControl('');
 
   ngOnInit(): void {
     this.commentForm = new FormGroup({
@@ -62,6 +65,12 @@ export class ReportComponent implements OnInit {
         Validators.required,
       ]),
     });
+
+    // initialise teacher comment control from report
+    this.teacherCommentControl = new FormControl(
+      this.report.report.classTrComment || '',
+      []
+    );
     this.studentNumber = this.report.report.studentNumber;
 
     this.userSubscription = this.store.select(selectUser).subscribe((user) => {
@@ -82,6 +91,10 @@ export class ReportComponent implements OnInit {
     return this.commentForm.get('comment');
   }
 
+  get teacherComment() {
+    return this.teacherCommentControl;
+  }
+
   saveComment() {
     if (this.comment?.valid) {
       // Check for validity of the form control
@@ -95,6 +108,24 @@ export class ReportComponent implements OnInit {
 
       this.store.dispatch(saveHeadCommentActions.saveHeadComment({ comment }));
       this.toggleEditState(); // Toggle state after dispatching
+    }
+  }
+
+  // Save teacher / class comment directly on the report
+  saveTeacherComment() {
+    if (this.teacherComment?.valid) {
+      const rep = this.report;
+      const comm: string = this.teacherComment.value;
+
+      const comment: TeacherCommentModel = {
+        comment: comm,
+        report: rep,
+      };
+
+      this.store.dispatch(
+        saveTeacherCommentActions.saveTeacherComment({ comment })
+      );
+      this.toggleTeacherEditState();
     }
   }
 
@@ -132,6 +163,15 @@ export class ReportComponent implements OnInit {
       );
     } else {
       console.warn('Cannot download report: ExamType is missing.');
+    }
+  }
+
+  toggleTeacherEditState() {
+    this.teacherEditState = !this.teacherEditState;
+    if (this.teacherEditState) {
+      this.teacherCommentControl.setValue(
+        this.report.report.classTrComment || ''
+      );
     }
   }
 }

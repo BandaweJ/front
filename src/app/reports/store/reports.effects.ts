@@ -157,4 +157,29 @@ export class ReportsEffects {
       )
     )
   );
+
+  // New effect: save teacher / class comment directly on the report
+  saveTeacherComment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(reportsActions.saveTeacherCommentActions.saveTeacherComment),
+      switchMap((data) =>
+        this.reportsService.saveTeacherComment(data.comment).pipe(
+          map((report) =>
+            reportsActions.saveTeacherCommentActions.saveTeacherCommentSuccess(
+              {
+                report,
+              }
+            )
+          ),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              reportsActions.saveTeacherCommentActions.saveTeacherCommentFail({
+                ...error,
+              })
+            )
+          )
+        )
+      )
+    )
+  );
 }

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ReportsModel } from '../models/reports.model';
 import { ReportModel } from '../models/report.model';
-import { HeadCommentModel } from '../models/comment.model';
+import { HeadCommentModel, TeacherCommentModel } from '../models/comment.model';
 import { environment } from 'src/environments/environment';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 
@@ -43,6 +43,14 @@ export class ReportsService {
 
   saveHeadComment(comment: HeadCommentModel): Observable<ReportsModel> {
     return this.httpClient.post<ReportsModel>(`${this.baseUrl}save/`, comment);
+  }
+
+  // New endpoint: save the class / form teacher's comment directly on the report
+  saveTeacherComment(comment: TeacherCommentModel): Observable<ReportsModel> {
+    return this.httpClient.post<ReportsModel>(
+      `${this.baseUrl}save-teacher-comment`,
+      comment
+    );
   }
 
   viewReports(

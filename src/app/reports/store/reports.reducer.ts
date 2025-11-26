@@ -52,6 +52,31 @@ export const reportsReducer = createReducer(
       reports: [...reports],
     })
   ),
+  // Teacher comment save (same pattern as head comment)
+  on(
+    reportsActions.saveTeacherCommentActions.saveTeacherComment,
+    (state, { comment }) => ({
+      ...state,
+    })
+  ),
+  on(
+    reportsActions.saveTeacherCommentActions.saveTeacherCommentSuccess,
+    (state, { report }) => ({
+      ...state,
+      reports: [
+        ...state.reports.map((rep) =>
+          rep.studentNumber === report.studentNumber ? report : rep
+        ),
+      ],
+    })
+  ),
+  on(
+    reportsActions.saveTeacherCommentActions.saveTeacherCommentFail,
+    (state, { error }) => ({
+      ...state,
+      errorMessage: error.message,
+    })
+  ),
   on(reportsActions.saveReportActions.saveReportsFail, (state, { error }) => ({
     ...state,
     isLoading: false,
