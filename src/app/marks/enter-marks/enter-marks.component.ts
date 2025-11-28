@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
 import { Observable, Subject, combineLatest, BehaviorSubject } from 'rxjs';
 import {
   map,
@@ -36,6 +37,8 @@ import {
   fetchSubjectMarksInClass,
   fetchSubjects,
   saveMarkAction,
+  saveMarkActionSuccess,
+  saveMarkActionFail,
   deleteMarkActions,
 } from '../store/marks.actions';
 import { selectMarks, selectSubjects, isLoading } from '../store/marks.selectors';
@@ -90,6 +93,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   
   // Debounce timers for saving
   private saveTimers: Map<number, any> = new Map();
+  
+  // Track which student number corresponds to which index for save status updates
+  private studentNumberToIndex: Map<string, number> = new Map();
 
   // Default fallback comments
   defaultCommentOptions: string[] = [
@@ -151,6 +157,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private store: Store,
+    private actions$: Actions,
     public title: Title,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
@@ -194,6 +201,58 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         
         // Clear save tracking when new data is loaded
         this.clearSaveTracking();
+        
+        // Rebuild student number to index mapping
+        this.studentNumberToIndex.clear();
+        marks.forEach((mark, index) => {
+          if (mark.student?.studentNumber) {
+            this.studentNumberToIndex.set(mark.student.studentNumber, index);
+          }
+        });
+      });
+
+    // Listen to save success actions
+    this.actions$
+      .pipe(
+        ofType(saveMarkActionSuccess),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(({ mark }) => {
+        const studentNumber = mark.student?.studentNumber;
+        if (studentNumber && this.studentNumberToIndex.has(studentNumber)) {
+          const index = this.studentNumberToIndex.get(studentNumber)!;
+          this.savingMarks.delete(index);
+          this.savedMarks.add(index);
+          
+          // Remove saved indicator after 2 seconds
+          setTimeout(() => {
+            this.savedMarks.delete(index);
+            this.cdr.detectChanges();
+          }, 2000);
+          
+          this.cdr.detectChanges();
+          console.log(`✅ Mark saved successfully for student ${studentNumber} at index ${index}`);
+        }
+      });
+
+    // Listen to save fail actions
+    this.actions$
+      .pipe(
+        ofType(saveMarkActionFail),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(({ error }) => {
+        console.error('❌ Mark save failed:', error);
+        // Find which mark failed by checking the error or tracking pending saves
+        // For now, clear all saving states and show error
+        this.savingMarks.clear();
+        this.cdr.detectChanges();
+        
+        this.snackBar.open(
+          `Failed to save mark: ${error.error?.message || error.message || 'Unknown error'}`,
+          'Close',
+          { duration: 5000, panelClass: ['error-snackbar'] }
+        );
       });
 
     this.enrolForm = new FormGroup({
@@ -482,35 +541,23 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
     console.log(`💾 Saving mark for index ${index}:`, { mark, comment });
 
+    // Store the student number to index mapping for this save
+    const studentNumber = markModel.student?.studentNumber;
+    if (studentNumber) {
+      this.studentNumberToIndex.set(studentNumber, index);
+    }
+
     this.store.dispatch(saveMarkAction({ mark: updatedMark }));
     
     // Store the saved values to prevent duplicates
     this.lastSavedValues.set(index, { mark, comment });
-    
-    // Show success feedback after a brief delay to indicate saving
-    setTimeout(() => {
-      this.savingMarks.delete(index);
-      this.savedMarks.add(index);
-      
-      // Remove saved indicator after 2 seconds
-      setTimeout(() => {
-        this.savedMarks.delete(index);
-      }, 2000);
-      
-      // Optional: Show snackbar for first few saves
-      if (this.savedMarks.size <= 3) {
-        this.snackBar.open('Mark saved successfully!', 'Dismiss', {
-          duration: 1500,
-        });
-      }
-      
-      console.log(`✅ Mark saved successfully for index ${index}`);
-    }, 300);
 
     const formGroup = this.getMarkFormGroup(index);
     formGroup.markAsPristine();
     formGroup.markAsUntouched();
     formGroup.updateValueAndValidity(); // Ensure validity is re-evaluated after state change
+    
+    // Note: Success/fail feedback is now handled by the action listeners in ngOnInit
   }
 
   isSavingMark(index: number): boolean {
@@ -747,6 +794,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     this.lastSavedValues.clear();
     this.savedMarks.clear();
     this.savingMarks.clear();
+    this.studentNumberToIndex.clear();
     
     console.log('🧹 Cleared save tracking data');
   }
