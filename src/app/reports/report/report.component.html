@@ -95,12 +95,6 @@
         ></textarea>
       </mat-form-field>
 
-      <!-- Info message for unsaved reports -->
-      <div *ngIf="(canEditCommentAndNotStudent$ | async) && !isReportSaved" class="unsaved-report-warning">
-        <mat-icon>info</mat-icon>
-        <span>This report hasn't been saved yet. Saving a comment will create the report automatically.</span>
-      </div>
-
       <!-- Display mode for authorised staff -->
       <p
         *ngIf="(canEditCommentAndNotStudent$ | async) && report.report.classTrComment && !teacherEditState"
@@ -147,12 +141,6 @@
         <p class="missing-comment-cue" *ngIf="(canEditCommentAndNotStudent$ | async) && !report.report.headComment && !editState">
           No Headmaster's comment entered. Click the field to add.
         </p>
-        
-        <!-- Info message for unsaved reports -->
-        <div *ngIf="(canEditCommentAndNotStudent$ | async) && !isReportSaved" class="unsaved-report-warning">
-          <mat-icon>info</mat-icon>
-          <span>This report hasn't been saved yet. Saving a comment will create the report automatically.</span>
-        </div>
 
       </form>
     </div>
