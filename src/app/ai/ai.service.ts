@@ -48,15 +48,45 @@ export class AIService {
     const percentage = (mark / maxMark) * 100;
     
     if (percentage >= 80) {
-      return ['Excellent work, keep it up', 'Outstanding performance', 'Superb effort shown'];
+      return [
+        'Excellent work, keep it up',
+        'Outstanding performance, stay motivated',
+        'Superb effort, continue excelling',
+        'Exceptional understanding, keep going',
+        'Continue this excellent standard'
+      ];
     } else if (percentage >= 70) {
-      return ['Good work, well done', 'Shows solid understanding', 'Keep up good work'];
+      return [
+        'Good work, well done',
+        'Shows solid understanding, continue',
+        'Great effort, keep improving',
+        'Good progress, stay focused',
+        'Keep up the good work'
+      ];
     } else if (percentage >= 60) {
-      return ['Satisfactory performance', 'Fair attempt made', 'Room for improvement'];
+      return [
+        'Good progress, keep pushing',
+        'You can do even better',
+        'Keep working, you\'re improving',
+        'Stay positive, continue learning',
+        'Believe in yourself, keep going'
+      ];
     } else if (percentage >= 50) {
-      return ['Needs more effort', 'Requires additional practice', 'Work harder to improve'];
+      return [
+        'Keep trying, you\'ll improve',
+        'Stay focused, practice more',
+        'You can do better, believe',
+        'Keep working hard, stay positive',
+        'Don\'t give up, keep going'
+      ];
     } else {
-      return ['Significant improvement needed', 'Requires intensive support', 'Must work much harder'];
+      return [
+        'You can improve, stay positive',
+        'Keep trying, don\'t give up',
+        'Believe in yourself, keep working',
+        'Stay motivated, you\'ll get there',
+        'Keep pushing forward, stay strong'
+      ];
     }
   }
 }
