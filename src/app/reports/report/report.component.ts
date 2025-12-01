@@ -49,6 +49,16 @@ export class ReportComponent implements OnInit {
     map(([isStudent, canEdit]) => !isStudent && canEdit)
   );
 
+  // Check if report is saved (has an ID)
+  get isReportSaved(): boolean {
+    return !!this.report?.id;
+  }
+
+  // Check if comments can be edited (report must be saved)
+  get canEditComments(): boolean {
+    return this.isReportSaved;
+  }
+
   private userSubscription: Subscription | undefined; // Declare subscription
 
   constructor(
@@ -96,15 +106,48 @@ export class ReportComponent implements OnInit {
   }
 
   saveComment() {
+    // Check if report is saved first
+    if (!this.isReportSaved) {
+      console.warn('Cannot save comment: Report must be saved first', {
+        reportId: this.report?.id,
+        hasReport: !!this.report,
+      });
+      return;
+    }
+
     if (this.comment?.valid) {
-      // Check for validity of the form control
-      const rep = this.report;
+      // Ensure we have a valid report with all required properties
+      if (!this.report || !this.report.report) {
+        console.error('Cannot save head comment: Report data is incomplete', {
+          hasReport: !!this.report,
+          hasReportReport: !!(this.report?.report),
+          report: this.report,
+        });
+        return;
+      }
+
       const comm: string = this.comment.value;
+
+      // Explicitly construct the report object with all necessary properties
+      const fullReport: ReportsModel = {
+        id: this.report.id,
+        num: this.report.num,
+        year: this.report.year,
+        name: this.report.name,
+        studentNumber: this.report.studentNumber,
+        report: {
+          ...this.report.report, // Spread existing report.report properties
+          headComment: comm, // Update the specific comment
+        },
+        examType: this.report.examType,
+      };
 
       const comment: HeadCommentModel = {
         comment: comm,
-        report: rep,
+        report: fullReport,
       };
+
+      console.log('Saving head comment with report:', comment);
 
       this.store.dispatch(saveHeadCommentActions.saveHeadComment({ comment }));
       this.toggleEditState(); // Toggle state after dispatching
@@ -113,14 +156,39 @@ export class ReportComponent implements OnInit {
 
   // Save teacher / class comment directly on the report
   saveTeacherComment() {
+    // Check if report is saved first
+    if (!this.isReportSaved) {
+      console.warn('Cannot save comment: Report must be saved first');
+      return;
+    }
+
     if (this.teacherComment?.valid) {
-      const rep = this.report;
       const comm: string = this.teacherComment.value;
+
+      // Ensure we have a valid report with all required properties
+      if (!this.report || !this.report.report) {
+        console.error('Cannot save teacher comment: Report data is incomplete', {
+          hasReport: !!this.report,
+          hasReportReport: !!(this.report?.report),
+          report: this.report,
+        });
+        return;
+      }
 
       const comment: TeacherCommentModel = {
         comment: comm,
-        report: rep,
+        report: {
+          id: this.report.id,
+          num: this.report.num,
+          year: this.report.year,
+          name: this.report.name,
+          studentNumber: this.report.studentNumber,
+          examType: this.report.examType,
+          report: this.report.report, // Ensure the nested report is included
+        },
       };
+
+      console.log('Saving teacher comment with report:', comment);
 
       this.store.dispatch(
         saveTeacherCommentActions.saveTeacherComment({ comment })
@@ -139,6 +207,12 @@ export class ReportComponent implements OnInit {
   }
 
   download() {
+    // Check if report is saved first
+    if (!this.isReportSaved) {
+      console.warn('Cannot download: Report must be saved first');
+      return;
+    }
+
     const { report } = this.report; // Destructure for cleaner access
     const {
       className: name,

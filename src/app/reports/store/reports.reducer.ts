@@ -11,6 +11,7 @@ export interface State {
   isLoaded: boolean;
   errorMessage: string;
   viewReportsError: string;
+  reportsGenerated: boolean; // Track if reports were successfully generated
 }
 
 export const initialState: State = {
@@ -21,6 +22,7 @@ export const initialState: State = {
   isLoaded: false,
   errorMessage: '',
   viewReportsError: '',
+  reportsGenerated: false,
 };
 
 export const reportsReducer = createReducer(
@@ -33,6 +35,7 @@ export const reportsReducer = createReducer(
     ...state,
     reports,
     isLoading: false,
+    reportsGenerated: true, // Mark that reports were successfully generated
   })),
   on(reportsActions.generateReportsFail, (state, { error }) => ({
     ...state,
@@ -43,6 +46,7 @@ export const reportsReducer = createReducer(
     ...state,
     isLoading: true,
     reports: [],
+    reportsGenerated: false, // Reset after saving
   })),
   on(
     reportsActions.saveReportActions.saveReportsSuccess,
@@ -87,6 +91,7 @@ export const reportsReducer = createReducer(
     isLoading: true,
     isLoaded: false,
     reports: [],
+    reportsGenerated: false, // Reset when viewing reports
   })),
   on(
     reportsActions.viewReportsActions.viewReportsSuccess,
@@ -189,6 +194,7 @@ export const reportsReducer = createReducer(
   on(reportsActions.viewReportsActions.resetReports, (state) => ({
     ...state,
     reports: [],
+    reportsGenerated: false, // Reset when reports are reset
   })),
   // --- YOUR NEW REDUCER HANDLER IS HERE ---
   on(

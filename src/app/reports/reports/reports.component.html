@@ -83,7 +83,8 @@
           </button>
           
           <button mat-flat-button type="button" class="save-button" 
-                  [disabled]="reportsForm.invalid || (reports$ | async)?.length === 0 || !(canSaveReports$ | async)"
+                  *ngIf="isAdmin$ | async"
+                  [disabled]="reportsForm.invalid || (reports$ | async)?.length === 0 || !(reportsGenerated$ | async)"
                   (click)="saveReports()">
             <mat-icon>save</mat-icon>
             <span>Save</span>
@@ -156,10 +157,32 @@
       </div>
 
       <div class="section-header" *ngIf="(reports$ | async)!.length > 0 && !(isLoading$ | async)">
-        <mat-icon class="section-icon">description</mat-icon>
-        <h3>Generated Reports</h3>
-        <div class="report-count">
-          {{ (reports$ | async)!.length }} Report{{ (reports$ | async)!.length !== 1 ? 's' : '' }}
+        <div class="header-left">
+          <mat-icon class="section-icon">description</mat-icon>
+          <h3>Generated Reports</h3>
+          <div class="report-count">
+            {{ (filteredReports$ | async)?.length || 0 }} of {{ (reports$ | async)?.length || 0 }} Report{{ ((reports$ | async)?.length || 0) !== 1 ? 's' : '' }}
+          </div>
+        </div>
+        
+        <!-- Search/Filter Input -->
+        <div class="search-container" *ngIf="(reports$ | async)!.length > 0">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search reports</mat-label>
+            <input matInput 
+                   [formControl]="searchControl" 
+                   placeholder="Search by name, surname, or student number"
+                   autocomplete="off">
+            <mat-icon matPrefix>search</mat-icon>
+            <button mat-icon-button 
+                    matSuffix 
+                    *ngIf="searchControl.value"
+                    (click)="searchControl.setValue('')"
+                    aria-label="Clear search">
+              <mat-icon>clear</mat-icon>
+            </button>
+            <mat-hint>Type to filter reports by student name or number</mat-hint>
+          </mat-form-field>
         </div>
       </div>
 
@@ -178,9 +201,20 @@
         </div>
       </div>
 
+      <!-- No Results Message (when search returns no results) -->
+      <div class="no-results-container" *ngIf="((reports$ | async)?.length ?? 0) > 0 && ((filteredReports$ | async)?.length ?? 0) === 0 && !(isLoading$ | async)">
+        <mat-icon class="no-results-icon">search_off</mat-icon>
+        <h3>No Reports Match Your Search</h3>
+        <p>No reports found matching "{{ searchControl.value }}". Try a different search term.</p>
+        <button mat-flat-button color="primary" (click)="searchControl.setValue('')">
+          <mat-icon>clear</mat-icon>
+          <span>Clear Search</span>
+        </button>
+      </div>
+
       <!-- Reports Grid -->
-      <div class="reports-grid" *ngIf="(reports$ | async)!.length > 0 && !(isLoading$ | async)">
-        <app-report *ngFor="let report of reports$ | async" [report]="report" class="report-card"></app-report>
+      <div class="reports-grid" *ngIf="((filteredReports$ | async)?.length ?? 0) > 0 && !(isLoading$ | async)">
+        <app-report *ngFor="let report of filteredReports$ | async" [report]="report" class="report-card"></app-report>
       </div>
     </div>
   </div>

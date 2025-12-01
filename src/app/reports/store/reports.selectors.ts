@@ -26,6 +26,11 @@ export const selectReportsLoaded = createSelector(
   (state: fromReportsReducer.State) => state.isLoaded
 );
 
+export const selectReportsGenerated = createSelector(
+  reportsState,
+  (state: fromReportsReducer.State) => state.reportsGenerated
+);
+
 export const selectStudentReports = createSelector(
   reportsState,
   (state: fromReportsReducer.State) => state.studentReports

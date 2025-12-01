@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
@@ -15,13 +15,13 @@ import {
 } from 'src/app/enrolment/store/enrolment.selectors';
 import * as reportsActions from '../store/reports.actions';
 import { ReportsModel } from '../models/reports.model';
-import { selectIsLoading, selectReports } from '../store/reports.selectors';
+import { selectIsLoading, selectReports, selectReportsGenerated } from '../store/reports.selectors';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { viewReportsActions } from '../store/reports.actions';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
-import { take, map } from 'rxjs/operators'; // Import take operator for saveReports
+import { take, map, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators'; // Import operators for filtering
 import { RoleAccessService } from 'src/app/services/role-access.service';
 
 @Component({
@@ -35,11 +35,47 @@ export class ReportsComponent implements OnInit, OnDestroy {
   classes$!: Observable<ClassesModel[]>;
 
   reports$: Observable<ReportsModel[]> = this.store.select(selectReports);
+  
+  // Search/filter control
+  searchControl = new FormControl('');
+  
+  // Filtered reports based on search input
+  filteredReports$: Observable<ReportsModel[]> = combineLatest([
+    this.reports$,
+    this.searchControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged()
+    )
+  ]).pipe(
+    map(([reports, searchTerm]) => {
+      // Ensure reports is an array
+      const reportsArray = reports || [];
+      
+      if (!searchTerm || searchTerm.trim() === '') {
+        return reportsArray;
+      }
+      
+      const searchLower = searchTerm.toLowerCase().trim();
+      return reportsArray.filter(report => {
+        const studentName = report.report?.name?.toLowerCase() || '';
+        const studentSurname = report.report?.surname?.toLowerCase() || '';
+        const studentNumber = report.studentNumber?.toLowerCase() || '';
+        const fullName = `${studentName} ${studentSurname}`.trim();
+        
+        return studentName.includes(searchLower) ||
+               studentSurname.includes(searchLower) ||
+               studentNumber.includes(searchLower) ||
+               fullName.includes(searchLower);
+      });
+    })
+  );
 
   role = '';
   id!: string;
   mode!: 'generate' | 'view';
   isLoading$ = this.store.select(selectIsLoading); // This is crucial for the spinner
+  reportsGenerated$ = this.store.select(selectReportsGenerated); // Track if reports were generated
   currentEnrolment!: EnrolsModel;
   
   // Role-based access observables
@@ -48,6 +84,11 @@ export class ReportsComponent implements OnInit, OnDestroy {
   );
   canGenerateReports$ = this.roleAccess.canGenerateReports$();
   canSaveReports$ = this.roleAccess.canSaveReports$();
+  
+  // Check if user is admin
+  isAdmin$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.admin, role))
+  );
 
   // Analytics properties
   totalStudents = 0;
@@ -103,6 +144,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.reports$.subscribe((reports) => {
         this.calculateAnalytics(reports);
+      })
+    );
+    
+    // Reset search when reports change
+    this.subscriptions.push(
+      this.reports$.subscribe(() => {
+        this.searchControl.setValue('', { emitEvent: false });
       })
     );
   }
