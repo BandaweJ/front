@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core'; // No OnDestroy needed here if no subscriptions are kept
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { ReportsModel } from '../models/reports.model';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -11,10 +11,11 @@ import {
 import { HeadCommentModel, TeacherCommentModel } from '../models/comment.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 
-import { selectIsLoading } from '../store/reports.selectors';
+import { selectIsLoading, selectReports } from '../store/reports.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
-import { Subscription, combineLatest } from 'rxjs'; // Import Subscription
-import { map } from 'rxjs/operators';
+import { Subscription, combineLatest } from 'rxjs';
+import { map, filter, take } from 'rxjs/operators';
+import { Actions, ofType } from '@ngrx/effects';
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 
@@ -25,9 +26,25 @@ import { ROLES } from 'src/app/registration/models/roles.enum';
   templateUrl: './report.component.html',
   styleUrls: ['./report.component.css'],
 })
-export class ReportComponent implements OnInit {
+export class ReportComponent implements OnInit, OnDestroy {
+  private _report!: ReportsModel;
+  
   @Input()
-  report!: ReportsModel;
+  set report(value: ReportsModel) {
+    this._report = value;
+    // Update form controls when report input changes
+    if (this.commentForm && value?.report) {
+      this.commentForm.get('comment')?.setValue(value.report.headComment || '', { emitEvent: false });
+    }
+    if (this.teacherCommentControl && value?.report) {
+      this.teacherCommentControl.setValue(value.report.classTrComment || '', { emitEvent: false });
+    }
+  }
+  
+  get report(): ReportsModel {
+    return this._report;
+  }
+  
   editState = false;
   teacherEditState = false;
   role = ''; // Initialize role
@@ -49,6 +66,8 @@ export class ReportComponent implements OnInit {
     map(([isStudent, canEdit]) => !isStudent && canEdit)
   );
 
+  private saveSubscriptions: Subscription[] = [];
+
   // Check if report is saved (has an ID)
   get isReportSaved(): boolean {
     return !!this.report?.id;
@@ -63,7 +82,8 @@ export class ReportComponent implements OnInit {
 
   constructor(
     private store: Store,
-    private roleAccess: RoleAccessService
+    private roleAccess: RoleAccessService,
+    private actions$: Actions,
   ) {}
 
   commentForm!: FormGroup;
@@ -88,6 +108,44 @@ export class ReportComponent implements OnInit {
         this.role = user.role;
       }
     });
+
+    // Subscribe to store reports to keep local report in sync
+    // This ensures the report ID is available after saving comments
+    const currentStudentNumber = this.report?.studentNumber;
+    if (currentStudentNumber) {
+      this.saveSubscriptions.push(
+        this.store.select(selectReports).pipe(
+          map(reports => reports?.find(r => r.studentNumber === currentStudentNumber)),
+          filter(report => !!report && (report.id !== this._report?.id || !this._report?.id)) // Update if ID changed or if we don't have an ID yet
+        ).subscribe(updatedReport => {
+          if (updatedReport && updatedReport.id) {
+            // Update the local report with the updated report from store (which includes the ID)
+            this._report = { ...updatedReport };
+          }
+        })
+      );
+    }
+
+    // Also subscribe to save success actions as a backup
+    this.saveSubscriptions.push(
+      this.actions$.pipe(
+        ofType(saveHeadCommentActions.saveHeadCommentSuccess),
+        filter((action: { report: ReportsModel }) => action.report.studentNumber === this.report?.studentNumber)
+      ).subscribe((action: { report: ReportsModel }) => {
+        // Update the local report with the saved report (which includes the ID)
+        this._report = { ...action.report };
+      })
+    );
+
+    this.saveSubscriptions.push(
+      this.actions$.pipe(
+        ofType(saveTeacherCommentActions.saveTeacherCommentSuccess),
+        filter((action: { report: ReportsModel }) => action.report.studentNumber === this.report?.studentNumber)
+      ).subscribe((action: { report: ReportsModel }) => {
+        // Update the local report with the saved report (which includes the ID)
+        this._report = { ...action.report };
+      })
+    );
   }
 
   // Add ngOnDestroy to unsubscribe if the component might not be destroyed and recreated quickly
@@ -149,7 +207,7 @@ export class ReportComponent implements OnInit {
   }
 
   // Save teacher / class comment directly on the report
-  saveTeacherComment() {
+  saveTeacherComment(event?: Event) {
     // Note: Backend can now create new reports if they don't exist
     // So we allow saving comments even on unsaved reports
     if (this.teacherComment?.valid) {
@@ -179,6 +237,10 @@ export class ReportComponent implements OnInit {
       };
 
       console.log('Saving teacher comment with report:', comment);
+
+      // Prevent default form submission behavior
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
 
       this.store.dispatch(
         saveTeacherCommentActions.saveTeacherComment({ comment })
