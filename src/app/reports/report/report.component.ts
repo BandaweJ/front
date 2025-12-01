@@ -54,9 +54,9 @@ export class ReportComponent implements OnInit {
     return !!this.report?.id;
   }
 
-  // Check if comments can be edited (report must be saved)
+  // Comments can always be edited - saving a comment will create/update the report automatically
   get canEditComments(): boolean {
-    return this.isReportSaved;
+    return true;
   }
 
   private userSubscription: Subscription | undefined; // Declare subscription
@@ -106,15 +106,8 @@ export class ReportComponent implements OnInit {
   }
 
   saveComment() {
-    // Check if report is saved first
-    if (!this.isReportSaved) {
-      console.warn('Cannot save comment: Report must be saved first', {
-        reportId: this.report?.id,
-        hasReport: !!this.report,
-      });
-      return;
-    }
-
+    // Note: Backend can now create new reports if they don't exist
+    // So we allow saving comments even on unsaved reports
     if (this.comment?.valid) {
       // Ensure we have a valid report with all required properties
       if (!this.report || !this.report.report) {
@@ -129,8 +122,9 @@ export class ReportComponent implements OnInit {
       const comm: string = this.comment.value;
 
       // Explicitly construct the report object with all necessary properties
+      // id is optional - if missing, backend will create a new report
       const fullReport: ReportsModel = {
-        id: this.report.id,
+        ...(this.report.id && { id: this.report.id }), // Include id only if it exists
         num: this.report.num,
         year: this.report.year,
         name: this.report.name,
@@ -156,12 +150,8 @@ export class ReportComponent implements OnInit {
 
   // Save teacher / class comment directly on the report
   saveTeacherComment() {
-    // Check if report is saved first
-    if (!this.isReportSaved) {
-      console.warn('Cannot save comment: Report must be saved first');
-      return;
-    }
-
+    // Note: Backend can now create new reports if they don't exist
+    // So we allow saving comments even on unsaved reports
     if (this.teacherComment?.valid) {
       const comm: string = this.teacherComment.value;
 
@@ -178,7 +168,7 @@ export class ReportComponent implements OnInit {
       const comment: TeacherCommentModel = {
         comment: comm,
         report: {
-          id: this.report.id,
+          ...(this.report.id && { id: this.report.id }), // Include id only if it exists
           num: this.report.num,
           year: this.report.year,
           name: this.report.name,
