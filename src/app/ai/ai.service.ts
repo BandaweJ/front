@@ -33,59 +33,44 @@ export class AIService {
             return response.comments;
           } else {
             console.warn('Comment generation failed:', response.error);
-            return this.getFallbackComments(request.mark, request.maxMark || 100);
+            return this.getFallbackComments(request.mark, request.maxMark || 100, request.subject);
           }
         }),
         catchError(error => {
           console.error('AI service error:', error);
           // Return fallback comments on error
-          return of(this.getFallbackComments(request.mark, request.maxMark || 100));
+          return of(this.getFallbackComments(request.mark, request.maxMark || 100, request.subject));
         })
       );
   }
 
-  private getFallbackComments(mark: number, maxMark: number): string[] {
+  private getFallbackComments(mark: number, maxMark: number, subject?: string): string[] {
     const percentage = (mark / maxMark) * 100;
+    const subjectRef = subject ? ` in ${subject}` : '';
     
-    if (percentage >= 80) {
+    if (percentage >= 60) {
       return [
-        'Excellent work, keep it up',
-        'Outstanding performance, stay motivated',
-        'Superb effort, continue excelling',
-        'Exceptional understanding, keep going',
-        'Continue this excellent standard'
-      ];
-    } else if (percentage >= 70) {
-      return [
-        'Good work, well done',
-        'Shows solid understanding, continue',
-        'Great effort, keep improving',
-        'Good progress, stay focused',
-        'Keep up the good work'
-      ];
-    } else if (percentage >= 60) {
-      return [
-        'Good progress, keep pushing',
-        'You can do even better',
-        'Keep working, you\'re improving',
-        'Stay positive, continue learning',
-        'Believe in yourself, keep going'
+        `Excellent work${subjectRef}, keep it up`,
+        `Great effort${subjectRef}, continue improving`,
+        `Good progress${subjectRef}, maintain standard`,
+        `Well done${subjectRef}, keep going`,
+        `Outstanding work${subjectRef}, stay focused`
       ];
     } else if (percentage >= 50) {
       return [
-        'Keep trying, you\'ll improve',
-        'Stay focused, practice more',
-        'You can do better, believe',
-        'Keep working hard, stay positive',
-        'Don\'t give up, keep going'
+        `Good progress${subjectRef}, push for more`,
+        `Keep working hard${subjectRef}, aim higher`,
+        `You can improve${subjectRef}, keep trying`,
+        `Stay focused${subjectRef}, work harder`,
+        `Good effort${subjectRef}, push yourself`
       ];
     } else {
       return [
-        'You can improve, stay positive',
-        'Keep trying, don\'t give up',
-        'Believe in yourself, keep working',
-        'Stay motivated, you\'ll get there',
-        'Keep pushing forward, stay strong'
+        `Read more${subjectRef}, ask questions`,
+        `Focus on basics${subjectRef}, seek help`,
+        `Work harder${subjectRef}, consult teachers`,
+        `Study more${subjectRef}, ask for help`,
+        `Practice more${subjectRef}, stay focused`
       ];
     }
   }
