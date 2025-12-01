@@ -295,7 +295,7 @@ export class RoleAccessService {
   canEditReportComment$(): Observable<boolean> {
     return this.hasPermission$(
       PERMISSIONS.REPORTS.EDIT_COMMENT,
-      [ROLES.admin, ROLES.director, ROLES.hod]
+      [ROLES.admin, ROLES.director, ROLES.hod, ROLES.teacher, ROLES.auditor, ROLES.reception]
     );
   }
 
