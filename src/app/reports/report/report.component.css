@@ -158,6 +158,11 @@ th {
 .comment-section {
   display: flex;
   flex-direction: column;
+  align-items: stretch; /* Ensure full width */
+}
+
+.comment-section > * {
+  align-self: stretch; /* Make all children take full width */
 }
 
 .comment-section h3 {
@@ -181,6 +186,7 @@ th {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  align-items: stretch; /* Ensure full width */
 }
 
 .full-width-textarea {
@@ -190,7 +196,7 @@ th {
 /* Style for the displayed head comment */
 .displayed-head-comment {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Top-align content instead of center */
   justify-content: space-between; /* To push edit button to the right */
   font-size: 14px;
   line-height: 1.4;
@@ -230,7 +236,7 @@ th {
   border: 1px solid #eee;
   min-height: 50px;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Top-align instead of center */
   justify-content: flex-start;
   word-break: break-word;
 }
