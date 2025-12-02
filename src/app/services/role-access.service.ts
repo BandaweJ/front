@@ -274,7 +274,7 @@ export class RoleAccessService {
   canDownloadReport$(): Observable<boolean> {
     return this.hasPermission$(
       PERMISSIONS.REPORTS.DOWNLOAD,
-      [ROLES.admin, ROLES.director, ROLES.auditor, ROLES.reception]
+      [ROLES.admin, ROLES.director, ROLES.auditor, ROLES.reception, ROLES.student]
     );
   }
 
