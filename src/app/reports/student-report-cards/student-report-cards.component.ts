@@ -148,24 +148,6 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
   }
 
   onReportSelect(): void {
-    // Check if trying to access Term 3, 2025, End of Term (not yet released)
-    if (
-      this.selectedTerm === 3 &&
-      this.selectedYear === 2025 &&
-      this.selectedExamType !== null &&
-      this.selectedExamType === ExamType.endofterm
-    ) {
-      this.store.dispatch(
-        ReportsActions.viewReportsActions.clearSelectedReport()
-      );
-      this.store.dispatch(
-        ReportsActions.viewReportsActions.setReportsErrorMsg({
-          errorMsg: 'Reports for Term 3, 2025 (End of Term) are not yet released. Please check back later.',
-        })
-      );
-      return;
-    }
-
     // Combine selected filters with student reports and invoices to determine selection and display eligibility
     combineLatest([this.studentReports$, this.allInvoices$])
       .pipe(
