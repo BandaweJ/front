@@ -152,7 +152,8 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
     if (
       this.selectedTerm === 3 &&
       this.selectedYear === 2025 &&
-      (this.selectedExamType === ExamType.endofterm || this.selectedExamType === 'End Of Term' || this.selectedExamType === 'End of Term')
+      this.selectedExamType !== null &&
+      this.selectedExamType === ExamType.endofterm
     ) {
       this.store.dispatch(
         ReportsActions.viewReportsActions.clearSelectedReport()
