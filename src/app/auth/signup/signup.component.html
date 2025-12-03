@@ -43,6 +43,7 @@
           <mat-select 
             formControlName="role" 
             placeholder="Choose your role"
+            [compareWith]="compareRoles"
             [class.error]="role?.invalid && role?.touched">
             <mat-option value="">Select Role</mat-option>
             <mat-option *ngFor="let role of roles" [value]="role">

@@ -63,6 +63,14 @@ export class SignupComponent implements OnInit, OnDestroy {
 
     this.initializeForm();
     this.setupFormValidation();
+    
+    // Debug: Log roles array
+    console.log('Available roles:', this.roles);
+    
+    // Debug: Watch role form control changes
+    this.role?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(value => {
+      console.log('Role form control value changed:', value);
+    });
   }
 
   ngOnDestroy(): void {
@@ -147,12 +155,34 @@ export class SignupComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const formValue = this.signupForm.value;
+    const roleValue = this.role?.value || formValue.role;
+    
+    // Ensure role is set
+    if (!roleValue || roleValue === '') {
+      this.snackBar.open('Please select a role', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar']
+      });
+      this.role?.markAsTouched();
+      return;
+    }
+
+    console.log('Signup form value:', formValue);
+    console.log('Role form control value:', this.role?.value);
+    console.log('Role value from formValue:', formValue.role);
+    console.log('Final role value:', roleValue);
+
     const signupData: SignupInterface = {
-      id: this.signupForm.value.id.trim(),
-      role: this.signupForm.value.role,
-      username: this.signupForm.value.username.trim(),
-      password: this.signupForm.value.password
+      id: (formValue.id || '').trim(),
+      role: roleValue,
+      username: (formValue.username || '').trim(),
+      password: formValue.password || ''
     };
+
+    console.log('Signup data being sent:', signupData);
 
     this.store.dispatch(signupActions.signup({ signupData }));
   }
@@ -263,6 +293,11 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   get password() {
     return this.signupForm.get('password');
+  }
+
+  // Compare function for mat-select to ensure proper value binding
+  compareRoles(role1: string, role2: string): boolean {
+    return role1 === role2;
   }
 
   // Helper method to check if field has error
