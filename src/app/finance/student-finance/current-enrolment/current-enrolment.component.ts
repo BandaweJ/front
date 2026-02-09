@@ -15,7 +15,7 @@ import { invoiceActions } from '../../store/finance.actions';
 @Component({
   selector: 'app-current-enrolment',
   templateUrl: './current-enrolment.component.html',
-  styleUrls: ['./current-enrolment.component.css'],
+  styleUrls: ['./current-enrolment.component.scss'],
 })
 export class CurrentEnrolmentComponent implements OnInit {
   @Input() studentNumber: string | undefined = undefined;
