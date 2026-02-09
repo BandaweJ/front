@@ -443,7 +443,7 @@ export class EnrolmentEffects {
         this.enrolService.updateCurrentEnrolment(data.enrol).pipe(
           tap((enrol) =>
             this.snackBar.open(
-              'Enrolment Updated to ' + enrol.residence,
+              'Enrolment updated' + (enrol.name ? ` (${enrol.name}, ${enrol.residence})` : ''),
               'OK',
               {
                 duration: 3000,

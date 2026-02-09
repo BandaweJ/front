@@ -32,6 +32,13 @@ export class EnrolService {
     return this.httpClient.get<EnrolsModel>(`${this.baseURL}${studentNumber}`);
   }
 
+  /**
+   * PATCH enrolment (e.g. class name, residence).
+   * Backend contract: when this endpoint updates the enrolment, it MUST also update
+   * any invoice rows that reference this enrolment (same enrol_id / term) so that
+   * stored class name and residence on invoices stay in sync. Only invoices for
+   * this enrolment's term (enrol.num, enrol.year) should be updated.
+   */
   updateCurrentEnrolment(enrol: EnrolsModel): Observable<EnrolsModel> {
     return this.httpClient.patch<EnrolsModel>(`${this.baseURL}`, enrol);
   }

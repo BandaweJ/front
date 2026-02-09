@@ -294,11 +294,19 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   showCurrentEnrol(enrol: EnrolsModel) {
-    const studentNumber = enrol.student.studentNumber;
-    let dialogRef = this.dialog.open(CurrentEnrolmentComponent, {
-      // height: '400px',
-      // width: '600px',
+    const dialogRef = this.dialog.open(CurrentEnrolmentComponent, {
       data: { enrol },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.updated && this.enrolForm.valid) {
+        const name = this.clas?.value;
+        const term: TermsModel = this.term?.value;
+        if (name && term) {
+          this.store.dispatch(
+            getEnrolmentByClass({ name, num: term.num, year: term.year })
+          );
+        }
+      }
     });
   }
 }

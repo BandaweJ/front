@@ -486,17 +486,35 @@ export const financeReducer = createReducer(
     loadStudentInvoicesErr: error.message,
   })),
   on(invoiceActions.updateInvoiceEnrolment, (state, { enrol }) => {
-    // Only update if an invoice currently exists
-    if (state.selectedStudentInvoice) {
-      return {
-        ...state,
-        selectedStudentInvoice: {
-          ...state.selectedStudentInvoice,
-          enrol: { ...enrol }, // Create a new enrol object to ensure immutability
-        },
-      };
-    }
-    return state; // If no invoice, do nothing
+    const enrolId = enrol.id;
+    const enrolNum = enrol.num;
+    const enrolYear = enrol.year;
+    if (enrolId == null) return state;
+
+    // Only update invoices for this enrolment's term (current term of the edited enrolment).
+    // Do not change invoices from previous or other terms.
+    const isSameTermEnrolment = (inv: InvoiceModel): boolean =>
+      inv.enrol?.id === enrolId &&
+      inv.enrol?.num === enrolNum &&
+      inv.enrol?.year === enrolYear;
+
+    const updateInvoiceEnrol = (inv: InvoiceModel): InvoiceModel =>
+      isSameTermEnrolment(inv) ? { ...inv, enrol: { ...enrol } } : inv;
+
+    const updatedAllInvoices = state.allInvoices.map(updateInvoiceEnrol);
+    const updatedTermInvoices = state.termInvoices.map(updateInvoiceEnrol);
+    const updatedStudentInvoices = state.studentInvoices.map(updateInvoiceEnrol);
+    const selectedUpdated = state.selectedStudentInvoice && isSameTermEnrolment(state.selectedStudentInvoice)
+      ? { ...state.selectedStudentInvoice, enrol: { ...enrol } }
+      : state.selectedStudentInvoice;
+
+    return {
+      ...state,
+      allInvoices: updatedAllInvoices,
+      termInvoices: updatedTermInvoices,
+      studentInvoices: updatedStudentInvoices,
+      selectedStudentInvoice: selectedUpdated,
+    };
   }),
   // Handle Create Exemption action (start loading)
   on(exemptionActions.createExemption, (state) => ({

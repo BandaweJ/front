@@ -4,22 +4,40 @@
   </mat-card-title>
   <mat-card-content>
     <label class="label">Student</label>
-    <span class="value">{{ currentEnrolment.student.name + " " + currentEnrolment.student.surname }}</span>
+    <span class="value">{{ currentEnrolment.student?.name + " " + currentEnrolment.student?.surname }}</span>
+    <label class="label">Term</label>
+    <span class="value">Term {{ currentEnrolment.num }} {{ currentEnrolment.year }}</span>
+
     <label class="label">Class</label>
-    <span class="value">{{ currentEnrolment.name }}</span>
-    <label class="label">Term </label>
-    <span class="value">{{ currentEnrolment.num + " " + currentEnrolment.year }}</span>
-    <label class="label">Residence </label>
     <span class="value">
-      <div class="display-mode" *ngIf="editable">
-        <span class="residence-text">{{ currentEnrolment.residence }}</span>
-        <mat-icon aria-hidden="false" aria-label="Edit icon" fontIcon="edit" (click)="editable = !editable"
+      <div class="display-mode" *ngIf="!editable">
+        <span class="residence-text">{{ currentEnrolment.name }}</span>
+        <mat-icon aria-hidden="false" aria-label="Edit icon" fontIcon="edit" (click)="startEdit()"
           color="accent"></mat-icon>
       </div>
+      <div class="edit-mode" *ngIf="editable">
+        <mat-form-field appearance="fill">
+          <mat-label>Class</mat-label>
+          <mat-select [value]="editClassName" (selectionChange)="editClassName = $event.value" required>
+            <mat-option *ngFor="let c of classes$ | async" [value]="c.name">
+              {{ c.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </span>
 
-      <div class="edit-mode" *ngIf="!editable">
-        <mat-form-field appearance="fill"> <mat-label>Residence</mat-label>
-          <mat-select [value]="currentEnrolment.residence" (selectionChange)="updateResidence($event.value)">
+    <label class="label">Residence</label>
+    <span class="value">
+      <div class="display-mode" *ngIf="!editable">
+        <span class="residence-text">{{ currentEnrolment.residence }}</span>
+        <mat-icon aria-hidden="false" aria-label="Edit icon" fontIcon="edit" (click)="startEdit()"
+          color="accent"></mat-icon>
+      </div>
+      <div class="edit-mode" *ngIf="editable">
+        <mat-form-field appearance="fill">
+          <mat-label>Residence</mat-label>
+          <mat-select [value]="editResidence" (selectionChange)="editResidence = $event.value">
             <mat-option *ngFor="let residence of residences" [value]="residence">
               {{ residence }}
             </mat-option>
@@ -28,5 +46,15 @@
       </div>
     </span>
 
+    <ng-container *ngIf="editable">
+      <span class="label"></span>
+      <span class="value action-row">
+        <button mat-raised-button color="primary" (click)="saveEnrolment()" [disabled]="saving || !editClassName?.trim()">
+          <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+          <span *ngIf="!saving">Save</span>
+        </button>
+        <button mat-button (click)="cancelEdit()" [disabled]="saving">Cancel</button>
+      </span>
+    </ng-container>
   </mat-card-content>
 </mat-card>

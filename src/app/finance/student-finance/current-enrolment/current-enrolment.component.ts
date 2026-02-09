@@ -1,10 +1,16 @@
-import { Component, Inject, Input, OnInit, Optional } from '@angular/core'; // <--- Import Optional
+import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { MatDialogRef } from '@angular/material/dialog';
+import { Actions, ofType } from '@ngrx/effects';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
-import { selectCurrentEnrolment } from 'src/app/enrolment/store/enrolment.selectors';
+import { selectCurrentEnrolment, selectClasses } from 'src/app/enrolment/store/enrolment.selectors';
 import { currentEnrolementActions } from 'src/app/enrolment/store/enrolment.actions';
 import { Residence } from 'src/app/enrolment/models/residence.enum';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ClassesModel } from 'src/app/enrolment/models/classes.model';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
+import { invoiceActions } from '../../store/finance.actions';
 
 @Component({
   selector: 'app-current-enrolment',
@@ -13,35 +19,37 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 })
 export class CurrentEnrolmentComponent implements OnInit {
   @Input() studentNumber: string | undefined = undefined;
-  editable = true;
+  editable = false;
   residences = [...Object.values(Residence)];
   currentEnrolment!: EnrolsModel;
+  classes$: Observable<ClassesModel[]> = this.store.select(selectClasses);
+  editClassName = '';
+  editResidence: Residence = Residence.Day;
+  saving = false;
 
   constructor(
     private store: Store,
-    // Add @Optional() decorator here
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: { enrol: EnrolsModel }
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: { enrol: EnrolsModel },
+    @Optional() private dialogRef: MatDialogRef<CurrentEnrolmentComponent>,
+    private actions$: Actions
   ) {
-    // Your existing constructor logic will now work correctly:
-    // If data is provided (from a dialog), it will use that.
-    // If data is null (because it's not a dialog), it will fall back to the store.
     if (this.data && this.data.enrol) {
       this.currentEnrolment = this.data.enrol;
-      this.editable = true; // Or set based on your dialog context
+      this.editClassName = this.data.enrol.name;
+      this.editResidence = this.data.enrol.residence;
+      this.editable = false;
     } else {
       this.store.select(selectCurrentEnrolment).subscribe((enrolment) => {
         if (enrolment) {
           this.currentEnrolment = enrolment;
-          // You might want to decide if `editable` should be true/false by default
-          // when data comes from the store.
-          // e.g., this.editable = false; // if it's display-only by default
+          this.editClassName = enrolment.name;
+          this.editResidence = enrolment.residence;
         }
       });
     }
   }
 
   ngOnInit(): void {
-    // This part ensures data is fetched if the component is used directly with studentNumber input
     if (this.studentNumber) {
       this.store.dispatch(
         currentEnrolementActions.fetchCurrentEnrolment({
@@ -51,16 +59,51 @@ export class CurrentEnrolmentComponent implements OnInit {
     }
   }
 
-  updateResidence(residence: Residence) {
+  startEdit(): void {
+    this.editable = true;
+    this.editClassName = this.currentEnrolment.name;
+    this.editResidence = this.currentEnrolment.residence;
+  }
+
+  cancelEdit(): void {
+    this.editable = false;
+    this.editClassName = this.currentEnrolment.name;
+    this.editResidence = this.currentEnrolment.residence;
+  }
+
+  saveEnrolment(): void {
+    const name = this.editClassName?.trim();
+    if (!name) return;
     const enrolment: EnrolsModel = {
       ...this.currentEnrolment,
-      residence,
+      name,
+      residence: this.editResidence,
     };
+    this.saving = true;
     this.store.dispatch(
-      currentEnrolementActions.updateCurrentEnrolment({
-        enrol: enrolment,
-      })
+      currentEnrolementActions.updateCurrentEnrolment({ enrol: enrolment })
     );
-    this.editable = !this.editable;
+    this.actions$
+      .pipe(
+        ofType(
+          currentEnrolementActions.updateCurrentEnrolmentSuccess,
+          currentEnrolementActions.updateCurrentEnrolmentFail
+        ),
+        take(1)
+      )
+      .subscribe((action) => {
+        this.saving = false;
+        if (currentEnrolementActions.updateCurrentEnrolmentSuccess.match(action)) {
+          const updatedEnrol = (action as { enrol: EnrolsModel }).enrol;
+          this.store.dispatch(
+            invoiceActions.updateInvoiceEnrolment({ enrol: updatedEnrol })
+          );
+          this.currentEnrolment = updatedEnrol;
+          this.editable = false;
+          if (this.dialogRef) {
+            this.dialogRef.close({ updated: true, enrol: updatedEnrol });
+          }
+        }
+      });
   }
 }
