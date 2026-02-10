@@ -30,7 +30,7 @@ export class CurrentEnrolmentComponent implements OnInit {
   constructor(
     private store: Store,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: { enrol: EnrolsModel },
-    @Optional() private dialogRef: MatDialogRef<CurrentEnrolmentComponent>,
+    @Optional() public dialogRef: MatDialogRef<CurrentEnrolmentComponent>,
     private actions$: Actions
   ) {
     if (this.data && this.data.enrol) {
@@ -93,7 +93,7 @@ export class CurrentEnrolmentComponent implements OnInit {
       )
       .subscribe((action) => {
         this.saving = false;
-        if (currentEnrolementActions.updateCurrentEnrolmentSuccess.match(action)) {
+        if (action.type === currentEnrolementActions.updateCurrentEnrolmentSuccess.type) {
           const updatedEnrol = (action as { enrol: EnrolsModel }).enrol;
           this.store.dispatch(
             invoiceActions.updateInvoiceEnrolment({ enrol: updatedEnrol })

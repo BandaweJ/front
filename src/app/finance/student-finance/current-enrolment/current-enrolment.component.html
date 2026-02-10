@@ -12,7 +12,7 @@
   <mat-dialog-content class="dialog-content">
     <div class="enrolment-grid">
       <span class="enrolment-label">Student</span>
-      <span class="enrolment-value">{{ currentEnrolment.student?.name }} {{ currentEnrolment.student?.surname }}</span>
+      <span class="enrolment-value">{{ currentEnrolment.student.name }} {{ currentEnrolment.student.surname }}</span>
 
       <span class="enrolment-label">Term</span>
       <span class="enrolment-value">Term {{ currentEnrolment.num }} {{ currentEnrolment.year }}</span>
@@ -58,7 +58,7 @@
 
   <mat-dialog-actions class="dialog-actions" *ngIf="editable">
     <button mat-button (click)="cancelEdit()" [disabled]="saving">Cancel</button>
-    <button mat-raised-button color="primary" (click)="saveEnrolment()" [disabled]="saving || !editClassName?.trim()" class="save-btn">
+    <button mat-raised-button color="primary" (click)="saveEnrolment()" [disabled]="saving || !editClassName.trim()" class="save-btn">
       <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
       <span *ngIf="!saving">Save changes</span>
     </button>
