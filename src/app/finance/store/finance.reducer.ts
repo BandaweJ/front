@@ -308,7 +308,7 @@ export const financeReducer = createReducer(
   on(invoiceActions.saveInvoiceFail, (state, { error }) => ({
     ...state,
     isLoading: false,
-    errorMessage: error.error.message,
+    errorMessage: error?.error?.message ?? error?.message ?? 'Failed to save invoice.',
   })),
   on(invoiceActions.fetchInvoiceStats, (state) => ({
     ...state,
