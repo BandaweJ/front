@@ -1,6 +1,17 @@
-# Front
+# Front (front-mu-five)
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.1.
+
+This repo is the frontend for the **front-mu-five** deployment only.
+
+## Deployments (two schools, two frontends)
+
+| Deployment      | URL                                      | Tenant slug | Repo / config |
+|-----------------|------------------------------------------|-------------|----------------|
+| **front-mu-five** | https://front-mu-five.vercel.app/signin | `default`   | This repo. `environment.ts` has `tenantSlug: 'default'`. |
+| **anarphy-portal** | https://anarphy-portal.vercel.app/apply | `anarphy`   | Separate repo. Set `tenantSlug: 'anarphy'` in that repo’s production environment. Ensure the backend has a tenant with slug `anarphy` in `public.tenants`. |
+
+Same backend; each frontend sends its fixed tenant via `X-Tenant` (from `environment.tenantSlug`).
 
 ## Development server
 

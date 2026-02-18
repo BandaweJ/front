@@ -32,7 +32,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatCardModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './signin.component.html',
   styleUrls: ['./signin.component.scss'],
@@ -134,7 +134,7 @@ export class SigninComponent implements OnInit, OnDestroy {
 
   signin(): void {
     this.formSubmitted = true;
-    
+
     if (this.signinForm.invalid) {
       this.markFormGroupTouched();
       this.showValidationErrors();

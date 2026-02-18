@@ -6,15 +6,20 @@ import {
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 function getTenantSlug(): string {
   if (typeof window === 'undefined') return 'default';
+  // Fixed tenant per deployment: one codebase, one deployment per school — no selector
+  if (environment.tenantSlug) return environment.tenantSlug;
   const stored = localStorage.getItem('tenantSlug');
   if (stored) return stored;
-  const hostname = window.location.hostname || '';
+  const hostname = (window.location.hostname || '').toLowerCase();
+  const defaultHosts = environment.defaultTenantHosts ?? [];
+  if (defaultHosts.some((h) => h.toLowerCase() === hostname)) return 'default';
   const parts = hostname.split('.');
   if (parts.length >= 2) {
-    const sub = parts[0].toLowerCase();
+    const sub = parts[0];
     if (sub && sub !== 'www' && sub !== 'api') return sub;
   }
   return 'default';
