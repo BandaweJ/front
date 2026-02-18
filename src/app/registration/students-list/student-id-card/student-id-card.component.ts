@@ -4,6 +4,7 @@ import { StudentsModel } from '../../models/students.model';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import * as QRCode from 'qrcode';
 import { Title } from '@angular/platform-browser';
+import { SystemSettingsService } from 'src/app/system/services/system-settings.service';
 
 @Component({
   selector: 'app-student-id-card',
@@ -16,20 +17,30 @@ export class StudentIdCardComponent implements OnInit, OnDestroy {
   qrCodeDataUrl: SafeUrl = '';
   isLoading = true;
   currentDate = new Date();
+  schoolName = 'School';
+  schoolAddress = '';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: StudentsModel,
     private dialogRef: MatDialogRef<StudentIdCardComponent>,
     private sanitizer: DomSanitizer,
     private cdr: ChangeDetectorRef,
-    private title: Title
+    private title: Title,
+    private systemSettings: SystemSettingsService
   ) {
     this.student = data;
   }
 
   ngOnInit(): void {
     this.title.setTitle(`Student ID Card - ${this.student.name} ${this.student.surname}`);
-    this.generateQRCode();
+    this.systemSettings.getSettings().subscribe(settings => {
+      this.schoolName = settings.schoolName ?? 'School';
+      this.schoolAddress = settings.schoolAddress ?? '';
+      this.cdr.markForCheck();
+      this.generateQRCode();
+    }, () => {
+      this.generateQRCode();
+    });
   }
 
   ngOnDestroy(): void {
@@ -43,7 +54,7 @@ export class StudentIdCardComponent implements OnInit, OnDestroy {
         studentNumber: this.student.studentNumber,
         name: `${this.student.name} ${this.student.surname}`,
         idNumber: this.student.idnumber,
-        school: 'Junior High School',
+        school: this.schoolName,
         url: `${window.location.origin}/student-view/${this.student.studentNumber}`
       };
 
@@ -228,7 +239,7 @@ export class StudentIdCardComponent implements OnInit, OnDestroy {
           <div class="id-card-container">
             <div class="id-card-content">
               <div class="header">
-                <h2 class="school-name">JUNIOR HIGH SCHOOL</h2>
+                <h2 class="school-name">${(this.schoolName || 'School').toUpperCase()}</h2>
                 <p class="school-subtitle">Student Identification Card</p>
               </div>
               <div class="student-info">
@@ -248,7 +259,7 @@ export class StudentIdCardComponent implements OnInit, OnDestroy {
               </div>
               <div class="footer">
                 <p class="valid-until">Valid until: ${(this.currentDate.getFullYear() + 1)}/${(this.currentDate.getMonth() + 1).toString().padStart(2, '0')}/${this.currentDate.getDate().toString().padStart(2, '0')}</p>
-                <p class="school-address">123 School Street, Education City</p>
+                <p class="school-address">${this.schoolAddress || ''}</p>
               </div>
             </div>
           </div>
@@ -304,7 +315,7 @@ export class StudentIdCardComponent implements OnInit, OnDestroy {
         // Add the ID card content
         tempContainer.innerHTML = `
           <div style="text-align: center; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 8px; margin-bottom: 8px;">
-            <h2 style="font-size: 12px; font-weight: bold; margin: 0; letter-spacing: 1px;">JUNIOR HIGH SCHOOL</h2>
+            <h2 style="font-size: 12px; font-weight: bold; margin: 0; letter-spacing: 1px;">${(this.schoolName || 'School').toUpperCase()}</h2>
             <p style="font-size: 8px; margin: 2px 0 0 0; opacity: 0.9;">Student Identification Card</p>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex: 1; gap: 10px;">
@@ -324,7 +335,7 @@ export class StudentIdCardComponent implements OnInit, OnDestroy {
           </div>
           <div style="text-align: center; font-size: 8px; opacity: 0.8; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 6px;">
             <p style="font-size: 7px; margin: 0 0 2px 0; font-weight: 600;">Valid until: ${(this.currentDate.getFullYear() + 1)}/${(this.currentDate.getMonth() + 1).toString().padStart(2, '0')}/${this.currentDate.getDate().toString().padStart(2, '0')}</p>
-            <p style="font-size: 6px; margin: 0; opacity: 0.7;">123 School Street, Education City</p>
+            <p style="font-size: 6px; margin: 0; opacity: 0.7;">${this.schoolAddress || ''}</p>
           </div>
         `;
         
@@ -529,7 +540,7 @@ export class StudentIdCardComponent implements OnInit, OnDestroy {
         <div class="id-card-container">
           <div class="id-card-content">
             <div class="header">
-              <h2 class="school-name">JUNIOR HIGH SCHOOL</h2>
+              <h2 class="school-name">${(this.schoolName || 'School').toUpperCase()}</h2>
               <p class="school-subtitle">Student Identification Card</p>
             </div>
             <div class="student-info">
@@ -549,7 +560,7 @@ export class StudentIdCardComponent implements OnInit, OnDestroy {
             </div>
             <div class="footer">
               <p class="valid-until">Valid until: ${(this.currentDate.getFullYear() + 1)}/${(this.currentDate.getMonth() + 1).toString().padStart(2, '0')}/${this.currentDate.getDate().toString().padStart(2, '0')}</p>
-              <p class="school-address">123 School Street, Education City</p>
+              <p class="school-address">${this.schoolAddress || ''}</p>
             </div>
           </div>
         </div>

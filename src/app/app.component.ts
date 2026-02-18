@@ -28,7 +28,7 @@ import { filter } from 'rxjs/operators';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'Junior High School';
+  title = 'School';
   
   currentTheme: Theme = 'light';
   

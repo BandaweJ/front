@@ -56,7 +56,7 @@ export class SigninComponent implements OnInit, OnDestroy {
   formSubmitted = false;
 
   ngOnInit(): void {
-    this.title.setTitle('Sign In - Junior High School');
+    this.title.setTitle('Sign In');
     
     // Subscribe to theme changes
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {

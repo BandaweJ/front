@@ -28,7 +28,7 @@
       <div class="id-card-content">
         <!-- Header -->
         <div class="header">
-          <h2 class="school-name">JUNIOR HIGH SCHOOL</h2>
+          <h2 class="school-name">{{ schoolName | uppercase }}</h2>
           <p class="school-subtitle">Student Identification Card</p>
         </div>
 
@@ -54,7 +54,7 @@
         <!-- Footer -->
         <div class="footer">
           <p class="valid-until">Valid until: {{ (currentDate.getFullYear() + 1) }}/{{ (currentDate.getMonth() + 1).toString().padStart(2, '0') }}/{{ currentDate.getDate().toString().padStart(2, '0') }}</p>
-          <p class="school-address">123 School Street, Education City</p>
+          <p class="school-address">{{ schoolAddress || ' ' }}</p>
         </div>
       </div>
     </div>

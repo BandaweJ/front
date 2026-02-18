@@ -50,7 +50,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.title.setTitle('Sign Up - Junior High School');
+    this.title.setTitle('Sign Up');
     
     // Subscribe to theme changes
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
