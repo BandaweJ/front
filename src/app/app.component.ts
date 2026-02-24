@@ -152,11 +152,25 @@ export class AppComponent implements OnInit, OnDestroy {
     
     // Initialize school information observables
     this.schoolName$ = settings$.pipe(
-      map(settings => settings.schoolName || 'Junior High School')
+      map(settings => {
+        const name = (settings.schoolName || '').toString().trim();
+        // Treat literal 'null'/'undefined' from DB as empty and fall back
+        if (!name || name.toLowerCase() === 'null' || name.toLowerCase() === 'undefined') {
+          return 'Junior High School';
+        }
+        return name;
+      })
     );
     
     this.schoolLogo$ = settings$.pipe(
-      map(settings => settings.schoolLogo || 'assets/jhs_logo.jpg')
+      map(settings => {
+        const logo = (settings.schoolLogo || '').toString().trim();
+        // Treat literal 'null'/'undefined' from DB as empty and fall back to bundled asset
+        if (!logo || logo.toLowerCase() === 'null' || logo.toLowerCase() === 'undefined') {
+          return 'assets/jhs_logo.jpg';
+        }
+        return logo;
+      })
     );
     
     this.schoolNameAbbr$ = settings$.pipe(
