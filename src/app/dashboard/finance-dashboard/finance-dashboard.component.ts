@@ -36,8 +36,13 @@ import {
   fetchClasses,
   fetchTerms,
   currentTermActions,
+  fetchEnrolsStats,
 } from 'src/app/enrolment/store/enrolment.actions';
-import { selectCurrentTerm } from 'src/app/enrolment/store/enrolment.selectors';
+import {
+  selectCurrentTerm,
+  selectEnrolsStats,
+} from 'src/app/enrolment/store/enrolment.selectors';
+import { EnrolStats } from 'src/app/enrolment/models/enrol-stats.model';
 
 @Component({
   selector: 'app-finance-dashboard',
@@ -90,6 +95,11 @@ export class FinanceDashboardComponent
   averagePaymentAmount$!: Observable<number>;
   collectionRate$!: Observable<number>;
   totalTransactions$!: Observable<number>;
+
+  // Enrolment statistics for finance view
+  enrolStats$!: Observable<EnrolStats | null>;
+  enrolClassTotals$!: Observable<{ className: string; total: number }[]>;
+  enrolTotalStudents$!: Observable<number>;
 
   currentSort$ = this.sortSubject.asObservable();
   sortOptions = [
@@ -224,6 +234,7 @@ export class FinanceDashboardComponent
       this.store.dispatch(fetchTerms());
       this.store.dispatch(fetchClasses());
       this.store.dispatch(currentTermActions.fetchCurrentTerm());
+      this.store.dispatch(fetchEnrolsStats());
     } catch (error) {
       this.handleError('Failed to load financial data');
     }
@@ -330,6 +341,26 @@ export class FinanceDashboardComponent
 
     this.totalTransactions$ = filteredData$.pipe(
       map((data) => data.length)
+    );
+
+    // Enrolment statistics: total students per class and overall total
+    this.enrolStats$ = this.store.pipe(select(selectEnrolsStats));
+
+    this.enrolClassTotals$ = this.enrolStats$.pipe(
+      map((stats) => {
+        if (!stats) {
+          return [];
+        }
+        return stats.clas.map((className, index) => {
+          const boys = stats.boys[index] || 0;
+          const girls = stats.girls[index] || 0;
+          return { className, total: boys + girls };
+        });
+      })
+    );
+
+    this.enrolTotalStudents$ = this.enrolClassTotals$.pipe(
+      map((rows) => rows.reduce((sum, row) => sum + row.total, 0))
     );
   }
 

@@ -46,6 +46,21 @@ export const fetchStudentsFailure = createAction(
   props<{ error: HttpErrorResponse }>()
 );
 
+export const searchStudents = createAction(
+  '[Students Registration] search students',
+  props<{ query: string; page?: number; limit?: number }>()
+);
+
+export const searchStudentsSuccess = createAction(
+  '[Students Registration] search students success',
+  props<{ students: StudentsModel[]; total: number }>()
+);
+
+export const searchStudentsFailure = createAction(
+  '[Students Registration] search students failure',
+  props<{ error: HttpErrorResponse }>()
+);
+
 export const addStudentAction = createAction(
   '[Add Student] add student',
   props<{ student: StudentsModel }>()

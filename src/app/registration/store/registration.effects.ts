@@ -74,6 +74,26 @@ export class RegistrationEffects {
     )
   );
 
+  // Server-side, paginated search for students
+  searchStudents$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromRegistrationActions.searchStudents),
+      switchMap(({ query, page, limit }) =>
+        this.studentsService.searchStudents(query, page ?? 1, limit ?? 50).pipe(
+          map(({ items, total }) =>
+            fromRegistrationActions.searchStudentsSuccess({
+              students: items,
+              total,
+            })
+          ),
+          catchError((error: HttpErrorResponse) =>
+            of(fromRegistrationActions.searchStudentsFailure({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
   addStudent$ = createEffect(() =>
     this.actions$.pipe(
       ofType(fromRegistrationActions.addStudentAction),

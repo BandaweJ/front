@@ -123,6 +123,16 @@
           </div>
         </div>
       </mat-card>
+      
+      <mat-card class="summary-card total-enrolment-card" role="article" aria-labelledby="total-enrolment-label">
+        <div class="summary-card-content">
+          <mat-icon class="card-icon" aria-hidden="true">groups</mat-icon>
+          <div class="summary-text">
+            <div class="card-label" id="total-enrolment-label">Total Enrolled Students</div>
+            <div class="card-value" aria-label="Total students enrolled">{{ enrolTotalStudents$ | async | number }}</div>
+          </div>
+        </div>
+      </mat-card>
     </div>
 
   <mat-card class="chart-card">
@@ -138,6 +148,29 @@
   </mat-card>
 
   <div class="tables-container">
+    <mat-card class="table-card enrolment-table-card">
+      <mat-card-header>
+        <mat-card-title>Enrolment by Class (Current Term)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="enrolment-table-wrapper">
+          <table class="enrolment-summary-table" *ngIf="(enrolClassTotals$ | async) as enrolRows; else noEnrolData">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Total Students</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of enrolRows">
+                <td>{{ row.className }}</td>
+                <td>{{ row.total }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
     <mat-card class="table-card">
       <mat-card-header>
         <mat-card-title>Recent Invoices</mat-card-title>
@@ -227,6 +260,13 @@
   </div>
   </div> <!-- End dashboard-content -->
 </div>
+
+<ng-template #noEnrolData>
+  <div class="no-data-found">
+    <mat-icon>info</mat-icon>
+    <p>No enrolment records found for the current term.</p>
+  </div>
+</ng-template>
 
 <ng-template #noDataFound>
   <div class="no-data-found">

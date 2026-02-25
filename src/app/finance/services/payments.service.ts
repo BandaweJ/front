@@ -66,6 +66,23 @@ export class PaymentsService {
     return this.httpClient.get<InvoiceModel[]>(`${this.baseURL}invoice/`);
   }
 
+  /**
+   * Paginated invoices for dashboard/list views.
+   */
+  getDashboardInvoices(
+    page = 1,
+    limit = 100,
+  ): Observable<{ items: InvoiceModel[]; total: number }> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    return this.httpClient.get<{ items: InvoiceModel[]; total: number }>(
+      `${this.baseURL}dashboard/invoices`,
+      { params },
+    );
+  }
+
   saveInvoice(invoice: InvoiceModel): Observable<InvoiceModel> {
     try {
       const payload = this.normalizeInvoice(invoice);
@@ -96,8 +113,40 @@ export class PaymentsService {
     );
   }
 
+  /**
+   * Finance dashboard summary aggregating totals from backend SQL.
+   */
+  getFinanceDashboardSummary(): Observable<{
+    totalInvoicesAmount: number;
+    totalPaymentsAmount: number;
+    outstandingBalance: number;
+  }> {
+    return this.httpClient.get<{
+      totalInvoicesAmount: number;
+      totalPaymentsAmount: number;
+      outstandingBalance: number;
+    }>(`${this.baseURL}dashboard/summary`);
+  }
+
   getAllReceipts(): Observable<ReceiptModel[]> {
     return this.httpClient.get<ReceiptModel[]>(`${this.baseURL}receipt/`);
+  }
+
+  /**
+   * Paginated receipts for dashboard/list views.
+   */
+  getDashboardReceipts(
+    page = 1,
+    limit = 100,
+  ): Observable<{ items: ReceiptModel[]; total: number }> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    return this.httpClient.get<{ items: ReceiptModel[]; total: number }>(
+      `${this.baseURL}dashboard/receipts`,
+      { params },
+    );
   }
 
   saveReceipt(

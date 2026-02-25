@@ -136,6 +136,11 @@
   --card-accent-color-light: #90a4ae;
 }
 
+.total-enrolment-card {
+  --card-accent-color: #3f51b5;
+  --card-accent-color-light: #5c6bc0;
+}
+
 .summary-card-content {
   padding: 2rem;
   display: flex;
@@ -204,6 +209,31 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
+}
+
+.enrolment-table-card {
+  grid-column: 1 / -1;
+}
+
+.enrolment-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.enrolment-summary-table th,
+.enrolment-summary-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.enrolment-summary-table th {
+  font-weight: 600;
+  color: #555;
+}
+
+.enrolment-summary-table td {
+  color: #333;
 }
 
 /* Table Cards */

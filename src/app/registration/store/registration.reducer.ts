@@ -78,6 +78,21 @@ export const registrationReducer = createReducer(
     errorMessage: error.message,
     isLoading: false,
   })),
+  on(registrationActions.searchStudents, (state) => ({
+    ...state,
+    isLoading: true,
+  })),
+  on(registrationActions.searchStudentsSuccess, (state, { students }) => ({
+    ...state,
+    students,
+    isLoading: false,
+    errorMessage: '',
+  })),
+  on(registrationActions.searchStudentsFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
+  })),
   on(registrationActions.addStudentAction, (state, { student }) => ({
     ...state,
     errorMessage: '',

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, shareReplay } from 'rxjs';
 import { StudentsModel } from '../models/students.model';
@@ -14,6 +14,25 @@ export class StudentsService {
 
   getAllStudents(): Observable<StudentsModel[]> {
     return this.httpClient.get<StudentsModel[]>(this.baseUrl);
+  }
+
+  /**
+   * Paginated, server-side student search for large datasets and typeahead.
+   */
+  searchStudents(
+    query: string,
+    page = 1,
+    limit = 50
+  ): Observable<{ items: StudentsModel[]; total: number }> {
+    let params = new HttpParams()
+      .set('q', query ?? '')
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    return this.httpClient.get<{ items: StudentsModel[]; total: number }>(
+      `${this.baseUrl}search`,
+      { params }
+    );
   }
 
   addStudent(student: StudentsModel): Observable<StudentsModel> {

@@ -17,6 +17,7 @@ import { StudentIdCardComponent } from './student-id-card/student-id-card.compon
 import {
   deleteStudentAction,
   fetchStudents,
+  searchStudents,
 } from '../store/registration.actions';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -64,7 +65,8 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {
-    this.store.dispatch(fetchStudents());
+    // Initial load: first page with empty query
+    this.store.dispatch(searchStudents({ query: '', page: 1, limit: 50 }));
   }
 
   ngOnInit(): void {
@@ -104,10 +106,9 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(searchTerm => {
-      this.dataSource.filter = searchTerm.trim().toLowerCase();
-      if (this.dataSource.paginator) {
-        this.dataSource.paginator.firstPage();
-      }
+      this.store.dispatch(
+        searchStudents({ query: searchTerm.trim(), page: 1, limit: 50 })
+      );
     });
   }
 
