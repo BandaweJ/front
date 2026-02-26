@@ -40,7 +40,7 @@
     <mat-card class="table-card">
       <mat-card-content>
         <div class="table-container">
-          <table mat-table [dataSource]="reportReleases$ | async" class="report-release-table">
+          <table mat-table [dataSource]="(reportReleases$ | async) || []" class="report-release-table">
             <!-- Term Number Column -->
             <ng-container matColumnDef="termNumber">
               <th mat-header-cell *matHeaderCellDef>Term</th>
