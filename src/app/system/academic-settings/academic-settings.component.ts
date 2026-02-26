@@ -21,6 +21,7 @@ import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { Title } from '@angular/platform-browser';
 import { EnrolmentModule } from 'src/app/enrolment/enrolment.module';
 import { MarksModule } from 'src/app/marks/marks.module';
+import { ReportReleaseManagementModule } from '../components/report-release-management/report-release-management.module';
 import { GradingSystemService, GradingSystem, GradeThresholds } from '../services/grading-system.service';
 import { HttpClient } from '@angular/common/http';
 
@@ -45,6 +46,7 @@ import { HttpClient } from '@angular/common/http';
     MatTableModule,
     EnrolmentModule,
     MarksModule,
+    ReportReleaseManagementModule,
   ],
   templateUrl: './academic-settings.component.html',
   styleUrls: ['./academic-settings.component.scss'],
