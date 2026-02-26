@@ -25,6 +25,7 @@ import { FinanceModule } from './finance/finance.module';
 import { SharedModule } from './shared/shared.module';
 import { UserManagementModule } from './user-management/user-management.module';
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
+import { reportReleaseReducer } from './system/store/report-release.reducer';
 
 @NgModule({
   declarations: [
@@ -51,7 +52,9 @@ import { ResultsAnalysisComponent } from './results-analysis/results-analysis.co
     BrowserAnimationsModule,
     NgChartsModule,
     SharedModule,
-    StoreModule.forRoot({}),
+    StoreModule.forRoot({
+      reportRelease: reportReleaseReducer
+    }),
     StoreDevtoolsModule.instrument({
       maxAge: 25,
       // logOnly: !isDevMode(),

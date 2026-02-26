@@ -6,27 +6,27 @@ export const selectReportReleaseState = createFeatureSelector<ReportReleaseState
 
 export const selectReportReleases = createSelector(
   selectReportReleaseState,
-  (state: ReportReleaseState) => state.reportReleases
+  (state: ReportReleaseState) => state?.reportReleases || []
 );
 
 export const selectReportReleasesLoading = createSelector(
   selectReportReleaseState,
-  (state: ReportReleaseState) => state.loading
+  (state: ReportReleaseState) => state?.loading || false
 );
 
 export const selectReportReleasesError = createSelector(
   selectReportReleaseState,
-  (state: ReportReleaseState) => state.error
+  (state: ReportReleaseState) => state?.error || null
 );
 
 export const selectReportReleasesSuccess = createSelector(
   selectReportReleaseState,
-  (state: ReportReleaseState) => state.success
+  (state: ReportReleaseState) => state?.success || null
 );
 
 export const selectGeneratedSessions = createSelector(
   selectReportReleaseState,
-  (state: ReportReleaseState) => state.generatedSessions
+  (state: ReportReleaseState) => state?.generatedSessions || []
 );
 
 export const selectReportReleaseById = createSelector(
