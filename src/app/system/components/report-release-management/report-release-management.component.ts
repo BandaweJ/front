@@ -145,7 +145,7 @@ export class ReportReleaseManagementComponent implements OnInit, OnDestroy {
   toggleReleaseStatus(reportRelease: ReportReleaseSettings): void {
     const updateDto = {
       isReleased: !reportRelease.isReleased,
-      releaseNotes: reportRelease.releaseNotes,
+      releaseNotes: reportRelease.releaseNotes || undefined,
       sendNotification: true
     };
 
