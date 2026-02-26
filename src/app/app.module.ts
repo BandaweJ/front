@@ -26,6 +26,7 @@ import { SharedModule } from './shared/shared.module';
 import { UserManagementModule } from './user-management/user-management.module';
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 import { reportReleaseReducer } from './system/store/report-release.reducer';
+import { ReportReleaseEffects } from './system/store/report-release.effects';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,7 @@ import { reportReleaseReducer } from './system/store/report-release.reducer';
       trace: false,
       traceLimit: 75,
     }),
-    EffectsModule.forRoot([]),
+    EffectsModule.forRoot([ReportReleaseEffects]),
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
