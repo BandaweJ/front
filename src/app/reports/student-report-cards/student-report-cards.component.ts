@@ -148,6 +148,25 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
   }
 
   onReportSelect(): void {
+    // Check if the selected report is term 1 2026 mid-term
+    if (
+      this.selectedTerm === 1 &&
+      this.selectedYear === 2026 &&
+      this.selectedExamType === ExamType.midterm
+    ) {
+      // Clear any previously selected report
+      this.store.dispatch(
+        ReportsActions.viewReportsActions.clearSelectedReport()
+      );
+      // Show the specific message for unreleased reports
+      this.store.dispatch(
+        ReportsActions.viewReportsActions.setReportsErrorMsg({
+          errorMsg: 'Reports for this exam session haven\'t been released yet',
+        })
+      );
+      return;
+    }
+
     // Combine selected filters with student reports and invoices to determine selection and display eligibility
     combineLatest([this.studentReports$, this.allInvoices$])
       .pipe(
