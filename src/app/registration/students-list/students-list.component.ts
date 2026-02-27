@@ -128,7 +128,7 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
         const surnameMatch = data.surname && data.surname.toLowerCase().includes(searchLower);
         const studentNumberMatch = data.studentNumber && data.studentNumber.toLowerCase().includes(searchLower);
         
-        return nameMatch || surnameMatch || studentNumberMatch;
+        return Boolean(nameMatch || surnameMatch || studentNumberMatch);
       };
       
       this.dataSource.data = searchResults;
