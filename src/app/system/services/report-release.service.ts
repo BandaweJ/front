@@ -71,7 +71,7 @@ export class ReportReleaseService {
 
   // Generate exam sessions from existing terms in database
   generateFromTerms(): Observable<ReportReleaseSettings[]> {
-    return this.http.post<ReportReleaseSettings[]>(`${this.apiUrl}/system/report-releases/generate-sessions-from-terms`, {});
+    return this.http.post<ReportReleaseSettings[]>(`${this.apiUrl}/system/report-releases/generate-from-terms`, {});
   }
 
   // Legacy method - generate exam sessions for current and next year
