@@ -185,14 +185,11 @@ export class FinanceEffects {
   fetchAllInvoices$ = createEffect(() =>
     this.actions$.pipe(
       ofType(invoiceActions.fetchAllInvoices),
-      switchMap((data) =>
-        // Use paginated invoices to avoid loading entire history into memory
-        this.paymentsService.getDashboardInvoices(1, 200).pipe(
-          map((allInvoices) => {
-            return invoiceActions.fetchAllInvoicesSuccess({
-              allInvoices: allInvoices.items,
-            });
-          }),
+      switchMap(() =>
+        this.paymentsService.getAllInvoices().pipe(
+          map((allInvoices) =>
+            invoiceActions.fetchAllInvoicesSuccess({ allInvoices })
+          ),
           catchError((error: HttpErrorResponse) =>
             of(invoiceActions.fetchAllInvoicesFail({ ...error }))
           )
@@ -473,13 +470,10 @@ export class FinanceEffects {
     this.actions$.pipe(
       ofType(receiptActions.fetchAllReceipts),
       switchMap(() =>
-        // Use paginated receipts to avoid loading entire history into memory
-        this.paymentsService.getDashboardReceipts(1, 200).pipe(
-          map((allReceipts) => {
-            return receiptActions.fetchAllReceiptsSuccess({
-              allReceipts: allReceipts.items,
-            });
-          }),
+        this.paymentsService.getAllReceipts().pipe(
+          map((allReceipts) =>
+            receiptActions.fetchAllReceiptsSuccess({ allReceipts })
+          ),
           catchError((error: HttpErrorResponse) =>
             of(receiptActions.fetchAllReceiptsFail({ ...error }))
           )
