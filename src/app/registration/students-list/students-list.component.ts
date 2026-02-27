@@ -10,14 +10,12 @@ import { MatSort } from '@angular/material/sort';
 import {
   selectIsLoading,
   selectRegErrorMsg,
-  selectStudents,
 } from '../store/registration.selectors';
 import { AddEditStudentComponent } from './add-edit-student/add-edit-student.component';
 import { StudentIdCardComponent } from './student-id-card/student-id-card.component';
 import {
   deleteStudentAction,
   fetchStudents,
-  searchStudents,
 } from '../store/registration.actions';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -67,8 +65,8 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private studentSearchService: StudentSearchService
   ) {
-    // Initial load: first page with empty query
-    this.store.dispatch(searchStudents({ query: '', page: 1, limit: 50 }));
+    // Initial load: trigger search with empty query to load all students
+    this.searchSubject.next('');
   }
 
   ngOnInit(): void {
