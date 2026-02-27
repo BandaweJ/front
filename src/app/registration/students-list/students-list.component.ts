@@ -120,7 +120,9 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
     ]).pipe(
       takeUntil(this.destroy$)
     ).subscribe(([search, gender, searchResults]) => {
-      this.dataSource.filterPredicate = (data: StudentsModel, filter: string) => {
+      this.dataSource.filterPredicate = (data: StudentsModel, filter: string): boolean => {
+        if (!filter) return true;
+        
         const searchLower = filter.toLowerCase();
         const nameMatch = data.name && data.name.toLowerCase().includes(searchLower);
         const surnameMatch = data.surname && data.surname.toLowerCase().includes(searchLower);
