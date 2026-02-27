@@ -35,7 +35,6 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
   private searchSubject = new Subject<string>();
   searchResults$!: Observable<StudentsModel[]>;
 
-  students$!: Observable<StudentsModel[]>;
   errorMsg$!: Observable<string>;
   isLoading$ = this.store.select(selectIsLoading);
 
@@ -90,15 +89,15 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private initializeForm(): void {
-    this.students$ = this.store.select(selectStudents);
     this.errorMsg$ = this.store.select(selectRegErrorMsg);
   }
 
   private setupObservables(): void {
-    this.students$.pipe(
+    // Remove old NgRx store dependency - we now use searchResults$
+    this.searchResults$.pipe(
       takeUntil(this.destroy$)
     ).subscribe((students) => {
-      this.dataSource.data = students;
+      this.dataSource.data = students || [];
       this.cdr.markForCheck();
     });
   }
@@ -120,19 +119,16 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
     ]).pipe(
       takeUntil(this.destroy$)
     ).subscribe(([search, gender, searchResults]) => {
-      this.dataSource.filterPredicate = (data: StudentsModel, filter: string): boolean => {
-        if (!filter) return true;
-        
-        const searchLower = filter.toLowerCase();
-        const nameMatch = data.name && data.name.toLowerCase().includes(searchLower);
-        const surnameMatch = data.surname && data.surname.toLowerCase().includes(searchLower);
-        const studentNumberMatch = data.studentNumber && data.studentNumber.toLowerCase().includes(searchLower);
-        
-        return Boolean(nameMatch || surnameMatch || studentNumberMatch);
-      };
+      // Apply gender filter if specified
+      let filteredResults = searchResults || [];
       
-      this.dataSource.data = searchResults;
+      if (gender && gender !== '') {
+        filteredResults = filteredResults.filter(student => student.gender === gender);
+      }
+      
+      this.dataSource.data = filteredResults;
       this.cdr.markForCheck();
+      
       if (this.dataSource.paginator) {
         this.dataSource.paginator.firstPage();
       }
@@ -142,6 +138,12 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
   onSearchChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchSubject.next(value);
+  }
+
+  // Refresh search results after student edit
+  refreshSearchResults(): void {
+    const currentSearchValue = this.filterForm.get('search')?.value || '';
+    this.searchSubject.next(currentSearchValue);
   }
 
   openAddEditStudentDialog(): void {
@@ -159,6 +161,8 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
           duration: 3000,
           verticalPosition: 'top'
         });
+        // Refresh search results after adding/editing
+        this.refreshSearchResults();
       }
     });
   }
@@ -189,6 +193,8 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
           duration: 3000,
           verticalPosition: 'top'
         });
+        // Refresh search results after editing
+        this.refreshSearchResults();
       }
     });
   }
