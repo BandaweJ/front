@@ -22,6 +22,7 @@ import {
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
+import { StudentSearchService } from '../../profiles/services/student-search.service';
 
 @Component({
   selector: 'app-students-list',
@@ -32,6 +33,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
+  searchResults$!: Observable<StudentsModel[]>;
 
   students$!: Observable<StudentsModel[]>;
   errorMsg$!: Observable<string>;
@@ -63,7 +65,8 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
     private snackBar: MatSnackBar,
     public title: Title,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private studentSearchService: StudentSearchService
   ) {
     // Initial load: first page with empty query
     this.store.dispatch(searchStudents({ query: '', page: 1, limit: 50 }));
@@ -101,38 +104,33 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private setupSearch(): void {
-    this.searchSubject.pipe(
+    this.searchResults$ = this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe(searchTerm => {
-      this.store.dispatch(
-        searchStudents({ query: searchTerm.trim(), page: 1, limit: 50 })
-      );
-    });
+      takeUntil(this.destroy$),
+      switchMap(query => this.studentSearchService.searchStudents(query))
+    );
   }
 
   private setupFiltering(): void {
     combineLatest([
       this.filterForm.get('search')!.valueChanges.pipe(startWith('')),
-      this.filterForm.get('gender')!.valueChanges.pipe(startWith(''))
+      this.filterForm.get('gender')!.valueChanges.pipe(startWith('')),
+      this.searchResults$
     ]).pipe(
       takeUntil(this.destroy$)
-    ).subscribe(([search, gender]) => {
-      this.dataSource.filterPredicate = (data: StudentsModel, filter: string) => {
-        const searchMatch = !search || 
-          data.name.toLowerCase().includes(search.toLowerCase()) ||
-          data.surname.toLowerCase().includes(search.toLowerCase()) ||
-          data.studentNumber.toLowerCase().includes(search.toLowerCase()) ||
-          data.cell.toLowerCase().includes(search.toLowerCase()) ||
-          data.email?.toLowerCase().includes(search.toLowerCase());
+    ).subscribe(([search, gender, searchResults]) => {
+      this.dataSource.filterPredicate = (data: StudentSearchResult, filter: string) => {
+        const searchLower = filter.toLowerCase();
+        const nameMatch = data.name && data.name.toLowerCase().includes(searchLower);
+        const surnameMatch = data.surname && data.surname.toLowerCase().includes(searchLower);
+        const studentNumberMatch = data.studentNumber && data.studentNumber.toLowerCase().includes(searchLower);
         
-        const genderMatch = !gender || data.gender === gender;
-        
-        return searchMatch && genderMatch;
+        return nameMatch || surnameMatch || studentNumberMatch;
       };
       
-      this.dataSource.filter = 'trigger';
+      this.dataSource.data = searchResults;
+      this.cdr.markForCheck();
       if (this.dataSource.paginator) {
         this.dataSource.paginator.firstPage();
       }
