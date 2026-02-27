@@ -584,6 +584,41 @@
   box-shadow: 0 8px 32px rgba(79, 172, 254, 0.3);
 }
 
+/* Cards 4–7: light background — use dark text so labels and values are visible */
+.collection-rate-card,
+.avg-invoice-card,
+.total-transactions-card,
+.total-enrolment-card {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.collection-rate-card .card-label,
+.avg-invoice-card .card-label,
+.total-transactions-card .card-label,
+.total-enrolment-card .card-label {
+  color: #444;
+}
+
+.collection-rate-card .card-value,
+.avg-invoice-card .card-value,
+.total-transactions-card .card-value,
+.total-enrolment-card .card-value {
+  color: #1a1a1a;
+  background: none;
+  -webkit-text-fill-color: #1a1a1a;
+}
+
+.collection-rate-card .card-icon,
+.avg-invoice-card .card-icon,
+.total-transactions-card .card-icon,
+.total-enrolment-card .card-icon {
+  color: var(--card-accent-color);
+  -webkit-text-fill-color: initial;
+  background: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
 /* --- New Styles for Charts and Tables --- */
 .chart-card {
   padding: 2rem;
