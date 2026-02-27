@@ -138,6 +138,27 @@ export class ReportReleaseEffects {
     )
   );
 
+  // Generate Sessions From Terms Effect
+  generateFromTerms$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ReportReleaseActions.generateFromTerms),
+      mergeMap(() =>
+        this.reportReleaseService.generateFromTerms().pipe(
+          map((reportReleases) =>
+            ReportReleaseActions.generateFromTermsSuccess({ reportReleases })
+          ),
+          catchError((error) =>
+            of(
+              ReportReleaseActions.generateFromTermsFailure({
+                error: error.message || 'Failed to generate sessions from terms',
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
   // Process Scheduled Releases Effect
   processScheduledReleases$ = createEffect(() =>
     this.actions$.pipe(

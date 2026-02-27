@@ -150,6 +150,26 @@ const _reportReleaseReducer = createReducer(
     error,
   })),
 
+  // Generate Sessions From Terms Actions
+  on(ReportReleaseActions.generateFromTerms, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+    success: null,
+  })),
+  on(ReportReleaseActions.generateFromTermsSuccess, (state, { reportReleases }) => ({
+    ...state,
+    reportReleases: [...state.reportReleases, ...reportReleases],
+    loading: false,
+    error: null,
+    success: 'Report release settings generated from terms successfully',
+  })),
+  on(ReportReleaseActions.generateFromTermsFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+  })),
+
   // Process Scheduled Releases Actions
   on(ReportReleaseActions.processScheduledReleases, (state) => ({
     ...state,
