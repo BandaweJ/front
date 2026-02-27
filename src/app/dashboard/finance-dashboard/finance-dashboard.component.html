@@ -154,18 +154,23 @@
       </mat-card-header>
       <mat-card-content>
         <div class="enrolment-table-wrapper">
-          <table class="enrolment-summary-table" *ngIf="(enrolClassTotals$ | async) as enrolRows; else noEnrolData">
+          <table class="enrolment-summary-table compact" *ngIf="(enrolClassTotals$ | async) as enrolRows; else noEnrolData">
             <thead>
               <tr>
                 <th>Class</th>
-                <th>Total Students</th>
+                <th>Total</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let row of enrolRows">
-                <td>{{ row.className }}</td>
-                <td>{{ row.total }}</td>
-              </tr>
+              <ng-container *ngFor="let row of enrolRows">
+                <tr *ngIf="row.kind === 'form'" class="form-group-header">
+                  <td colspan="2">{{ row.formLabel }}</td>
+                </tr>
+                <tr *ngIf="row.kind === 'class'">
+                  <td>{{ row.className }}</td>
+                  <td>{{ row.total }}</td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
         </div>

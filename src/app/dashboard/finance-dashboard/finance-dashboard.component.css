@@ -236,6 +236,29 @@
   color: #333;
 }
 
+.enrolment-summary-table.compact th,
+.enrolment-summary-table.compact td {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.enrolment-summary-table.compact .form-group-header td {
+  font-weight: 600;
+  color: #555;
+  background: rgba(0, 0, 0, 0.04);
+  padding-top: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.enrolment-summary-table.compact .form-group-header + tr td {
+  border-top: none;
+}
+
+.enrolment-table-wrapper {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
 /* Table Cards */
 .table-card {
   border-radius: 16px;

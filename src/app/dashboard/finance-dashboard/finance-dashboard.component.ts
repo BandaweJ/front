@@ -41,7 +41,9 @@ import {
 import {
   selectCurrentTerm,
   selectEnrolsStats,
+  selectClasses,
 } from 'src/app/enrolment/store/enrolment.selectors';
+import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { EnrolStats } from 'src/app/enrolment/models/enrol-stats.model';
 
 @Component({
@@ -96,9 +98,10 @@ export class FinanceDashboardComponent
   collectionRate$!: Observable<number>;
   totalTransactions$!: Observable<number>;
 
-  // Enrolment statistics for finance view
+  // Enrolment statistics for finance view (grouped by form, sorted ascending)
   enrolStats$!: Observable<EnrolStats | null>;
-  enrolClassTotals$!: Observable<{ className: string; total: number }[]>;
+  /** Rows for enrolment table: form headers and class rows, grouped by form and sorted ascending */
+  enrolClassTotals$!: Observable<Array<{ kind: 'form'; form: number; formLabel: string } | { kind: 'class'; className: string; total: number }>>;
   enrolTotalStudents$!: Observable<number>;
 
   currentSort$ = this.sortSubject.asObservable();
@@ -343,24 +346,50 @@ export class FinanceDashboardComponent
       map((data) => data.length)
     );
 
-    // Enrolment statistics: total students per class and overall total
+    // Enrolment statistics: total students per class, grouped by form and sorted ascending
     this.enrolStats$ = this.store.pipe(select(selectEnrolsStats));
 
-    this.enrolClassTotals$ = this.enrolStats$.pipe(
-      map((stats) => {
-        if (!stats) {
+    this.enrolClassTotals$ = combineLatest([
+      this.store.pipe(select(selectEnrolsStats)),
+      this.store.pipe(select(selectClasses)),
+    ]).pipe(
+      map(([stats, classes]: [EnrolStats | null, ClassesModel[]]) => {
+        if (!stats || !stats.clas) {
           return [];
         }
-        return stats.clas.map((className, index) => {
-          const boys = stats.boys[index] || 0;
-          const girls = stats.girls[index] || 0;
-          return { className, total: boys + girls };
+        const s = stats;
+        const classList = classes || [];
+        const getForm = (className: string): number =>
+          classList.find((c) => c.name === className)?.form ?? 999;
+
+        const rows = s.clas.map((className, index) => {
+          const boys = s.boys[index] || 0;
+          const girls = s.girls[index] || 0;
+          return { className, total: boys + girls, form: getForm(className) };
         });
+        rows.sort((a, b) => a.form - b.form || a.className.localeCompare(b.className));
+
+        const result: Array<{ kind: 'form'; form: number; formLabel: string } | { kind: 'class'; className: string; total: number }> = [];
+        let currentForm = -1;
+        for (const row of rows) {
+          if (row.form !== currentForm) {
+            currentForm = row.form;
+            result.push({ kind: 'form', form: row.form, formLabel: `Form ${row.form}` });
+          }
+          result.push({ kind: 'class', className: row.className, total: row.total });
+        }
+        return result;
       })
     );
 
-    this.enrolTotalStudents$ = this.enrolClassTotals$.pipe(
-      map((rows) => rows.reduce((sum, row) => sum + row.total, 0))
+    this.enrolTotalStudents$ = this.store.pipe(
+      select(selectEnrolsStats),
+      map((stats) => {
+        if (!stats || !stats.boys) return 0;
+        const boysTotal = (stats.boys || []).reduce((a, b) => a + b, 0);
+        const girlsTotal = (stats.girls || []).reduce((a, b) => a + b, 0);
+        return boysTotal + girlsTotal;
+      })
     );
   }
 
