@@ -71,8 +71,8 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeForm();
-    this.setupObservables();
-    this.setupSearch();
+    this.setupSearch();  // Setup search first to initialize searchResults$
+    this.setupObservables();  // Then setup observables
     this.setupFiltering();
   }
 
