@@ -766,12 +766,14 @@ export const getFeesCollectionReport = (filters: FeesCollectionReportFilters) =>
 export const selectAllCombinedFinanceData = createSelector(
   selectAllInvoices,
   selectAllNonVoidedReceipts,
-  (invoices: InvoiceModel[], receipts: ReceiptModel[]): FinanceDataModel[] => {
+  (invoices: InvoiceModel[] | null | undefined, receipts: ReceiptModel[] | null | undefined): FinanceDataModel[] => {
     const combined: FinanceDataModel[] = [];
+    const safeInvoices = invoices ?? [];
+    const safeReceipts = receipts ?? [];
 
     // Map Invoices to FinanceDataModel (filter out voided invoices)
-    if (invoices) {
-      invoices
+    if (safeInvoices.length > 0) {
+      safeInvoices
         .filter((invoice) => !invoice.isVoided) // Filter out voided invoices
         .forEach((invoice) => {
           combined.push({
@@ -799,8 +801,8 @@ export const selectAllCombinedFinanceData = createSelector(
     }
 
     // Map Receipts to FinanceDataModel (now including all non-voided receipts)
-    if (receipts) {
-      receipts.forEach((receipt) => {
+    if (safeReceipts.length > 0) {
+      safeReceipts.forEach((receipt) => {
         combined.push({
           id: receipt.receiptNumber,
           transactionDate: receipt.paymentDate,

@@ -295,15 +295,18 @@ export class FinanceDashboardComponent
       error: (error) => this.handleError('Failed to filter and sort data')
     });
 
-    // Setup summary observables (using filtered data)
-    this.totalInvoices$ = filteredData$.pipe(
+    // Setup summary observables (using filtered data; guard against null)
+    const safeFilteredData$ = filteredData$.pipe(
+      map((data) => (data != null && Array.isArray(data) ? data : []))
+    );
+    this.totalInvoices$ = safeFilteredData$.pipe(
       map((data) =>
         data
           .filter((item) => item.type === 'Invoice')
           .reduce((acc, item) => acc + +item.amount, 0)
       )
     );
-    this.totalPayments$ = filteredData$.pipe(
+    this.totalPayments$ = safeFilteredData$.pipe(
       map((data) =>
         data
           .filter((item) => item.type === 'Payment')
@@ -316,7 +319,7 @@ export class FinanceDashboardComponent
     ]).pipe(map(([invoices, payments]) => invoices - payments));
 
     // Additional financial metrics (using filtered data)
-    this.averageInvoiceAmount$ = filteredData$.pipe(
+    this.averageInvoiceAmount$ = safeFilteredData$.pipe(
       map((data) => {
         const invoices = data.filter((item) => item.type === 'Invoice');
         return invoices.length > 0 
@@ -325,7 +328,7 @@ export class FinanceDashboardComponent
       })
     );
 
-    this.averagePaymentAmount$ = filteredData$.pipe(
+    this.averagePaymentAmount$ = safeFilteredData$.pipe(
       map((data) => {
         const payments = data.filter((item) => item.type === 'Payment');
         return payments.length > 0 
@@ -343,7 +346,7 @@ export class FinanceDashboardComponent
       })
     );
 
-    this.totalTransactions$ = filteredData$.pipe(
+    this.totalTransactions$ = safeFilteredData$.pipe(
       map((data) => data.length)
     );
 

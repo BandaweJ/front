@@ -63,7 +63,8 @@ export class SearchFinanceEntityComponent implements OnInit, OnDestroy {
   ): FinanceDataModel[] {
     const results: FinanceDataModel[] = [];
     allData$.subscribe((data) => {
-      data.forEach((item) => {
+      const safe = data ?? [];
+      safe.forEach((item) => {
         // Check multiple fields for a match
         const searchString = `${item.id} ${item.description} ${item.studentName}`;
         if (searchString.toLowerCase().includes(filterValue)) {
@@ -80,7 +81,8 @@ export class SearchFinanceEntityComponent implements OnInit, OnDestroy {
   ): FinanceDataModel[] {
     const results: FinanceDataModel[] = [];
     allData$.subscribe((data) => {
-      results.push(...data.slice(0, 5));
+      const safe = data ?? [];
+      results.push(...safe.slice(0, 5));
     });
     return results;
   }
