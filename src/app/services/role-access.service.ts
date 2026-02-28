@@ -26,10 +26,11 @@ export class RoleAccessService {
 
   /**
    * Check if user has any of the specified roles
+   * Dev role has access to everything, so always true when role is dev
    */
   hasAnyRole$(...roles: string[]): Observable<boolean> {
     return this.getCurrentRole$().pipe(
-      map(role => role !== null && roles.includes(role))
+      map(role => role !== null && (role === ROLES.dev || roles.includes(role)))
     );
   }
 
@@ -53,16 +54,18 @@ export class RoleAccessService {
 
   /**
    * Check if user has a specific role (synchronous version using current role)
+   * Dev is treated as having every role for access control
    */
   hasRole(role: string, currentRole: string | null): boolean {
-    return currentRole === role;
+    return currentRole === role || currentRole === ROLES.dev;
   }
 
   /**
    * Check if user has any of the specified roles (synchronous version)
+   * Dev role has access to everything
    */
   hasAnyRole(currentRole: string | null, ...roles: string[]): boolean {
-    return currentRole !== null && roles.includes(currentRole);
+    return currentRole !== null && (currentRole === ROLES.dev || roles.includes(currentRole));
   }
 
   /**
@@ -221,6 +224,9 @@ export class RoleAccessService {
       this.store.select(selectUser)
     ]).pipe(
       map(([role, user]) => {
+        if (role === ROLES.dev) {
+          return true;
+        }
         // First, check if user has permissions array and if it includes the required permission
         if (user?.permissions && Array.isArray(user.permissions)) {
           const hasPermission = user.permissions.includes(permissionName);

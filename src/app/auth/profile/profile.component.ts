@@ -55,7 +55,7 @@ export class ProfileComponent implements OnInit {
       });
 
     this.userDetails$.subscribe((details) => {
-      if (this.currentUserRole === ROLES.teacher) {
+      if (this.currentUserRole === ROLES.teacher || this.currentUserRole === ROLES.dev) {
         this.teacher = details as TeachersModel;
       } else if (this.currentUserRole === ROLES.student) {
         this.student = details as StudentsModel;
@@ -67,7 +67,7 @@ export class ProfileComponent implements OnInit {
 
   // Helper functions remain the same as they now rely on currentUserRole
   isTeacher(): boolean {
-    return this.currentUserRole === ROLES.teacher;
+    return this.currentUserRole === ROLES.teacher || this.currentUserRole === ROLES.dev;
   }
 
   isStudent(): boolean {

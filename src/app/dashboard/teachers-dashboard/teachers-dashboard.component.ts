@@ -89,7 +89,7 @@ export class TeachersDashboardComponent {
               ROLES.hod,
               ROLES.reception,
               ROLES.teacher,
-              ROLES.reception,
+              ROLES.dev,
             ].includes(user!.role)
           ) {
             this.store.dispatch(fetchTeachers());
@@ -173,7 +173,7 @@ export class TeachersDashboardComponent {
   // Centralized navigation method for role-based access
   private _navigateToRoleBased(path: string): void {
     if (
-      [ROLES.admin, ROLES.hod, ROLES.reception, ROLES.teacher].includes(
+      [ROLES.admin, ROLES.hod, ROLES.reception, ROLES.teacher, ROLES.dev].includes(
         this.role
       )
     ) {
@@ -182,11 +182,11 @@ export class TeachersDashboardComponent {
   }
 
   navigateToTeachersSummary(): void {
-    if (this.role === ROLES.admin) this._navigateToRoleBased('/teachers');
+    if (this.role === ROLES.admin || this.role === ROLES.dev) this._navigateToRoleBased('/teachers');
   }
 
   navigateToStudentsSummary(): void {
-    if (this.role === ROLES.admin) this._navigateToRoleBased('/students');
+    if (this.role === ROLES.admin || this.role === ROLES.dev) this._navigateToRoleBased('/students');
   }
 
   navigateToClassLists(): void {

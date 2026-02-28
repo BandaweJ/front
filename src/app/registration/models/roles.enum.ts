@@ -7,4 +7,5 @@ export enum ROLES {
   hod = 'hod',
   auditor = 'auditor',
   director = 'director',
+  dev = 'dev',
 }

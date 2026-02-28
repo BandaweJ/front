@@ -63,7 +63,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               ROLES.hod,
               ROLES.reception,
               ROLES.teacher,
-              ROLES.reception,
+              ROLES.dev,
             ].includes(user!.role)
           ) {
           }

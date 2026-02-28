@@ -91,7 +91,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.title.setTitle('Calendar');
     
     this.isAdmin$.subscribe(admin => {
-      this.isAdmin = admin === ROLES.admin || admin === ROLES.director;
+      this.isAdmin = admin === ROLES.admin || admin === ROLES.director || admin === ROLES.dev;
       this.cdr.markForCheck();
     });
 

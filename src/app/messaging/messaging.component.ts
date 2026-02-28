@@ -77,8 +77,8 @@ export class MessagingComponent implements OnInit, OnDestroy {
     this.roleAccess.getCurrentRole$()
       .pipe(takeUntil(this.destroy$))
       .subscribe(role => {
-        this.isAdmin = role === ROLES.admin;
-        this.isDirector = role === ROLES.director;
+        this.isAdmin = role === ROLES.admin || role === ROLES.dev;
+        this.isDirector = role === ROLES.director || role === ROLES.dev;
         this.cdr.markForCheck();
       });
 

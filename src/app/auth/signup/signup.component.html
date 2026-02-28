@@ -62,7 +62,7 @@
         <!-- ID/Email Field -->
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>{{
-            role?.value === 'teacher'
+            role?.value === 'teacher' || role?.value === 'dev'
             ? 'I.D Number'
             : role?.value === 'student'
             ? 'Student Number'
@@ -75,7 +75,7 @@
             [placeholder]="getPlaceholder()"
             [class.error]="id?.invalid && id?.touched" />
           <mat-icon matPrefix class="field-icon">
-            {{ role?.value === 'teacher' ? 'badge' : role?.value === 'student' ? 'school' : 'email' }}
+            {{ role?.value === 'teacher' || role?.value === 'dev' ? 'badge' : role?.value === 'student' ? 'school' : 'email' }}
           </mat-icon>
           <mat-hint *ngIf="!id?.invalid || !id?.touched">{{ getHint() }}</mat-hint>
           

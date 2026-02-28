@@ -194,7 +194,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   // Helper methods for dynamic field labels and hints
   getPlaceholder(): string {
     const role = this.role?.value;
-    if (role === 'teacher') {
+    if (role === 'teacher' || role === 'dev') {
       return '03123456F98';
     } else if (role === 'student') {
       return 'S2405234';
@@ -206,7 +206,7 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   getHint(): string {
     const role = this.role?.value;
-    if (role === 'teacher') {
+    if (role === 'teacher' || role === 'dev') {
       return 'Format: 03123456F98';
     } else if (role === 'student') {
       return 'Format: S2405234';
@@ -218,7 +218,7 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   getFieldLabel(): string {
     const role = this.role?.value;
-    if (role === 'teacher') {
+    if (role === 'teacher' || role === 'dev') {
       return 'I.D Number';
     } else if (role === 'student') {
       return 'Student Number';
