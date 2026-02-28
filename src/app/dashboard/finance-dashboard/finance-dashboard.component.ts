@@ -268,7 +268,7 @@ export class FinanceDashboardComponent
       allData$,
       this.filterSubject.asObservable(),
     ]).pipe(
-      map(([data, filters]) => this.applyFilters(data, filters)),
+      map(([data, filters]) => this.applyFilters(data ?? [], filters)),
       takeUntil(this.ngUnsubscribe)
     );
 
@@ -277,12 +277,13 @@ export class FinanceDashboardComponent
       filteredData$,
       this.sortSubject.asObservable(),
     ]).pipe(
-      map(([filteredData, sort]) => this.applySorting(filteredData, sort)),
+      map(([filteredData, sort]) => this.applySorting(filteredData ?? [], sort)),
       tap((data) => {
-        this.invoicesDataSource.data = data.filter(
+        const safe = Array.isArray(data) ? data : [];
+        this.invoicesDataSource.data = safe.filter(
           (item) => item.type === 'Invoice'
         );
-        this.paymentsDataSource.data = data.filter(
+        this.paymentsDataSource.data = safe.filter(
           (item) => item.type === 'Payment'
         );
         this.cdr.markForCheck();
@@ -394,6 +395,7 @@ export class FinanceDashboardComponent
   }
 
   private processChartData(data: FinanceDataModel[]): void {
+    if (!data || !Array.isArray(data)) return;
     const monthlyTotals = new Map<
       string,
       { invoices: number; payments: number }
@@ -509,6 +511,7 @@ export class FinanceDashboardComponent
     data: FinanceDataModel[],
     filters: FinanceFilter
   ): FinanceDataModel[] {
+    if (!data || !Array.isArray(data)) return [];
     if (!filters || Object.keys(filters).length === 0) {
       return data;
     }
@@ -534,6 +537,7 @@ export class FinanceDashboardComponent
     data: FinanceDataModel[],
     sort: string
   ): FinanceDataModel[] {
+    if (!data || !Array.isArray(data)) return [];
     const sortedData = [...data];
     switch (sort) {
       case 'dateDesc':

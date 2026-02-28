@@ -54,10 +54,13 @@ export class RoleAccessService {
 
   /**
    * Check if user has a specific role (synchronous version using current role)
-   * Dev is treated as having every role for access control
+   * Dev is treated as having every role for access control, except student (dev does not access student dashboard).
    */
   hasRole(role: string, currentRole: string | null): boolean {
-    return currentRole === role || currentRole === ROLES.dev;
+    if (currentRole === null) return false;
+    if (currentRole === role) return true;
+    if (currentRole === ROLES.dev && role !== ROLES.student) return true;
+    return false;
   }
 
   /**
