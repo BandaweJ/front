@@ -187,7 +187,12 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
-    this.subjects$ = this.store.select(selectSubjects);
+    this.subjects$ = this.store.select(selectSubjects).pipe(
+      map((subjects) => {
+        const list = subjects ?? [];
+        return [...list].sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+      })
+    );
     this.isLoading$ = this.store.select(isLoading);
 
     this.store
