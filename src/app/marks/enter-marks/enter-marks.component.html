@@ -76,6 +76,11 @@
       </mat-form-field>
     </div>
 
+    <div *ngIf="getPendingCount() > 0" class="pending-sync-banner">
+      <span>{{ getPendingCount() }} mark(s) waiting to sync.</span>
+      <button mat-button color="accent" (click)="retryPendingMarks()">Retry now</button>
+    </div>
+
     <div *ngIf="dataSource.data.length > 0; else noDataMessage">
       <table mat-table [dataSource]="dataSource" matSort>
         <ng-container matColumnDef="studentNumber">
@@ -219,6 +224,10 @@
                   Comment is required.
                 </mat-error>
               </mat-form-field>
+              <div *ngIf="isSaveFailed(i)" class="row-save-error">
+                <span>Couldn't save.</span>
+                <button mat-button color="warn" (click)="retrySaveForRow(row, i)">Retry</button>
+              </div>
             </div>
           </td>
         </ng-container>

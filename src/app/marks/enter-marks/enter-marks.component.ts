@@ -17,7 +17,9 @@ import {
   debounceTime,
   distinctUntilChanged,
   switchMap,
+  filter,
 } from 'rxjs/operators';
+import { fromEvent } from 'rxjs';
 import { ClassesModel } from '../../enrolment/models/classes.model';
 import { TermsModel } from '../../enrolment/models/terms.model';
 import {
@@ -47,6 +49,8 @@ import { ExamType } from '../models/examtype.enum';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { AIService } from '../../ai/ai.service';
+import { PendingMarksService } from '../services/pending-marks.service';
+import { HttpErrorResponse } from '@angular/common/http';
 // ConfirmDialogComponent will be lazy loaded
 
 interface MarkFormGroup {
@@ -96,6 +100,10 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   
   // Track which student number corresponds to which index for save status updates
   private studentNumberToIndex: Map<string, number> = new Map();
+
+  // Per-row save failure state (index -> user-facing message)
+  failedSaveIndices = new Set<number>();
+  failedSaveErrors = new Map<number, string>();
 
   // Default fallback comments
   defaultCommentOptions: string[] = [
@@ -162,7 +170,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private aiService: AIService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private pendingMarks: PendingMarksService
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
@@ -206,7 +215,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         
         // Clear save tracking when new data is loaded
         this.clearSaveTracking();
-        
+
         // Rebuild student number to index mapping
         this.studentNumberToIndex.clear();
         marks.forEach((mark, index) => {
@@ -223,20 +232,22 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(({ mark }) => {
+        this.pendingMarks.remove(mark);
         const studentNumber = mark.student?.studentNumber;
         if (studentNumber && this.studentNumberToIndex.has(studentNumber)) {
           const index = this.studentNumberToIndex.get(studentNumber)!;
           this.savingMarks.delete(index);
+          this.failedSaveIndices.delete(index);
+          this.failedSaveErrors.delete(index);
           this.savedMarks.add(index);
-          
+
           // Remove saved indicator after 2 seconds
           setTimeout(() => {
             this.savedMarks.delete(index);
             this.cdr.detectChanges();
           }, 2000);
-          
+
           this.cdr.detectChanges();
-          console.log(`✅ Mark saved successfully for student ${studentNumber} at index ${index}`);
         }
       });
 
@@ -246,18 +257,33 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         ofType(saveMarkActionFail),
         takeUntil(this.destroy$)
       )
-      .subscribe(({ error }) => {
-        console.error('❌ Mark save failed:', error);
-        // Find which mark failed by checking the error or tracking pending saves
-        // For now, clear all saving states and show error
-        this.savingMarks.clear();
+      .subscribe(({ error, mark }) => {
+        const userMessage = this.getUserFriendlySaveError(error);
+        const index =
+          mark?.student?.studentNumber != null
+            ? this.studentNumberToIndex.get(mark.student.studentNumber)
+            : undefined;
+
+        if (index !== undefined) {
+          this.savingMarks.delete(index);
+          this.failedSaveIndices.add(index);
+          this.failedSaveErrors.set(index, userMessage);
+        } else {
+          this.savingMarks.clear();
+        }
+
+        if (mark) {
+          this.pendingMarks.add(mark);
+        }
+
         this.cdr.detectChanges();
-        
-        this.snackBar.open(
-          `Failed to save mark: ${error.error?.message || error.message || 'Unknown error'}`,
-          'Close',
-          { duration: 5000, panelClass: ['error-snackbar'] }
+
+        const snackRef = this.snackBar.open(
+          userMessage,
+          'Retry',
+          { duration: 7000, panelClass: ['error-snackbar'] }
         );
+        snackRef.onAction().subscribe(() => this.retryPendingMarks());
       });
 
     this.enrolForm = new FormGroup({
@@ -266,6 +292,19 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       subject: new FormControl('', Validators.required),
       examType: new FormControl('', Validators.required),
     });
+
+    // On init: if we have pending marks (e.g. restored from localStorage) and network is present, try to sync
+    if (typeof navigator !== 'undefined' && navigator.onLine && this.pendingMarks.getPendingCount() > 0) {
+      this.retryPendingMarks();
+    }
+
+    // Auto-retry pending marks when network comes back
+    fromEvent(window, 'online')
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(() => this.pendingMarks.getPendingCount() > 0)
+      )
+      .subscribe(() => this.retryPendingMarks());
   }
 
   ngAfterViewInit(): void {
@@ -393,6 +432,49 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  private getUserFriendlySaveError(error: HttpErrorResponse): string {
+    const isNetwork =
+      error.status === 0 ||
+      error.message === 'Http failure response' ||
+      (typeof error.message === 'string' &&
+        (error.message.toLowerCase().includes('network') ||
+          error.message.toLowerCase().includes('failed to fetch')));
+    if (isNetwork) {
+      return 'Connection problem. Mark saved locally; will sync when back online.';
+    }
+    const msg =
+      error.error?.message ??
+      (typeof error.error === 'string' ? error.error : null) ??
+      error.message ??
+      'Server error';
+    return `Could not save: ${msg}`;
+  }
+
+  isSaveFailed(index: number): boolean {
+    return this.failedSaveIndices.has(index);
+  }
+
+  getSaveError(index: number): string | undefined {
+    return this.failedSaveErrors.get(index);
+  }
+
+  getPendingCount(): number {
+    return this.pendingMarks.getPendingCount();
+  }
+
+  retryPendingMarks(): void {
+    const pending = this.pendingMarks.getAll();
+    pending.forEach((mark) => this.store.dispatch(saveMarkAction({ mark })));
+    this.cdr.detectChanges();
+  }
+
+  retrySaveForRow(markModel: MarksModel, index: number): void {
+    this.failedSaveIndices.delete(index);
+    this.failedSaveErrors.delete(index);
+    this.saveMark(markModel, index);
+    this.cdr.detectChanges();
+  }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -474,8 +556,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!formGroup.valid) {
       formGroup.markAllAsTouched();
       this.snackBar.open(
-        'Please enter a valid mark (0-100) and comment for this row.',
-        'Error',
+        'Please fix this row: mark 0–100 and comment required.',
+        'Close',
         { duration: 3000 }
       );
       console.log(
@@ -792,16 +874,16 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private clearSaveTracking() {
     // Clear all timers
-    this.saveTimers.forEach(timer => clearTimeout(timer));
+    this.saveTimers.forEach((timer) => clearTimeout(timer));
     this.saveTimers.clear();
-    
+
     // Clear tracking data
     this.lastSavedValues.clear();
     this.savedMarks.clear();
     this.savingMarks.clear();
     this.studentNumberToIndex.clear();
-    
-    console.log('🧹 Cleared save tracking data');
+    this.failedSaveIndices.clear();
+    this.failedSaveErrors.clear();
   }
 
   /**

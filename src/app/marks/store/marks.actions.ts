@@ -84,7 +84,7 @@ export const saveMarkActionSuccess = createAction(
 
 export const saveMarkActionFail = createAction(
   '[Enter Mark Component] save mark fail',
-  props<{ error: HttpErrorResponse }>()
+  props<{ error: HttpErrorResponse; mark?: MarksModel }>()
 );
 
 export const editSubjectActions = createActionGroup({

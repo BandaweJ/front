@@ -111,23 +111,9 @@ export class MarksEffects {
       ofType(marksActions.saveMarkAction),
       switchMap((data) =>
         this.marksService.saveMark(data.mark).pipe(
-          tap((data) =>
-            this.snackBar.open(
-              `${data.student.name} ${data.student.surname}\'s ${data.mark} in ${data.subject.name}  Saved`,
-              'OK',
-              {
-                duration: 3000,
-                verticalPosition: 'top',
-                horizontalPosition: 'center',
-              }
-            )
-          ),
-          map((mark) => {
-            // console.log(teacher);
-            return marksActions.saveMarkActionSuccess({ mark });
-          }),
+          map((mark) => marksActions.saveMarkActionSuccess({ mark })),
           catchError((error: HttpErrorResponse) =>
-            of(marksActions.saveMarkActionFail({ ...error }))
+            of(marksActions.saveMarkActionFail({ error, mark: data.mark }))
           )
         )
       )
