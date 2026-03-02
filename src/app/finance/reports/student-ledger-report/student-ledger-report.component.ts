@@ -30,6 +30,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 
 interface LedgerSummary {
   totalDebits: number;
@@ -99,7 +100,8 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
     private store: Store,
     private themeService: ThemeService,
     private cdr: ChangeDetectorRef,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dashboardService: DashboardService
   ) {
     this.isLoading$ = this.store.select(selectIsLoadingFinancials);
     this.error$ = this.store.select(selectErrorMsg).pipe(
@@ -244,6 +246,26 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
           newestTransaction: dates[dates.length - 1] || null,
         };
       })
+    );
+
+    // Backend balance (same source as student dashboard) so ledger and dashboard never show different numbers
+    this.backendBalance$ = this.selectedStudent$.pipe(
+      switchMap(student =>
+        student
+          ? this.dashboardService.getStudentDashboardSummary(student.studentNumber).pipe(
+              map(res => res?.financialSummary?.amountOwed ?? null),
+              catchError(() => of(null))
+            )
+          : of(null)
+      )
+    );
+
+    // Prefer backend balance for display; fallback to ledger netBalance if API fails or no student
+    this.ledgerView$ = combineLatest([this.ledgerSummary$, this.backendBalance$]).pipe(
+      map(([summary, backendBalance]) => ({
+        ...summary,
+        displayBalance: backendBalance ?? summary.netBalance,
+      }))
     );
   }
 

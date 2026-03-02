@@ -59,17 +59,17 @@
               </h3>
               <p class="student-number">Student Number: {{ selectedStudent.studentNumber }}</p>
             </div>
-            <div class="balance-display" *ngIf="ledgerSummary$ | async as summary">
-              <div class="balance-value" [class]="getBalanceClass(summary.netBalance)">
-                <span class="balance-label">{{ getBalanceLabel(summary.netBalance) }}</span>
-                <span class="balance-amount">{{ summary.netBalance | currency:'USD':'symbol':'1.2-2' }}</span>
+            <div class="balance-display" *ngIf="ledgerView$ | async as view">
+              <div class="balance-value" [class]="getBalanceClass(view.displayBalance)">
+                <span class="balance-label">{{ getBalanceLabel(view.displayBalance) }}</span>
+                <span class="balance-amount">{{ view.displayBalance | currency:'USD':'symbol':'1.2-2' }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Summary Statistics -->
-        <div *ngIf="ledgerSummary$ | async as summary" class="summary-cards">
+        <div *ngIf="ledgerView$ | async as summary" class="summary-cards">
           <mat-card class="summary-card">
             <mat-card-content>
               <mat-icon class="summary-icon" color="warn">description</mat-icon>
