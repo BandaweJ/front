@@ -12,9 +12,9 @@ import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { User } from 'src/app/auth/models/user.model';
 import { receiptActions, invoiceActions } from '../../store/finance.actions';
 import {
-  getStudentLedger,
   LedgerEntry,
   selectIsLoading,
+  selectStudentLedgerFromStudentData,
 } from '../../store/finance.selector';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 
@@ -34,9 +34,8 @@ import { ThemeService, Theme } from 'src/app/services/theme.service';
 export class StudentPaymentHistoryComponent implements OnInit, OnDestroy {
   // Data Observables
   user$ = this.store.select(selectUser);
-  paymentHistory$: Observable<LedgerEntry[]> = this.user$.pipe(
-    filter((user): user is User => !!user && !!user.id),
-    switchMap((user) => this.store.select(getStudentLedger(user.id)))
+  paymentHistory$: Observable<LedgerEntry[]> = this.store.select(
+    selectStudentLedgerFromStudentData,
   );
   loading$ = this.store.select(selectIsLoading);
   currentTheme: Theme = 'light';

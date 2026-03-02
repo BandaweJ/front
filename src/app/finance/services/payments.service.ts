@@ -13,6 +13,10 @@ import {
   CreditActivityReportModel,
   CreditTransactionQueryParams,
 } from '../models/credit-transaction.model';
+import {
+  FinanceDashboardSummary,
+  FinanceDashboardSummaryFilters,
+} from '../models/finance-dashboard-summary.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsService {
@@ -114,18 +118,22 @@ export class PaymentsService {
   }
 
   /**
-   * Finance dashboard summary aggregating totals from backend SQL.
+   * Finance dashboard summary for cards and chart (optional filters).
    */
-  getFinanceDashboardSummary(): Observable<{
-    totalInvoicesAmount: number;
-    totalPaymentsAmount: number;
-    outstandingBalance: number;
-  }> {
-    return this.httpClient.get<{
-      totalInvoicesAmount: number;
-      totalPaymentsAmount: number;
-      outstandingBalance: number;
-    }>(`${this.baseURL}dashboard/summary`);
+  getFinanceDashboardSummary(
+    filters?: FinanceDashboardSummaryFilters
+  ): Observable<FinanceDashboardSummary> {
+    let params = new HttpParams();
+    if (filters) {
+      if (filters.startDate) params = params.set('startDate', filters.startDate);
+      if (filters.endDate) params = params.set('endDate', filters.endDate);
+      if (filters.enrolTerm) params = params.set('enrolTerm', filters.enrolTerm);
+      if (filters.transactionType) params = params.set('transactionType', filters.transactionType);
+    }
+    return this.httpClient.get<FinanceDashboardSummary>(
+      `${this.baseURL}dashboard/summary`,
+      { params }
+    );
   }
 
   getAllReceipts(): Observable<ReceiptModel[]> {

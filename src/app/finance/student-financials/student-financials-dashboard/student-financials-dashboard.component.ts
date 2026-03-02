@@ -10,18 +10,15 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription, Subject, combineLatest } from 'rxjs';
 import { filter, tap, takeUntil, take, switchMap, map } from 'rxjs/operators';
 import {
-  getStudentLedger,
-  LedgerEntry,
-  selectIsLoading,
-  selectAllInvoices,
-  selectAllNonVoidedReceipts,
-  selectInvoicesAndReceiptsLoaded,
-  selectStudentBalance,
+  selectStudentInvoices,
+  selectStudentReceipts,
 } from '../../store/finance.selector';
 import {
   invoiceActions,
   receiptActions,
 } from '../../store/finance.actions';
+import { studentDashboardActions } from 'src/app/dashboard/store/dashboard.actions';
+import { selectStudentDashboardSummary } from 'src/app/dashboard/store/dashboard.selectors';
 import { User } from 'src/app/auth/models/user.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
@@ -87,51 +84,32 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     this.user$ = this.store.select(selectUser);
-    
-    // Calculate outstanding balance using student-specific invoices and receipts (more efficient)
-    // Data should already be loaded by loadUserData() (dispatches fetchStudentInvoices/fetchStudentReceipts)
-    // Simply use the selector - value will display when it becomes available
-    this.outstandingBalance$ = this.user$.pipe(
-      filter((user): user is User => !!user && !!user.id),
-      switchMap(() => this.store.select(selectStudentBalance))
+
+    // Outstanding balance from backend summary (single source of truth)
+    this.outstandingBalance$ = this.store.select(selectStudentDashboardSummary).pipe(
+      map((summary) => summary?.financialSummary?.amountOwed ?? 0)
     );
-    
-    // No loading state needed - value will display when available
-    
-    // Initialize computed properties
+
     this.currentUser$ = this.user$;
     this.studentNumber$ = this.user$.pipe(
       map(user => user?.id || null)
     );
-    
-    // Get student name from invoices or receipts in the store
-    this.studentName$ = this.user$.pipe(
-      filter((user): user is User => !!user && !!user.id),
-      switchMap((user) => {
-        return combineLatest([
-          this.store.select(selectAllInvoices),
-          this.store.select(selectAllNonVoidedReceipts)
-        ]).pipe(
-          map(([invoices, receipts]) => {
-            // Try to get student name from invoices first
-            const studentInvoice = (invoices || []).find(
-              (inv) => inv.student?.studentNumber === user.id
-            );
-            if (studentInvoice?.student) {
-              return `${studentInvoice.student.name} ${studentInvoice.student.surname}`.trim();
-            }
-            
-            // If not found in invoices, try receipts
-            const studentReceipt = (receipts || []).find(
-              (rec) => rec.student?.studentNumber === user.id
-            );
-            if (studentReceipt?.student) {
-              return `${studentReceipt.student.name} ${studentReceipt.student.surname}`.trim();
-            }
-            
-            return null;
-          })
-        );
+
+    // Get student name from student-scoped invoices or receipts (already loaded for this student)
+    this.studentName$ = combineLatest([
+      this.store.select(selectStudentInvoices),
+      this.store.select(selectStudentReceipts),
+    ]).pipe(
+      map(([invoices, receipts]) => {
+        const inv = (invoices || [])[0];
+        if (inv?.student) {
+          return `${inv.student.name} ${inv.student.surname}`.trim();
+        }
+        const rec = (receipts || [])[0];
+        if (rec?.student) {
+          return `${rec.student.name} ${rec.student.surname}`.trim();
+        }
+        return null;
       })
     );
   }
@@ -156,8 +134,6 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
         // Take only the first emission to prevent multiple dispatches
         take(1),
         tap((user) => {
-          // Fetch only this student's invoices and receipts (more efficient than fetching all)
-          // This will only run once when the component initializes
           this.store.dispatch(
             invoiceActions.fetchStudentInvoices({
               studentNumber: user.id,
@@ -165,6 +141,11 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
           );
           this.store.dispatch(
             receiptActions.fetchStudentReceipts({
+              studentNumber: user.id,
+            })
+          );
+          this.store.dispatch(
+            studentDashboardActions.fetchStudentDashboardSummary({
               studentNumber: user.id,
             })
           );

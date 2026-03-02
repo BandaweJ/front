@@ -20,9 +20,14 @@ import { takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { FinanceDataModel } from '../../finance/models/finance-data.model';
 import { FinanceFilter } from '../../finance/models/finance-filter.model';
+import { FinanceDashboardSummaryFilters } from '../../finance/models/finance-dashboard-summary.model';
 import { FilterFinanceDialogComponent } from './filter-finance-dialog/filter-finance-dialog.component';
-import { selectAllCombinedFinanceData } from 'src/app/finance/store/finance.selector';
 import {
+  selectAllCombinedFinanceData,
+  selectFinanceDashboardSummary,
+} from 'src/app/finance/store/finance.selector';
+import {
+  financeDashboardSummaryActions,
   invoiceActions,
   receiptActions,
 } from 'src/app/finance/store/finance.actions';
@@ -243,27 +248,48 @@ export class FinanceDashboardComponent
     }
   }
 
+  /** Map UI filter to API summary filters (only fields supported by backend). */
+  private toSummaryFilters(
+    f: FinanceFilter
+  ): FinanceDashboardSummaryFilters | undefined {
+    if (!f || Object.keys(f).length === 0) return undefined;
+    const startDate = f.startDate;
+    const endDate = f.endDate;
+    const enrolTerm = f.enrolTerm;
+    const transactionType =
+      f.transactionType === 'Invoice' || f.transactionType === 'Payment'
+        ? f.transactionType
+        : undefined;
+    if (!startDate && !endDate && !enrolTerm && !transactionType)
+      return undefined;
+    return { startDate, endDate, enrolTerm, transactionType };
+  }
+
   private setupDataSubscriptions(): void {
     const allData$ = this.store.pipe(select(selectAllCombinedFinanceData));
 
-    // Handle data loading and chart updates
+    // When filters change, refetch dashboard summary (cards + chart from API)
+    this.filterSubject
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((f) => {
+        this.store.dispatch(
+          financeDashboardSummaryActions.fetchFinanceDashboardSummary({
+            filters: this.toSummaryFilters(f),
+          })
+        );
+      });
+
+    // Tables: use full list + client-side filter/sort (unchanged)
     allData$
       .pipe(
-        map((data) => this.processChartData(data)),
         tap(() => {
           this.isLoading = false;
           this.cdr.markForCheck();
-          if (this.chart) {
-            this.chart.update();
-          }
         }),
         takeUntil(this.ngUnsubscribe)
       )
-      .subscribe({
-        error: (error) => this.handleError('Failed to process chart data')
-      });
+      .subscribe({ error: (err) => this.handleError('Failed to load data') });
 
-    // Create filtered data observable (for widgets and tables)
     const filteredData$ = combineLatest([
       allData$,
       this.filterSubject.asObservable(),
@@ -272,7 +298,6 @@ export class FinanceDashboardComponent
       takeUntil(this.ngUnsubscribe)
     );
 
-    // Handle filtered and sorted data (for tables)
     const filteredAndSortedData$ = combineLatest([
       filteredData$,
       this.sortSubject.asObservable(),
@@ -295,60 +320,53 @@ export class FinanceDashboardComponent
       error: (error) => this.handleError('Failed to filter and sort data')
     });
 
-    // Setup summary observables (using filtered data; guard against null)
-    const safeFilteredData$ = filteredData$.pipe(
-      map((data) => (data != null && Array.isArray(data) ? data : []))
+    // Cards and chart: from backend summary API (single source for aggregates)
+    const summary$ = this.store.pipe(select(selectFinanceDashboardSummary));
+    this.totalInvoices$ = summary$.pipe(
+      map((s) => s?.totalInvoiced ?? 0)
     );
-    this.totalInvoices$ = safeFilteredData$.pipe(
-      map((data) =>
-        data
-          .filter((item) => item.type === 'Invoice')
-          .reduce((acc, item) => acc + +item.amount, 0)
+    this.totalPayments$ = summary$.pipe(
+      map((s) => s?.totalPayments ?? 0)
+    );
+    this.totalBalance$ = summary$.pipe(
+      map((s) => s?.outstandingBalance ?? 0)
+    );
+    this.averageInvoiceAmount$ = summary$.pipe(
+      map((s) => s?.averageInvoiceAmount ?? 0)
+    );
+    this.averagePaymentAmount$ = summary$.pipe(
+      map((s) => s?.averagePaymentAmount ?? 0)
+    );
+    this.collectionRate$ = summary$.pipe(
+      map((s) => s?.collectionRate ?? 0)
+    );
+    this.totalTransactions$ = summary$.pipe(
+      map((s) => s?.totalTransactions ?? 0)
+    );
+
+    // Chart: from summary monthly breakdown
+    summary$
+      .pipe(
+        tap((summary) => {
+          if (summary?.monthlyBreakdown?.length) {
+            this.barChartData.labels = summary.monthlyBreakdown.map(
+              (m) => m.monthLabel
+            );
+            this.barChartData.datasets[0].data =
+              summary.monthlyBreakdown.map((m) => m.invoicesTotal);
+            this.barChartData.datasets[1].data =
+              summary.monthlyBreakdown.map((m) => m.paymentsTotal);
+          } else {
+            this.barChartData.labels = [];
+            this.barChartData.datasets[0].data = [];
+            this.barChartData.datasets[1].data = [];
+          }
+          if (this.chart) this.chart.update();
+          this.cdr.markForCheck();
+        }),
+        takeUntil(this.ngUnsubscribe)
       )
-    );
-    this.totalPayments$ = safeFilteredData$.pipe(
-      map((data) =>
-        data
-          .filter((item) => item.type === 'Payment')
-          .reduce((acc, item) => acc + +item.amount, 0)
-      )
-    );
-    this.totalBalance$ = combineLatest([
-      this.totalInvoices$,
-      this.totalPayments$,
-    ]).pipe(map(([invoices, payments]) => invoices - payments));
-
-    // Additional financial metrics (using filtered data)
-    this.averageInvoiceAmount$ = safeFilteredData$.pipe(
-      map((data) => {
-        const invoices = data.filter((item) => item.type === 'Invoice');
-        return invoices.length > 0 
-          ? invoices.reduce((acc, item) => acc + +item.amount, 0) / invoices.length 
-          : 0;
-      })
-    );
-
-    this.averagePaymentAmount$ = safeFilteredData$.pipe(
-      map((data) => {
-        const payments = data.filter((item) => item.type === 'Payment');
-        return payments.length > 0 
-          ? payments.reduce((acc, item) => acc + +item.amount, 0) / payments.length 
-          : 0;
-      })
-    );
-
-    this.collectionRate$ = combineLatest([
-      this.totalInvoices$,
-      this.totalPayments$,
-    ]).pipe(
-      map(([invoices, payments]) => {
-        return invoices > 0 ? (payments / invoices) * 100 : 0;
-      })
-    );
-
-    this.totalTransactions$ = safeFilteredData$.pipe(
-      map((data) => data.length)
-    );
+      .subscribe();
 
     // Enrolment statistics: total students per class, grouped by form and sorted ascending
     this.enrolStats$ = this.store.pipe(select(selectEnrolsStats));
@@ -394,49 +412,6 @@ export class FinanceDashboardComponent
         const girlsTotal = (stats.girls || []).reduce((a, b) => a + b, 0);
         return boysTotal + girlsTotal;
       })
-    );
-  }
-
-  private processChartData(data: FinanceDataModel[]): void {
-    if (!data || !Array.isArray(data)) return;
-    const monthlyTotals = new Map<
-      string,
-      { invoices: number; payments: number }
-    >();
-    
-    data.forEach((item) => {
-      const date = new Date(item.transactionDate);
-      const monthYear = date.toLocaleString('default', {
-        month: 'short',
-        year: 'numeric',
-      });
-
-      if (!monthlyTotals.has(monthYear)) {
-        monthlyTotals.set(monthYear, { invoices: 0, payments: 0 });
-      }
-
-      const totals = monthlyTotals.get(monthYear)!;
-      if (item.type === 'Invoice') {
-        totals.invoices += +item.amount;
-      } else {
-        totals.payments += +item.amount;
-      }
-    });
-
-    const sortedKeys = Array.from(monthlyTotals.keys()).sort((a, b) => {
-      const [monthA, yearA] = a.split(' ');
-      const [monthB, yearB] = b.split(' ');
-      const dateA = new Date(`${monthA} 1, ${yearA}`);
-      const dateB = new Date(`${monthB} 1, ${yearB}`);
-      return dateA.getTime() - dateB.getTime();
-    });
-
-    this.barChartData.labels = sortedKeys;
-    this.barChartData.datasets[0].data = sortedKeys.map(
-      (key) => monthlyTotals.get(key)!.invoices
-    );
-    this.barChartData.datasets[1].data = sortedKeys.map(
-      (key) => monthlyTotals.get(key)!.payments
     );
   }
 

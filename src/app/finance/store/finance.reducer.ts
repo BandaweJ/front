@@ -6,6 +6,7 @@ import {
   billStudentActions,
   exemptionActions,
   feesActions,
+  financeDashboardSummaryActions,
   invoiceActions,
   isNewComerActions,
   receiptActions,
@@ -16,6 +17,7 @@ import { BalancesModel } from '../models/balances.model';
 import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
 import { ExemptionModel } from '../models/exemption.model';
+import { FinanceDashboardSummary } from '../models/finance-dashboard-summary.model';
 import { ExemptionType } from '../enums/exemption-type.enum';
 import { FeesNames } from '../enums/fees-names.enum';
 
@@ -55,6 +57,10 @@ export interface State {
   loadingExemptionById: boolean;
   updatingExemption: boolean;
   deletingExemption: boolean;
+
+  financeDashboardSummary: FinanceDashboardSummary | null;
+  loadingFinanceDashboardSummary: boolean;
+  financeDashboardSummaryError: string | null;
 }
 
 export const initialState: State = {
@@ -92,6 +98,10 @@ export const initialState: State = {
   loadingExemptionById: false,
   updatingExemption: false,
   deletingExemption: false,
+
+  financeDashboardSummary: null,
+  loadingFinanceDashboardSummary: false,
+  financeDashboardSummaryError: null,
 };
 
 export const financeReducer = createReducer(
@@ -666,5 +676,28 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error.message,
-  }))
+  })),
+
+  on(financeDashboardSummaryActions.fetchFinanceDashboardSummary, (state) => ({
+    ...state,
+    loadingFinanceDashboardSummary: true,
+    financeDashboardSummaryError: null,
+  })),
+  on(
+    financeDashboardSummaryActions.fetchFinanceDashboardSummarySuccess,
+    (state, { summary }) => ({
+      ...state,
+      financeDashboardSummary: summary,
+      loadingFinanceDashboardSummary: false,
+      financeDashboardSummaryError: null,
+    })
+  ),
+  on(
+    financeDashboardSummaryActions.fetchFinanceDashboardSummaryFailure,
+    (state, { error }) => ({
+      ...state,
+      loadingFinanceDashboardSummary: false,
+      financeDashboardSummaryError: error?.message ?? 'Failed to load summary',
+    })
+  )
 );

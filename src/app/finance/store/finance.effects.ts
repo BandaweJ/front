@@ -10,6 +10,7 @@ import {
   billStudentActions,
   exemptionActions,
   feesActions,
+  financeDashboardSummaryActions,
   invoiceActions,
   isNewComerActions,
   receiptActions,
@@ -27,6 +28,28 @@ export class FinanceEffects {
     private exemptionService: ExemptionService,
     private snackBar: MatSnackBar
   ) {}
+
+  fetchFinanceDashboardSummary$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(financeDashboardSummaryActions.fetchFinanceDashboardSummary),
+      switchMap(({ filters }) =>
+        this.paymentsService.getFinanceDashboardSummary(filters).pipe(
+          map((summary) =>
+            financeDashboardSummaryActions.fetchFinanceDashboardSummarySuccess({
+              summary,
+            })
+          ),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              financeDashboardSummaryActions.fetchFinanceDashboardSummaryFailure({
+                error,
+              })
+            )
+          )
+        )
+      )
+    )
+  );
 
   fetchFees$ = createEffect(() =>
     this.actions$.pipe(

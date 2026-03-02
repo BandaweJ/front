@@ -12,6 +12,10 @@ import { InvoiceStatsModel } from '../models/invoice-stats.model';
 import { ReceiptModel } from '../models/payment.model';
 import { PaymentMethods } from '../enums/payment-methods.enum';
 import { ExemptionModel } from '../models/exemption.model';
+import {
+  FinanceDashboardSummary,
+  FinanceDashboardSummaryFilters,
+} from '../models/finance-dashboard-summary.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -148,6 +152,20 @@ export const receiptActions = createActionGroup({
     'Void Receipt': props<{ receiptId: number }>(), // Request to void a receipt
     'Void Receipt Success': props<{ receipt: ReceiptModel }>(), // Voiding successful, provide updated receipt
     'Void Receipt Failure': props<{ error: HttpErrorResponse }>(), // Voiding failed
+  },
+});
+
+// Finance dashboard summary (cards + chart from backend API)
+export const financeDashboardSummaryActions = createActionGroup({
+  source: 'Finance Dashboard',
+  events: {
+    fetchFinanceDashboardSummary: props<{
+      filters?: FinanceDashboardSummaryFilters;
+    }>(),
+    fetchFinanceDashboardSummarySuccess: props<{
+      summary: FinanceDashboardSummary;
+    }>(),
+    fetchFinanceDashboardSummaryFailure: props<{ error: HttpErrorResponse }>(),
   },
 });
 

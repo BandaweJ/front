@@ -33,7 +33,6 @@ import {
   invoiceActions,
   receiptActions,
 } from 'src/app/finance/store/finance.actions';
-import { selectStudentBalance } from 'src/app/finance/store/finance.selector';
 import { ContinuousAssessmentService, ContinuousAssessmentAnalytics } from 'src/app/marks/continuous-assessment/continuous-assessment.service';
 
 @Component({
@@ -50,10 +49,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   public currentEnrolment$: Observable<EnrolsModel | null>;
   public enrolmentLoading$: Observable<boolean>;
   public enrolmentLoaded$: Observable<boolean>;
-  
-  // Amount owed calculated from store (single source of truth)
-  // Value will display when it becomes available
-  public amountOwed$: Observable<number>;
 
   public caAnalytics: ContinuousAssessmentAnalytics | null = null;
   public caLoading = false;
@@ -71,14 +66,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
     this.studentDetails$ = this.currentEnrolment$.pipe(
       map((enrolment) => (enrolment ? enrolment.student : null))
-    );
-    
-    // Calculate amount owed using student-specific invoices and receipts (more efficient)
-    // Data should already be loaded by the component's ngOnInit (dispatches fetchStudentInvoices/fetchStudentReceipts)
-    // Simply use the selector - value will display when it becomes available
-    this.amountOwed$ = (this.store.select(selectUser) as Observable<User | null>).pipe(
-      filter((user): user is User => !!user && !!user.id),
-      switchMap(() => this.store.select(selectStudentBalance))
     );
   }
 

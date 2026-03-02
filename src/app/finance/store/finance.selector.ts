@@ -41,6 +41,21 @@ import {
 export const financeState =
   createFeatureSelector<fromFinanceReducer.State>('finance');
 
+export const selectFinanceDashboardSummary = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.financeDashboardSummary
+);
+
+export const selectLoadingFinanceDashboardSummary = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.loadingFinanceDashboardSummary
+);
+
+export const selectFinanceDashboardSummaryError = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.financeDashboardSummaryError
+);
+
 // --- Existing Selectors (No changes needed for these initial ones) ---
 export const selectCurrentExemption = createSelector(
   financeState,
@@ -346,32 +361,18 @@ export interface LedgerEntry extends PaymentHistoryItem {
   runningBalance: number; // Add running balance to each entry
 }
 
-export const getStudentLedger = (studentNumber: string) =>
-  createSelector(
-    selectAllInvoices,
-    selectAllNonVoidedReceipts, // --- MODIFICATION: Use selectAllNonVoidedReceipts ---
-    (
-      allInvoices: InvoiceModel[] | null,
-      allReceipts: ReceiptModel[] | null // These will now be non-voided
-    ): LedgerEntry[] => {
-      if (!studentNumber || (!allInvoices && !allReceipts)) {
-        return [];
-      }
-
-      const ledgerEntries: PaymentHistoryItem[] = [];
-
-      // Filter invoices for the specific student
-      // Filter out voided invoices
-      const studentInvoices = (allInvoices || []).filter(
-        (inv) => !inv.isVoided
-      ).filter(
-        (inv) => inv.student?.studentNumber === studentNumber
-      );
-
-      // Filter receipts for the specific student (already non-voided from upstream selector)
-      const studentReceipts = (allReceipts || []).filter(
-        (rec) => rec.student?.studentNumber === studentNumber
-      );
+/**
+ * Builds ledger entries with running balance from invoices and receipts.
+ * Used by getStudentLedger (staff: from allInvoices/allReceipts filtered by student) and
+ * selectStudentLedgerFromStudentData (student: from studentInvoices/studentReceipts).
+ */
+function buildLedgerFromInvoicesAndReceipts(
+  invoices: InvoiceModel[],
+  receipts: ReceiptModel[],
+): LedgerEntry[] {
+  const ledgerEntries: PaymentHistoryItem[] = [];
+  const studentInvoices = invoices.filter((inv) => !inv.isVoided);
+  const studentReceipts = receipts;
 
       // 1. Process Invoices (Debit entries)
       studentInvoices.forEach((invoice) => {
@@ -445,34 +446,25 @@ export const getStudentLedger = (studentNumber: string) =>
             }
             
             // Method 2: Find invoice by checking if any invoice has this allocation in its allocations array
-            // This works for non-voided invoices in allInvoices
-            // (Same approach as credit allocations)
-            if (!allocationInvoice && allInvoices) {
-              allocationInvoice = allInvoices.find(inv => 
+            if (!allocationInvoice && studentInvoices.length > 0) {
+              allocationInvoice = studentInvoices.find(inv =>
                 inv.allocations && Array.isArray(inv.allocations) &&
                 inv.allocations.some(alloc => alloc.id === allocation.id)
               );
-              
-              // If found via this method, set the invoiceId for future reference
+
               if (allocationInvoice && !allocation.invoiceId) {
                 allocation.invoiceId = allocationInvoice.id;
               }
             }
-            
+
             // Method 3: Try to find by invoiceId if available (fallback)
-            if (!allocationInvoice && allInvoices && allocation.invoiceId) {
-              allocationInvoice = allInvoices.find(inv => inv.id === allocation.invoiceId);
+            if (!allocationInvoice && allocation.invoiceId) {
+              allocationInvoice = studentInvoices.find(inv => inv.id === allocation.invoiceId);
             }
-            
+
             // Skip if we still can't find the invoice
-            // This could mean:
-            // 1. The invoice relation wasn't loaded by the backend (data issue)
-            // 2. The invoice was deleted but allocation still exists (data integrity issue)
-            // Note: If invoice is voided, it should still be loaded on the allocation object
             if (!allocationInvoice || !allocationInvoice.invoiceNumber) {
-              // Only log warning if we have enough context to debug
-              // Don't spam console if data just isn't loaded yet
-              if (allInvoices && allInvoices.length > 0) {
+              if (studentInvoices.length > 0) {
                 // Check if allocation has invoice object but it's voided
                 const hasVoidedInvoice = allocation.invoice && allocation.invoice.isVoided;
                 
@@ -485,7 +477,7 @@ export const getStudentLedger = (studentNumber: string) =>
                   hasInvoiceObject: !!allocation.invoice,
                   invoiceIsVoided: hasVoidedInvoice,
                   invoiceObjectKeys: allocation.invoice ? Object.keys(allocation.invoice) : [],
-                  allInvoicesCount: allInvoices.length,
+                  invoicesCount: studentInvoices.length,
                   // If invoice exists but is voided, we should still show the allocation
                   // but mark it appropriately
                 });
@@ -525,57 +517,83 @@ export const getStudentLedger = (studentNumber: string) =>
         }
       });
 
-      // 2.5. Process Credit Allocations (overpayments applied to invoices)
-      studentInvoices.forEach((invoice) => {
-        if (invoice.creditAllocations && invoice.creditAllocations.length > 0) {
-          invoice.creditAllocations.forEach((creditAllocation) => {
-            // Use the parent invoice if creditAllocation.invoice is not loaded
-            // (This can happen when credit allocations are loaded as part of the invoice)
-            const allocationInvoice = creditAllocation.invoice || invoice;
-            
-            if (!allocationInvoice || !allocationInvoice.invoiceNumber) {
-              return;
-            }
-            
-            ledgerEntries.push({
-              id: `CREDIT-ALLOC-${creditAllocation.id}`,
-              type: 'Allocation',
-              date: new Date(creditAllocation.allocationDate),
-              description: `Allocated from Student Credit to Invoice #${allocationInvoice.invoiceNumber}`,
-              amount: +creditAllocation.amountApplied,
-              direction: 'in',
-              relatedDocNumber: allocationInvoice.invoiceNumber,
-            });
-          });
+  // 2.5. Process Credit Allocations (overpayments applied to invoices)
+  studentInvoices.forEach((invoice) => {
+    if (invoice.creditAllocations && invoice.creditAllocations.length > 0) {
+      invoice.creditAllocations.forEach((creditAllocation) => {
+        const allocationInvoice = creditAllocation.invoice || invoice;
+        if (!allocationInvoice || !allocationInvoice.invoiceNumber) {
+          return;
         }
+        ledgerEntries.push({
+          id: `CREDIT-ALLOC-${creditAllocation.id}`,
+          type: 'Allocation',
+          date: new Date(creditAllocation.allocationDate),
+          description: `Allocated from Student Credit to Invoice #${allocationInvoice.invoiceNumber}`,
+          amount: +creditAllocation.amountApplied,
+          direction: 'in',
+          relatedDocNumber: allocationInvoice.invoiceNumber,
+        });
       });
+    }
+  });
 
-      // 3. Sort all entries chronologically
-      ledgerEntries.sort((a, b) => a.date.getTime() - b.date.getTime());
+  // 3. Sort all entries chronologically
+  ledgerEntries.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-      // 4. Calculate running balance
-      // Full payment amounts reduce the balance (money received)
-      // Allocations are for display/tracking only (showing which invoice received the payment)
-      // This ensures the balance reflects actual cash flow: invoices - payments
-      let currentRunningBalance = 0;
-      const ledgerWithRunningBalance: LedgerEntry[] = ledgerEntries.map(
-        (entry) => {
-          if (entry.type === 'Invoice') {
-            currentRunningBalance += entry.amount;
-          } else if (entry.type === 'Payment') {
-            // Full payment amount reduces balance (money received)
-            // This accounts for both allocated amounts and any overpayments (credits)
-            currentRunningBalance -= entry.amount;
-          }
-          // Allocation entries are for display only - they don't affect the running balance
-          // because the full payment amount was already subtracted above
-          return { ...entry, runningBalance: currentRunningBalance };
-        }
-      );
-
-      return ledgerWithRunningBalance;
+  // 4. Calculate running balance
+  let currentRunningBalance = 0;
+  const ledgerWithRunningBalance: LedgerEntry[] = ledgerEntries.map(
+    (entry) => {
+      if (entry.type === 'Invoice') {
+        currentRunningBalance += entry.amount;
+      } else if (entry.type === 'Payment') {
+        currentRunningBalance -= entry.amount;
+      }
+      return { ...entry, runningBalance: currentRunningBalance };
     }
   );
+
+  return ledgerWithRunningBalance;
+}
+
+export const getStudentLedger = (studentNumber: string) =>
+  createSelector(
+    selectAllInvoices,
+    selectAllNonVoidedReceipts,
+    (
+      allInvoices: InvoiceModel[] | null,
+      allReceipts: ReceiptModel[] | null,
+    ): LedgerEntry[] => {
+      if (!studentNumber || (!allInvoices && !allReceipts)) {
+        return [];
+      }
+      const studentInvoices = (allInvoices || [])
+        .filter((inv) => !inv.isVoided)
+        .filter((inv) => inv.student?.studentNumber === studentNumber);
+      const studentReceipts = (allReceipts || []).filter(
+        (rec) => rec.student?.studentNumber === studentNumber,
+      );
+      return buildLedgerFromInvoicesAndReceipts(
+        studentInvoices,
+        studentReceipts,
+      );
+    },
+  );
+
+/** Ledger built from student-scoped invoices/receipts (for student view). */
+export const selectStudentLedgerFromStudentData = createSelector(
+  selectStudentInvoices,
+  selectStudentReceipts,
+  (
+    studentInvoices: InvoiceModel[] | null,
+    studentReceipts: ReceiptModel[] | null,
+  ): LedgerEntry[] =>
+    buildLedgerFromInvoicesAndReceipts(
+      studentInvoices || [],
+      studentReceipts || [],
+    ),
+);
 
 // --- Fees Collection Report Specific Models (no changes here) ---
 export interface PaymentMethodBreakdown {
