@@ -81,6 +81,10 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
   rawLedger$!: Observable<LedgerEntry[]>;
   filteredLedger$!: Observable<LedgerEntry[]>;
   ledgerSummary$!: Observable<LedgerSummary>;
+  /** Balance from backend (same source as student dashboard). */
+  backendBalance$!: Observable<number | null>;
+  /** Summary plus display balance: prefer backend amountOwed, fallback to ledger netBalance. */
+  ledgerView$!: Observable<LedgerSummary & { displayBalance: number }>;
   isLoading$: Observable<boolean>;
   error$: Observable<string | null>;
   allStudents$: Observable<StudentsModel[]>;
@@ -261,8 +265,11 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
     );
 
     // Prefer backend balance for display; fallback to ledger netBalance if API fails or no student
-    this.ledgerView$ = combineLatest([this.ledgerSummary$, this.backendBalance$]).pipe(
-      map(([summary, backendBalance]) => ({
+    this.ledgerView$ = combineLatest([
+      this.ledgerSummary$,
+      this.backendBalance$,
+    ]).pipe(
+      map(([summary, backendBalance]: [LedgerSummary, number | null]) => ({
         ...summary,
         displayBalance: backendBalance ?? summary.netBalance,
       }))

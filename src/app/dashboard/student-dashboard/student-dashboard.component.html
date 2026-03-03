@@ -86,9 +86,9 @@
 
           <div class="data-item amount-owed">
             <label>Total Amount Owed:</label>
-            <span [class.positive]="(financialSummary.amountOwed ?? 0) <= 0"
-              [class.negative]="(financialSummary.amountOwed ?? 0) > 0">
-              {{ financialSummary.amountOwed ?? 0 | currency:'USD':'symbol':'1.2-2' }}
+            <span [class.positive]="financialSummary.amountOwed <= 0"
+              [class.negative]="financialSummary.amountOwed > 0">
+              {{ financialSummary.amountOwed | currency:'USD':'symbol':'1.2-2' }}
             </span>
           </div>
 
