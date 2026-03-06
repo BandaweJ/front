@@ -260,6 +260,12 @@ const routes: Routes = [
     title: 'Student Finance Reconciliation',
   },
   {
+    canActivate: [AuthGuardService],
+    path: 'class-reconciliation',
+    loadComponent: () => import('./finance/reports/class-reconciliation/class-reconciliation.component').then(m => m.ClassReconciliationComponent),
+    title: 'Class Finance Reconciliation',
+  },
+  {
     path: 'user-management',
     loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
     canActivate: [AuthGuardService],

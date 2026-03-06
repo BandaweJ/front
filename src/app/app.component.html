@@ -355,6 +355,14 @@
                 Reconciliation</span>
             </button>
 
+            <!-- Class Reconciliation -->
+            <button mat-button routerLink="/class-reconciliation" routerLinkActive="active"
+              *ngIf="canAccessFinancialReports$ | async">
+              <mat-icon>groups</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Class
+                Reconciliation</span>
+            </button>
+
           </div>
         </mat-expansion-panel>
 
