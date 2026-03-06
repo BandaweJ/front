@@ -153,24 +153,35 @@ export class MarksEffects {
   deleteMark$ = createEffect(() =>
     this.actions$.pipe(
       ofType(marksActions.deleteMarkActions.deleteMark),
-      switchMap((data) =>
-        this.marksService.deleteMark(data.mark).pipe(
-          tap((data) =>
+      switchMap(({ mark }) =>
+        this.marksService.deleteMark(mark).pipe(
+          tap(() => {
+            const studentLabel =
+              mark.student?.name != null && mark.student?.surname != null
+                ? `${mark.student.name} ${mark.student.surname}`
+                : mark.student?.name ?? mark.student?.surname ?? 'Student';
+            const markValue = mark.mark != null ? String(mark.mark) : '?';
+            const subjectLabel =
+              typeof mark.subject === 'object' && mark.subject?.name != null
+                ? mark.subject.name
+                : typeof mark.subject === 'string'
+                  ? mark.subject
+                  : 'subject';
             this.snackBar.open(
-              `${data.student.name} ${data.student.surname}\'s ${data.mark} in ${data.subject} Deleted`,
+              `${studentLabel}'s ${markValue} in ${subjectLabel} deleted`,
               'OK',
               {
                 duration: 3000,
                 verticalPosition: 'top',
                 horizontalPosition: 'center',
               }
-            )
-          ),
-          map((mark) => {
-            return marksActions.deleteMarkActions.deleteMarkSuccess({
-              mark,
-            });
+            );
           }),
+          map((deletedMark) =>
+            marksActions.deleteMarkActions.deleteMarkSuccess({
+              mark: deletedMark,
+            })
+          ),
           catchError((error: HttpErrorResponse) =>
             of(marksActions.deleteMarkActions.deleteMarkFail({ ...error }))
           )

@@ -8,7 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { StudentsModel } from 'src/app/registration/models/students.model';
 import { PaymentMethods } from '../../enums/payment-methods.enum';
@@ -16,9 +16,7 @@ import { Store } from '@ngrx/store';
 import {
   getStudentLedger,
   LedgerEntry,
-  selectCreatedReceipt,
   selectIsLoading,
-  selectErrorMsg,
 } from '../../store/finance.selector';
 import { receiptActions, invoiceActions } from '../../store/finance.actions';
 import { filter, map, combineLatest, Observable, Subject, takeUntil } from 'rxjs';
@@ -26,6 +24,7 @@ import { State } from '../../store/finance.reducer';
 import { ReceiptModel } from '../../models/payment.model';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { Actions, ofType } from '@ngrx/effects';
 
 @Component({
   selector: 'app-add-receipt-dialog',
@@ -55,9 +54,7 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
 
   // Observables for state from NgRx Store
   amountDue$: Observable<number> = new Observable<number>();
-  createdReceipt$!: Observable<ReceiptModel>;
   isLoading$!: Observable<boolean>;
-  error$!: Observable<string>;
   isLoadingBalance$: Observable<boolean> = new Observable<boolean>();
   
   // Computed observables for suggestions
@@ -72,9 +69,9 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<AddReceiptDialogComponent>,
     private fb: FormBuilder,
     private store: Store<State>,
+    private actions$: Actions,
     public themeService: ThemeService,
     private cdr: ChangeDetectorRef,
-    private snackBar: MatSnackBar
   ) {
     this.addReceiptForm = this.fb.group({
       amountPaid: ['', [Validators.required, Validators.min(0.01)]],
@@ -82,9 +79,7 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
       description: [''],
     });
 
-    this.createdReceipt$ = this.store.select(selectCreatedReceipt);
     this.isLoading$ = this.store.select(selectIsLoading);
-    this.error$ = this.store.select(selectErrorMsg);
     
     // Watch for form changes to calculate suggestions
     this.setupSuggestionObservables();
@@ -136,45 +131,17 @@ export class AddReceiptDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Clear any stale state so the dialog doesn't react to a previous save
+    this.store.dispatch(receiptActions.clearCreatedReceipt());
+
     // Ensure invoices and receipts are loaded in the store for balance calculation
     this.store.dispatch(invoiceActions.fetchAllInvoices());
     this.store.dispatch(receiptActions.fetchAllReceipts());
 
-    // Close dialog when receipt is successfully created
-    this.createdReceipt$
-      .pipe(
-        filter((receipt) => !!receipt && !!receipt.receiptNumber),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((receipt) => {
-        this.snackBar.open(
-          `Receipt ${receipt.receiptNumber} created successfully!`,
-          'Close',
-          {
-            duration: 3000,
-            panelClass: ['success-snackbar'],
-            horizontalPosition: 'center',
-            verticalPosition: 'top',
-          }
-        );
-        this.dialogRef.close(receipt);
-      });
-
-    // Handle errors
-    this.error$
-      .pipe(
-        filter((error) => !!error),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((error) => {
-        this.snackBar.open(`Error: ${error}`, 'Close', {
-          duration: 5000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-        });
-        this.cdr.markForCheck();
-      });
+    // Close dialog only after the backend confirms save success
+    this.actions$
+      .pipe(ofType(receiptActions.saveReceiptSuccess), takeUntil(this.destroy$))
+      .subscribe(({ receipt }) => this.dialogRef.close(receipt));
 
     // Subscribe to theme changes
     this.themeService.theme$

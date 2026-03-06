@@ -673,10 +673,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.store.dispatch(deleteMarkActions.deleteMark({ mark }));
-        this.snackBar.open('Mark deleted successfully.', 'Dismiss', { 
-          duration: 2000,
-          panelClass: ['success-snackbar']
-        });
+        // Success/failure feedback is handled after the API responds (see marks effects)
       }
     });
   }

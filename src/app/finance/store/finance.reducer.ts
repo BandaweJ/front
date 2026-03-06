@@ -390,6 +390,8 @@ export const financeReducer = createReducer(
   on(receiptActions.saveReceipt, (state) => ({
     ...state,
     isLoading: true,
+    // Reset so UI can't react to stale "createdReceipt" from a prior save
+    createdReceipt: {} as ReceiptModel,
     errorMessage: '',
   })),
   on(receiptActions.saveReceiptSuccess, (state, { receipt }) => ({
@@ -458,6 +460,8 @@ export const financeReducer = createReducer(
   on(receiptActions.clearCreatedReceipt, (state) => ({
     ...state,
     createdReceipt: {} as ReceiptModel,
+    errorMessage: '',
+    isLoading: false,
   })),
   on(receiptActions.fetchStudentReceipts, (state) => ({
     ...state,
