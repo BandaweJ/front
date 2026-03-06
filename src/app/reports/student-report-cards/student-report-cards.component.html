@@ -1,7 +1,25 @@
 <div class="student-reports-dashboard">
   <h2>My Report Cards</h2>
 
-  <mat-card class="filter-card">
+  <!-- Parent: select which child's reports to view -->
+  <ng-container *ngIf="isParent$ | async">
+    <div *ngIf="(linkedChildren$ | async)?.length === 0" class="no-children-msg">
+      No linked students. Contact the school to link your children to your account.
+    </div>
+    <div *ngIf="(linkedChildren$ | async)?.length as len" [class.hidden]="len === 0">
+      <mat-form-field appearance="fill" class="child-select" *ngIf="len > 1">
+        <mat-label>View report cards for</mat-label>
+        <mat-select [value]="selectedChildStudentNumber$ | async" (selectionChange)="onParentSelectChild($event.value)">
+          <mat-option *ngFor="let c of linkedChildren$ | async" [value]="c.studentNumber">
+            {{ c.studentNumber }} – {{ c.name }} {{ c.surname }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <p *ngIf="len === 1 && (effectiveStudentNumber$ | async) as sn" class="child-info">Viewing reports for: {{ sn }}</p>
+    </div>
+  </ng-container>
+
+  <mat-card *ngIf="!(isParent$ | async) || (linkedChildren$ | async)?.length" class="filter-card">
     <mat-card-header>
       <mat-card-title>Select a Report</mat-card-title>
     </mat-card-header>

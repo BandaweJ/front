@@ -19,6 +19,7 @@ import { TeacherViewComponent } from './teachers-list/teacher-view/teacher-view.
 import { StudentViewComponent } from './students-list/student-view/student-view.component';
 import { SharedService } from '../shared.service';
 import { StudentIdCardComponent } from './students-list/student-id-card/student-id-card.component';
+import { ParentsService } from './services/parents.service';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,6 @@ import { StudentIdCardComponent } from './students-list/student-id-card/student-
     StoreModule.forFeature('reg', registrationReducer),
     EffectsModule.forFeature([RegistrationEffects]),
   ],
-  providers: [TeachersService, StudentsService, SharedService],
+  providers: [TeachersService, StudentsService, ParentsService, SharedService],
 })
 export class RegistrationModule {}

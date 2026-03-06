@@ -20,8 +20,15 @@ import {
 import { studentDashboardActions } from 'src/app/dashboard/store/dashboard.actions';
 import { selectStudentDashboardSummary } from 'src/app/dashboard/store/dashboard.selectors';
 import { User } from 'src/app/auth/models/user.model';
-import { selectUser } from 'src/app/auth/store/auth.selectors';
+import {
+  selectUser,
+  selectIsParent,
+  selectLinkedChildrenForParent,
+} from 'src/app/auth/store/auth.selectors';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { BehaviorSubject } from 'rxjs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-student-financials-dashboard',
@@ -32,6 +39,8 @@ import { ThemeService, Theme } from 'src/app/services/theme.service';
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
+    MatFormFieldModule,
   ],
   templateUrl: './student-financials-dashboard.component.html',
   styleUrls: ['./student-financials-dashboard.component.scss'],
@@ -41,12 +50,18 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   // Data Observables
   user$: Observable<User | null>;
   outstandingBalance$: Observable<number>;
-  
+  isParent$: Observable<boolean>;
+  linkedChildren$: Observable<{ studentNumber: string; name?: string; surname?: string }[]>;
+
+  /** When user is parent, the selected child's student number; otherwise unused. */
+  selectedChildStudentNumber$ = new BehaviorSubject<string | null>(null);
+
   // Computed properties
   currentUser$: Observable<User | null>;
+  /** Effective student number: for student = user.id, for parent = selected linked child. */
   studentNumber$: Observable<string | null>;
   studentName$: Observable<string | null>;
-  
+
   // Theme
   currentTheme: Theme = 'light';
 
@@ -84,6 +99,8 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     this.user$ = this.store.select(selectUser);
+    this.isParent$ = this.store.select(selectIsParent);
+    this.linkedChildren$ = this.store.select(selectLinkedChildrenForParent);
 
     // Outstanding balance from backend summary (single source of truth)
     this.outstandingBalance$ = this.store.select(selectStudentDashboardSummary).pipe(
@@ -91,8 +108,20 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     );
 
     this.currentUser$ = this.user$;
-    this.studentNumber$ = this.user$.pipe(
-      map(user => user?.id || null)
+    // For student: user.id is student number. For parent: use selected linked child.
+    this.studentNumber$ = combineLatest([
+      this.user$,
+      this.isParent$,
+      this.linkedChildren$,
+      this.selectedChildStudentNumber$,
+    ]).pipe(
+      map(([user, isParent, children, selected]) => {
+        if (!user?.id) return null;
+        if (!isParent) return user.id;
+        if (children.length === 0) return null;
+        if (selected) return selected;
+        return children[0]?.studentNumber ?? null;
+      })
     );
 
     // Get student name from student-scoped invoices or receipts (already loaded for this student)
@@ -128,32 +157,43 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   }
 
   loadUserData(): void {
-    this.user$
+    // When effective student number is set, load invoices/receipts/dashboard for that student (own id for student, selected child for parent).
+    this.studentNumber$
       .pipe(
-        filter((user): user is User => !!user && !!user.id),
-        // Take only the first emission to prevent multiple dispatches
-        take(1),
-        tap((user) => {
+        filter((sn): sn is string => !!sn),
+        tap((studentNumber) => {
           this.store.dispatch(
-            invoiceActions.fetchStudentInvoices({
-              studentNumber: user.id,
-            })
+            invoiceActions.fetchStudentInvoices({ studentNumber })
           );
           this.store.dispatch(
-            receiptActions.fetchStudentReceipts({
-              studentNumber: user.id,
-            })
+            receiptActions.fetchStudentReceipts({ studentNumber })
           );
           this.store.dispatch(
-            studentDashboardActions.fetchStudentDashboardSummary({
-              studentNumber: user.id,
-            })
+            studentDashboardActions.fetchStudentDashboardSummary({ studentNumber })
           );
-        })
+        }),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe({
         error: (error) => console.error('Failed to load user data:', error)
       });
+
+    // When parent and linked children load, auto-select first child if none selected.
+    combineLatest([this.isParent$, this.linkedChildren$, this.selectedChildStudentNumber$])
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        filter(([isParent, children]) => isParent && children.length > 0),
+        take(1)
+      )
+      .subscribe(([, children, selected]) => {
+        if (!selected) {
+          this.selectedChildStudentNumber$.next(children[0].studentNumber);
+        }
+      });
+  }
+
+  onParentSelectChild(studentNumber: string): void {
+    this.selectedChildStudentNumber$.next(studentNumber);
   }
 
   private setupNavigation(): void {

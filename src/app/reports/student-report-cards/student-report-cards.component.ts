@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, combineLatest } from 'rxjs';
-import { takeUntil, filter, tap, switchMap } from 'rxjs/operators';
+import { Observable, Subject, combineLatest, BehaviorSubject } from 'rxjs';
+import { takeUntil, filter, tap, switchMap, map, take } from 'rxjs/operators';
 
 import * as ReportsActions from '../store/reports.actions';
 import * as AuthSelectors from 'src/app/auth/store/auth.selectors';
+import { selectIsParent, selectLinkedChildrenForParent } from 'src/app/auth/store/auth.selectors';
 import { ReportsModel } from '../models/reports.model';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { Router } from '@angular/router';
@@ -45,6 +46,12 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
   // --- END NEW Observables ---
 
   studentNumber: string | null = null;
+  isParent$: Observable<boolean>;
+  linkedChildren$: Observable<{ studentNumber: string; name?: string; surname?: string }[]>;
+  /** When user is parent: selected child's student number. */
+  selectedChildStudentNumber$ = new BehaviorSubject<string | null>(null);
+  /** Effective student number for fetching reports: user.id for student, selected child for parent. */
+  effectiveStudentNumber$: Observable<string | null>;
   private destroy$ = new Subject<void>();
 
   availableTerms: number[] = [];
@@ -65,74 +72,57 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
     this.allInvoices$ = this.store.select(selectStudentInvoices); // Use the provided selector
     this.invoicesLoading$ = this.store.select(selectLoadingStudentInvoices); // Use the provided selector
     // --- END Initialize NEW Observables ---
+
+    this.isParent$ = this.store.select(selectIsParent);
+    this.linkedChildren$ = this.store.select(selectLinkedChildrenForParent);
+    this.effectiveStudentNumber$ = combineLatest([
+      this.store.select(AuthSelectors.selectUser),
+      this.isParent$,
+      this.linkedChildren$,
+      this.selectedChildStudentNumber$,
+    ]).pipe(
+      map(([user, isParent, children, selected]) => {
+        if (!user?.id) return null;
+        if (!isParent) return user.id;
+        if (!children?.length) return null;
+        return selected || children[0]?.studentNumber || null;
+      })
+    );
+  }
+
+  onParentSelectChild(studentNumber: string): void {
+    this.selectedChildStudentNumber$.next(studentNumber);
   }
 
   ngOnInit(): void {
-    this.store
-      .select(AuthSelectors.selectUser)
+    this.effectiveStudentNumber$
       .pipe(
-        filter((user) => !!user?.id), // Only proceed if studentNumber exists
-        tap((user) => {
-          this.studentNumber = user!.id;
-          // Dispatch action to fetch reports when studentNumber is available
+        filter((sn): sn is string => !!sn),
+        tap((studentNumber) => {
+          this.studentNumber = studentNumber;
           this.store.dispatch(
-            ReportsActions.viewReportsActions.fetchStudentReports({
-              studentNumber: this.studentNumber!,
-            })
+            ReportsActions.viewReportsActions.fetchStudentReports({ studentNumber })
+          );
+          this.store.dispatch(
+            invoiceActions.fetchStudentInvoices({ studentNumber })
           );
         }),
-        switchMap((user) =>
-          // Combine fetching reports and invoices
-          combineLatest([
-            this.store.select(selectReportsLoaded), // Assuming you have a selector for Reports loaded state
-            this.store.select(selectIsLoading), // Assuming you have a selector for Reports loading state
-            this.store.select(selectStudentInvoices), // Get the actual invoices data
-            this.store.select(selectLoadingStudentInvoices), // Get the loading state for invoices
-          ]).pipe(
-            filter(
-              ([
-                reportsLoaded,
-                reportsLoading,
-                currentInvoices, // Add currentInvoices to filter check
-                invoicesLoading,
-              ]) =>
-                // Dispatch reports if not loaded/loading
-                (!reportsLoaded && !reportsLoading) ||
-                // Dispatch invoices if not loading AND no data exists (implies not loaded)
-                (!invoicesLoading &&
-                  (!currentInvoices || currentInvoices.length === 0))
-            ),
-            tap(
-              ([
-                reportsLoaded,
-                reportsLoading,
-                currentInvoices,
-                invoicesLoading,
-              ]) => {
-                if (!reportsLoaded && !reportsLoading) {
-                  this.store.dispatch(
-                    ReportsActions.viewReportsActions.fetchStudentReports({
-                      studentNumber: user!.id,
-                    })
-                  );
-                }
-                if (
-                  !invoicesLoading &&
-                  (!currentInvoices || currentInvoices.length === 0)
-                ) {
-                  this.store.dispatch(
-                    invoiceActions.fetchStudentInvoices({
-                      studentNumber: user!.id,
-                    })
-                  );
-                }
-              }
-            )
-          )
-        ),
         takeUntil(this.destroy$)
       )
       .subscribe();
+
+    // Auto-select first child when parent and linked children load
+    combineLatest([this.isParent$, this.linkedChildren$, this.selectedChildStudentNumber$])
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(([isParent, children]) => isParent && (children?.length ?? 0) > 0),
+        map(([, children, selected]) => ({ children: children!, selected })),
+        filter(({ selected }) => !selected),
+        take(1)
+      )
+      .subscribe(({ children }) => {
+        this.selectedChildStudentNumber$.next(children[0].studentNumber);
+      });
 
     // Populate filter options dynamically from fetched reports
     this.studentReports$.pipe(takeUntil(this.destroy$)).subscribe((reports) => {

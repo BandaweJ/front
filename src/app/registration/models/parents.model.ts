@@ -6,4 +6,6 @@ export interface ParentsModel {
   idnumber: string;
   cell: string;
   address: string;
+  /** Linked children (when loaded from API with relations) */
+  students?: { studentNumber: string; name?: string; surname?: string }[];
 }

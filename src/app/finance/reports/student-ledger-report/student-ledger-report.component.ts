@@ -13,6 +13,7 @@ import {
 } from '../../store/finance.selector';
 import { selectStudents } from 'src/app/registration/store/registration.selectors';
 import { fetchStudents } from 'src/app/registration/store/registration.actions';
+import { selectLinkedStudentNumbers, selectIsParent } from 'src/app/auth/store/auth.selectors';
 import { invoiceActions, receiptActions } from '../../store/finance.actions';
 import { StudentSearchComponent } from 'src/app/shared/search-by-student-number/search-by-student-number.component';
 import { MatCardModule } from '@angular/material/card';
@@ -128,7 +129,18 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
       }),
       catchError(() => of('An unexpected error occurred'))
     );
-    this.allStudents$ = this.store.select(selectStudents);
+    // For parent role, restrict to linked children only; for staff, show all students.
+    this.allStudents$ = combineLatest([
+      this.store.select(selectStudents),
+      this.store.select(selectLinkedStudentNumbers),
+      this.store.select(selectIsParent),
+    ]).pipe(
+      map(([all, linkedNumbers, isParent]) => {
+        if (!isParent || !linkedNumbers || linkedNumbers.length === 0) return all || [];
+        const set = new Set(linkedNumbers);
+        return (all || []).filter((s) => set.has(s.studentNumber));
+      })
+    );
     
     this.setupDataFlow();
   }

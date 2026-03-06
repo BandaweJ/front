@@ -6,12 +6,12 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-import { Observable, Subject, of } from 'rxjs';
-import { takeUntil, map, shareReplay, catchError } from 'rxjs/operators';
+import { Observable, Subject, of, combineLatest } from 'rxjs';
+import { takeUntil, map, shareReplay, catchError, filter, take } from 'rxjs/operators';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Store } from '@ngrx/store';
-import { selectIsLoggedIn, selectUser } from './auth/store/auth.selectors';
-import { checkAuthStatus } from './auth/store/auth.actions';
+import { selectIsLoggedIn, selectUser, selectUserDetails } from './auth/store/auth.selectors';
+import { checkAuthStatus, userDetailsActions } from './auth/store/auth.actions';
 import { ThemeService, Theme } from './services/theme.service';
 import { RoleAccessService } from './services/role-access.service';
 import { ROLES } from './registration/models/roles.enum';
@@ -20,7 +20,6 @@ import { Title } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, NavigationEnd } from '@angular/router';
 import { MessagingService } from './messaging/services/messaging.service';
-import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -55,7 +54,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   // Role-based access observables - these update when role changes
   canAccessRegistration$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception, ROLES.director))
   );
   canAccessEnrolment$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.doesNotHaveRole(role, ROLES.student, ROLES.parent))
@@ -106,6 +105,9 @@ export class AppComponent implements OnInit, OnDestroy {
   );
   isStudent$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.student, role))
+  );
+  isParent$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.parent, role))
   );
 
   private destroy$ = new Subject<void>();
@@ -202,6 +204,24 @@ export class AppComponent implements OnInit, OnDestroy {
     });
     
     this.store.dispatch(checkAuthStatus());
+
+    // When parent logs in, load their profile with linked students so finance/reports can show only their children
+    combineLatest([
+      this.store.select(selectUser),
+      this.store.select(selectUserDetails),
+    ]).pipe(
+      filter(([user, details]) => {
+        if (!user?.id || user.role !== ROLES.parent) return false;
+        if (!details) return true;
+        return !('students' in details);
+      }),
+      take(1),
+      takeUntil(this.destroy$)
+    ).subscribe(([user]) => {
+      if (user?.id && user.role) {
+        this.store.dispatch(userDetailsActions.fetchUser({ id: user.id, role: user.role }));
+      }
+    });
 
     this.checkScreenSize(); // Initial screen size check
 

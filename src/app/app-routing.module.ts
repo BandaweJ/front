@@ -19,6 +19,7 @@ import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.componen
 import { ProfileComponent } from './auth/profile/profile.component';
 import { TeacherViewComponent } from './registration/teachers-list/teacher-view/teacher-view.component';
 import { StudentViewComponent } from './registration/students-list/student-view/student-view.component';
+import { ParentsListComponent } from './registration/parents-list/parents-list.component';
 import { ClassListsComponent } from './enrolment/terms-classes/class-lists/class-lists.component';
 import { MarksProgressComponent } from './marks/marks-progress/marks-progress.component';
 // FeesComponent is lazy loaded
@@ -86,6 +87,12 @@ const routes: Routes = [
     component: StudentViewComponent,
     canActivate: [AuthGuardService],
     title: 'Student Details',
+  },
+  {
+    path: 'parents',
+    component: ParentsListComponent,
+    canActivate: [AuthGuardService],
+    title: 'Manage Parents',
   },
   {
     path: 'classes',

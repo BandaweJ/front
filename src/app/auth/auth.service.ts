@@ -10,6 +10,7 @@ import jwt_decode from 'jwt-decode';
 import { User } from './models/user.model';
 import { StudentsModel } from '../registration/models/students.model';
 import { TeachersModel } from '../registration/models/teachers.model';
+import { ParentsModel } from '../registration/models/parents.model';
 
 @Injectable({
   providedIn: 'root',
@@ -72,8 +73,8 @@ export class AuthService {
   fetchUserDetails(
     id: string,
     role: string
-  ): Observable<StudentsModel | TeachersModel> {
-    return this.http.get<StudentsModel | TeachersModel>(
+  ): Observable<StudentsModel | TeachersModel | ParentsModel> {
+    return this.http.get<StudentsModel | TeachersModel | ParentsModel>(
       `${this.baseUrl}${id}/${role}`
     );
   }

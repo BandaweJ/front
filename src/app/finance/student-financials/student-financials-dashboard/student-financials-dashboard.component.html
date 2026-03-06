@@ -6,16 +6,38 @@
       <div class="header-content">
         <div class="welcome-section">
           <h1 class="dashboard-title">Student Financials</h1>
-          <p class="dashboard-subtitle" *ngIf="studentName$ | async as studentName">
-            Welcome back, {{ studentName }}
-          </p>
-          <p class="student-info" *ngIf="studentNumber$ | async as studentNumber">
-            Student Number: {{ studentNumber }}
-          </p>
+          <!-- Parent: show child selector or message -->
+          <ng-container *ngIf="isParent$ | async">
+            <div *ngIf="(linkedChildren$ | async)?.length === 0" class="no-children-msg">
+              No linked students. Contact the school to link your children to your account.
+            </div>
+            <div *ngIf="(linkedChildren$ | async)?.length as len" [class.hidden]="len === 0">
+              <mat-form-field appearance="outline" class="child-select" *ngIf="len > 1">
+                <mat-label>View finances for</mat-label>
+                <mat-select [value]="selectedChildStudentNumber$ | async" (selectionChange)="onParentSelectChild($event.value)">
+                  <mat-option *ngFor="let c of linkedChildren$ | async" [value]="c.studentNumber">
+                    {{ c.studentNumber }} – {{ c.name }} {{ c.surname }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <p class="student-info" *ngIf="len === 1 && (studentNumber$ | async) as sn">
+                Viewing finances for linked student: {{ sn }}
+              </p>
+            </div>
+          </ng-container>
+          <!-- Student: welcome and student number -->
+          <ng-container *ngIf="(isParent$ | async) === false">
+            <p class="dashboard-subtitle" *ngIf="studentName$ | async as studentName">
+              Welcome back, {{ studentName }}
+            </p>
+            <p class="student-info" *ngIf="studentNumber$ | async as studentNumber">
+              Student Number: {{ studentNumber }}
+            </p>
+          </ng-container>
         </div>
         
-        <!-- Outstanding Balance Card -->
-        <mat-card class="balance-card" role="region" aria-label="Outstanding balance">
+        <!-- Outstanding Balance Card (hidden when parent has no linked children) -->
+        <mat-card *ngIf="!(isParent$ | async) || (linkedChildren$ | async)?.length" class="balance-card" role="region" aria-label="Outstanding balance">
           <div class="balance-content">
             <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
             <div class="balance-details">
@@ -31,8 +53,8 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <nav class="dashboard-tabs" role="tablist" aria-label="Financial sections">
+    <!-- Navigation Tabs (hidden when parent has no linked children) -->
+    <nav *ngIf="!(isParent$ | async) || (linkedChildren$ | async)?.length" class="dashboard-tabs" role="tablist" aria-label="Financial sections">
       <div class="tab-list">
         <a *ngFor="let link of navLinks; let i = index" 
            [routerLink]="link.path" 
