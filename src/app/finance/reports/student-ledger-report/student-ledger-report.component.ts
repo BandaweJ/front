@@ -81,9 +81,15 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
   rawLedger$!: Observable<LedgerEntry[]>;
   filteredLedger$!: Observable<LedgerEntry[]>;
   ledgerSummary$!: Observable<LedgerSummary>;
-  /** Balance from backend (same source as student dashboard). */
+  /** Amount owed from backend (same source as student dashboard). */
   backendBalance$!: Observable<number | null>;
-  /** Summary plus display balance: prefer backend amountOwed, fallback to ledger netBalance. */
+  /**
+   * Summary plus display balance.
+   *
+   * Important: backend "amountOwed" is clamped to >= 0, so it cannot represent
+   * a credit balance. For credit cases (netBalance < 0), we must display the
+   * ledger netBalance so the UI can show "Credit Balance" correctly.
+   */
   ledgerView$!: Observable<LedgerSummary & { displayBalance: number }>;
   isLoading$: Observable<boolean>;
   error$: Observable<string | null>;
@@ -264,14 +270,17 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
       )
     );
 
-    // Prefer backend balance for display; fallback to ledger netBalance if API fails or no student
+    // Display rules:
+    // - If ledger indicates credit (netBalance < 0), show netBalance (negative) so UI shows "Credit Balance".
+    // - Otherwise prefer backend amountOwed to stay consistent with dashboard, fallback to ledger netBalance.
     this.ledgerView$ = combineLatest([
       this.ledgerSummary$,
       this.backendBalance$,
     ]).pipe(
       map(([summary, backendBalance]: [LedgerSummary, number | null]) => ({
         ...summary,
-        displayBalance: backendBalance ?? summary.netBalance,
+        displayBalance:
+          summary.netBalance < 0 ? summary.netBalance : (backendBalance ?? summary.netBalance),
       }))
     );
   }
