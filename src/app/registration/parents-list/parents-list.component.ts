@@ -77,9 +77,10 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMsg = err.error?.message || err.message || 'Failed to load parents';
+          const msg = err.error?.message || err.message || 'Failed to load parents';
+          this.errorMsg = msg;
           this.cdr.markForCheck();
-          this.snackBar.open(this.errorMsg, 'Close', { duration: 5000 });
+          this.snackBar.open(msg, 'Close', { duration: 5000 });
         },
       });
   }
