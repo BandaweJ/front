@@ -43,6 +43,37 @@ export const selectUserDetails = createSelector(
   (state: fromAuthReducer.State) => state.userDetails
 );
 
+/**
+ * Linked children (students) for any role that has a parent profile attached.
+ * This relies on `userDetails.students` being populated, regardless of the user's primary role.
+ */
+export const selectLinkedChildrenAnyRole = createSelector(
+  authState,
+  (state: fromAuthReducer.State) => {
+    const details = state.userDetails as
+      | { students?: { studentNumber: string; name?: string; surname?: string }[] }
+      | null
+      | undefined;
+
+    if (!details || !('students' in details)) {
+      return [];
+    }
+
+    return details.students || [];
+  }
+);
+
+/**
+ * True when the current account has any linked children in their profile,
+ * regardless of whether their primary role is parent, teacher, dev, etc.
+ * Used to drive "parent-like" views for teacher/dev accounts that also
+ * have a parent profile attached.
+ */
+export const selectHasLinkedChildrenProfile = createSelector(
+  selectLinkedChildrenAnyRole,
+  (children) => children.length > 0
+);
+
 /** When user is parent: list of linked child student numbers; otherwise null (no restriction). */
 export const selectLinkedStudentNumbers = createSelector(
   authState,

@@ -22,8 +22,8 @@ import { selectStudentDashboardSummary } from 'src/app/dashboard/store/dashboard
 import { User } from 'src/app/auth/models/user.model';
 import {
   selectUser,
-  selectIsParent,
-  selectLinkedChildrenForParent,
+  selectLinkedChildrenAnyRole,
+  selectHasLinkedChildrenProfile,
 } from 'src/app/auth/store/auth.selectors';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { BehaviorSubject } from 'rxjs';
@@ -50,6 +50,10 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   // Data Observables
   user$: Observable<User | null>;
   outstandingBalance$: Observable<number>;
+  /**
+   * True when the logged-in account has any linked children (parent profile),
+   * regardless of whether their primary role is parent, teacher, or dev.
+   */
   isParent$: Observable<boolean>;
   linkedChildren$: Observable<{ studentNumber: string; name?: string; surname?: string }[]>;
 
@@ -99,8 +103,9 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     this.user$ = this.store.select(selectUser);
-    this.isParent$ = this.store.select(selectIsParent);
-    this.linkedChildren$ = this.store.select(selectLinkedChildrenForParent);
+    // Treat any account with linked children as "parent-like" for this view
+    this.isParent$ = this.store.select(selectHasLinkedChildrenProfile);
+    this.linkedChildren$ = this.store.select(selectLinkedChildrenAnyRole);
 
     // Outstanding balance from backend summary (single source of truth)
     this.outstandingBalance$ = this.store.select(selectStudentDashboardSummary).pipe(

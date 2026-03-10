@@ -5,7 +5,10 @@ import { takeUntil, filter, tap, switchMap, map, take } from 'rxjs/operators';
 
 import * as ReportsActions from '../store/reports.actions';
 import * as AuthSelectors from 'src/app/auth/store/auth.selectors';
-import { selectIsParent, selectLinkedChildrenForParent } from 'src/app/auth/store/auth.selectors';
+import {
+  selectHasLinkedChildrenProfile,
+  selectLinkedChildrenAnyRole,
+} from 'src/app/auth/store/auth.selectors';
 import { ReportsModel } from '../models/reports.model';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { Router } from '@angular/router';
@@ -73,8 +76,9 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
     this.invoicesLoading$ = this.store.select(selectLoadingStudentInvoices); // Use the provided selector
     // --- END Initialize NEW Observables ---
 
-    this.isParent$ = this.store.select(selectIsParent);
-    this.linkedChildren$ = this.store.select(selectLinkedChildrenForParent);
+    // Treat any account with linked children as "parent-like" for this view
+    this.isParent$ = this.store.select(selectHasLinkedChildrenProfile);
+    this.linkedChildren$ = this.store.select(selectLinkedChildrenAnyRole);
     this.effectiveStudentNumber$ = combineLatest([
       this.store.select(AuthSelectors.selectUser),
       this.isParent$,

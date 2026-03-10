@@ -10,7 +10,12 @@ import { Observable, Subject, of, combineLatest } from 'rxjs';
 import { takeUntil, map, shareReplay, catchError, filter, take } from 'rxjs/operators';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Store } from '@ngrx/store';
-import { selectIsLoggedIn, selectUser, selectUserDetails } from './auth/store/auth.selectors';
+import {
+  selectHasLinkedChildrenProfile,
+  selectIsLoggedIn,
+  selectUser,
+  selectUserDetails,
+} from './auth/store/auth.selectors';
 import { checkAuthStatus, userDetailsActions } from './auth/store/auth.actions';
 import { ThemeService, Theme } from './services/theme.service';
 import { RoleAccessService } from './services/role-access.service';
@@ -109,6 +114,13 @@ export class AppComponent implements OnInit, OnDestroy {
   isParent$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.parent, role))
   );
+  /**
+   * True when the logged-in account has any linked children profile information,
+   * regardless of whether their primary role is parent, teacher, or dev.
+   * Used to expose student-style finance views for teacher/dev accounts that
+   * also act as parents.
+   */
+  hasLinkedChildrenProfile$ = this.store.select(selectHasLinkedChildrenProfile);
 
   private destroy$ = new Subject<void>();
 

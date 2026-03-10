@@ -79,20 +79,33 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
         debounceTime(300),
         distinctUntilChanged(),
         takeUntil(this.destroy$),
-        switchMap((term) => {
-          this.isLoading = true;
-          this.errorMsg = null;
+      )
+      .subscribe((term) => {
+        this.fetchParents(term || '');
+      });
+  }
+
+  loadParents(): void {
+    // Explicitly reload using the current search term (e.g., after add/edit/delete/link).
+    const currentTerm = this.searchControl.value || '';
+    this.fetchParents(currentTerm);
+  }
+
+  private fetchParents(term: string): void {
+    this.isLoading = true;
+    this.errorMsg = null;
+    this.cdr.markForCheck();
+    this.parentsService
+      .search(term || '')
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError((err) => {
+          const msg =
+            err?.error?.message || err?.message || 'Failed to load parents';
+          this.errorMsg = msg;
+          this.snackBar.open(msg, 'Close', { duration: 5000 });
           this.cdr.markForCheck();
-          return this.parentsService.search(term || '').pipe(
-            catchError((err) => {
-              const msg =
-                err?.error?.message || err?.message || 'Failed to load parents';
-              this.errorMsg = msg;
-              this.snackBar.open(msg, 'Close', { duration: 5000 });
-              this.cdr.markForCheck();
-              return of<ParentsModel[]>([]);
-            }),
-          );
+          return of<ParentsModel[]>([]);
         }),
       )
       .subscribe((parents) => {
@@ -100,12 +113,6 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isLoading = false;
         this.cdr.markForCheck();
       });
-  }
-
-  loadParents(): void {
-    // Re-trigger current search term (e.g., after add/edit/delete).
-    const currentTerm = this.searchControl.value || '';
-    this.searchControl.setValue(currentTerm);
   }
 
   openAddDialog(): void {

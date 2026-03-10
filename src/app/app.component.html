@@ -251,8 +251,13 @@
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Receipting</span>
             </button>
 
-            <!-- Student Financials (student: own; parent: linked children) -->
-            <button mat-button routerLink="/student-financials" routerLinkActive="active" *ngIf="(isStudent$ | async) || (isParent$ | async)">
+            <!-- Student Financials (student: own; parent/teacher/dev with linked children: linked children) -->
+            <button
+              mat-button
+              routerLink="/student-financials"
+              routerLinkActive="active"
+              *ngIf="(isStudent$ | async) || (hasLinkedChildrenProfile$ | async)"
+            >
               <mat-icon>receipt</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Financials</span>
             </button>
