@@ -195,7 +195,7 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const amount = this.legacyBalanceAmount;
+      const amount = this.legacyBalanceAmount ?? 0;
       this.isSavingWithLegacyBalance = true;
       this.cdr.markForCheck();
 
