@@ -8,7 +8,7 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { isLoading, selectErrorMsg } from '../store/auth.selectors';
-import { ROLES } from 'src/app/registration/models/roles.enum';
+import { ROLES, ROLES_FOR_SELECTION } from 'src/app/registration/models/roles.enum';
 import { Title } from '@angular/platform-browser';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { CommonModule } from '@angular/common';
@@ -80,7 +80,7 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   signupForm!: FormGroup;
   hide = true;
-  roles = [...Object.values(ROLES)];
+  roles = [...ROLES_FOR_SELECTION];
   errorMsg$!: Observable<string>;
   isLoading$!: Observable<boolean>;
   formSubmitted = false;

@@ -18,3 +18,28 @@
 .profile-buttons-container button.mat-flat-button .mat-icon {
   margin-right: 4px; /* Space between icon and text */
 }
+
+.user-info-and-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-role-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.85rem;
+}
+
+.user-role-name .display-name {
+  font-weight: 500;
+}
+
+.user-role-name .role-badge {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  text-transform: capitalize;
+}

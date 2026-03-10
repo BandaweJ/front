@@ -9,3 +9,8 @@ export enum ROLES {
   director = 'director',
   dev = 'dev',
 }
+
+/** Roles shown in dropdowns (excludes dev – not for general user assignment). */
+export const ROLES_FOR_SELECTION: ROLES[] = Object.values(ROLES).filter(
+  (r) => r !== ROLES.dev
+);

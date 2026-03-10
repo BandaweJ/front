@@ -205,15 +205,16 @@ export class AppComponent implements OnInit, OnDestroy {
     
     this.store.dispatch(checkAuthStatus());
 
-    // When parent logs in, load their profile with linked students so finance/reports can show only their children
+    // When user logs in, load their profile (display name in header; for parents, linked students for finance/reports)
     combineLatest([
       this.store.select(selectUser),
       this.store.select(selectUserDetails),
     ]).pipe(
       filter(([user, details]) => {
-        if (!user?.id || user.role !== ROLES.parent) return false;
-        if (!details) return true;
-        return !('students' in details);
+        if (!user?.id || !user.role) return false;
+        if (!details) return true; // load for all roles so we have display name
+        if (user.role === ROLES.parent) return !('students' in details);
+        return false;
       }),
       take(1),
       takeUntil(this.destroy$)

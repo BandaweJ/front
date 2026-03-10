@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
-import { ROLES } from '../../../registration/models/roles.enum';
+import { ROLES, ROLES_FOR_SELECTION } from '../../../registration/models/roles.enum';
 import { CreateUserModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectLoading } from '../../store/user-management.selectors';
@@ -37,7 +37,7 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   createUserForm: FormGroup;
-  roles = Object.values(ROLES);
+  roles = ROLES_FOR_SELECTION;
   loading$ = this.store.select(selectLoading);
 
   constructor(

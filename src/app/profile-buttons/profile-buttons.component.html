@@ -4,8 +4,15 @@
     <span>Sign In</span>
   </button>
 
-  <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="isLoggedIn">
-    <mat-icon>account_circle</mat-icon> </button>
+  <div *ngIf="isLoggedIn" class="user-info-and-menu">
+    <span class="user-role-name" *ngIf="(userDisplayName$ | async) || (userRole$ | async)">
+      <span class="display-name" *ngIf="userDisplayName$ | async as name">{{ name }}</span>
+      <span class="role-badge" *ngIf="userRole$ | async as role">{{ role }}</span>
+    </span>
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+  </div>
 
   <mat-menu #menu="matMenu">
     <button mat-menu-item (click)="onProfile()">

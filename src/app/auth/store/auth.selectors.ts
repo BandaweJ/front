@@ -71,3 +71,26 @@ export const selectIsParent = createSelector(
   selectAuthUserRole,
   (role) => role === 'parent'
 );
+
+/** Display name for header: student = name + surname, teacher/parent = title + surname, else username */
+export const selectUserDisplayName = createSelector(
+  authState,
+  (state: fromAuthReducer.State) => {
+    const user = state.user;
+    const details = state.userDetails;
+    const role = user?.role;
+    if (!user) return null;
+    if (details && role === 'student' && 'name' in details && 'surname' in details) {
+      return `${(details as { name: string }).name} ${(details as { surname: string }).surname}`.trim();
+    }
+    if (details && (role === 'teacher' || role === 'dev') && 'title' in details && 'surname' in details) {
+      const d = details as { title?: string; surname: string };
+      return [d.title, d.surname].filter(Boolean).join(' ').trim() || user.username;
+    }
+    if (details && role === 'parent' && 'title' in details && 'surname' in details) {
+      const d = details as { title?: string; surname: string };
+      return [d.title, d.surname].filter(Boolean).join(' ').trim() || user.username;
+    }
+    return user.username || null;
+  }
+);

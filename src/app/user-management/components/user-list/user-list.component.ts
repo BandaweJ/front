@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { ROLES } from '../../../registration/models/roles.enum';
+import { ROLES, ROLES_FOR_SELECTION } from '../../../registration/models/roles.enum';
 import { UserManagementModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectUsersList, selectLoading, selectError, selectUsersPagination } from '../../store/user-management.selectors';
@@ -83,7 +83,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   error$ = this.store.select(selectError);
 
   // Roles for filter dropdown
-  roles = Object.values(ROLES);
+  roles = ROLES_FOR_SELECTION;
   statuses = ['active', 'inactive', 'suspended'];
 
   // Selection

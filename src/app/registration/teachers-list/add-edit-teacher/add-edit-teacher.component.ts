@@ -14,7 +14,7 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subject, takeUntil, filter, tap } from 'rxjs';
 import { Title } from '@angular/platform-browser';
-import { ROLES } from '../../models/roles.enum';
+import { ROLES, ROLES_FOR_SELECTION } from '../../models/roles.enum';
 
 @Component({
   selector: 'app-add-edit-teacher',
@@ -31,7 +31,7 @@ export class AddEditTeacherComponent implements OnInit, OnDestroy {
   errorMsg$!: Observable<string>;
   isLoading$!: Observable<boolean>;
   activeValues = [true, false];
-  roles = Object.values(ROLES);
+  roles = ROLES_FOR_SELECTION;
   isLoading = false;
 
   constructor(

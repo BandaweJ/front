@@ -4,7 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
-import { ROLES } from '../../../registration/models/roles.enum';
+import { ROLES, ROLES_FOR_SELECTION } from '../../../registration/models/roles.enum';
 import { UserManagementModel } from '../../models/user-management.model';
 import { userManagementActions } from '../../store/user-management.actions';
 import { selectLoading, selectError } from '../../store/user-management.selectors';
@@ -26,7 +26,7 @@ export class BulkOperationsComponent implements OnInit, OnDestroy {
   loading$ = this.store.select(selectLoading);
   error$ = this.store.select(selectError);
 
-  roles = Object.values(ROLES);
+  roles = ROLES_FOR_SELECTION;
   statuses = ['active', 'inactive', 'suspended'];
 
   selectedUsers: UserManagementModel[] = [];
