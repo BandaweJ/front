@@ -1,5 +1,5 @@
 <div class="profile-buttons-container">
-  <button mat-flat-button color="accent" *ngIf="!isLoggedIn" (click)="switchToSignin()">
+  <button mat-flat-button color="accent" *ngIf="!isLoggedIn && !isOnSigninPage" (click)="switchToSignin()">
     <mat-icon>login</mat-icon>
     <span>Sign In</span>
   </button>

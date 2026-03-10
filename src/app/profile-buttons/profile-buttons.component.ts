@@ -20,7 +20,12 @@ export class ProfileButtonsComponent {
   userRole$: Observable<string | undefined> = this.store.select(selectAuthUserRole);
   userDisplayName$: Observable<string | null> = this.store.select(selectUserDisplayName);
 
-  constructor(private store: Store, private router: Router) {} // Type the Store
+  constructor(private store: Store, private router: Router) {}
+
+  /** True when already on signin page – hide Sign In button to avoid redundant link */
+  get isOnSigninPage(): boolean {
+    return this.router.url.startsWith('/signin');
+  }
 
   onLogout(): void {
     this.store.dispatch(logout());
