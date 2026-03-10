@@ -11,7 +11,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, of } from 'rxjs';
+import {
+  takeUntil,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  startWith,
+  catchError,
+} from 'rxjs/operators';
+import { FormControl } from '@angular/forms';
 import { ParentsModel } from '../models/parents.model';
 import { ParentsService } from '../services/parents.service';
 import { Title } from '@angular/platform-browser';
@@ -39,6 +48,7 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSource = new MatTableDataSource<ParentsModel>([]);
   isLoading = false;
   errorMsg: string | null = null;
+  searchControl = new FormControl<string>('', { nonNullable: true });
 
   constructor(
     private parentsService: ParentsService,
@@ -50,7 +60,7 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.title.setTitle('Manage Parents');
-    this.loadParents();
+    this.setupSearch();
   }
 
   ngAfterViewInit(): void {
@@ -62,27 +72,40 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadParents(): void {
-    this.isLoading = true;
-    this.errorMsg = null;
-    this.cdr.markForCheck();
-    this.parentsService
-      .getAll()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (parents) => {
-          this.dataSource.data = parents;
-          this.isLoading = false;
+  private setupSearch(): void {
+    this.searchControl.valueChanges
+      .pipe(
+        startWith(this.searchControl.value || ''),
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$),
+        switchMap((term) => {
+          this.isLoading = true;
+          this.errorMsg = null;
           this.cdr.markForCheck();
-        },
-        error: (err) => {
-          this.isLoading = false;
-          const msg = err.error?.message || err.message || 'Failed to load parents';
-          this.errorMsg = msg;
-          this.cdr.markForCheck();
-          this.snackBar.open(msg, 'Close', { duration: 5000 });
-        },
+          return this.parentsService.search(term || '').pipe(
+            catchError((err) => {
+              const msg =
+                err?.error?.message || err?.message || 'Failed to load parents';
+              this.errorMsg = msg;
+              this.snackBar.open(msg, 'Close', { duration: 5000 });
+              this.cdr.markForCheck();
+              return of<ParentsModel[]>([]);
+            }),
+          );
+        }),
+      )
+      .subscribe((parents) => {
+        this.dataSource.data = parents;
+        this.isLoading = false;
+        this.cdr.markForCheck();
       });
+  }
+
+  loadParents(): void {
+    // Re-trigger current search term (e.g., after add/edit/delete).
+    const currentTerm = this.searchControl.value || '';
+    this.searchControl.setValue(currentTerm);
   }
 
   openAddDialog(): void {

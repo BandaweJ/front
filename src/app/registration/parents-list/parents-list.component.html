@@ -3,7 +3,30 @@
     <mat-icon class="title-icon">family_restroom</mat-icon>
     <h1 class="page-title">Manage Parents</h1>
     <span class="spacer"></span>
-    <button mat-raised-button color="primary" (click)="openAddDialog()" matTooltip="Add Parent">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search parents</mat-label>
+      <input
+        matInput
+        [formControl]="searchControl"
+        placeholder="Surname, email, or cell"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        *ngIf="searchControl.value"
+        (click)="searchControl.setValue('')"
+        aria-label="Clear search"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openAddDialog()"
+      matTooltip="Add Parent"
+    >
       <mat-icon>add</mat-icon>
       Add Parent
     </button>

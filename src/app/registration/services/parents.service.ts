@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ParentsModel } from '../models/parents.model';
@@ -13,7 +13,8 @@ export class ParentsService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<ParentsModel[]> {
-    return this.http.get<ParentsModel[]>(this.baseUrl);
+    // Default list view: server-side limited and ordered.
+    return this.search('');
   }
 
   getByEmail(email: string): Observable<ParentsModel> {
@@ -33,6 +34,13 @@ export class ParentsService {
 
   delete(email: string): Observable<void> {
     return this.http.delete<void>(this.baseUrl + encodeURIComponent(email));
+  }
+
+  search(term: string, limit: number = 100): Observable<ParentsModel[]> {
+    const params = new HttpParams()
+      .set('q', term || '')
+      .set('limit', String(limit));
+    return this.http.get<ParentsModel[]>(this.baseUrl + 'search', { params });
   }
 
   setLinkedStudents(
