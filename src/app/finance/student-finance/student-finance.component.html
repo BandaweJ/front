@@ -152,10 +152,54 @@
                    <mat-icon>receipt_long</mat-icon>
                    Invoice Details
                  </mat-card-title>
-                 <mat-card-subtitle>Invoice #{{ invoice.invoiceNumber }}</mat-card-subtitle>
+                 <mat-card-subtitle>
+                   Invoice #{{ invoice.invoiceNumber }}
+                 </mat-card-subtitle>
                </mat-card-header>
 
                <mat-card-content>
+                 <!-- Balance brought forward (legacy) controls -->
+                 <div class="legacy-balance-container">
+                   <mat-form-field appearance="outline" class="legacy-balance-field">
+                     <mat-label>Balance brought forward (legacy)</mat-label>
+                     <input
+                       matInput
+                       type="number"
+                       min="0"
+                       step="0.01"
+                       [(ngModel)]="legacyBalanceAmount"
+                       [disabled]="invoice.balanceBfwd || isSavingWithLegacyBalance"
+                     />
+                     <mat-hint>
+                       Opening balance from before this system. Added to this invoice total.
+                     </mat-hint>
+                   </mat-form-field>
+
+                   <button
+                     mat-stroked-button
+                     color="primary"
+                     class="legacy-balance-button"
+                     (click)="saveInvoiceWithLegacyBalance()"
+                     [disabled]="
+                       isSavingWithLegacyBalance ||
+                       !legacyBalanceAmount ||
+                       legacyBalanceAmount <= 0 ||
+                       !!invoice.balanceBfwd
+                     ">
+                     <mat-icon *ngIf="!isSavingWithLegacyBalance">save</mat-icon>
+                     <mat-spinner
+                       *ngIf="isSavingWithLegacyBalance"
+                       diameter="20">
+                     </mat-spinner>
+                     <span *ngIf="!isSavingWithLegacyBalance">
+                       Save with Balance B/F
+                     </span>
+                     <span *ngIf="isSavingWithLegacyBalance">
+                       Saving...
+                     </span>
+                   </button>
+                 </div>
+
                  <app-invoice-item [invoice]="invoice" [downloadable]="true"></app-invoice-item>
                </mat-card-content>
              </mat-card>

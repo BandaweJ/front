@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { take, takeUntil, filter } from 'rxjs/operators';
+import { take, takeUntil, filter, finalize } from 'rxjs/operators';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
 import { StudentsModel } from 'src/app/registration/models/students.model';
@@ -28,6 +28,8 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { FinanceService } from '../services/finance.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-student-finance',
@@ -63,13 +65,19 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
   selectedStudentNumber: string | null = null;
   selectedStudent: StudentsModel | null = null;
 
+  // UI state for legacy balance (balance brought forward)
+  legacyBalanceAmount: number | null = null;
+  isSavingWithLegacyBalance = false;
+
   private destroy$ = new Subject<void>();
   currentTheme: Theme = 'light';
 
   constructor(
     private store: Store,
     public themeService: ThemeService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private financeService: FinanceService,
+    private snackBar: MatSnackBar,
   ) {
     this.terms$ = this.store.select(selectTerms);
     this.invoice$ = this.store.select(selectedStudentInvoice);
@@ -136,5 +144,98 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
 
   isFormValid(): boolean {
     return !!(this.selectedStudentNumber && this.selectedTerm);
+  }
+
+  /**
+   * Create a legacy balance for the selected student and attach it to the
+   * current invoice as balanceBfwd, then save the invoice.
+   */
+  saveInvoiceWithLegacyBalance(): void {
+    if (this.isSavingWithLegacyBalance) {
+      return;
+    }
+
+    if (!this.legacyBalanceAmount || this.legacyBalanceAmount <= 0) {
+      this.snackBar.open(
+        'Please enter a positive legacy balance amount before saving.',
+        'Close',
+        { duration: 4000 }
+      );
+      return;
+    }
+
+    this.invoice$.pipe(take(1)).subscribe((currentInvoice) => {
+      if (!currentInvoice) {
+        this.snackBar.open(
+          'No invoice available. Generate an invoice first.',
+          'Close',
+          { duration: 4000 }
+        );
+        return;
+      }
+
+      if (currentInvoice.balanceBfwd) {
+        this.snackBar.open(
+          'This invoice already has a balance brought forward attached.',
+          'Close',
+          { duration: 4000 }
+        );
+        return;
+      }
+
+      const studentNumber =
+        currentInvoice.student?.studentNumber || this.selectedStudentNumber;
+
+      if (!studentNumber) {
+        this.snackBar.open(
+          'Missing student number. Please select a student and try again.',
+          'Close',
+          { duration: 4000 }
+        );
+        return;
+      }
+
+      const amount = this.legacyBalanceAmount;
+      this.isSavingWithLegacyBalance = true;
+      this.cdr.markForCheck();
+
+      this.financeService
+        .createFeesBalance({
+          amount,
+          studentNumber,
+        })
+        .pipe(
+          take(1),
+          finalize(() => {
+            this.isSavingWithLegacyBalance = false;
+            this.cdr.markForCheck();
+          })
+        )
+        .subscribe({
+          next: (balance) => {
+            const invoiceWithLegacy: InvoiceModel = {
+              ...currentInvoice,
+              balanceBfwd: balance,
+            };
+            this.store.dispatch(
+              invoiceActions.saveInvoice({ invoice: invoiceWithLegacy })
+            );
+            this.snackBar.open(
+              'Legacy balance attached and invoice save requested.',
+              'Close',
+              { duration: 4000 }
+            );
+            this.legacyBalanceAmount = null;
+          },
+          error: (err) => {
+            console.error('Failed to create legacy balance', err);
+            this.snackBar.open(
+              'Failed to create legacy balance. Please try again.',
+              'Close',
+              { duration: 5000 }
+            );
+          },
+        });
+    });
   }
 }

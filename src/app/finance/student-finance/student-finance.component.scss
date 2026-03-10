@@ -380,12 +380,27 @@ $surface-dark: #1e1e1e;
 // Ensure mat-card-content displays invoice properly
 .invoice-card mat-card-content {
   overflow: visible;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  display: block;
   min-height: 0;
   padding: 1rem;
   max-width: 100%;
+}
+
+.legacy-balance-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.legacy-balance-field {
+  flex: 1 1 auto;
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.legacy-balance-button {
+  white-space: nowrap;
 }
 
 .theme-dark .invoice-card,
