@@ -148,6 +148,7 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
     
     const currentValues = {
       username: this.data.user.username || '',
+      role: this.data.user.role || '',
       name: this.data.user.name || '',
       surname: this.data.user.surname || '',
       email: this.data.user.email || '',
