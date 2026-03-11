@@ -34,8 +34,8 @@ export class UserManagementService {
   }
 
   updateUser(id: string, user: UpdateUserModel): Observable<{ message: string }> {
-    // Update account (username)
-    return this.httpClient.patch<{ message: string }>(`${environment.apiUrl}/auth/${id}`, { username: user.username });
+    // Update account (username, role, status where supported by backend)
+    return this.httpClient.patch<{ message: string }>(`${environment.apiUrl}/auth/${id}`, user);
   }
 
   updateProfile(id: string, profileData: any): Observable<{ message: string }> {

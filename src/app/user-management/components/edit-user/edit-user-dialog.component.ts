@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { UserManagementService } from '../../services/user-management.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 
 @Component({
   selector: 'app-edit-user-dialog',
@@ -35,6 +36,8 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
   
   editUserForm: FormGroup;
   loading = false;
+  // For user-management only, allow all roles including dev
+  roles = Object.values(ROLES);
 
   constructor(
     private fb: FormBuilder,
@@ -45,6 +48,7 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
   ) {
     this.editUserForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
+      role: ['', [Validators.required]],
       name: ['', [Validators.required]],
       surname: [''],
       email: ['', [this.optionalEmailValidator]],
@@ -59,6 +63,7 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
     if (this.data.user) {
       this.editUserForm.patchValue({
         username: this.data.user.username || '',
+        role: this.data.user.role || '',
         name: this.data.user.name || '',
         surname: this.data.user.surname || '',
         email: this.data.user.email || '',
@@ -81,10 +86,10 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
       
       // Prepare profile data (exclude username)
       // Include active status in profile data for backend to handle
-      const { username, ...profileData } = formValue;
+      const { username, role, ...profileData } = formValue;
 
       // Chain both updates using RxJS operators
-      this.userManagementService.updateUser(this.data.userId, { username: formValue.username })
+      this.userManagementService.updateUser(this.data.userId, { username: formValue.username, role: formValue.role })
         .pipe(
           switchMap(accountResponse => 
             this.userManagementService.updateProfile(this.data.userId, profileData)

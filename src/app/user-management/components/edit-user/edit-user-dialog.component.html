@@ -22,6 +22,15 @@
           <mat-icon matSuffix>person</mat-icon>
           <mat-error *ngIf="getFieldError('username')">{{ getFieldError('username') }}</mat-error>
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Role *</mat-label>
+          <mat-select formControlName="role">
+            <mat-option *ngFor="let role of roles" [value]="role">
+              {{ role }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
       <!-- Profile Information -->
