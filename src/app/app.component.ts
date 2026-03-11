@@ -246,6 +246,34 @@ export class AppComponent implements OnInit, OnDestroy {
       this.changeDetectorRef.detectChanges(); // Force update view to reflect margin change
     });
 
+    // After login, route users to the correct default dashboard:
+    // - Parents with linked children → parent dashboard
+    // - Everyone else → main dashboard
+    combineLatest([
+      this.isLoggedIn$,
+      this.roleAccess.getCurrentRole$(),
+      this.hasLinkedChildrenProfile$,
+    ])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([loggedIn, role, hasLinkedChildren]) => {
+        if (!loggedIn) {
+          return;
+        }
+
+        const isParent = this.roleAccess.hasRole(ROLES.parent, role);
+        const currentUrl = this.router.url;
+
+        // Only auto-redirect when coming from signin/root,
+        // so we don't interfere with manual navigation.
+        if (currentUrl === '/signin' || currentUrl === '/' || currentUrl === '') {
+          if (isParent && hasLinkedChildren) {
+            this.router.navigate(['/parent-dashboard']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        }
+      });
+
     this.user$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
       if (user) {
         this.role = user.role;
