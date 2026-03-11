@@ -18,3 +18,7 @@
 <!-- Student Dashboard -->
 <app-student-dashboard *ngIf="canAccessStudentDashboard$ | async"></app-student-dashboard>
 <!-- End Student Dashboard -->
+
+<!-- Parent Dashboard -->
+<app-parent-dashboard *ngIf="canAccessParentDashboard$ | async"></app-parent-dashboard>
+<!-- End Parent Dashboard -->

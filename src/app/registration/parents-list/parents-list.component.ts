@@ -159,14 +159,29 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef
       .afterClosed()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((result) => {
+      .subscribe((result: ParentsModel | undefined) => {
         if (result) {
           this.snackBar.open('Linked students updated', 'Close', {
             duration: 3000,
           });
-          this.loadParents();
+          // Update the row in place; do not refetch here or search response can overwrite with empty students
+          this.mergeUpdatedParent(result);
         }
       });
+  }
+
+  /** Merge updated parent (e.g. from link-students dialog) into the table so UI updates without waiting for refetch. */
+  private mergeUpdatedParent(updated: ParentsModel): void {
+    const email = updated?.email;
+    if (!email) return;
+    const idx = this.dataSource.data.findIndex((p) => p.email === email);
+    if (idx === -1) return;
+    const students = Array.isArray(updated.students) ? updated.students : [];
+    const merged: ParentsModel = { ...this.dataSource.data[idx], ...updated, students };
+    const newData = [...this.dataSource.data];
+    newData[idx] = merged;
+    this.dataSource.data = newData;
+    this.cdr.markForCheck();
   }
 
   deleteParent(parent: ParentsModel): void {
@@ -207,7 +222,7 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getLinkedStudentsLabel(parent: ParentsModel): string {
-    const students = parent.students || [];
+    const students = Array.isArray(parent?.students) ? parent.students : [];
     if (students.length === 0) return 'None';
     if (students.length === 1) {
       const s = students[0];

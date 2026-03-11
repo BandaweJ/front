@@ -17,6 +17,7 @@ import {
   selectStudentLedgerFromStudentData,
 } from '../../store/finance.selector';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-student-payment-history',
@@ -26,6 +27,7 @@ import { ThemeService, Theme } from 'src/app/services/theme.service';
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+    EmptyStateComponent,
   ],
   templateUrl: './student-payment-history.component.html',
   styleUrls: ['./student-payment-history.component.scss'],

@@ -70,8 +70,9 @@ export const invoiceActions = createActionGroup({
     fetchAllInvoicesFail: props<{ error: HttpErrorResponse }>(),
 
     fetchStudentInvoices: props<{ studentNumber: string }>(),
-    fetchStudentInvoicesSuccess: props<{ studentInvoices: InvoiceModel[] }>(),
+    fetchStudentInvoicesSuccess: props<{ studentNumber: string; studentInvoices: InvoiceModel[] }>(),
     fetchStudentInvoicesFail: props<{ error: HttpErrorResponse }>(),
+    setEffectiveStudentForFinance: props<{ studentNumber: string | null }>(),
 
     updateInvoiceEnrolment: props<{ enrol: EnrolsModel }>(),
     clearInvoice: emptyProps(), // Add a clear action for when selection changes
@@ -145,7 +146,7 @@ export const receiptActions = createActionGroup({
     clearCreatedReceipt: emptyProps(),
 
     fetchStudentReceipts: props<{ studentNumber: string }>(),
-    fetchStudentReceiptsSuccess: props<{ studentReceipts: ReceiptModel[] }>(),
+    fetchStudentReceiptsSuccess: props<{ studentNumber: string; studentReceipts: ReceiptModel[] }>(),
     fetchStudentReceiptsFail: props<{ error: HttpErrorResponse }>(),
 
     // --- NEW ACTIONS FOR VOIDING ---

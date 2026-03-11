@@ -13,6 +13,7 @@ import { Store } from '@ngrx/store';
 import {
   selectHasLinkedChildrenProfile,
   selectIsLoggedIn,
+  selectIsParent,
   selectUser,
   selectUserDetails,
 } from './auth/store/auth.selectors';
@@ -114,6 +115,8 @@ export class AppComponent implements OnInit, OnDestroy {
   isParent$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.parent, role))
   );
+  /** True when user role is parent (case-insensitive). Used for Finance overview and parent views. */
+  isParentRole$ = this.store.select(selectIsParent);
   /**
    * True when the logged-in account has any linked children profile information,
    * regardless of whether their primary role is parent, teacher, or dev.
@@ -246,33 +249,16 @@ export class AppComponent implements OnInit, OnDestroy {
       this.changeDetectorRef.detectChanges(); // Force update view to reflect margin change
     });
 
-    // After login, route users to the correct default dashboard:
-    // - Parents with linked children → parent dashboard
-    // - Everyone else → main dashboard
-    combineLatest([
-      this.isLoggedIn$,
-      this.roleAccess.getCurrentRole$(),
-      this.hasLinkedChildrenProfile$,
-    ])
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(([loggedIn, role, hasLinkedChildren]) => {
-        if (!loggedIn) {
-          return;
-        }
-
-        const isParent = this.roleAccess.hasRole(ROLES.parent, role);
-        const currentUrl = this.router.url;
-
-        // Only auto-redirect when coming from signin/root,
-        // so we don't interfere with manual navigation.
-        if (currentUrl === '/signin' || currentUrl === '/' || currentUrl === '') {
-          if (isParent && hasLinkedChildren) {
-            this.router.navigate(['/parent-dashboard']);
-          } else {
-            this.router.navigate(['/dashboard']);
-          }
-        }
-      });
+    // After login, route everyone to /dashboard (role-specific view is shown inside dashboard component)
+    this.isLoggedIn$.pipe(
+      takeUntil(this.destroy$),
+      filter((loggedIn) => !!loggedIn)
+    ).subscribe(() => {
+      const url = this.router.url;
+      if (url === '/signin' || url === '/' || url === '') {
+        this.router.navigate(['/dashboard']);
+      }
+    });
 
     this.user$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
       if (user) {

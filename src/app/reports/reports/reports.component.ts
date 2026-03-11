@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Observable, Subscription, combineLatest, BehaviorSubject } from 'rxjs';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
@@ -16,18 +16,23 @@ import {
 import * as reportsActions from '../store/reports.actions';
 import { ReportsModel } from '../models/reports.model';
 import { selectIsLoading, selectReports, selectReportsGenerated } from '../store/reports.selectors';
-import { selectUser } from 'src/app/auth/store/auth.selectors';
+import {
+  selectUser,
+  selectIsParent,
+  selectLinkedChildrenAnyRole,
+} from 'src/app/auth/store/auth.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { viewReportsActions } from '../store/reports.actions';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { take, map, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators'; // Import operators for filtering
 import { RoleAccessService } from 'src/app/services/role-access.service';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-reports',
   templateUrl: './reports.component.html',
-  styleUrls: ['./reports.component.css'],
+  styleUrls: ['./reports.component.scss'],
 })
 export class ReportsComponent implements OnInit, OnDestroy {
   reportsForm!: FormGroup;
@@ -82,12 +87,28 @@ export class ReportsComponent implements OnInit, OnDestroy {
   isStudent$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.student, role))
   );
+  /** Parent viewing children's reports (tabbed by child). Use role so parent always sees this view. */
+  isParent$ = this.store.select(selectIsParent);
+  linkedChildren$ = this.store.select(selectLinkedChildrenAnyRole);
+  /** Staff view: form, generate, view, analytics, grid — only for teachers, admins, auditor, director, dev; never students or parents. */
+  isStaffReportsView$ = combineLatest([this.isStudent$, this.isParent$]).pipe(
+    map(([student, parent]) => !student && !parent)
+  );
   canGenerateReports$ = this.roleAccess.canGenerateReports$();
   canSaveReports$ = this.roleAccess.canSaveReports$();
   
-  // Check if user is admin
   isAdmin$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.admin, role))
+  );
+
+  /** Parent tab: index of selected child (for Progress Reports tabbed view). */
+  selectedChildIndex$ = new BehaviorSubject(0);
+  /** Resolved student number for the selected tab (one report-cards instance per view). */
+  selectedChildStudentNumber$: Observable<string | null> = combineLatest([
+    this.linkedChildren$,
+    this.selectedChildIndex$,
+  ]).pipe(
+    map(([children, idx]) => (children && children[idx]) ? children[idx].studentNumber : null)
   );
 
   // Analytics properties
@@ -139,6 +160,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    // (selectedChildStudentNumber$ is derived from linkedChildren$ + selectedChildIndex$; no extra subscription)
 
     // Subscribe to reports changes to calculate analytics
     this.subscriptions.push(
@@ -307,6 +330,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
     });
 
     return totalMarks > 0 ? Math.round((passingMarks / totalMarks) * 100 * 100) / 100 : 0;
+  }
+
+  onParentTabChange(ev: MatTabChangeEvent): void {
+    this.selectedChildIndex$.next(ev.index);
   }
 
   ngOnDestroy(): void {

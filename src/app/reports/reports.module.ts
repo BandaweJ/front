@@ -11,7 +11,8 @@ import { ReportsEffects } from './store/reports.effects';
 import { ReportComponent } from './report/report.component';
 import { FinanceModule } from '../finance/finance.module';
 import { StudentReportCardsComponent } from './student-report-cards/student-report-cards.component';
-// import { PaymentModule } from '../';
+import { NoLinkedStudentsComponent } from '../shared/no-linked-students/no-linked-students.component';
+import { EmptyStateComponent } from '../shared/empty-state/empty-state.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,8 @@ import { StudentReportCardsComponent } from './student-report-cards/student-repo
   imports: [
     CommonModule,
     MaterialModule,
+    NoLinkedStudentsComponent,
+    EmptyStateComponent,
     RouterModule,
     FormsModule,
     ReactiveFormsModule,

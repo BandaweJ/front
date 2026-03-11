@@ -49,6 +49,13 @@ export interface State {
   loadingStudentReceipts: boolean;
   loadStudentInvoicesErr: string;
 
+  /** Effective student number for finance overview (set by dashboard; used by invoice/receipt when parent). */
+  effectiveStudentNumberForFinance: string | null;
+
+  /** Cache by student number to avoid refetch when parent switches back to a child tab. */
+  studentInvoicesByNumber: Record<string, InvoiceModel[]>;
+  studentReceiptsByNumber: Record<string, ReceiptModel[]>;
+
   exemption: ExemptionModel | null;
   exemptionLoading: boolean;
   exemptionError: string | null;
@@ -89,6 +96,9 @@ export const initialState: State = {
   studentReceipts: [],
   loadingStudentReceipts: false,
   loadStudentReceiptsErr: '',
+  effectiveStudentNumberForFinance: null,
+  studentInvoicesByNumber: {},
+  studentReceiptsByNumber: {},
 
   exemption: null,
   exemptionLoading: false,
@@ -470,10 +480,14 @@ export const financeReducer = createReducer(
   })),
   on(
     receiptActions.fetchStudentReceiptsSuccess,
-    (state, { studentReceipts }) => ({
+    (state, { studentNumber, studentReceipts }) => ({
       ...state,
       studentReceipts,
       loadingStudentReceipts: false,
+      studentReceiptsByNumber: {
+        ...state.studentReceiptsByNumber,
+        [studentNumber]: studentReceipts,
+      },
     })
   ),
   on(receiptActions.fetchStudentReceiptsFail, (state, { error }) => ({
@@ -484,20 +498,28 @@ export const financeReducer = createReducer(
   on(invoiceActions.fetchStudentInvoices, (state) => ({
     ...state,
     loadingStudentInvoices: true,
-    loadStudentInvoiceErr: '',
+    loadStudentInvoicesErr: '',
   })),
   on(
     invoiceActions.fetchStudentInvoicesSuccess,
-    (state, { studentInvoices }) => ({
+    (state, { studentNumber, studentInvoices }) => ({
       ...state,
       studentInvoices,
       loadingStudentInvoices: false,
+      studentInvoicesByNumber: {
+        ...state.studentInvoicesByNumber,
+        [studentNumber]: studentInvoices,
+      },
     })
   ),
   on(invoiceActions.fetchStudentInvoicesFail, (state, { error }) => ({
     ...state,
     loadingStudentInvoices: false,
     loadStudentInvoicesErr: error.message,
+  })),
+  on(invoiceActions.setEffectiveStudentForFinance, (state, { studentNumber }) => ({
+    ...state,
+    effectiveStudentNumberForFinance: studentNumber,
   })),
   on(invoiceActions.updateInvoiceEnrolment, (state, { enrol }) => {
     const enrolId = enrol.id;

@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Store } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { FinanceService } from '../services/finance.service';
 import { catchError, map, mergeMap, of, switchMap, tap } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import {
   balancesActions,
@@ -18,10 +20,16 @@ import {
 import { PaymentsService } from '../services/payments.service';
 import { EnrolService } from 'src/app/enrolment/services/enrol.service';
 import { ExemptionService } from '../services/exemption.service';
+import {
+  selectCachedInvoicesForStudent,
+  selectCachedReceiptsForStudent,
+} from './finance.selector';
+
 @Injectable()
 export class FinanceEffects {
   constructor(
     private actions$: Actions,
+    private store: Store,
     private financeService: FinanceService,
     private paymentsService: PaymentsService,
     private enrolService: EnrolService,
@@ -224,17 +232,34 @@ export class FinanceEffects {
   fetchStudentInvoices$ = createEffect(() =>
     this.actions$.pipe(
       ofType(invoiceActions.fetchStudentInvoices),
-      switchMap((data) =>
-        this.paymentsService.getStudentInvoices(data.studentNumber).pipe(
-          map((studentInvoices) => {
-            return invoiceActions.fetchStudentInvoicesSuccess({
-              studentInvoices,
-            });
-          }),
-          catchError((error: HttpErrorResponse) =>
-            of(invoiceActions.fetchStudentInvoicesFail({ ...error }))
+      mergeMap((action) =>
+        this.store
+          .select(selectCachedInvoicesForStudent(action.studentNumber))
+          .pipe(
+            take(1),
+            mergeMap((cached) =>
+              cached != null
+                ? of(
+                    invoiceActions.fetchStudentInvoicesSuccess({
+                      studentNumber: action.studentNumber,
+                      studentInvoices: cached,
+                    })
+                  )
+                : this.paymentsService
+                    .getStudentInvoices(action.studentNumber)
+                    .pipe(
+                      map((studentInvoices) =>
+                        invoiceActions.fetchStudentInvoicesSuccess({
+                          studentNumber: action.studentNumber,
+                          studentInvoices,
+                        })
+                      ),
+                      catchError((error: HttpErrorResponse) =>
+                        of(invoiceActions.fetchStudentInvoicesFail({ ...error }))
+                      )
+                    )
+            )
           )
-        )
       )
     )
   );
@@ -242,17 +267,34 @@ export class FinanceEffects {
   fetchStudentReceipts$ = createEffect(() =>
     this.actions$.pipe(
       ofType(receiptActions.fetchStudentReceipts),
-      switchMap((data) =>
-        this.paymentsService.getStudentReceipts(data.studentNumber).pipe(
-          map((studentReceipts) => {
-            return receiptActions.fetchStudentReceiptsSuccess({
-              studentReceipts,
-            });
-          }),
-          catchError((error: HttpErrorResponse) =>
-            of(receiptActions.fetchStudentReceiptsFail({ ...error }))
+      mergeMap((action) =>
+        this.store
+          .select(selectCachedReceiptsForStudent(action.studentNumber))
+          .pipe(
+            take(1),
+            mergeMap((cached) =>
+              cached != null
+                ? of(
+                    receiptActions.fetchStudentReceiptsSuccess({
+                      studentNumber: action.studentNumber,
+                      studentReceipts: cached,
+                    })
+                  )
+                : this.paymentsService
+                    .getStudentReceipts(action.studentNumber)
+                    .pipe(
+                      map((studentReceipts) =>
+                        receiptActions.fetchStudentReceiptsSuccess({
+                          studentNumber: action.studentNumber,
+                          studentReceipts,
+                        })
+                      ),
+                      catchError((error: HttpErrorResponse) =>
+                        of(receiptActions.fetchStudentReceiptsFail({ ...error }))
+                      )
+                    )
+            )
           )
-        )
       )
     )
   );

@@ -14,12 +14,17 @@ import {
   selectStudentReceipts,
   selectLoadStudentReceiptsErr,
   selectLoadingStudentReceipts,
+  selectEffectiveStudentForFinance,
 } from '../../store/finance.selector';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
+import { selectIsParent } from 'src/app/auth/store/auth.selectors';
 import { User } from 'src/app/auth/models/user.model';
 import { receiptActions } from '../../store/finance.actions';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ReceiptModel } from '../../models/payment.model';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-student-receipts',
@@ -32,6 +37,7 @@ import { ThemeService, Theme } from 'src/app/services/theme.service';
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    EmptyStateComponent,
   ],
   templateUrl: './student-receipts.component.html',
   styleUrls: ['./student-receipts.component.scss'],
@@ -66,22 +72,26 @@ export class StudentReceiptsComponent implements OnInit, OnDestroy {
   }
 
   loadReceipts(): void {
-    this.userSubscription = this.store
-      .select(selectUser)
-      .pipe(
-        filter((user): user is User => !!user && !!user.id),
-        take(1), // Take only the first emitted studentNumber
-        tap((user) => {
-          this.store.dispatch(
-            receiptActions.fetchStudentReceipts({
-              studentNumber: user.id,
-            })
-          );
-        })
-      )
-      .subscribe({
-        error: (error) => console.error('Failed to load receipts:', error)
-      });
+    this.userSubscription = combineLatest([
+      this.store.select(selectUser),
+      this.store.select(selectIsParent),
+      this.store.select(selectEffectiveStudentForFinance),
+    ]).pipe(
+      filter(([user, isParent, effectiveStudent]) => {
+        if (!user?.id) return false;
+        if (isParent) return !!effectiveStudent;
+        return true;
+      }),
+      take(1),
+      map(([user, isParent, effectiveStudent]) => (user!.id && !isParent) ? user!.id : effectiveStudent!),
+      tap((studentNumber) => {
+        this.store.dispatch(
+          receiptActions.fetchStudentReceipts({ studentNumber })
+        );
+      })
+    ).subscribe({
+      error: (error) => console.error('Failed to load receipts:', error)
+    });
   }
 
   ngOnDestroy(): void {

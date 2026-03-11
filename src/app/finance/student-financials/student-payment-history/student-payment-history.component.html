@@ -98,11 +98,11 @@
 
     <!-- No Data State -->
     <ng-template #noPaymentHistory>
-      <div class="no-data-container">
-        <mat-icon class="no-data-icon">history</mat-icon>
-        <h3 class="no-data-title">No Payment History Found</h3>
-        <p class="no-data-message">You don't have any payment history yet. Transactions will appear here once payments are processed.</p>
-      </div>
+      <app-empty-state
+        icon="history"
+        title="No Payment History Found"
+        message="You don't have any payment history yet. Transactions will appear here once payments are processed.">
+      </app-empty-state>
     </ng-template>
   </div>
 </div>

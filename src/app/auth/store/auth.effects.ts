@@ -157,10 +157,8 @@ export class AuthEffects {
             authStatus.accessToken
           ) {
             // Note: Permissions are not stored in JWT, so they won't be available on page refresh
-            // They will be empty array until user logs in again or we fetch them separately
             this.router.navigateByUrl('/dashboard');
             return signinActions.signinSuccess({
-              // Use grouped action for dispatch
               user: authStatus.user,
               accessToken: authStatus.accessToken,
             });

@@ -6,12 +6,12 @@
   </div>
 
   <!-- Error State -->
-  <div *ngIf="(error$ | async) && !(loading$ | async)" class="error-container">
-    <mat-icon class="error-icon">error_outline</mat-icon>
+  <div *ngIf="(error$ | async) && !(loading$ | async)" class="error-container" role="alert" aria-live="assertive">
+    <mat-icon class="error-icon" aria-hidden="true">error_outline</mat-icon>
     <h3 class="error-title">Unable to load receipts</h3>
     <p class="error-message">{{ error$ | async }}</p>
-    <button mat-raised-button color="primary" (click)="loadReceipts()">
-      <mat-icon>refresh</mat-icon>
+    <button mat-raised-button color="primary" (click)="loadReceipts()" type="button">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
       Retry
     </button>
   </div>
@@ -159,11 +159,11 @@
 
     <!-- No Data State -->
     <ng-template #noReceipts>
-      <div class="no-data-container">
-        <mat-icon class="no-data-icon">payment</mat-icon>
-        <h3 class="no-data-title">No Receipts Found</h3>
-        <p class="no-data-message">You don't have any payment receipts yet. Receipts will appear here once payments are processed.</p>
-      </div>
+      <app-empty-state
+        icon="payment"
+        title="No Receipts Found"
+        message="You don't have any payment receipts yet. Receipts will appear here once payments are processed.">
+      </app-empty-state>
     </ng-template>
   </div>
 </div>

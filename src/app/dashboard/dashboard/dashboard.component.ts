@@ -37,6 +37,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   canAccessStudentDashboard$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.student, role))
   );
+  canAccessParentDashboard$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasRole(ROLES.parent, role))
+  );
 
   currentTermNum!: number;
   currentTermYear!: number;

@@ -26,8 +26,8 @@
     </div>
   </div>
 
-  <!-- Main Card -->
-  <div class="main-card" *ngIf="!(isStudent$ | async)">
+  <!-- Staff Reports (teachers, admins, auditor, director, dev): form, generate, view, analytics, grid -->
+  <div class="main-card" *ngIf="isStaffReportsView$ | async">
     <!-- Form Section -->
     <div class="form-section">
       <div class="form-header">
@@ -219,8 +219,39 @@
     </div>
   </div>
 
-  <!-- Student Reports Section -->
+  <!-- Student Reports Section (student viewing own reports) -->
   <div class="student-reports-section" *ngIf="isStudent$ | async">
     <app-student-report-cards></app-student-report-cards>
+  </div>
+
+  <!-- Parent Reports Section: tabs per child; in each tab the same view students see (term/year/exam filter + report card) -->
+  <div class="parent-reports-section" *ngIf="(isParent$ | async) && !(isStudent$ | async)">
+    <div class="header-section parent-header">
+      <div class="header-content">
+        <div class="title-section">
+          <mat-icon class="header-icon">assessment</mat-icon>
+          <div class="page-title">Progress Reports</div>
+          <div class="page-subtitle">View report cards for each child — same view as when the student logs in</div>
+        </div>
+      </div>
+    </div>
+    <ng-container *ngIf="(linkedChildren$ | async)?.length === 0">
+      <app-no-linked-students title="No linked students" hint="Contact the school to link your children to your account. You can also ask an admin to link students in the Parents list."></app-no-linked-students>
+    </ng-container>
+    <ng-container *ngIf="(linkedChildren$ | async)?.length">
+      <mat-tab-group class="parent-report-tabs" (selectedTabChange)="onParentTabChange($event)" aria-label="Report cards by child">
+        <mat-tab *ngFor="let child of linkedChildren$ | async" [label]="(child.studentNumber + ' – ' + (child.name || '') + ' ' + (child.surname || '')).trim()"
+          [attr.aria-label]="'Report cards for ' + (((child.name || '') + ' ' + (child.surname || '')).trim() || child.studentNumber)">
+        </mat-tab>
+      </mat-tab-group>
+      <div class="tab-content" [attr.aria-busy]="isLoading$ | async">
+        <div *ngIf="isLoading$ | async" class="tab-loading-overlay" role="status" aria-label="Loading reports for selected child">
+          <mat-spinner diameter="36"></mat-spinner>
+          <span class="tab-loading-text">Loading…</span>
+        </div>
+        <!-- Same component and view students see: Select a Report (term/year/exam) + report display -->
+        <app-student-report-cards [studentNumberInput]="selectedChildStudentNumber$ | async"></app-student-report-cards>
+      </div>
+    </ng-container>
   </div>
 </div>

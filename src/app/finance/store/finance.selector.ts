@@ -206,14 +206,43 @@ export const selectInvoiceWarning = createSelector(
 
 export const selectStudentInvoices = createSelector(
   financeState,
-  (state: fromFinanceReducer.State) => state.studentInvoices
+  (state: fromFinanceReducer.State) => {
+    const effective = state.effectiveStudentNumberForFinance;
+    const cached = effective ? state.studentInvoicesByNumber?.[effective] : undefined;
+    return cached ?? state.studentInvoices ?? [];
+  }
 );
 
-// --- MODIFICATION START: Use selectAllNonVoidedReceipts for student receipts as well ---
+export const selectEffectiveStudentForFinance = createSelector(
+  financeState,
+  (state: fromFinanceReducer.State) => state.effectiveStudentNumberForFinance
+);
+
+/** Returns cached invoices for a student number (for skip-fetch when switching tabs). */
+export const selectCachedInvoicesForStudent = (studentNumber: string) =>
+  createSelector(
+    financeState,
+    (state: fromFinanceReducer.State) =>
+      state.studentInvoicesByNumber?.[studentNumber]
+  );
+
+/** Returns cached receipts for a student number (for skip-fetch when switching tabs). */
+export const selectCachedReceiptsForStudent = (studentNumber: string) =>
+  createSelector(
+    financeState,
+    (state: fromFinanceReducer.State) =>
+      state.studentReceiptsByNumber?.[studentNumber]
+  );
+
+// --- MODIFICATION START: Use cache by student when effective set; filter voided ---
 export const selectStudentReceipts = createSelector(
   financeState,
-  (state: fromFinanceReducer.State) =>
-    (state.studentReceipts || []).filter((receipt) => !receipt.isVoided)
+  (state: fromFinanceReducer.State) => {
+    const effective = state.effectiveStudentNumberForFinance;
+    const cached = effective ? state.studentReceiptsByNumber?.[effective] : undefined;
+    const list = cached ?? state.studentReceipts ?? [];
+    return list.filter((receipt) => !receipt.isVoided);
+  }
 );
 // --- MODIFICATION END ---
 

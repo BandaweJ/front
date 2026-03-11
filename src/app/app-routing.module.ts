@@ -59,12 +59,8 @@ const routes: Routes = [
   },
   {
     path: 'parent-dashboard',
-    loadComponent: () =>
-      import('./dashboard/parent-dashboard/parent-dashboard.component').then(
-        (m) => m.ParentDashboardComponent
-      ),
-    canActivate: [AuthGuardService],
-    title: 'Parent Dashboard',
+    redirectTo: 'dashboard',
+    pathMatch: 'full',
   },
   {
     path: 'teachers',
@@ -82,7 +78,7 @@ const routes: Routes = [
     path: 'student-financials',
     loadComponent: () => import('./finance/student-financials/student-financials-dashboard/student-financials-dashboard.component').then(m => m.StudentFinancialsDashboardComponent),
     canActivate: [AuthGuardService],
-    title: 'Student Financials',
+    title: 'Finance overview',
     loadChildren: () => import('./finance/student-financials/student-financials.routes').then(m => m.STUDENT_FINANCIALS_ROUTES),
   },
   {

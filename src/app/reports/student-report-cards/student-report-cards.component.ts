@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, combineLatest, BehaviorSubject } from 'rxjs';
 import { takeUntil, filter, tap, switchMap, map, take } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import {
   selectHasLinkedChildrenProfile,
   selectLinkedChildrenAnyRole,
 } from 'src/app/auth/store/auth.selectors';
+import { EffectiveStudentService } from 'src/app/services/effective-student.service';
 import { ReportsModel } from '../models/reports.model';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { Router } from '@angular/router';
@@ -32,28 +33,27 @@ import { invoiceActions } from 'src/app/finance/store/finance.actions';
 @Component({
   selector: 'app-student-report-cards',
   templateUrl: './student-report-cards.component.html',
-  styleUrls: ['./student-report-cards.component.css'],
+  styleUrls: ['./student-report-cards.component.scss'],
 })
-export class StudentReportCardsComponent implements OnInit, OnDestroy {
+export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges {
+  /** When set (e.g. by parent reports tab), use this student only. Omits the child selector. */
+  @Input() studentNumberInput: string | null = null;
+
   studentReports$: Observable<ReportsModel[]>;
   selectedReport$: Observable<ReportsModel | null>;
   isLoading$: Observable<boolean>;
   errorMessage$: Observable<string>;
+  emptyStateMessage$: Observable<string>;
 
-  // --- NEW Observables for Invoices (using provided selector names) ---
-  allInvoices$: Observable<InvoiceModel[]>; // This will now map to selectStudentInvoices
-  invoicesLoading$: Observable<boolean>; // This will now map to selectLoadingStudentInvoices
-  // No direct 'invoicesLoaded$' selector was provided, so we'll rely on invoicesLoading$ and the presence of data.
-  // For better state management, consider adding `loaded: boolean;` to your finance state and a corresponding selector.
-  // For now, `invoicesLoaded$` will be derived implicitly for `filter` logic.
-  // --- END NEW Observables ---
+  allInvoices$: Observable<InvoiceModel[]>;
+  invoicesLoading$: Observable<boolean>;
 
   studentNumber: string | null = null;
   isParent$: Observable<boolean>;
   linkedChildren$: Observable<{ studentNumber: string; name?: string; surname?: string }[]>;
-  /** When user is parent: selected child's student number. */
   selectedChildStudentNumber$ = new BehaviorSubject<string | null>(null);
-  /** Effective student number for fetching reports: user.id for student, selected child for parent. */
+  private inputStudentNumber$ = new BehaviorSubject<string | null>(null);
+  /** Effective student number: input when set, else user.id for student, selected child for parent. */
   effectiveStudentNumber$: Observable<string | null>;
   private destroy$ = new Subject<void>();
 
@@ -65,11 +65,22 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
   selectedYear: number | null = null;
   selectedExamType: ExamType | null = null;
 
-  constructor(private store: Store, private router: Router) {
+  constructor(
+    private store: Store,
+    private router: Router,
+    private effectiveStudentService: EffectiveStudentService,
+  ) {
     this.studentReports$ = this.store.select(selectStudentReports);
     this.selectedReport$ = this.store.select(selectSelectedReport);
     this.isLoading$ = this.store.select(selectIsLoading);
     this.errorMessage$ = this.store.select(selectReportsErrorMsg);
+    this.emptyStateMessage$ = this.studentReports$.pipe(
+      map((reports) => {
+        const len = reports?.length ?? 0;
+        if (len === 0) return 'No report cards available for you yet.';
+        return `Select a Term, Year, and Exam Type above to view your report card. You have ${len} available reports.`;
+      })
+    );
 
     // --- Initialize NEW Invoices Observables (using provided selector names) ---
     this.allInvoices$ = this.store.select(selectStudentInvoices); // Use the provided selector
@@ -79,19 +90,16 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
     // Treat any account with linked children as "parent-like" for this view
     this.isParent$ = this.store.select(selectHasLinkedChildrenProfile);
     this.linkedChildren$ = this.store.select(selectLinkedChildrenAnyRole);
-    this.effectiveStudentNumber$ = combineLatest([
-      this.store.select(AuthSelectors.selectUser),
-      this.isParent$,
-      this.linkedChildren$,
+    this.effectiveStudentNumber$ = this.effectiveStudentService.getEffectiveStudentNumber$(
       this.selectedChildStudentNumber$,
-    ]).pipe(
-      map(([user, isParent, children, selected]) => {
-        if (!user?.id) return null;
-        if (!isParent) return user.id;
-        if (!children?.length) return null;
-        return selected || children[0]?.studentNumber || null;
-      })
+      this.inputStudentNumber$.asObservable(),
     );
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['studentNumberInput']) {
+      this.inputStudentNumber$.next(this.studentNumberInput ?? null);
+    }
   }
 
   onParentSelectChild(studentNumber: string): void {

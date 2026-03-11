@@ -80,7 +80,7 @@ export const selectLinkedStudentNumbers = createSelector(
   (state: fromAuthReducer.State) => {
     const role = state.user?.role;
     const details = state.userDetails;
-    if (role !== 'parent' || !details || !('students' in details)) return null;
+    if (!role || (role as string).toLowerCase() !== 'parent' || !details || !('students' in details)) return null;
     const students = (details as { students?: { studentNumber: string }[] }).students;
     return (students || []).map((s) => s.studentNumber);
   }
@@ -92,7 +92,7 @@ export const selectLinkedChildrenForParent = createSelector(
   (state: fromAuthReducer.State) => {
     const role = state.user?.role;
     const details = state.userDetails;
-    if (role !== 'parent' || !details || !('students' in details)) return [];
+    if (!role || (role as string).toLowerCase() !== 'parent' || !details || !('students' in details)) return [];
     const students = (details as { students?: { studentNumber: string; name?: string; surname?: string }[] }).students;
     return students || [];
   }
@@ -100,7 +100,7 @@ export const selectLinkedChildrenForParent = createSelector(
 
 export const selectIsParent = createSelector(
   selectAuthUserRole,
-  (role) => role === 'parent'
+  (role) => (role && role.toLowerCase()) === 'parent'
 );
 
 /** Display name for header: student = name + surname, teacher/parent = title + surname, else username */

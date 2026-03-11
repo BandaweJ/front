@@ -19,6 +19,7 @@ import { DashboardEffects } from './store/dashboard.effects';
 import { TeachersDashboardComponent } from './teachers-dashboard/teachers-dashboard.component';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
 import { DashboardCardComponent } from './dashboard-card/dashboard-card.component';
+import { ParentDashboardComponent } from './parent-dashboard/parent-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { DashboardCardComponent } from './dashboard-card/dashboard-card.componen
     ReportsModule,
     StoreModule.forFeature('dashboard', dashboardReducer),
     EffectsModule.forFeature([DashboardEffects]),
+    ParentDashboardComponent, // standalone
   ],
 })
 export class DashboardModule {}

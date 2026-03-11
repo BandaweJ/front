@@ -1,8 +1,8 @@
 <div class="student-reports-dashboard">
   <h2>My Report Cards</h2>
 
-  <!-- Parent: select which child's reports to view -->
-  <ng-container *ngIf="isParent$ | async">
+  <!-- Parent: select which child's reports to view (hidden when used inside tab with studentNumberInput) -->
+  <ng-container *ngIf="(isParent$ | async) && !studentNumberInput">
     <div *ngIf="(linkedChildren$ | async)?.length === 0" class="no-children-msg">
       No linked students. Contact the school to link your children to your account.
     </div>
@@ -53,7 +53,7 @@
   </mat-card>
 
   <mat-spinner *ngIf="isLoading$ | async"></mat-spinner>
-  <div *ngIf="errorMessage$ | async" class="error-message">
+  <div *ngIf="errorMessage$ | async" class="error-message" role="alert" aria-live="assertive">
     {{ errorMessage$ | async }}
   </div>
 
@@ -64,11 +64,11 @@
   </div>
 
   <ng-template #noReportSelected>
-    <div *ngIf="!(isLoading$ | async) && !(errorMessage$ | async)" class="info-message">
-      <p>Select a Term, Year, and Exam Type above to view your report card.</p>
-      <p *ngIf="(studentReports$ | async)?.length === 0">No report cards available for you yet.</p>
-      <p *ngIf="(studentReports$ | async)?.length">You have {{ (studentReports$ | async)?.length }} available reports.
-      </p>
-    </div>
+    <app-empty-state
+      *ngIf="!(isLoading$ | async) && !(errorMessage$ | async)"
+      icon="description"
+      title="Select a report"
+      [message]="(emptyStateMessage$ | async) ?? ''">
+    </app-empty-state>
   </ng-template>
 </div>

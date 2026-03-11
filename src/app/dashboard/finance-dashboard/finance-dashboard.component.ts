@@ -181,7 +181,7 @@ export class FinanceDashboardComponent
           label: function(context) {
             const label = context.dataset.label || '';
             const value = context.parsed.y;
-            return label + ': $' + value.toLocaleString();
+            return label + ': $' + (value != null ? value.toLocaleString() : '0');
           },
         },
       },

@@ -49,7 +49,7 @@ import { MatInputModule } from '@angular/material/input';
           (keyup.enter)="addBulk()"
           placeholder="e.g. S2403003, S2502607"
         />
-        <button mat-icon-button matSuffix type="button" (click)="addBulk()" [disabled]="!bulkInput?.trim()">
+        <button mat-icon-button matSuffix type="button" (click)="addBulk()" [disabled]="!bulkInput.trim()">
           <mat-icon>add</mat-icon>
         </button>
       </mat-form-field>
@@ -226,9 +226,19 @@ export class LinkStudentsDialogComponent implements OnInit {
     this.parentsService
       .setLinkedStudents(this.data.parent.email, Array.from(this.selectedStudentNumbers))
       .subscribe({
-        next: (updated) => {
+        next: () => {
           this.snackBar.open('Linked students updated', 'Close', { duration: 2000 });
-          this.dialogRef.close(updated);
+          // Always pass students from what we just saved (selection), so the list can show them without relying on API response
+          const students = this.selectedStudentNumbersArray.map((sn) => {
+            const s = this.studentsIndex.get(sn);
+            return { studentNumber: sn, name: s?.name, surname: s?.surname };
+          });
+          const payload: ParentsModel = {
+            ...this.data.parent,
+            email: this.data.parent.email,
+            students,
+          };
+          this.dialogRef.close(payload);
         },
         error: (err) => {
           this.saving = false;

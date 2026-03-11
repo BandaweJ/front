@@ -7,12 +7,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
-import { filter, Observable, Subscription, take, tap, takeUntil } from 'rxjs';
+import { filter, Observable, Subscription, take, tap, takeUntil, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { InvoiceModel } from '../../models/invoice.model';
 import { invoiceActions } from '../../store/finance.actions';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
-import { selectStudentInvoices, selectLoadingStudentInvoices, selectLoadStudentInvoicesErr } from '../../store/finance.selector';
+import { selectIsParent } from 'src/app/auth/store/auth.selectors';
+import { selectStudentInvoices, selectLoadingStudentInvoices, selectLoadStudentInvoicesErr, selectEffectiveStudentForFinance } from '../../store/finance.selector';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-student-invoices',
@@ -24,6 +27,7 @@ import { ThemeService, Theme } from 'src/app/services/theme.service';
     MatButtonModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    EmptyStateComponent,
   ],
   templateUrl: './student-invoices.component.html',
   styleUrls: ['./student-invoices.component.scss'],
@@ -58,24 +62,26 @@ export class StudentInvoicesComponent implements OnInit, OnDestroy {
   }
 
   loadInvoices(): void {
-    this.userSubscription = this.store
-      .select(selectUser)
-      .pipe(
-        filter((user) => !!user && !!user.id),
-        take(1),
-        tap((user) => {
-          this.store.dispatch(
-            invoiceActions.fetchStudentInvoices({
-              studentNumber: user!.id,
-            })
-          );
-        })
-      )
-      .subscribe({
-        error: (error) => {
-          console.error('Error loading invoices:', error);
-        }
-      });
+    this.userSubscription = combineLatest([
+      this.store.select(selectUser),
+      this.store.select(selectIsParent),
+      this.store.select(selectEffectiveStudentForFinance),
+    ]).pipe(
+      filter(([user, isParent, effectiveStudent]) => {
+        if (!user?.id) return false;
+        if (isParent) return !!effectiveStudent;
+        return true;
+      }),
+      take(1),
+      map(([user, isParent, effectiveStudent]) => (user!.id && !isParent) ? user!.id : effectiveStudent!),
+      tap((studentNumber) => {
+        this.store.dispatch(
+          invoiceActions.fetchStudentInvoices({ studentNumber })
+        );
+      })
+    ).subscribe({
+      error: (error) => console.error('Error loading invoices:', error)
+    });
   }
 
   ngOnDestroy(): void {

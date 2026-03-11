@@ -22,7 +22,7 @@
   margin-top: 20px;
   font-size: 1.2rem;
   font-weight: 500;
-  background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background: var(--bg-gradient-light, linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c));
   background-size: 300% 300%;
   animation: gradientShift 3s ease infinite;
   -webkit-background-clip: text;
@@ -94,7 +94,7 @@
 /* Main Container */
 .main-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+  background: var(--bg-gradient-light, linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%));
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   padding: 2rem;
@@ -167,7 +167,7 @@
 
 /* Main Card */
 .main-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -183,7 +183,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
+  background: linear-gradient(90deg, var(--primary-blue), #764ba2, #f093fb, #f5576c, #4facfe);
   background-size: 300% 300%;
   animation: gradientShift 5s ease infinite;
 }
@@ -205,7 +205,7 @@
   font-size: 2rem;
   width: 2rem;
   height: 2rem;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, var(--primary-blue), var(--primary-blue-dark));
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
   -webkit-background-clip: text;
@@ -217,7 +217,7 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .reports-form {
@@ -284,7 +284,7 @@
 }
 
 .save-button {
-  background: linear-gradient(45deg, #2196f3, #1976d2);
+  background: linear-gradient(45deg, var(--primary-blue), var(--primary-blue-dark));
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
   color: white;
@@ -296,10 +296,10 @@
 }
 
 .view-button {
-  background: linear-gradient(45deg, #ff9800, #f57c00);
+  background: linear-gradient(45deg, var(--accent-gold), var(--accent-gold-light));
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
-  color: white;
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .view-button:hover:not(:disabled) {
@@ -326,7 +326,7 @@
 }
 
 .analytics-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface);
   backdrop-filter: blur(10px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -351,7 +351,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background: linear-gradient(90deg, var(--primary-blue), #764ba2, #f093fb, #f5576c);
   background-size: 300% 300%;
   animation: gradientShift 5s ease infinite;
 }
@@ -369,7 +369,7 @@
   font-size: 1.5rem;
   width: 1.5rem;
   height: 1.5rem;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, var(--primary-blue), var(--primary-blue-dark));
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
   -webkit-background-clip: text;
@@ -381,7 +381,7 @@
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
   line-height: 1.2;
   white-space: nowrap;
   overflow: visible;
@@ -400,9 +400,9 @@
 .card-value {
   font-size: 2.2rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, var(--primary-blue), var(--primary-blue-dark));
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
   -webkit-background-clip: text;
@@ -415,7 +415,7 @@
 
 .card-label {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
@@ -429,7 +429,7 @@
 }
 
 .total-subjects::before {
-  background: linear-gradient(90deg, #ffd700, #ffed4e);
+  background: linear-gradient(90deg, var(--accent-gold), #ffed4e);
 }
 
 .average-mark::before {
@@ -437,7 +437,7 @@
 }
 
 .pass-rate::before {
-  background: linear-gradient(90deg, #2196f3, #1976d2);
+  background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-dark));
 }
 
 /* Reports Section */
@@ -453,7 +453,7 @@
   gap: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
 }
 
 .header-left {
@@ -480,7 +480,7 @@
 .no-results-container {
   text-align: center;
   padding: 3rem 2rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   margin: 2rem 0;
@@ -491,17 +491,17 @@
   font-size: 64px;
   width: 64px;
   height: 64px;
-  color: #999;
+  color: var(--text-secondary);
   margin-bottom: 1rem;
 }
 
 .no-results-container h3 {
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .no-results-container p {
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 1.5rem;
 }
 
@@ -509,7 +509,7 @@
   font-size: 2rem;
   width: 2rem;
   height: 2rem;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, var(--primary-blue), var(--primary-blue-dark));
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
   -webkit-background-clip: text;
@@ -521,32 +521,32 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
   flex: 1;
 }
 
 .report-count {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.9rem;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
 }
 
 /* No Reports Container */
 .no-reports-container {
   text-align: center;
   padding: 3rem 2rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .no-reports-icon {
   font-size: 4rem;
   width: 4rem;
   height: 4rem;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, var(--primary-blue), var(--primary-blue-dark));
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
   -webkit-background-clip: text;
@@ -558,7 +558,7 @@
 .no-reports-container h3 {
   margin: 0 0 1rem 0;
   font-size: 1.5rem;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .no-reports-container p {
@@ -585,7 +585,7 @@
 }
 
 .report-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface);
   backdrop-filter: blur(10px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -616,7 +616,7 @@
 
 /* Student Reports Section */
 .student-reports-section {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -637,57 +637,125 @@
   animation: gradientShift 5s ease infinite;
 }
 
+/* Parent reports: tabbed by child (theme + SCSS nesting) */
+.parent-reports-section {
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  position: relative;
+
+  .parent-header .header-content {
+    color: var(--text-primary);
+    text-align: left;
+  }
+
+  .parent-header .title-section {
+    align-items: flex-start;
+  }
+
+  .no-children-msg {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+}
+
+.parent-report-tabs {
+  padding: 0 1rem 1rem;
+
+  .tab-content {
+    padding: 1rem 0;
+    position: relative;
+    min-height: 120px;
+  }
+
+  .mat-mdc-tab-body-content {
+    overflow: visible;
+  }
+
+  .mat-mdc-tab .mdc-tab__text-label {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.tab-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.85);
+  z-index: 2;
+  border-radius: 8px;
+}
+
+.tab-loading-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-container {
     padding: 1rem;
   }
-  
+
   .page-title {
     font-size: 2rem;
   }
-  
+
   .page-subtitle {
     font-size: 1rem;
   }
-  
+
   .form-section {
     padding: 1.5rem;
   }
-  
+
   .form-fields {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .action-buttons button {
     width: 100%;
   }
-  
+
   .reports-section {
     padding: 1.5rem;
   }
-  
+
   .analytics-cards {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
   }
-  
+
   .reports-grid {
     gap: 1.5rem;
   }
-  
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .report-count {
     align-self: flex-start;
   }
@@ -697,53 +765,53 @@
   .main-container {
     padding: 0.5rem;
   }
-  
+
   .form-section {
     padding: 1rem;
   }
-  
+
   .reports-section {
     padding: 1rem;
   }
-  
+
   .analytics-cards {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .card-value {
     font-size: 2rem;
   }
-  
+
   .analytics-card .card-header {
     min-height: 50px;
     padding: 1rem 1rem 0.5rem 1rem;
   }
-  
+
   .analytics-card .card-content {
     min-height: 70px;
     padding: 0.5rem 1rem 1rem 1rem;
   }
-  
+
   .page-title {
     font-size: 1.8rem;
   }
-  
+
   .header-icon {
     font-size: 2.5rem;
     width: 2.5rem;
     height: 2.5rem;
   }
-  
+
   .action-buttons button {
     padding: 0.875rem 1.5rem;
     font-size: 0.9rem;
   }
-  
+
   .no-reports-container {
     padding: 2rem 1rem;
   }
-  
+
   .no-reports-icon {
     font-size: 3rem;
     width: 3rem;
