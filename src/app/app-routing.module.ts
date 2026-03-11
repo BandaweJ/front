@@ -58,6 +58,15 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
   },
   {
+    path: 'parent-dashboard',
+    loadComponent: () =>
+      import('./dashboard/parent-dashboard/parent-dashboard.component').then(
+        (m) => m.ParentDashboardComponent
+      ),
+    canActivate: [AuthGuardService],
+    title: 'Parent Dashboard',
+  },
+  {
     path: 'teachers',
     component: TeachersListComponent,
     canActivate: [AuthGuardService],

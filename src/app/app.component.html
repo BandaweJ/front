@@ -49,6 +49,12 @@
           <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Dashboard</span>
         </button>
 
+        <!-- Parent Dashboard (when user has linked children) -->
+        <button mat-button *ngIf="hasLinkedChildrenProfile$ | async" routerLink="/parent-dashboard" routerLinkActive="active">
+          <mat-icon>family_restroom</mat-icon>
+          <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Parent Dashboard</span>
+        </button>
+
         <!-- Registration -->
         <mat-expansion-panel *ngIf="canAccessRegistration$ | async">
           <!-- Registration Header -->
