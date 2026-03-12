@@ -218,18 +218,30 @@ export class LinkStudentsDialogComponent implements OnInit {
 
   save(): void {
     if (this.saving) return;
+    const studentNumbers = Array.from(this.selectedStudentNumbers)
+      .map((sn) => (sn || '').trim())
+      .filter(Boolean);
     if (!this.hasChanges) {
       this.snackBar.open('No changes to save', 'Close', { duration: 2000 });
       return;
     }
+    // Guardrail: prevent accidental unlinking if selection is empty due to a UI/state bug.
+    if (studentNumbers.length === 0 && this.initialSelected.size > 0) {
+      this.snackBar.open(
+        'No linked students selected. This would unlink all existing students — please reselect and try again.',
+        'Close',
+        { duration: 6000 },
+      );
+      return;
+    }
     this.saving = true;
     this.parentsService
-      .setLinkedStudents(this.data.parent.email, Array.from(this.selectedStudentNumbers))
+      .setLinkedStudents(this.data.parent.email, studentNumbers)
       .subscribe({
         next: () => {
           this.snackBar.open('Linked students updated', 'Close', { duration: 2000 });
           // Always pass students from what we just saved (selection), so the list can show them without relying on API response
-          const students = this.selectedStudentNumbersArray.map((sn) => {
+          const students = studentNumbers.slice().sort().map((sn) => {
             const s = this.studentsIndex.get(sn);
             return { studentNumber: sn, name: s?.name, surname: s?.surname };
           });

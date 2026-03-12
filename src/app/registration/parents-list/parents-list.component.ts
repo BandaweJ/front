@@ -152,21 +152,53 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openLinkStudentsDialog(parent: ParentsModel): void {
-    const dialogRef = this.dialog.open(LinkStudentsDialogComponent, {
-      width: '600px',
-      data: { parent },
-    });
-    dialogRef
-      .afterClosed()
+    // IMPORTANT: backend endpoint is "replace-all" (setLinkedStudents). To avoid accidentally
+    // unlinking existing students, always load the latest parent (with current students)
+    // before opening the dialog.
+    this.isLoading = true;
+    this.cdr.markForCheck();
+    this.parentsService
+      .getByEmail(parent.email)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((result: ParentsModel | undefined) => {
-        if (result) {
-          this.snackBar.open('Linked students updated', 'Close', {
-            duration: 3000,
+      .subscribe({
+        next: (freshParent) => {
+          this.isLoading = false;
+          const dialogRef = this.dialog.open(LinkStudentsDialogComponent, {
+            width: '600px',
+            data: { parent: freshParent },
           });
-          // Update the row in place; do not refetch here or search response can overwrite with empty students
-          this.mergeUpdatedParent(result);
-        }
+          dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((result: ParentsModel | undefined) => {
+              if (result) {
+                this.snackBar.open('Linked students updated', 'Close', {
+                  duration: 3000,
+                });
+                this.mergeUpdatedParent(result);
+                // Refresh this row from the server (includes relations) so the table reflects persisted state.
+                this.parentsService
+                  .getByEmail(result.email)
+                  .pipe(takeUntil(this.destroy$))
+                  .subscribe({
+                    next: (fresh) => this.mergeUpdatedParent(fresh),
+                    error: () => {
+                      // If refresh fails, keep the merged payload (still useful for immediate feedback).
+                    },
+                  });
+              }
+            });
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          const msg =
+            err?.error?.message ||
+            err?.message ||
+            'Failed to load parent details';
+          this.snackBar.open(msg, 'Close', { duration: 5000 });
+          this.cdr.markForCheck();
+        },
       });
   }
 
@@ -181,6 +213,8 @@ export class ParentsListComponent implements OnInit, AfterViewInit, OnDestroy {
     const newData = [...this.dataSource.data];
     newData[idx] = merged;
     this.dataSource.data = newData;
+    // Force table to re-render (MatTableDataSource + OnPush)
+    this.dataSource._updateChangeSubscription();
     this.cdr.markForCheck();
   }
 
