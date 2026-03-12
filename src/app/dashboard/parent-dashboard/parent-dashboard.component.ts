@@ -57,8 +57,19 @@ import {
 import { ContinuousAssessmentService, ContinuousAssessmentAnalytics } from 'src/app/marks/continuous-assessment/continuous-assessment.service';
 import { ParentDashboardService } from './parent-dashboard.service';
 import { ParentDashboardSummaryDto, ChildSummaryDto } from './models/parent-dashboard-summary.model';
+import { ThemeService, Theme } from 'src/app/services/theme.service';
 
 type LinkedChild = { studentNumber: string; name?: string; surname?: string };
+
+interface MarksInsights {
+  average: number;
+  totalCount: number;
+  passedCount: number;
+  bestSubject?: string;
+  bestMark?: number;
+  weakestSubject?: string;
+  weakestMark?: number;
+}
 
 @Component({
   selector: 'app-parent-dashboard',
@@ -103,6 +114,7 @@ export class ParentDashboardComponent implements OnInit, OnDestroy {
 
   marksDataSource = new MatTableDataSource<MarksModel>([]);
   marksDisplayedColumns: string[] = ['subject', 'term', 'year', 'mark', 'examType'];
+  marksInsights: MarksInsights | null = null;
 
   lineChartOptions: ChartOptions = {
     responsive: true,
@@ -127,6 +139,8 @@ export class ParentDashboardComponent implements OnInit, OnDestroy {
   caAnalytics: ContinuousAssessmentAnalytics | null = null;
   caLoading = false;
 
+  currentTheme: Theme = 'light';
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -134,6 +148,7 @@ export class ParentDashboardComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private caService: ContinuousAssessmentService,
     private parentDashboardService: ParentDashboardService,
+    private themeService: ThemeService,
   ) {
     this.linkedChildren$ = this.store.select(selectLinkedChildrenAnyRole);
 
@@ -202,6 +217,13 @@ export class ParentDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
+
     this.parentDashboardService.getSummary().subscribe({
       next: (summary) => {
         this.summary$.next(summary);
@@ -254,8 +276,41 @@ export class ParentDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((marks) => {
         this.marksDataSource.data = marks ?? [];
+        this.marksInsights = this.buildMarksInsights(marks ?? []);
         this.cdr.markForCheck();
       });
+  }
+
+  private buildMarksInsights(marks: MarksModel[]): MarksInsights | null {
+    const numeric = (marks || []).filter(
+      (m) => typeof m.mark === 'number' && m.mark !== null && !isNaN(m.mark as any),
+    );
+    if (!numeric.length) return null;
+
+    const totalCount = numeric.length;
+    const sum = numeric.reduce((acc, m) => acc + (Number(m.mark) || 0), 0);
+    const average = sum / totalCount;
+
+    const sorted = [...numeric].sort((a, b) => (Number(a.mark) || 0) - (Number(b.mark) || 0));
+    const weakest = sorted[0];
+    const best = sorted[sorted.length - 1];
+
+    const bestSubject =
+      best.subject?.name || best.subject?.code || 'Best subject';
+    const weakestSubject =
+      weakest.subject?.name || weakest.subject?.code || 'Weakest subject';
+
+    const passedCount = numeric.filter((m) => (Number(m.mark) || 0) >= 50).length;
+
+    return {
+      average,
+      totalCount,
+      passedCount,
+      bestSubject,
+      bestMark: Number(best.mark) || 0,
+      weakestSubject,
+      weakestMark: Number(weakest.mark) || 0,
+    };
   }
 
   retrySummary(): void {

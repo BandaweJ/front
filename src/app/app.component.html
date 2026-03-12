@@ -43,8 +43,13 @@
     <div class="sidenav-container">
       <mat-accordion>
 
-        <!-- Dashboard -->
-        <button mat-button routerLink="/dashboard" routerLinkActive="active">
+        <!-- Dashboard (hidden for parent role; parents use Parent Dashboard instead) -->
+        <button
+          mat-button
+          *ngIf="!(isParentRole$ | async)"
+          routerLink="/dashboard"
+          routerLinkActive="active"
+        >
           <mat-icon>dashboard</mat-icon>
           <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Dashboard</span>
         </button>
