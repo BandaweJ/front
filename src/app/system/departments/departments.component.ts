@@ -45,6 +45,7 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly userManagementService: UserManagementService,
     private readonly snackBar: MatSnackBar,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
