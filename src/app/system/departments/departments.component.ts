@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
@@ -11,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, finalize, takeUntil } from 'rxjs';
 import {
   DepartmentModel,
 } from '../../user-management/models/user-management.model';
@@ -57,16 +58,22 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
 
   private loadDepartments(): void {
     this.loading = true;
+    this.cdr.markForCheck();
     this.userManagementService
       .getDepartments()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.cdr.markForCheck();
+        }),
+        takeUntil(this.destroy$),
+      )
       .subscribe({
         next: (departments) => {
           this.departments = departments;
-          this.loading = false;
+          this.cdr.markForCheck();
         },
         error: () => {
-          this.loading = false;
           this.snackBar.open(
             'Failed to load departments',
             'Close',
