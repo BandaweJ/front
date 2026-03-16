@@ -1,0 +1,159 @@
+<div class="requisitions-page">
+  <mat-card class="requisition-card">
+    <mat-card-header>
+      <div mat-card-avatar class="requisition-avatar"></div>
+      <mat-card-title>New Department Requisition</mat-card-title>
+      <mat-card-subtitle>
+        Request items for your department. You can track progress as it moves through approvals.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="requisition-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Requisition title</mat-label>
+            <input matInput formControlName="title" placeholder="e.g. Science lab consumables" />
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Overview / justification</mat-label>
+            <textarea
+              matInput
+              formControlName="description"
+              rows="3"
+              placeholder="Briefly describe what these items are for"
+            ></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="line-items-header">
+          <h3>Line items</h3>
+          <button mat-stroked-button color="primary" type="button" (click)="addItemRow()">
+            <mat-icon>add</mat-icon>
+            Add item
+          </button>
+        </div>
+
+        <div formArrayName="items" class="line-items">
+          <div
+            class="line-item-row"
+            *ngFor="let item of items.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <mat-form-field appearance="outline" class="qty-field">
+              <mat-label>Qty</mat-label>
+              <input matInput type="number" formControlName="quantity" min="1" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="description-field">
+              <mat-label>Item description</mat-label>
+              <input
+                matInput
+                formControlName="description"
+                placeholder="e.g. A4 exam papers, whiteboard markers"
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="use-field">
+              <mat-label>Intended use</mat-label>
+              <input
+                matInput
+                formControlName="intendedUse"
+                placeholder="e.g. Term 1 mock exams, daily class teaching"
+              />
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              (click)="removeItemRow(i)"
+              [disabled]="items.length === 1"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+            <mat-icon>send</mat-icon>
+            Submit requisition
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="requisition-card">
+    <mat-card-header>
+      <mat-card-title>Your requisitions</mat-card-title>
+      <mat-card-subtitle>
+        Track status as they move from deputy to head to director/auditor.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <table mat-table [dataSource]="requisitions" class="requisitions-table" *ngIf="requisitions.length">
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Date </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.createdAt | date: 'mediumDate' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Title </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="title-cell">
+              <div class="title-text">{{ req.title }}</div>
+              <div class="subtitle" *ngIf="req.description">{{ req.description }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef> Department </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.department?.name || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let req">
+            <mat-chip-set>
+              <mat-chip [ngClass]="'status-' + req.status">
+                {{ req.status | titlecase }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef> Items </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="items-cell">
+              <div *ngFor="let item of req.items">
+                <span class="qty">{{ item.quantity }}×</span>
+                <span class="desc">{{ item.description }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <div class="empty-state" *ngIf="!requisitions.length">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No requisitions yet. Use the form above to submit one for your department.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

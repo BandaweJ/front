@@ -25,6 +25,8 @@ export interface UserDetailsModel extends UserManagementModel {
   active?: boolean;
   idnumber?: string;
   prevSchool?: string;
+  departmentId?: string | null;
+  departmentName?: string | null;
 }
 
 export interface UserListPaginatedModel {
@@ -78,5 +80,12 @@ export interface UserActivityPaginatedModel {
   limit: number;
   totalPages: number;
 }
+
+export interface DepartmentModel {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 
 

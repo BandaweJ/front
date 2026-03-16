@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { UserManagementModel, UserDetailsModel, UserListPaginatedModel, CreateUserModel, UpdateUserModel, ChangePasswordModel, UserActivityPaginatedModel } from '../models/user-management.model';
+import { UserManagementModel, UserDetailsModel, UserListPaginatedModel, CreateUserModel, UpdateUserModel, ChangePasswordModel, UserActivityPaginatedModel, DepartmentModel } from '../models/user-management.model';
 
 @Injectable({
   providedIn: 'root'
@@ -91,6 +91,10 @@ export class UserManagementService {
 
     // Use the correct backend endpoint at /activity/system
     return this.httpClient.get<UserActivityPaginatedModel>(`${environment.apiUrl}/activity/system`, { params });
+  }
+
+  getDepartments(): Observable<DepartmentModel[]> {
+    return this.httpClient.get<DepartmentModel[]>(`${environment.apiUrl}/departments`);
   }
 }
 

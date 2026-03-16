@@ -67,6 +67,18 @@
           </mat-form-field>
         </div>
 
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field full-width">
+            <mat-label>Department</mat-label>
+            <mat-select formControlName="departmentId">
+              <mat-option [value]="''">Unassigned</mat-option>
+              <mat-option *ngFor="let dept of departments" [value]="dept.id">
+                {{ dept.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
         <mat-form-field appearance="outline" class="form-field full-width">
           <mat-label>Address</mat-label>
           <textarea matInput formControlName="address" placeholder="Enter address" rows="2"></textarea>

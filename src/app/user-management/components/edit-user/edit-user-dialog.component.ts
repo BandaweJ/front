@@ -14,6 +14,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { UserManagementService } from '../../services/user-management.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ROLES } from 'src/app/registration/models/roles.enum';
+import { DepartmentModel } from '../../models/user-management.model';
 
 @Component({
   selector: 'app-edit-user-dialog',
@@ -40,6 +41,7 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
   loading = false;
   // For user-management only, allow all roles including dev
   roles = Object.values(ROLES);
+  departments: DepartmentModel[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -56,6 +58,7 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
       email: ['', [this.optionalEmailValidator]],
       cell: [''],
       address: [''],
+      departmentId: [''],
       active: [true],
     });
   }
@@ -71,9 +74,20 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
         email: this.data.user.email || '',
         cell: this.data.user.cell || '',
         address: this.data.user.address || '',
+        departmentId: this.data.user.departmentId || '',
         active: this.data.user.active !== undefined ? this.data.user.active : true,
       });
     }
+
+    this.userManagementService
+      .getDepartments()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (departments) => (this.departments = departments),
+        error: () => {
+          // Silent failure – department selection is optional and falls back gracefully
+        },
+      });
   }
 
   ngOnDestroy(): void {
@@ -88,13 +102,18 @@ export class EditUserDialogComponent implements OnInit, OnDestroy {
       
       // Prepare profile data (exclude username)
       // Include active status in profile data for backend to handle
-      const { username, role, ...profileData } = formValue;
+      const { username, role, departmentId, ...profileData } = formValue;
+
+      const profileUpdate = {
+        ...profileData,
+        ...(departmentId ? { departmentId } : {}),
+      };
 
       // Chain both updates using RxJS operators
       this.userManagementService.updateUser(this.data.userId, { username: formValue.username, role: formValue.role })
         .pipe(
-          switchMap(accountResponse => 
-            this.userManagementService.updateProfile(this.data.userId, profileData)
+          switchMap(accountResponse =>
+            this.userManagementService.updateProfile(this.data.userId, profileUpdate)
           ),
           takeUntil(this.destroy$)
         )
