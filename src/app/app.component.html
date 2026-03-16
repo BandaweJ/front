@@ -76,6 +76,13 @@
               <mat-icon>people</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Teachers</span>
             </button>
+            <!-- Departments (shortcut to system/departments) -->
+            <button mat-button routerLink="/system/departments" routerLinkActive="active">
+              <mat-icon>apartment</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">
+                Departments
+              </span>
+            </button>
             <!-- Students -->
             <button mat-button routerLink="/students" routerLinkActive="active">
               <mat-icon>school</mat-icon>
@@ -412,6 +419,14 @@
             <button mat-button routerLink="/user-management" routerLinkActive="active">
               <mat-icon>manage_accounts</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">User Management</span>
+            </button>
+
+            <!-- Departments -->
+            <button mat-button routerLink="/system/departments" routerLinkActive="active">
+              <mat-icon>apartment</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">
+                Departments
+              </span>
             </button>
 
             <!-- Role & Permissions -->

@@ -218,6 +218,12 @@ const routes: Routes = [
     title: 'Receipting',
   },
   {
+    path: 'system/departments',
+    loadComponent: () => import('./system/departments/departments.component').then(m => m.DepartmentsComponent),
+    canActivate: [AuthGuardService],
+    title: 'Departments',
+  },
+  {
     path: 'requisitions',
     loadComponent: () => import('./finance/requisitions/requisitions.component').then(m => m.RequisitionsComponent),
     canActivate: [AuthGuardService],
