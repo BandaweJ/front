@@ -96,6 +96,18 @@ export class UserManagementService {
   getDepartments(): Observable<DepartmentModel[]> {
     return this.httpClient.get<DepartmentModel[]>(`${environment.apiUrl}/departments`);
   }
+
+  createDepartment(payload: { name: string; description?: string }): Observable<DepartmentModel> {
+    return this.httpClient.post<DepartmentModel>(`${environment.apiUrl}/departments`, payload);
+  }
+
+  updateDepartment(id: string, payload: { name?: string; description?: string }): Observable<DepartmentModel> {
+    return this.httpClient.patch<DepartmentModel>(`${environment.apiUrl}/departments/${id}`, payload);
+  }
+
+  deleteDepartment(id: string): Observable<{ success: boolean }> {
+    return this.httpClient.delete<{ success: boolean }>(`${environment.apiUrl}/departments/${id}`);
+  }
 }
 
 

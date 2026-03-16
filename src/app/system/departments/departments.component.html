@@ -7,6 +7,37 @@
   </mat-card-header>
 
   <mat-card-content>
+    <form class="new-dept-form" (ngSubmit)="addDepartment()">
+      <mat-form-field appearance="outline" class="name-field">
+        <mat-label>Department name</mat-label>
+        <input
+          matInput
+          [(ngModel)]="newDeptName"
+          name="newDeptName"
+          required
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="description-field">
+        <mat-label>Description (optional)</mat-label>
+        <input
+          matInput
+          [(ngModel)]="newDeptDescription"
+          name="newDeptDescription"
+        />
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="saving || !newDeptName.trim()"
+      >
+        <mat-icon>add</mat-icon>
+        Create
+      </button>
+    </form>
+
     <div *ngIf="loading" class="loading-container">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Loading departments…</p>
@@ -16,9 +47,8 @@
       <mat-icon>info</mat-icon>
       <p>No departments have been configured yet.</p>
       <p class="hint">
-        An administrator can add departments directly in the database or via future
-        management tools. Once departments exist, you can assign teachers and HODs
-        to them from User Management.
+        Use the form above to add departments. Once departments exist, you can
+        assign teachers and HODs to them from User Management.
       </p>
     </div>
 
@@ -39,6 +69,20 @@
         <th mat-header-cell *matHeaderCellDef> Description </th>
         <td mat-cell *matCellDef="let dept">
           {{ dept.description || '—' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let dept">
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="deleteDepartment(dept.id)"
+            matTooltip="Delete department"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
         </td>
       </ng-container>
 

@@ -3,6 +3,22 @@
   margin: 16px auto;
 }
 
+.new-dept-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.name-field {
+  flex: 1 1 200px;
+}
+
+.description-field {
+  flex: 2 1 260px;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
