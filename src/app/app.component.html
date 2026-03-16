@@ -298,6 +298,19 @@
               <mat-icon>account_balance_wallet</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Balances</span>
             </button>
+
+            <!-- Requisitions -->
+            <button
+              mat-button
+              routerLink="/requisitions"
+              routerLinkActive="active"
+              *ngIf="canAccessRequisitions$ | async"
+            >
+              <mat-icon>shopping_cart</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">
+                Requisitions
+              </span>
+            </button>
           </div>
         </mat-expansion-panel>
 

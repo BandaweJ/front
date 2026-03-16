@@ -83,6 +83,18 @@ export class AppComponent implements OnInit, OnDestroy {
   canAccessFinancialReports$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.auditor, ROLES.director))
   );
+  canAccessRequisitions$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role =>
+      this.roleAccess.hasAnyRole(
+        role,
+        ROLES.dev,
+        ROLES.admin,
+        ROLES.director,
+        ROLES.deputy,
+        ROLES.head,
+      ),
+    ),
+  );
   canAccessSystemAdmin$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.admin, role))
   );
