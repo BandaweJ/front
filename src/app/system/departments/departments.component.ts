@@ -20,6 +20,8 @@ import {
   DepartmentModel,
 } from '../../user-management/models/user-management.model';
 import { UserManagementService } from '../../user-management/services/user-management.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { DepartmentEditDialogComponent } from './department-edit-dialog.component';
 
 @Component({
   selector: 'app-departments',
@@ -36,6 +38,8 @@ import { UserManagementService } from '../../user-management/services/user-manag
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
+    MatDialogModule,
+    DepartmentEditDialogComponent,
   ],
   templateUrl: './departments.component.html',
   styleUrls: ['./departments.component.scss'],
@@ -55,6 +59,7 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
     private readonly userManagementService: UserManagementService,
     private readonly snackBar: MatSnackBar,
     private readonly cdr: ChangeDetectorRef,
+    private readonly dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -173,51 +178,21 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
   }
 
   editDepartment(dept: DepartmentModel): void {
-    const currentName = dept.name || '';
-    const currentDescription = dept.description || '';
+    const dialogRef = this.dialog.open(DepartmentEditDialogComponent, {
+      width: '420px',
+      data: { department: dept },
+      disableClose: true,
+    });
 
-    const newName = window.prompt('Department name', currentName);
-    if (newName === null) {
-      return; // user cancelled
-    }
-    const trimmedName = newName.trim();
-    if (!trimmedName) {
-      this.snackBar.open('Department name is required', 'Close', {
-        duration: 3000,
-        verticalPosition: 'top',
-      });
-      return;
-    }
-
-    const newDescription = window.prompt(
-      'Description (optional)',
-      currentDescription,
-    );
-
-    this.userManagementService
-      .updateDepartment(dept.id, {
-        name: trimmedName,
-        description: newDescription?.trim() || undefined,
-      })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (updated) => {
-          this.departments = this.departments
-            .map((d) => (d.id === updated.id ? updated : d))
-            .sort((a, b) => a.name.localeCompare(b.name));
-          this.cdr.markForCheck();
-          this.snackBar.open('Department updated', 'OK', {
-            duration: 3000,
-            verticalPosition: 'top',
-          });
-        },
-        error: () => {
-          this.snackBar.open('Failed to update department', 'Close', {
-            duration: 5000,
-            verticalPosition: 'top',
-          });
-        },
-      });
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((updated?: DepartmentModel) => {
+      if (!updated) {
+        return;
+      }
+      this.departments = this.departments
+        .map((d) => (d.id === updated.id ? updated : d))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      this.cdr.markForCheck();
+    });
   }
 }
 
