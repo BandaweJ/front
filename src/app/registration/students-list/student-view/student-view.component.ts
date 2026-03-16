@@ -5,12 +5,29 @@ import { Store } from '@ngrx/store';
 import { StudentsModel } from '../../models/students.model';
 import { selectStudents, selectIsLoading, selectRegErrorMsg } from '../../store/registration.selectors';
 import { SharedService } from 'src/app/shared.service';
-import { Subject, takeUntil, filter, map, switchMap, startWith } from 'rxjs';
+import { Subject, takeUntil, filter, map } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AddEditStudentComponent } from '../add-edit-student/add-edit-student.component';
 import { StudentIdCardComponent } from '../student-id-card/student-id-card.component';
 import { deleteStudentAction } from '../../store/registration.actions';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+
+interface StudentEnrolment {
+  id: number;
+  name: string;
+  num: number;
+  year: number;
+  residence: string;
+}
+
+interface StudentEnrolmentStatus {
+  currentEnrolment: StudentEnrolment | null;
+  lastEnrolment: StudentEnrolment | null;
+  isCurrentlyEnrolled: boolean;
+  enrolments: StudentEnrolment[];
+}
 
 @Component({
   selector: 'app-student-view',
@@ -26,6 +43,10 @@ export class StudentViewComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
 
+  enrolmentStatus: StudentEnrolmentStatus | null = null;
+  enrolmentLoading = false;
+  enrolmentError: string | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private store: Store,
@@ -34,7 +55,8 @@ export class StudentViewComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private router: Router,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private http: HttpClient,
   ) {
     this.studentId = this.route.snapshot.params['studentNumber'];
   }
@@ -42,6 +64,7 @@ export class StudentViewComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.setupLoadingState();
     this.loadStudent();
+    this.loadEnrolmentStatus();
   }
 
   ngOnDestroy(): void {
@@ -77,6 +100,36 @@ export class StudentViewComponent implements OnInit, OnDestroy {
       }
       this.cdr.markForCheck();
     });
+  }
+
+  private loadEnrolmentStatus(): void {
+    if (!this.studentId) {
+      return;
+    }
+
+    this.enrolmentLoading = true;
+    this.enrolmentError = null;
+    this.cdr.markForCheck();
+
+    this.http
+      .get<StudentEnrolmentStatus>(
+        `${environment.apiUrl}/enrolment/student/${encodeURIComponent(
+          this.studentId,
+        )}/status`,
+      )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (status) => {
+          this.enrolmentStatus = status;
+          this.enrolmentLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.enrolmentError = 'Could not load enrolment details';
+          this.enrolmentLoading = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   goBack(): void {

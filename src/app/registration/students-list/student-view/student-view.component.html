@@ -175,6 +175,48 @@
               </span>
             </span>
           </div>
+
+          <!-- Enrolment Details -->
+          <div class="detail-item" *ngIf="enrolmentLoading">
+            <span class="detail-label">Enrolment</span>
+            <span class="detail-value">Loading enrolment details...</span>
+          </div>
+
+          <div class="detail-item" *ngIf="enrolmentError && !enrolmentLoading">
+            <span class="detail-label">Enrolment</span>
+            <span class="detail-value">{{ enrolmentError }}</span>
+          </div>
+
+          <ng-container *ngIf="!enrolmentLoading && !enrolmentError && enrolmentStatus">
+            <div class="detail-item">
+              <span class="detail-label">Current Term Status</span>
+              <span class="detail-value">
+                <span
+                  class="status-chip"
+                  [ngClass]="enrolmentStatus.isCurrentlyEnrolled ? 'active-status' : 'inactive-status'"
+                >
+                  <mat-icon>
+                    {{ enrolmentStatus.isCurrentlyEnrolled ? 'check_circle' : 'cancel' }}
+                  </mat-icon>
+                  {{ enrolmentStatus.isCurrentlyEnrolled ? 'Currently enrolled this term' : 'Not enrolled in current term' }}
+                </span>
+              </span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Current Class</span>
+              <span class="detail-value">
+                {{ enrolmentStatus.currentEnrolment?.name || 'No current class' }}
+              </span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Last Enrolled Class</span>
+              <span class="detail-value">
+                {{ enrolmentStatus.lastEnrolment?.name || 'No previous enrolments' }}
+              </span>
+            </div>
+          </ng-container>
         </mat-card-content>
       </mat-card>
     </div>
