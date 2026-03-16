@@ -171,5 +171,53 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
         },
       });
   }
+
+  editDepartment(dept: DepartmentModel): void {
+    const currentName = dept.name || '';
+    const currentDescription = dept.description || '';
+
+    const newName = window.prompt('Department name', currentName);
+    if (newName === null) {
+      return; // user cancelled
+    }
+    const trimmedName = newName.trim();
+    if (!trimmedName) {
+      this.snackBar.open('Department name is required', 'Close', {
+        duration: 3000,
+        verticalPosition: 'top',
+      });
+      return;
+    }
+
+    const newDescription = window.prompt(
+      'Description (optional)',
+      currentDescription,
+    );
+
+    this.userManagementService
+      .updateDepartment(dept.id, {
+        name: trimmedName,
+        description: newDescription?.trim() || undefined,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updated) => {
+          this.departments = this.departments
+            .map((d) => (d.id === updated.id ? updated : d))
+            .sort((a, b) => a.name.localeCompare(b.name));
+          this.cdr.markForCheck();
+          this.snackBar.open('Department updated', 'OK', {
+            duration: 3000,
+            verticalPosition: 'top',
+          });
+        },
+        error: () => {
+          this.snackBar.open('Failed to update department', 'Close', {
+            duration: 5000,
+            verticalPosition: 'top',
+          });
+        },
+      });
+  }
 }
 
