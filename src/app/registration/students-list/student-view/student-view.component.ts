@@ -113,7 +113,7 @@ export class StudentViewComponent implements OnInit, OnDestroy {
 
     this.http
       .get<StudentEnrolmentStatus>(
-        `${environment.apiUrl}/enrolment/student/${encodeURIComponent(
+        `${environment.apiUrl}/enrolment/enrol/student/${encodeURIComponent(
           this.studentId,
         )}/status`,
       )
