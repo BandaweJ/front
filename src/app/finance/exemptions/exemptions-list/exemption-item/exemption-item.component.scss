@@ -313,3 +313,15 @@ $border-dark: #424242;
   opacity: 1;
 }
 
+// Always show actions when selected (no need to hover)
+.exemption-item.selected .exemption-actions {
+  opacity: 1;
+}
+
+// On touch/mobile, hover isn't reliable—show actions by default
+@media (max-width: 768px) {
+  .exemption-actions {
+    opacity: 1;
+  }
+}
+

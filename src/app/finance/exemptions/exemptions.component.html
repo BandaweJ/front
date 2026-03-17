@@ -32,6 +32,46 @@
         </mat-card-content>
       </mat-card>
 
+      <!-- Selected exemption (fast actions after search/select) -->
+      <mat-card *ngIf="selectedExemption" class="selected-exemption-card">
+        <mat-card-content class="selected-exemption-content">
+          <div class="selected-exemption-main">
+            <div class="selected-title">
+              <mat-icon>task_alt</mat-icon>
+              <div class="selected-text">
+                <div class="selected-heading">Selected exemption</div>
+                <div class="selected-subheading">
+                  {{ selectedExemption.student.studentNumber }} — {{ selectedExemption.student.name }} {{ selectedExemption.student.surname }}
+                </div>
+              </div>
+            </div>
+            <div class="selected-meta">
+              <span class="pill">{{ formatTypeLabel(selectedExemption.type) }}</span>
+              <span class="pill" *ngIf="selectedExemption.fixedAmount">
+                Fixed: ${{ selectedExemption.fixedAmount | number:'1.2-2' }}
+              </span>
+              <span class="pill" *ngIf="selectedExemption.percentageAmount">
+                Percent: {{ selectedExemption.percentageAmount }}%
+              </span>
+              <span class="pill" [class.active]="selectedExemption.isActive" [class.inactive]="!selectedExemption.isActive">
+                {{ selectedExemption.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="selected-exemption-actions">
+            <button mat-stroked-button color="primary" (click)="onEditClick(selectedExemption)">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </button>
+            <button mat-stroked-button color="warn" (click)="onDeleteClick(selectedExemption)">
+              <mat-icon>delete</mat-icon>
+              Delete
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
       <!-- Exemptions List -->
       <div class="exemptions-list-container">
         <app-exemptions-list

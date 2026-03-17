@@ -164,6 +164,13 @@ export class ExemptionsComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  formatTypeLabel(type: ExemptionType | string): string {
+    return String(type)
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   private applyFilters(): void {
     let filtered = [...this.exemptions];
 

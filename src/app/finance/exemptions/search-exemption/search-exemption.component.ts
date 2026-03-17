@@ -44,7 +44,7 @@ export class SearchExemptionComponent implements OnInit, OnDestroy {
     isActive?: boolean;
   }>();
 
-  searchControl = new FormControl('');
+  searchControl = new FormControl<string | ExemptionModel>('');
   typeControl = new FormControl<string>('');
   activeControl = new FormControl<boolean | null>(null);
   
@@ -125,7 +125,9 @@ export class SearchExemptionComponent implements OnInit, OnDestroy {
 
   applyFilters(): void {
     let filtered = [...this.exemptions];
-    const searchTerm = this.searchControl.value?.toLowerCase() || '';
+    const rawSearch = this.searchControl.value;
+    const searchTerm =
+      typeof rawSearch === 'string' ? rawSearch.toLowerCase() : '';
     const typeValue = this.typeControl.value;
     const isActive = this.activeControl.value;
 
@@ -173,12 +175,19 @@ export class SearchExemptionComponent implements OnInit, OnDestroy {
 
   selectExemption(exemption: ExemptionModel): void {
     this.exemptionSelected.emit(exemption);
-    this.searchControl.setValue('');
+    // Keep selection visible in the input so users can immediately edit/delete without scrolling
+    this.searchControl.setValue(exemption, { emitEvent: false });
+    this.cdr.markForCheck();
   }
 
   displayFn(exemption: ExemptionModel): string {
     if (!exemption || !exemption.student) return '';
     return `${exemption.student.studentNumber} - ${exemption.student.name} ${exemption.student.surname} (${exemption.type})`;
+  }
+
+  clearSearchSelection(): void {
+    this.searchControl.setValue('', { emitEvent: true });
+    this.cdr.markForCheck();
   }
 
   clearFilters(): void {

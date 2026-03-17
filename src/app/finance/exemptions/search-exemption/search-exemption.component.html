@@ -9,7 +9,19 @@
         [matAutocomplete]="auto"
         placeholder="Search by student name, number, email..."
       />
-      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectExemption($event.option.value)">
+      <button
+        *ngIf="searchControl.value"
+        mat-icon-button
+        matSuffix
+        (click)="clearSearchSelection()"
+        matTooltip="Clear selection"
+        type="button">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        [displayWith]="displayFn"
+        (optionSelected)="selectExemption($event.option.value)">
         <mat-option *ngFor="let exemption of filteredExemptions" [value]="exemption">
           <div class="autocomplete-option">
             <div class="option-main">
