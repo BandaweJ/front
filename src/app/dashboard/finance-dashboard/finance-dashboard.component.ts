@@ -106,7 +106,14 @@ export class FinanceDashboardComponent
   // Enrolment statistics for finance view (grouped by form, sorted ascending)
   enrolStats$!: Observable<EnrolStats | null>;
   /** Rows for enrolment table: form headers and class rows, grouped by form and sorted ascending */
-  enrolClassTotals$!: Observable<Array<{ kind: 'form'; form: number; formLabel: string } | { kind: 'class'; className: string; total: number }>>;
+  enrolClassTotals$!: Observable<
+    Array<
+      | { kind: 'form'; form: number; formLabel: string }
+      | { kind: 'class'; className: string; total: number; form: number }
+      | { kind: 'formTotal'; form: number; total: number; label: string }
+      | { kind: 'grandTotal'; total: number; label: string }
+    >
+  >;
   enrolTotalStudents$!: Observable<number>;
 
   currentSort$ = this.sortSubject.asObservable();
@@ -391,15 +398,52 @@ export class FinanceDashboardComponent
         });
         rows.sort((a, b) => a.form - b.form || a.className.localeCompare(b.className));
 
-        const result: Array<{ kind: 'form'; form: number; formLabel: string } | { kind: 'class'; className: string; total: number }> = [];
+        const result: Array<
+          | { kind: 'form'; form: number; formLabel: string }
+          | { kind: 'class'; className: string; total: number; form: number }
+          | { kind: 'formTotal'; form: number; total: number; label: string }
+          | { kind: 'grandTotal'; total: number; label: string }
+        > = [];
+
         let currentForm = -1;
+        let currentFormTotal = 0;
+        let grandTotal = 0;
+
+        const pushFormTotalIfNeeded = () => {
+          if (currentForm !== -1) {
+            result.push({
+              kind: 'formTotal',
+              form: currentForm,
+              total: currentFormTotal,
+              label: `Total Form ${currentForm}`,
+            });
+          }
+        };
+
         for (const row of rows) {
           if (row.form !== currentForm) {
+            // close previous form with subtotal row
+            pushFormTotalIfNeeded();
+
             currentForm = row.form;
+            currentFormTotal = 0;
             result.push({ kind: 'form', form: row.form, formLabel: `Form ${row.form}` });
           }
-          result.push({ kind: 'class', className: row.className, total: row.total });
+
+          result.push({
+            kind: 'class',
+            className: row.className,
+            total: row.total,
+            form: row.form,
+          });
+          currentFormTotal += row.total;
+          grandTotal += row.total;
         }
+
+        // close last form
+        pushFormTotalIfNeeded();
+
+        result.push({ kind: 'grandTotal', total: grandTotal, label: 'Total All Forms' });
         return result;
       })
     );

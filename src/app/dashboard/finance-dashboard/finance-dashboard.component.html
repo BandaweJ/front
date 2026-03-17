@@ -170,6 +170,14 @@
                   <td>{{ row.className }}</td>
                   <td>{{ row.total }}</td>
                 </tr>
+                <tr *ngIf="row.kind === 'formTotal'" class="form-group-total">
+                  <td>{{ row.label }}</td>
+                  <td>{{ row.total }}</td>
+                </tr>
+                <tr *ngIf="row.kind === 'grandTotal'" class="form-grand-total">
+                  <td>{{ row.label }}</td>
+                  <td>{{ row.total }}</td>
+                </tr>
               </ng-container>
             </tbody>
           </table>

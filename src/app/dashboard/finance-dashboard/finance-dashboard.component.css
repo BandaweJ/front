@@ -250,6 +250,18 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
+.enrolment-summary-table.compact .form-group-total td {
+  font-weight: 600;
+  background: rgba(102, 126, 234, 0.06);
+  border-top: 1px solid #e0e0e0;
+}
+
+.enrolment-summary-table.compact .form-grand-total td {
+  font-weight: 700;
+  background: rgba(102, 126, 234, 0.12);
+  border-top: 2px solid #d0d7ff;
+}
+
 .enrolment-summary-table.compact .form-group-header + tr td {
   border-top: none;
 }
