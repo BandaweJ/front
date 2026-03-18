@@ -1,5 +1,5 @@
 <div class="requisitions-page">
-  <mat-card class="requisition-card">
+  <mat-card class="requisition-card" *ngIf="canCreate">
     <mat-card-header>
       <div mat-card-avatar class="requisition-avatar"></div>
       <mat-card-title>New Department Requisition</mat-card-title>
@@ -97,7 +97,7 @@
     </mat-card-header>
 
     <mat-card-content>
-      <table mat-table [dataSource]="requisitions" class="requisitions-table" *ngIf="requisitions.length">
+      <table mat-table [dataSource]="myRequisitions" class="requisitions-table" *ngIf="myRequisitions.length">
         <ng-container matColumnDef="createdAt">
           <th mat-header-cell *matHeaderCellDef> Date </th>
           <td mat-cell *matCellDef="let req">
@@ -146,13 +146,76 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openDetails(row)" class="clickable-row"></tr>
       </table>
 
-      <div class="empty-state" *ngIf="!requisitions.length">
+      <div class="empty-state" *ngIf="!myRequisitions.length">
         <mat-icon>inventory_2</mat-icon>
         <p>No requisitions yet. Use the form above to submit one for your department.</p>
       </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="requisition-card" *ngIf="approvalRequisitions.length">
+    <mat-card-header>
+      <mat-card-title>Requisitions for your approval</mat-card-title>
+      <mat-card-subtitle>
+        Open a requisition to sign, authorise, or reject it.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <table mat-table [dataSource]="approvalRequisitions" class="requisitions-table">
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Date </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.createdAt | date: 'mediumDate' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Title </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="title-cell">
+              <div class="title-text">{{ req.title }}</div>
+              <div class="subtitle" *ngIf="req.description">{{ req.description }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef> Department </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.department?.name || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let req">
+            <mat-chip-set>
+              <mat-chip [ngClass]="'status-' + req.status">
+                {{ req.status | titlecase }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef> Items </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="items-cell">
+              <div *ngFor="let item of req.items">
+                <span class="qty">{{ item.quantity }}×</span>
+                <span class="desc">{{ item.description }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openDetails(row)" class="clickable-row"></tr>
+      </table>
     </mat-card-content>
   </mat-card>
 </div>

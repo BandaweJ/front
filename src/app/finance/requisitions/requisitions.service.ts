@@ -43,6 +43,10 @@ export class RequisitionsService {
     return this.httpClient.get<Requisition[]>(this.baseUrl);
   }
 
+  getRequisitionById(id: string): Observable<Requisition> {
+    return this.httpClient.get<Requisition>(`${this.baseUrl}/${id}`);
+  }
+
   createRequisition(payload: CreateRequisitionPayload): Observable<Requisition> {
     return this.httpClient.post<Requisition>(this.baseUrl, payload);
   }
@@ -66,6 +70,12 @@ export class RequisitionsService {
       `${this.baseUrl}/${id}/authorise`,
       {},
     );
+  }
+
+  reject(id: string, reason: string): Observable<Requisition> {
+    return this.httpClient.post<Requisition>(`${this.baseUrl}/${id}/reject`, {
+      reason,
+    });
   }
 }
 

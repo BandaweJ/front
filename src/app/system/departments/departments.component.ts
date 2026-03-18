@@ -14,14 +14,27 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { FormsModule } from '@angular/forms';
-import { Subject, finalize, takeUntil } from 'rxjs';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { Subject, finalize, takeUntil, startWith, map } from 'rxjs';
 import {
   DepartmentModel,
 } from '../../user-management/models/user-management.model';
 import { UserManagementService } from '../../user-management/services/user-management.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DepartmentEditDialogComponent } from './department-edit-dialog.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatListModule } from '@angular/material/list';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import {
+  DepartmentsApiService,
+  DepartmentDetails,
+  TeacherSummary,
+  SubjectSummary,
+} from './departments-api.service';
 
 @Component({
   selector: 'app-departments',
@@ -38,7 +51,15 @@ import { DepartmentEditDialogComponent } from './department-edit-dialog.componen
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
+    ReactiveFormsModule,
     MatDialogModule,
+    MatTabsModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatListModule,
+    MatDividerModule,
+    MatTooltipModule,
+    MatAutocompleteModule,
     DepartmentEditDialogComponent,
   ],
   templateUrl: './departments.component.html',
@@ -48,15 +69,47 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   loading = false;
-  departments: DepartmentModel[] = [];
+  departments: DepartmentDetails[] = [];
   newDeptName = '';
   newDeptDescription = '';
   saving = false;
 
   displayedColumns: string[] = ['name', 'description', 'actions'];
 
+  selectedDepartmentId: string | null = null;
+  selectedDepartment: DepartmentDetails | null = null;
+
+  allTeachers: TeacherSummary[] = [];
+  allSubjects: SubjectSummary[] = [];
+
+  teacherToAddControl = new FormControl<string>('');
+  subjectToAddControl = new FormControl<string>('');
+
+  filteredTeachers$ = this.teacherToAddControl.valueChanges.pipe(
+    startWith(''),
+    map((term) => {
+      const q = String(term || '').toLowerCase().trim();
+      if (!q) return this.allTeachers;
+      return this.allTeachers.filter((t) =>
+        `${t.name} ${t.surname} ${t.email}`.toLowerCase().includes(q),
+      );
+    }),
+  );
+
+  filteredSubjects$ = this.subjectToAddControl.valueChanges.pipe(
+    startWith(''),
+    map((term) => {
+      const q = String(term || '').toLowerCase().trim();
+      if (!q) return this.allSubjects;
+      return this.allSubjects.filter((s) =>
+        `${s.code} ${s.name}`.toLowerCase().includes(q),
+      );
+    }),
+  );
+
   constructor(
     private readonly userManagementService: UserManagementService,
+    private readonly departmentsApi: DepartmentsApiService,
     private readonly snackBar: MatSnackBar,
     private readonly cdr: ChangeDetectorRef,
     private readonly dialog: MatDialog,
@@ -64,6 +117,7 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadDepartments();
+    this.loadLookups();
   }
 
   ngOnDestroy(): void {
@@ -74,7 +128,7 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
   private loadDepartments(): void {
     this.loading = true;
     this.cdr.markForCheck();
-    this.userManagementService
+    this.departmentsApi
       .getDepartments()
       .pipe(
         finalize(() => {
@@ -86,6 +140,10 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (departments) => {
           this.departments = departments;
+          if (this.selectedDepartmentId) {
+            this.selectedDepartment =
+              departments.find((d) => d.id === this.selectedDepartmentId) ?? null;
+          }
           this.cdr.markForCheck();
         },
         error: () => {
@@ -97,6 +155,28 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
               verticalPosition: 'top',
             },
           );
+        },
+      });
+  }
+
+  private loadLookups(): void {
+    this.departmentsApi
+      .getTeachers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (teachers) => {
+          this.allTeachers = teachers ?? [];
+          this.cdr.markForCheck();
+        },
+      });
+
+    this.departmentsApi
+      .getSubjects()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (subjects) => {
+          this.allSubjects = subjects ?? [];
+          this.cdr.markForCheck();
         },
       });
   }
@@ -126,12 +206,10 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (dept) => {
-          this.departments = [...this.departments, dept].sort((a, b) =>
-            a.name.localeCompare(b.name),
-          );
+        next: () => {
           this.newDeptName = '';
           this.newDeptDescription = '';
+          this.loadDepartments();
           this.cdr.markForCheck();
           this.snackBar.open('Department created', 'OK', {
             duration: 3000,
@@ -162,6 +240,10 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.departments = this.departments.filter((d) => d.id !== id);
+          if (this.selectedDepartmentId === id) {
+            this.selectedDepartmentId = null;
+            this.selectedDepartment = null;
+          }
           this.cdr.markForCheck();
           this.snackBar.open('Department deleted', 'OK', {
             duration: 3000,
@@ -188,11 +270,128 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
       if (!updated) {
         return;
       }
-      this.departments = this.departments
-        .map((d) => (d.id === updated.id ? updated : d))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      this.cdr.markForCheck();
+      this.loadDepartments();
     });
+  }
+
+  selectDepartment(dept: DepartmentDetails): void {
+    this.selectedDepartmentId = dept.id;
+    this.selectedDepartment = dept;
+    this.cdr.markForCheck();
+  }
+
+  formatTeacherName(t: TeacherSummary): string {
+    return `${t.name} ${t.surname}`.trim();
+  }
+
+  displayTeacherId = (teacherId?: string | null): string => {
+    const id = (teacherId ?? '').trim();
+    if (!id) return '';
+    const t = this.allTeachers.find((x) => x.id === id);
+    return t ? `${this.formatTeacherName(t)} (${t.id})` : id;
+  };
+
+  displaySubjectCode = (code?: string | null): string => {
+    const c = (code ?? '').trim();
+    if (!c) return '';
+    const s = this.allSubjects.find((x) => x.code === c);
+    return s ? `${s.name} (${s.code})` : c;
+  };
+
+  setHod(teacherId: string | null): void {
+    if (!this.selectedDepartmentId) return;
+    this.departmentsApi
+      .setHod(this.selectedDepartmentId, teacherId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updated) => {
+          this.departments = this.departments.map((d) => (d.id === updated.id ? updated : d));
+          this.selectedDepartment = updated;
+          this.cdr.markForCheck();
+          this.snackBar.open('HOD updated', 'OK', { duration: 2500, verticalPosition: 'top' });
+        },
+        error: () => {
+          this.snackBar.open('Failed to update HOD', 'Close', { duration: 5000, verticalPosition: 'top' });
+        },
+      });
+  }
+
+  addTeacherToDepartment(): void {
+    if (!this.selectedDepartmentId) return;
+    const teacherId = (this.teacherToAddControl.value || '').trim();
+    if (!teacherId) return;
+    this.departmentsApi
+      .addTeacher(this.selectedDepartmentId, teacherId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updated) => {
+          this.departments = this.departments.map((d) => (d.id === updated.id ? updated : d));
+          this.selectedDepartment = updated;
+          this.teacherToAddControl.setValue('');
+          this.cdr.markForCheck();
+          this.snackBar.open('Teacher assigned', 'OK', { duration: 2500, verticalPosition: 'top' });
+        },
+        error: () => {
+          this.snackBar.open('Failed to assign teacher', 'Close', { duration: 5000, verticalPosition: 'top' });
+        },
+      });
+  }
+
+  removeTeacherFromDepartment(teacherId: string): void {
+    if (!this.selectedDepartmentId) return;
+    this.departmentsApi
+      .removeTeacher(this.selectedDepartmentId, teacherId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updated) => {
+          this.departments = this.departments.map((d) => (d.id === updated.id ? updated : d));
+          this.selectedDepartment = updated;
+          this.cdr.markForCheck();
+          this.snackBar.open('Teacher removed', 'OK', { duration: 2500, verticalPosition: 'top' });
+        },
+        error: () => {
+          this.snackBar.open('Failed to remove teacher', 'Close', { duration: 5000, verticalPosition: 'top' });
+        },
+      });
+  }
+
+  addSubjectToDepartment(): void {
+    if (!this.selectedDepartmentId) return;
+    const subjectCode = (this.subjectToAddControl.value || '').trim();
+    if (!subjectCode) return;
+    this.departmentsApi
+      .addSubject(this.selectedDepartmentId, subjectCode)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updated) => {
+          this.departments = this.departments.map((d) => (d.id === updated.id ? updated : d));
+          this.selectedDepartment = updated;
+          this.subjectToAddControl.setValue('');
+          this.cdr.markForCheck();
+          this.snackBar.open('Subject linked', 'OK', { duration: 2500, verticalPosition: 'top' });
+        },
+        error: () => {
+          this.snackBar.open('Failed to link subject', 'Close', { duration: 5000, verticalPosition: 'top' });
+        },
+      });
+  }
+
+  removeSubjectFromDepartment(subjectCode: string): void {
+    if (!this.selectedDepartmentId) return;
+    this.departmentsApi
+      .removeSubject(this.selectedDepartmentId, subjectCode)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updated) => {
+          this.departments = this.departments.map((d) => (d.id === updated.id ? updated : d));
+          this.selectedDepartment = updated;
+          this.cdr.markForCheck();
+          this.snackBar.open('Subject removed', 'OK', { duration: 2500, verticalPosition: 'top' });
+        },
+        error: () => {
+          this.snackBar.open('Failed to remove subject', 'Close', { duration: 5000, verticalPosition: 'top' });
+        },
+      });
   }
 }
 

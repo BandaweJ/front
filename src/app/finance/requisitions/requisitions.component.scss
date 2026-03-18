@@ -81,6 +81,10 @@
   width: 100%;
 }
 
+.clickable-row {
+  cursor: pointer;
+}
+
 .title-cell {
   display: flex;
   flex-direction: column;
