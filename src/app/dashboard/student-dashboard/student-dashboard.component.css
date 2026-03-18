@@ -84,6 +84,42 @@
   font-weight: 600;
 }
 
+/* Liabilities */
+.liabilities-card .liabilities-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.liabilities-card .liability {
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.liabilities-card .desc {
+  font-weight: 600;
+}
+
+.liabilities-card .meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.liabilities-card .amount {
+  font-weight: 700;
+}
+
+.liabilities-card .hint {
+  margin-top: 8px;
+  opacity: 0.8;
+  font-size: 12px;
+}
+
 .student-dashboard-main-container {
   display: flex;
   flex-direction: column;

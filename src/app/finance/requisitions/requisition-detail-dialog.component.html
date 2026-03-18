@@ -6,6 +6,7 @@
     <div><strong>Department:</strong> {{ req.department?.name || '—' }}</div>
     <div><strong>Status:</strong> <mat-chip>{{ req.status | titlecase }}</mat-chip></div>
     <div><strong>Date:</strong> {{ req.createdAt | date: 'medium' }}</div>
+    <div *ngIf="req.receivedAt"><strong>Received:</strong> {{ req.receivedAt | date: 'medium' }}</div>
   </div>
 
   <div *ngIf="req.description" class="desc">
@@ -42,6 +43,16 @@
 
 <div mat-dialog-actions align="end">
   <button mat-button mat-dialog-close [disabled]="saving">Close</button>
+
+  <button
+    mat-stroked-button
+    color="primary"
+    (click)="receiveIntoInventory()"
+    [disabled]="saving || !canReceiveIntoInventory()"
+  >
+    <mat-icon>inventory_2</mat-icon>
+    Receive into inventory
+  </button>
 
   <button
     mat-stroked-button

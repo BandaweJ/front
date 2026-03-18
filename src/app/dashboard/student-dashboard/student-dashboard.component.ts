@@ -34,6 +34,7 @@ import {
   receiptActions,
 } from 'src/app/finance/store/finance.actions';
 import { ContinuousAssessmentService, ContinuousAssessmentAnalytics } from 'src/app/marks/continuous-assessment/continuous-assessment.service';
+import { InvoiceChargesApiService, InvoiceCharge } from 'src/app/payment/invoice-charges-api.service';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -53,9 +54,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   public caAnalytics: ContinuousAssessmentAnalytics | null = null;
   public caLoading = false;
 
+  public liabilities: InvoiceCharge[] = [];
+  public liabilitiesLoading = false;
+
   private subscriptions: Subscription = new Subscription();
 
-  constructor(private store: Store, private caService: ContinuousAssessmentService) {
+  constructor(
+    private store: Store,
+    private caService: ContinuousAssessmentService,
+    private chargesApi: InvoiceChargesApiService,
+  ) {
     this.dashboardSummary$ = this.store.select(selectStudentDashboardSummary);
     this.summaryLoading$ = this.store.select(selectStudentDashboardLoading);
     this.summaryLoaded$ = this.store.select(selectStudentDashboardLoaded);
@@ -104,6 +112,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               })
             );
             this.loadContinuousAssessmentAnalytics(studentNumber);
+            this.loadLiabilities(studentNumber);
           })
         )
         .subscribe()
@@ -175,6 +184,31 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         this.caLoading = false;
       },
     });
+  }
+
+  private loadLiabilities(studentNumber: string) {
+    this.liabilitiesLoading = true;
+    // We need current enrolment term/year; use the store's current enrolment once loaded.
+    this.subscriptions.add(
+      this.currentEnrolment$
+        .pipe(
+          filter((e): e is EnrolsModel => !!e && typeof e.num === 'number' && typeof e.year === 'number'),
+          take(1),
+          switchMap((enrol) =>
+            this.chargesApi.getPendingChargesForInvoice(studentNumber, enrol.num, enrol.year),
+          ),
+        )
+        .subscribe({
+          next: (res) => {
+            this.liabilities = (res.pendingCharges ?? []).filter((c) => !c.isVoided);
+            this.liabilitiesLoading = false;
+          },
+          error: () => {
+            this.liabilities = [];
+            this.liabilitiesLoading = false;
+          },
+        }),
+    );
   }
 
   ngOnDestroy(): void {

@@ -318,6 +318,32 @@
                 Requisitions
               </span>
             </button>
+
+            <!-- Inventory -->
+            <button
+              mat-button
+              routerLink="/inventory"
+              routerLinkActive="active"
+              *ngIf="canAccessInventory$ | async"
+            >
+              <mat-icon>inventory_2</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">
+                Inventory
+              </span>
+            </button>
+
+            <!-- Lost & Damaged -->
+            <button
+              mat-button
+              routerLink="/incidents"
+              routerLinkActive="active"
+              *ngIf="canAccessIncidents$ | async"
+            >
+              <mat-icon>report</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">
+                Lost & Damaged
+              </span>
+            </button>
           </div>
         </mat-expansion-panel>
 

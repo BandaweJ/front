@@ -230,6 +230,18 @@ const routes: Routes = [
     title: 'Department Requisitions',
   },
   {
+    path: 'inventory',
+    loadComponent: () => import('./inventory/inventory.component').then(m => m.InventoryComponent),
+    canActivate: [AuthGuardService],
+    title: 'Department Inventory',
+  },
+  {
+    path: 'incidents',
+    loadComponent: () => import('./incidents/incidents.component').then(m => m.IncidentsComponent),
+    canActivate: [AuthGuardService],
+    title: 'Lost & Damaged Items',
+  },
+  {
     path: 'exemptions',
     loadComponent: () => import('./finance/exemptions/exemptions.component').then(m => m.ExemptionsComponent),
     canActivate: [AuthGuardService],

@@ -12,6 +12,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { Requisition, RequisitionsService } from './requisitions.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
+import { MatDialog } from '@angular/material/dialog';
+import { RequisitionReceiveIntoInventoryDialogComponent } from './requisition-receive-into-inventory-dialog.component';
 
 export interface RequisitionDetailDialogData {
   requisition: Requisition;
@@ -31,6 +33,7 @@ export interface RequisitionDetailDialogData {
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
+    RequisitionReceiveIntoInventoryDialogComponent,
   ],
   templateUrl: './requisition-detail-dialog.component.html',
   styleUrls: ['./requisition-detail-dialog.component.scss'],
@@ -47,6 +50,7 @@ export class RequisitionDetailDialogComponent {
     private readonly dialogRef: MatDialogRef<RequisitionDetailDialogComponent>,
     private readonly requisitionsService: RequisitionsService,
     private readonly snackBar: MatSnackBar,
+    private readonly dialog: MatDialog,
   ) {}
 
   get req(): Requisition {
@@ -63,6 +67,10 @@ export class RequisitionDetailDialogComponent {
 
   canAuthoriseOrReject(): boolean {
     return (this.data.role === ROLES.auditor || this.data.role === ROLES.director) && this.req.status === 'awaiting_authorization';
+  }
+
+  canReceiveIntoInventory(): boolean {
+    return this.data.role === ROLES.hod && this.req.status === 'authorized';
   }
 
   private finish(updated: Requisition): void {
@@ -128,6 +136,23 @@ export class RequisitionDetailDialogComponent {
         },
         error: () => this.snackBar.open('Failed to reject', 'Close', { duration: 5000, verticalPosition: 'top' }),
       });
+  }
+
+  receiveIntoInventory(): void {
+    const ref = this.dialog.open(RequisitionReceiveIntoInventoryDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      data: { requisition: this.req },
+    });
+
+    ref.afterClosed().subscribe((didReceive?: boolean) => {
+      if (!didReceive) return;
+      // Reload requisition from backend so received quantities are reflected.
+      this.requisitionsService.getRequisitionById(this.req.id).subscribe({
+        next: (updated) => this.finish(updated),
+        error: () => this.finish(this.req),
+      });
+    });
   }
 }
 

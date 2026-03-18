@@ -59,10 +59,12 @@ export class RequisitionsComponent implements OnInit, OnDestroy {
   form: FormGroup;
   myRequisitions: Requisition[] = [];
   approvalRequisitions: Requisition[] = [];
+  pendingReceiving: Requisition[] = [];
   loading = false;
   role: ROLES | null = null;
 
   canCreate = false;
+  canReceive = false;
 
   displayedColumns: string[] = [
     'createdAt',
@@ -94,12 +96,14 @@ export class RequisitionsComponent implements OnInit, OnDestroy {
       this.role === ROLES.seniorTeacher ||
       this.role === ROLES.deputy ||
       this.role === ROLES.head;
+    this.canReceive = this.role === ROLES.hod;
 
     if (this.items.length === 0) {
       this.addItemRow();
     }
     this.loadMyRequisitions();
     this.loadApprovalRequisitions();
+    this.loadPendingReceiving();
   }
 
   ngOnDestroy(): void {
@@ -231,6 +235,25 @@ export class RequisitionsComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadPendingReceiving(): void {
+    if (!this.canReceive) {
+      this.pendingReceiving = [];
+      return;
+    }
+
+    this.requisitionsService
+      .getPendingReceiving()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.pendingReceiving = data ?? [];
+        },
+        error: () => {
+          this.pendingReceiving = [];
+        },
+      });
+  }
+
   openDetails(req: Requisition): void {
     if (!this.role) return;
     const ref = this.dialog.open(RequisitionDetailDialogComponent, {
@@ -245,7 +268,11 @@ export class RequisitionsComponent implements OnInit, OnDestroy {
       this.approvalRequisitions = this.approvalRequisitions.map((r) =>
         r.id === updated.id ? updated : r,
       );
+      this.pendingReceiving = this.pendingReceiving.map((r) =>
+        r.id === updated.id ? updated : r,
+      );
       this.loadApprovalRequisitions();
+      this.loadPendingReceiving();
     });
   }
 }

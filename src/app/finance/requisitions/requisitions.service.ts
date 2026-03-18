@@ -8,6 +8,7 @@ export interface RequisitionItem {
   description: string;
   quantity: number;
   intendedUse?: string;
+  receivedQuantity?: number;
 }
 
 export interface Requisition {
@@ -16,6 +17,7 @@ export interface Requisition {
   description?: string;
   status: string;
   createdAt: string;
+  receivedAt?: string | null;
   department?: { id: string; name: string };
   createdBy?: { id: string; name: string; surname: string };
   items: RequisitionItem[];
@@ -37,6 +39,10 @@ export class RequisitionsService {
 
   getMyRequisitions(): Observable<Requisition[]> {
     return this.httpClient.get<Requisition[]>(`${this.baseUrl}/mine`);
+  }
+
+  getPendingReceiving(): Observable<Requisition[]> {
+    return this.httpClient.get<Requisition[]>(`${this.baseUrl}/pending-receiving`);
   }
 
   getAllRequisitions(): Observable<Requisition[]> {

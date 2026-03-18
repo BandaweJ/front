@@ -109,6 +109,26 @@
 
       </div>
 
+      <div class="summary-card liabilities-card">
+        <h4>Outstanding liabilities (lost/damaged items)</h4>
+        <div *ngIf="liabilitiesLoading" class="loading-spinner">Loading liabilities...</div>
+        <div *ngIf="!liabilitiesLoading && !liabilities.length" class="no-data-message">
+          No outstanding liabilities.
+        </div>
+        <div *ngIf="!liabilitiesLoading && liabilities.length" class="liabilities-list">
+          <div class="liability" *ngFor="let c of liabilities">
+            <div class="desc">{{ c.description }}</div>
+            <div class="meta">
+              <span class="amount">{{ c.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="status">{{ c.status | titlecase }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="hint">
+          These charges are added to your next invoice after approvals.
+        </div>
+      </div>
+
       <div class="summary-card academic-card">
         <h4>Academic Overview</h4>
         <div class="data-item">

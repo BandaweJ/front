@@ -156,6 +156,69 @@
     </mat-card-content>
   </mat-card>
 
+  <mat-card class="requisition-card" *ngIf="pendingReceiving.length">
+    <mat-card-header>
+      <mat-card-title>Pending receiving</mat-card-title>
+      <mat-card-subtitle>
+        Authorised requisitions with items still awaiting receipt. Open one to receive into a room.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <table mat-table [dataSource]="pendingReceiving" class="requisitions-table">
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Date </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.createdAt | date: 'mediumDate' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Title </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="title-cell">
+              <div class="title-text">{{ req.title }}</div>
+              <div class="subtitle" *ngIf="req.description">{{ req.description }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef> Department </th>
+          <td mat-cell *matCellDef="let req">
+            {{ req.department?.name || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let req">
+            <mat-chip-set>
+              <mat-chip [ngClass]="'status-' + req.status">
+                {{ req.status | titlecase }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef> Items </th>
+          <td mat-cell *matCellDef="let req">
+            <div class="items-cell">
+              <div *ngFor="let item of req.items">
+                <span class="qty">{{ item.quantity }}×</span>
+                <span class="desc">{{ item.description }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openDetails(row)" class="clickable-row"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
   <mat-card class="requisition-card" *ngIf="approvalRequisitions.length">
     <mat-card-header>
       <mat-card-title>Requisitions for your approval</mat-card-title>
