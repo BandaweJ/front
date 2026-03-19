@@ -10,6 +10,11 @@ import { PERMISSIONS } from './permissions.constants';
   providedIn: 'root'
 })
 export class RoleAccessService {
+  private normalizeRole(role: string | null | undefined): string | null {
+    if (!role) return null;
+    return role.toString().trim().toLowerCase();
+  }
+
   constructor(
     private store: Store,
     private rolesPermissionsService: RolesPermissionsService
@@ -57,9 +62,11 @@ export class RoleAccessService {
    * Dev is treated as having every role for access control, except student (dev does not access student dashboard).
    */
   hasRole(role: string, currentRole: string | null): boolean {
-    if (currentRole === null) return false;
-    if (currentRole === role) return true;
-    if (currentRole === ROLES.dev && role !== ROLES.student) return true;
+    const normalizedCurrent = this.normalizeRole(currentRole);
+    const normalizedTarget = this.normalizeRole(role);
+    if (!normalizedCurrent || !normalizedTarget) return false;
+    if (normalizedCurrent === normalizedTarget) return true;
+    if (normalizedCurrent === ROLES.dev && normalizedTarget !== ROLES.student) return true;
     return false;
   }
 
@@ -68,14 +75,25 @@ export class RoleAccessService {
    * Dev role has access to everything
    */
   hasAnyRole(currentRole: string | null, ...roles: string[]): boolean {
-    return currentRole !== null && (currentRole === ROLES.dev || roles.includes(currentRole));
+    const normalizedCurrent = this.normalizeRole(currentRole);
+    if (!normalizedCurrent) return false;
+    if (normalizedCurrent === ROLES.dev) return true;
+    const normalizedRoles = roles
+      .map((r) => this.normalizeRole(r))
+      .filter((r): r is string => Boolean(r));
+    return normalizedRoles.includes(normalizedCurrent);
   }
 
   /**
    * Check if user does NOT have any of the specified roles (synchronous version)
    */
   doesNotHaveRole(currentRole: string | null, ...roles: string[]): boolean {
-    return currentRole !== null && !roles.includes(currentRole);
+    const normalizedCurrent = this.normalizeRole(currentRole);
+    if (!normalizedCurrent) return false;
+    const normalizedRoles = roles
+      .map((r) => this.normalizeRole(r))
+      .filter((r): r is string => Boolean(r));
+    return !normalizedRoles.includes(normalizedCurrent);
   }
 
   /**
