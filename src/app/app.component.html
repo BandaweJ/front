@@ -332,6 +332,18 @@
               </span>
             </button>
 
+            <button
+              mat-button
+              routerLink="/library"
+              routerLinkActive="active"
+              *ngIf="canAccessLibrary$ | async"
+            >
+              <mat-icon>menu_book</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">
+                Library
+              </span>
+            </button>
+
             <!-- Lost & Damaged -->
             <button
               mat-button

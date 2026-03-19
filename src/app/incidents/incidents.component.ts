@@ -13,12 +13,16 @@ import { Subject, finalize, takeUntil } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { ROLES } from '../registration/models/roles.enum';
 import { ChargeableIncident, IncidentType, IncidentsApiService } from './incidents-api.service';
+import { LibraryApiService, LibraryCopy } from '../library/library-api.service';
 
 type IncidentForm = {
   type: IncidentType;
   studentNumber?: string;
   replacementCost: number;
   description: string;
+  textbookCopyId?: string;
+  roomId?: string;
+  inventoryItemId?: string;
 };
 
 @Component({
@@ -54,7 +58,13 @@ export class IncidentsComponent implements OnInit, OnDestroy {
     studentNumber: '',
     replacementCost: 0,
     description: '',
+    textbookCopyId: '',
+    roomId: '',
+    inventoryItemId: '',
   };
+
+  availableCopies: LibraryCopy[] = [];
+  rejectReasonByIncidentId: Record<string, string> = {};
 
   displayedColumns: string[] = ['createdAt', 'type', 'student', 'cost', 'status', 'actions'];
 
@@ -62,6 +72,7 @@ export class IncidentsComponent implements OnInit, OnDestroy {
     private readonly api: IncidentsApiService,
     private readonly snackBar: MatSnackBar,
     private readonly auth: AuthService,
+    private readonly libraryApi: LibraryApiService,
   ) {}
 
   ngOnInit(): void {
@@ -70,6 +81,7 @@ export class IncidentsComponent implements OnInit, OnDestroy {
 
     this.loadMine();
     this.loadPending();
+    this.loadAvailableCopies();
   }
 
   ngOnDestroy(): void {
@@ -103,6 +115,9 @@ export class IncidentsComponent implements OnInit, OnDestroy {
       description: desc,
       replacementCost: cost,
       studentNumber: (this.form.studentNumber || '').trim() || null,
+      textbookCopyId: this.form.textbookCopyId || null,
+      roomId: this.form.roomId || null,
+      inventoryItemId: this.form.inventoryItemId || null,
     })
     .pipe(finalize(() => (this.loading = false)), takeUntil(this.destroy$))
     .subscribe({
@@ -112,6 +127,9 @@ export class IncidentsComponent implements OnInit, OnDestroy {
         this.form.description = '';
         this.form.studentNumber = '';
         this.form.replacementCost = 0;
+        this.form.textbookCopyId = '';
+        this.form.roomId = '';
+        this.form.inventoryItemId = '';
         this.loadPending();
       },
       error: () => this.snackBar.open('Failed to report incident', 'Close', { duration: 5000, verticalPosition: 'top' }),
@@ -136,8 +154,29 @@ export class IncidentsComponent implements OnInit, OnDestroy {
       });
   }
 
-  act(row: ChargeableIncident, action: 'confirm' | 'deputy' | 'head' | 'accept'): void {
+  private loadAvailableCopies(): void {
+    this.libraryApi
+      .getCopies({ status: 'available' })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (copies) => (this.availableCopies = copies ?? []),
+        error: () => (this.availableCopies = []),
+      });
+  }
+
+  act(row: ChargeableIncident, action: 'confirm' | 'deputy' | 'head' | 'accept' | 'reject'): void {
+    if (action === 'reject') {
+      const reason = (this.rejectReasonByIncidentId[row.id] || '').trim();
+      if (!reason) {
+        this.snackBar.open('Rejection reason is required', 'Close', {
+          duration: 4000,
+          verticalPosition: 'top',
+        });
+        return;
+      }
+    }
     this.loading = true;
+    const reason = (this.rejectReasonByIncidentId[row.id] || '').trim();
     const req =
       action === 'confirm'
         ? this.api.confirmHod(row.id)
@@ -145,6 +184,8 @@ export class IncidentsComponent implements OnInit, OnDestroy {
           ? this.api.signDeputy(row.id)
           : action === 'head'
             ? this.api.signHead(row.id)
+          : action === 'reject'
+            ? this.api.reject(row.id, reason)
             : this.api.accept(row.id);
 
     req.pipe(finalize(() => (this.loading = false)), takeUntil(this.destroy$)).subscribe({
@@ -159,13 +200,14 @@ export class IncidentsComponent implements OnInit, OnDestroy {
     });
   }
 
-  canAction(row: ChargeableIncident, action: 'confirm' | 'deputy' | 'head' | 'accept'): boolean {
+  canAction(row: ChargeableIncident, action: 'confirm' | 'deputy' | 'head' | 'accept' | 'reject'): boolean {
     if (!this.role) return false;
     if (this.role === ROLES.dev || this.role === ROLES.admin) return true;
     if (action === 'confirm') return this.role === ROLES.hod && row.status === 'submitted';
     if (action === 'deputy') return this.role === ROLES.deputy && row.status === 'hod_confirmed';
     if (action === 'head') return this.role === ROLES.head && row.status === 'deputy_signed';
     if (action === 'accept') return (this.role === ROLES.auditor || this.role === ROLES.director) && row.status === 'head_signed';
+    if (action === 'reject') return (this.role === ROLES.auditor || this.role === ROLES.director) && row.status === 'head_signed';
     return false;
   }
 }

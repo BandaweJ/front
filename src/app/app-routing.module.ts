@@ -236,6 +236,12 @@ const routes: Routes = [
     title: 'Department Inventory',
   },
   {
+    path: 'library',
+    loadComponent: () => import('./library/library.component').then(m => m.LibraryComponent),
+    canActivate: [AuthGuardService],
+    title: 'Library Management',
+  },
+  {
     path: 'incidents',
     loadComponent: () => import('./incidents/incidents.component').then(m => m.IncidentsComponent),
     canActivate: [AuthGuardService],

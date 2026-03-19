@@ -114,6 +114,22 @@ export class AppComponent implements OnInit, OnDestroy {
       ),
     ),
   );
+  canAccessLibrary$ = this.roleAccess.getCurrentRole$().pipe(
+    map((role) =>
+      this.roleAccess.hasAnyRole(
+        role,
+        ROLES.dev,
+        ROLES.admin,
+        ROLES.director,
+        ROLES.auditor,
+        ROLES.head,
+        ROLES.deputy,
+        ROLES.hod,
+        ROLES.seniorTeacher,
+        ROLES.teacher,
+      ),
+    ),
+  );
   canAccessIncidents$ = this.roleAccess.getCurrentRole$().pipe(
     map((role) =>
       this.roleAccess.hasAnyRole(

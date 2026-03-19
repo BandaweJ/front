@@ -27,6 +27,16 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
+          <mat-label>Textbook copy (optional)</mat-label>
+          <mat-select [(ngModel)]="form.textbookCopyId">
+            <mat-option value="">None</mat-option>
+            <mat-option *ngFor="let c of availableCopies" [value]="c.id">
+              {{ c.bookNumber }} - {{ c.title?.title || 'Title' }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Replacement cost</mat-label>
           <input matInput type="number" min="0" [(ngModel)]="form.replacementCost" />
         </mat-form-field>
@@ -126,6 +136,11 @@
             <button mat-stroked-button color="primary" *ngIf="canAction(r,'confirm')" (click)="act(r,'confirm')">Confirm (HOD)</button>
             <button mat-stroked-button color="primary" *ngIf="canAction(r,'deputy')" (click)="act(r,'deputy')">Sign (Deputy)</button>
             <button mat-stroked-button color="primary" *ngIf="canAction(r,'head')" (click)="act(r,'head')">Sign (Head)</button>
+            <mat-form-field appearance="outline" *ngIf="canAction(r,'reject')" class="reason-field">
+              <mat-label>Rejection reason</mat-label>
+              <input matInput [(ngModel)]="rejectReasonByIncidentId[r.id]" />
+            </mat-form-field>
+            <button mat-stroked-button color="warn" *ngIf="canAction(r,'reject')" (click)="act(r,'reject')">Reject</button>
             <button mat-raised-button color="primary" *ngIf="canAction(r,'accept')" (click)="act(r,'accept')">Accept</button>
           </td>
         </ng-container>
