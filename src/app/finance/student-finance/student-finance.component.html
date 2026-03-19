@@ -180,12 +180,7 @@
                      color="primary"
                      class="legacy-balance-button"
                      (click)="saveInvoiceWithLegacyBalance()"
-                     [disabled]="
-                       isSavingWithLegacyBalance ||
-                       !legacyBalanceAmount ||
-                       legacyBalanceAmount <= 0 ||
-                       !!invoice.balanceBfwd
-                     ">
+                     [disabled]="!canSaveWithLegacyBalance(invoice)">
                      <mat-icon *ngIf="!isSavingWithLegacyBalance">save</mat-icon>
                      <mat-spinner
                        *ngIf="isSavingWithLegacyBalance"
@@ -199,6 +194,9 @@
                      </span>
                    </button>
                  </div>
+                 <p class="legacy-balance-note" *ngIf="getExistingBalanceBfwdAmount(invoice) > 0">
+                   This invoice already has a balance brought forward.
+                 </p>
 
                  <app-invoice-item [invoice]="invoice" [downloadable]="true"></app-invoice-item>
                </mat-card-content>

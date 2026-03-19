@@ -157,7 +157,8 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.legacyBalanceAmount || this.legacyBalanceAmount <= 0) {
+    const requestedAmount = Number(this.legacyBalanceAmount);
+    if (!Number.isFinite(requestedAmount) || requestedAmount <= 0) {
       this.snackBar.open(
         'Please enter a positive legacy balance amount before saving.',
         'Close',
@@ -176,7 +177,7 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
         return;
       }
 
-      if (currentInvoice.balanceBfwd) {
+      if (this.getExistingBalanceBfwdAmount(currentInvoice) > 0) {
         this.snackBar.open(
           'This invoice already has a balance brought forward attached.',
           'Close',
@@ -197,7 +198,7 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const amount = this.legacyBalanceAmount ?? 0;
+      const amount = requestedAmount;
       this.isSavingWithLegacyBalance = true;
       this.cdr.markForCheck();
 
@@ -239,5 +240,21 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
           },
         });
     });
+  }
+
+  getExistingBalanceBfwdAmount(invoice: InvoiceModel | null | undefined): number {
+    const amountRaw = (invoice as any)?.balanceBfwd?.amount;
+    const amount = Number(amountRaw);
+    return Number.isFinite(amount) && amount > 0 ? amount : 0;
+  }
+
+  canSaveWithLegacyBalance(invoice: InvoiceModel | null | undefined): boolean {
+    const requestedAmount = Number(this.legacyBalanceAmount);
+    return (
+      !this.isSavingWithLegacyBalance &&
+      Number.isFinite(requestedAmount) &&
+      requestedAmount > 0 &&
+      this.getExistingBalanceBfwdAmount(invoice) <= 0
+    );
   }
 }
