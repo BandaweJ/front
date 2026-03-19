@@ -306,7 +306,25 @@
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Balances</span>
             </button>
 
-            <!-- Requisitions -->
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Operations -->
+        <mat-expansion-panel
+          *ngIf="
+            (canAccessRequisitions$ | async) ||
+            (canAccessInventory$ | async) ||
+            (canAccessLibrary$ | async) ||
+            (canAccessIncidents$ | async)
+          "
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>inventory_2</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Operations</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="sidenav-container">
             <button
               mat-button
               routerLink="/requisitions"
@@ -319,7 +337,6 @@
               </span>
             </button>
 
-            <!-- Inventory -->
             <button
               mat-button
               routerLink="/inventory"
@@ -344,7 +361,6 @@
               </span>
             </button>
 
-            <!-- Lost & Damaged -->
             <button
               mat-button
               routerLink="/incidents"
