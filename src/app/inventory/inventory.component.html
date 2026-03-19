@@ -80,6 +80,14 @@
             <button
               *ngIf="canManageInventory"
               mat-button
+              color="primary"
+              (click)="editRoom(room)"
+            >
+              Edit
+            </button>
+            <button
+              *ngIf="canManageInventory"
+              mat-button
               color="warn"
               (click)="room.isActive ? archiveRoom(room) : restoreRoom(room)"
             >
@@ -275,6 +283,14 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let item">
+            <button
+              *ngIf="canManageInventory"
+              mat-stroked-button
+              color="primary"
+              (click)="editItem(item)"
+            >
+              Edit
+            </button>
             <button mat-stroked-button color="primary" (click)="adjustStock(item)">
               Adjust
             </button>

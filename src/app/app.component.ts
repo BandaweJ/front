@@ -90,8 +90,11 @@ export class AppComponent implements OnInit, OnDestroy {
         ROLES.dev,
         ROLES.admin,
         ROLES.director,
+        ROLES.auditor,
         ROLES.deputy,
         ROLES.head,
+        ROLES.hod,
+        ROLES.seniorTeacher,
       ),
     ),
   );

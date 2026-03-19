@@ -244,6 +244,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
     const ref = this.dialog.open(InventoryCreateRoomDialogComponent, {
       width: '520px',
       maxWidth: '95vw',
+      data: { mode: 'create' },
     });
 
     ref.afterClosed()
@@ -261,6 +262,46 @@ export class InventoryComponent implements OnInit, OnDestroy {
             },
             error: () => {
               this.snackBar.open('Failed to create room', 'Close', { duration: 5000 });
+            },
+          });
+      });
+  }
+
+  editRoom(room: Room): void {
+    if (!this.canManageInventory) {
+      this.snackBar.open('Only HOD can manage rooms', 'Close', { duration: 4000 });
+      return;
+    }
+
+    const ref = this.dialog.open(InventoryCreateRoomDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      data: { mode: 'edit', room },
+    });
+
+    ref.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result?: { name: string; code?: string; description?: string }) => {
+        if (!result) return;
+        this.loadingRooms = true;
+        this.inventoryApi
+          .updateRoom(room.id, {
+            name: result.name,
+            code: result.code ?? null,
+            description: result.description ?? null,
+          })
+          .pipe(finalize(() => (this.loadingRooms = false)), takeUntil(this.destroy$))
+          .subscribe({
+            next: (updated) => {
+              this.snackBar.open('Room updated', 'OK', { duration: 2500 });
+              this.rooms = this.rooms.map((r) => (r.id === updated.id ? updated : r));
+              if (this.selectedRoom?.id === updated.id) {
+                this.selectedRoom = updated;
+              }
+              this.refreshRooms();
+            },
+            error: () => {
+              this.snackBar.open('Failed to update room', 'Close', { duration: 5000 });
             },
           });
       });
@@ -315,7 +356,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
     const ref = this.dialog.open(InventoryCreateItemDialogComponent, {
       width: '620px',
       maxWidth: '95vw',
-      data: { room: this.selectedRoom },
+      data: { room: this.selectedRoom, mode: 'create' },
     });
 
     ref.afterClosed()
@@ -334,6 +375,46 @@ export class InventoryComponent implements OnInit, OnDestroy {
             },
             error: () => {
               this.snackBar.open('Failed to add item', 'Close', { duration: 5000 });
+            },
+          });
+      });
+  }
+
+  editItem(item: InventoryItem): void {
+    if (!this.canManageInventory || !this.selectedRoom) {
+      this.snackBar.open('Only HOD can update inventory items', 'Close', { duration: 4000 });
+      return;
+    }
+
+    const ref = this.dialog.open(InventoryCreateItemDialogComponent, {
+      width: '620px',
+      maxWidth: '95vw',
+      data: { room: this.selectedRoom, mode: 'edit', item },
+    });
+
+    ref.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result?: { name: string; category?: string; unit?: string; reorderLevel?: number | null; notes?: string | null }) => {
+        if (!result) return;
+        this.loadingItems = true;
+        this.inventoryApi
+          .updateItem(item.id, {
+            name: result.name,
+            category: result.category ?? null,
+            unit: result.unit ?? null,
+            reorderLevel:
+              result.reorderLevel === undefined ? null : result.reorderLevel,
+            notes: result.notes ?? null,
+          })
+          .pipe(finalize(() => (this.loadingItems = false)), takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.snackBar.open('Item updated', 'OK', { duration: 2500 });
+              this.refreshItems();
+              this.refreshRoomSummary();
+            },
+            error: () => {
+              this.snackBar.open('Failed to update item', 'Close', { duration: 5000 });
             },
           });
       });

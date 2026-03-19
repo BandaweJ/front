@@ -22,6 +22,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 import { Subject, finalize, takeUntil } from 'rxjs';
 import {
   CreateRequisitionPayload,
@@ -48,6 +49,7 @@ import { RequisitionDetailDialogComponent } from './requisition-detail-dialog.co
     MatChipsModule,
     MatSnackBarModule,
     MatDialogModule,
+    MatSelectModule,
     RequisitionDetailDialogComponent,
   ],
   templateUrl: './requisitions.component.html',
@@ -65,6 +67,8 @@ export class RequisitionsComponent implements OnInit, OnDestroy {
 
   canCreate = false;
   canReceive = false;
+  searchControl = new FormControl<string>('');
+  statusFilterControl = new FormControl<string>('all');
 
   displayedColumns: string[] = [
     'createdAt',
@@ -273,6 +277,96 @@ export class RequisitionsComponent implements OnInit, OnDestroy {
       );
       this.loadApprovalRequisitions();
       this.loadPendingReceiving();
+    });
+  }
+
+  get filteredMyRequisitions(): Requisition[] {
+    return this.applyFilters(this.myRequisitions);
+  }
+
+  get filteredApprovalRequisitions(): Requisition[] {
+    return this.applyFilters(this.approvalRequisitions);
+  }
+
+  get filteredPendingReceiving(): Requisition[] {
+    return this.applyFilters(this.pendingReceiving);
+  }
+
+  get statusSummary(): Array<{ status: string; count: number }> {
+    const all = [
+      ...this.myRequisitions,
+      ...this.approvalRequisitions,
+      ...this.pendingReceiving,
+    ];
+    const mapCounts = new Map<string, number>();
+    for (const req of all) {
+      mapCounts.set(req.status, (mapCounts.get(req.status) ?? 0) + 1);
+    }
+
+    return Array.from(mapCounts.entries())
+      .map(([status, count]) => ({ status, count }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  exportFilteredCsv(): void {
+    const rows = this.applyFilters(this.myRequisitions).map((req) => ({
+      createdAt: req.createdAt,
+      title: req.title,
+      department: req.department?.name ?? '',
+      status: req.status,
+      items: (req.items ?? [])
+        .map((item) => `${item.quantity}x ${item.description}`)
+        .join('; '),
+    }));
+
+    if (!rows.length) {
+      this.snackBar.open('No filtered requisitions to export', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const header = ['createdAt', 'title', 'department', 'status', 'items'];
+    const lines = [
+      header.join(','),
+      ...rows.map((row) =>
+        header
+          .map((key) => `"${String((row as any)[key] ?? '').replace(/"/g, '""')}"`)
+          .join(','),
+      ),
+    ];
+    const blob = new Blob([lines.join('\n')], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `requisitions-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private applyFilters(list: Requisition[]): Requisition[] {
+    const search = (this.searchControl.value || '').toLowerCase().trim();
+    const status = (this.statusFilterControl.value || 'all').toLowerCase().trim();
+
+    return (list ?? []).filter((req) => {
+      const matchesStatus = status === 'all' || req.status.toLowerCase() === status;
+      if (!matchesStatus) return false;
+      if (!search) return true;
+
+      const searchable = [
+        req.title,
+        req.description,
+        req.department?.name,
+        req.status,
+        ...(req.items ?? []).map((item) => item.description),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return searchable.includes(search);
     });
   }
 }

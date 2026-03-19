@@ -1,10 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { Room } from './inventory-api.service';
+
+type RoomDialogData = {
+  mode?: 'create' | 'edit';
+  room?: Room;
+};
 
 @Component({
   selector: 'app-inventory-create-room-dialog',
@@ -27,10 +33,32 @@ export class InventoryCreateRoomDialogComponent {
     description: ['', [Validators.maxLength(500)]],
   });
 
+  mode: 'create' | 'edit' = 'create';
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialogRef: MatDialogRef<InventoryCreateRoomDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public readonly data: RoomDialogData | null,
   ) {}
+
+  ngOnInit(): void {
+    this.mode = this.data?.mode === 'edit' ? 'edit' : 'create';
+    if (this.mode === 'edit' && this.data?.room) {
+      this.form.patchValue({
+        name: this.data.room.name || '',
+        code: this.data.room.code || '',
+        description: this.data.room.description || '',
+      });
+    }
+  }
+
+  get title(): string {
+    return this.mode === 'edit' ? 'Edit room' : 'Add room';
+  }
+
+  get saveLabel(): string {
+    return this.mode === 'edit' ? 'Update' : 'Save';
+  }
 
   cancel(): void {
     this.dialogRef.close();
