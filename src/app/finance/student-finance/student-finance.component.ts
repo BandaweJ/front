@@ -177,15 +177,6 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
         return;
       }
 
-      if (this.getExistingBalanceBfwdAmount(currentInvoice) > 0) {
-        this.snackBar.open(
-          'This invoice already has a balance brought forward attached.',
-          'Close',
-          { duration: 4000 }
-        );
-        return;
-      }
-
       const studentNumber =
         currentInvoice.student?.studentNumber || this.selectedStudentNumber;
 
@@ -199,6 +190,34 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
       }
 
       const amount = requestedAmount;
+      const existingBalance = (currentInvoice as any)?.balanceBfwd;
+      const existingBalanceId = Number(existingBalance?.id);
+      const existingAmount = this.getExistingBalanceBfwdAmount(currentInvoice);
+
+      // If invoice already has a linked balance, update that same balance value
+      // instead of creating another balance row.
+      if (existingBalanceId > 0) {
+        const invoiceWithLegacy: InvoiceModel = {
+          ...currentInvoice,
+          balanceBfwd: {
+            ...existingBalance,
+            id: existingBalanceId,
+            amount,
+            studentNumber,
+          } as any,
+        };
+        this.store.dispatch(invoiceActions.saveInvoice({ invoice: invoiceWithLegacy }));
+        this.snackBar.open(
+          existingAmount !== amount
+            ? 'Balance brought forward updated and invoice save requested.'
+            : 'Balance brought forward is unchanged.',
+          'Close',
+          { duration: 4000 }
+        );
+        this.legacyBalanceAmount = null;
+        return;
+      }
+
       this.isSavingWithLegacyBalance = true;
       this.cdr.markForCheck();
 
@@ -216,9 +235,16 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
         )
         .subscribe({
           next: (balance) => {
+            // Always persist the amount the user just entered, even if the
+            // balance creation endpoint returns a stale/aggregated amount.
+            const normalizedBalance = {
+              ...balance,
+              amount,
+              studentNumber,
+            };
             const invoiceWithLegacy: InvoiceModel = {
               ...currentInvoice,
-              balanceBfwd: balance,
+              balanceBfwd: normalizedBalance,
             };
             this.store.dispatch(
               invoiceActions.saveInvoice({ invoice: invoiceWithLegacy })
@@ -250,11 +276,12 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
 
   canSaveWithLegacyBalance(invoice: InvoiceModel | null | undefined): boolean {
     const requestedAmount = Number(this.legacyBalanceAmount);
+    const existingAmount = this.getExistingBalanceBfwdAmount(invoice);
     return (
       !this.isSavingWithLegacyBalance &&
       Number.isFinite(requestedAmount) &&
       requestedAmount > 0 &&
-      this.getExistingBalanceBfwdAmount(invoice) <= 0
+      (existingAmount <= 0 || requestedAmount !== existingAmount)
     );
   }
 }
