@@ -142,7 +142,12 @@ export class InventoryComponent implements OnInit, OnDestroy {
     const auth = this.authService.getAuthStatus();
     this.role = auth.user?.role ?? null;
 
-    this.canManageInventory = this.role === ROLES.hod;
+    this.canManageInventory =
+      this.role === ROLES.hod ||
+      this.role === ROLES.deputy ||
+      this.role === ROLES.head ||
+      this.role === ROLES.admin ||
+      this.role === ROLES.dev;
 
     this.canFilterDepartment =
       this.role === ROLES.deputy ||
@@ -237,7 +242,11 @@ export class InventoryComponent implements OnInit, OnDestroy {
 
   createRoom(): void {
     if (!this.canManageInventory) {
-      this.snackBar.open('Only HOD can create rooms', 'Close', { duration: 4000 });
+      this.snackBar.open(
+        'Only deputy, head, admin, hod, or dev can create rooms',
+        'Close',
+        { duration: 4000 },
+      );
       return;
     }
 
