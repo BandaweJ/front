@@ -13,5 +13,9 @@ export enum ROLES {
   dev = 'dev',
 }
 
-/** Roles shown in dropdowns (excludes dev – not for general user assignment). */
-export const ROLES_FOR_SELECTION: ROLES[] = [ROLES.teacher];
+/** Roles shown in signup dropdowns (excludes internal/system roles). */
+export const ROLES_FOR_SELECTION: ROLES[] = [
+  ROLES.teacher,
+  ROLES.student,
+  ROLES.parent,
+];
