@@ -118,6 +118,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   passRate = 0;
 
   private subscriptions: Subscription[] = [];
+  private previousReportsKey = '';
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
@@ -170,10 +171,17 @@ export class ReportsComponent implements OnInit, OnDestroy {
       })
     );
     
-    // Reset search when reports change
+    // Reset search only when a new report collection is loaded (not per-row comment edits)
     this.subscriptions.push(
-      this.reports$.subscribe(() => {
-        this.searchControl.setValue('', { emitEvent: false });
+      this.reports$.subscribe((reports) => {
+        const key = (reports || [])
+          .map((r) => `${r.studentNumber}:${r.id ?? 'new'}`)
+          .join('|');
+        const isDifferentCollection = key !== this.previousReportsKey;
+        if (isDifferentCollection && this.previousReportsKey) {
+          this.searchControl.setValue('', { emitEvent: false });
+        }
+        this.previousReportsKey = key;
       })
     );
   }
@@ -334,6 +342,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   onParentTabChange(ev: MatTabChangeEvent): void {
     this.selectedChildIndex$.next(ev.index);
+  }
+
+  trackByReport(index: number, report: ReportsModel): string {
+    return `${report.studentNumber}-${report.id ?? index}`;
   }
 
   ngOnDestroy(): void {

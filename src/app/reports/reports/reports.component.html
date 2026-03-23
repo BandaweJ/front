@@ -214,7 +214,7 @@
 
       <!-- Reports Grid -->
       <div class="reports-grid" *ngIf="((filteredReports$ | async)?.length ?? 0) > 0 && !(isLoading$ | async)">
-        <app-report *ngFor="let report of filteredReports$ | async" [report]="report" class="report-card"></app-report>
+        <app-report *ngFor="let report of filteredReports$ | async; trackBy: trackByReport" [report]="report" class="report-card"></app-report>
       </div>
     </div>
   </div>
