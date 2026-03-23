@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, ofType, createEffect } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { catchError, exhaustMap, map, tap } from 'rxjs/operators';
+import { catchError, exhaustMap, map, switchMap, tap } from 'rxjs/operators';
 import {
   signinActions,
   signupActions,
@@ -148,7 +148,7 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(checkAuthStatus), // Still an individual action
-        map(() => {
+        switchMap(() => {
           const authStatus = this.authService.getAuthStatus();
 
           if (
@@ -156,17 +156,28 @@ export class AuthEffects {
             authStatus.user &&
             authStatus.accessToken
           ) {
-            // Note: Permissions are not stored in JWT, so they won't be available on page refresh
             this.router.navigateByUrl('/dashboard');
-            return signinActions.signinSuccess({
-              user: authStatus.user,
-              accessToken: authStatus.accessToken,
-            });
+            return this.authService.getUserPermissions(authStatus.user.id).pipe(
+              map(({ permissions }) =>
+                signinActions.signinSuccess({
+                  user: { ...authStatus.user!, permissions },
+                  accessToken: authStatus.accessToken!,
+                })
+              ),
+              catchError(() =>
+                of(
+                  signinActions.signinSuccess({
+                    user: authStatus.user!,
+                    accessToken: authStatus.accessToken!,
+                  })
+                )
+              )
+            );
           } else {
             localStorage.removeItem('token');
             localStorage.removeItem('tenantSlug');
             this.router.navigateByUrl('/signin');
-            return logout(); // Still an individual action
+            return of(logout()); // Still an individual action
           }
         })
       )

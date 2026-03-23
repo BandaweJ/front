@@ -41,6 +41,7 @@ import { RevenueRecognitionReportComponent } from './finance/reports/revenue-rec
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 import { ExemptionReportsComponent } from './finance/reports/exemption-reports/exemption-reports/exemption-reports.component';
 // Lazy loaded - removed direct import
+import { ROLES } from './registration/models/roles.enum';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -66,6 +67,7 @@ const routes: Routes = [
     path: 'teachers',
     component: TeachersListComponent,
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin, ROLES.reception, ROLES.director] },
     title: 'Manage Teachers',
   },
   {
@@ -85,6 +87,7 @@ const routes: Routes = [
     path: 'students',
     component: StudentsListComponent,
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin, ROLES.reception, ROLES.director] },
     title: 'Manage Students',
   },
   {
@@ -97,6 +100,7 @@ const routes: Routes = [
     path: 'parents',
     component: ParentsListComponent,
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin, ROLES.reception, ROLES.director] },
     title: 'Manage Parents',
   },
   {
@@ -191,18 +195,21 @@ const routes: Routes = [
     path: 'fees',
     loadComponent: () => import('./finance/fees/fees.component').then(m => m.FeesComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin, ROLES.reception, ROLES.auditor, ROLES.director] },
     title: 'Manage Fees',
   },
   {
     path: 'balances',
     loadComponent: () => import('./finance/student-balances/student-balances.component').then(m => m.StudentBalancesComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.reception] },
     title: 'Manage Balances',
   },
   {
     path: 'invoice',
     loadComponent: () => import('./finance/student-finance/invoice/invoice.component').then(m => m.InvoiceComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.reception, ROLES.auditor, ROLES.director] },
     title: 'Invoice Management',
   },
   {
@@ -215,12 +222,14 @@ const routes: Routes = [
     path: 'payments',
     loadComponent: () => import('./finance/payments/payments.component').then(m => m.PaymentsComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.auditor, ROLES.director] },
     title: 'Receipting',
   },
   {
     path: 'system/departments',
     loadComponent: () => import('./system/departments/departments.component').then(m => m.DepartmentsComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin] },
     title: 'Departments',
   },
   {
@@ -311,42 +320,49 @@ const routes: Routes = [
     path: 'user-management',
     loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin] },
     title: 'User Management',
   },
   {
     path: 'system/roles',
     loadComponent: () => import('./system/roles-permissions/roles-permissions.component').then(m => m.RolesPermissionsComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin] },
     title: 'Roles & Permissions',
   },
   {
     path: 'system/academic',
     loadComponent: () => import('./system/academic-settings/academic-settings.component').then(m => m.AcademicSettingsComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin] },
     title: 'Academic Settings',
   },
   {
     path: 'system/settings',
     loadComponent: () => import('./system/system-settings/system-settings.component').then(m => m.SystemSettingsComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin] },
     title: 'System Settings',
   },
   {
     path: 'system/audit',
     loadComponent: () => import('./system/audit-logs/audit-logs.component').then(m => m.AuditLogsComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin, ROLES.director, ROLES.auditor] },
     title: 'Audit Logs',
   },
   {
     path: 'system/analytics',
     loadComponent: () => import('./system/analytics/analytics.component').then(m => m.AnalyticsComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin, ROLES.director] },
     title: 'Analytics & Reports',
   },
   {
     path: 'system/integrations',
     loadComponent: () => import('./system/integrations/integrations.component').then(m => m.IntegrationsComponent),
     canActivate: [AuthGuardService],
+    data: { roles: [ROLES.admin] },
     title: 'Integrations',
   },
   {

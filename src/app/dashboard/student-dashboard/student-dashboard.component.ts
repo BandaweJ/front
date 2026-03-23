@@ -1,8 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  combineLatest,
-  distinctUntilChanged,
   filter,
   map,
   Observable,
@@ -118,59 +116,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         .subscribe()
     );
 
-    // REVISED Dashboard Summary & Enrolment Data Fetching (already good, just including for completeness)
-    this.subscriptions.add(
-      (this.store.select(selectUser) as Observable<User | null>)
-        .pipe(
-          filter((user): user is User => !!user && !!user.id),
-          map((user: User) => user.id),
-          distinctUntilChanged(),
-          switchMap((studentId) =>
-            combineLatest([
-              this.store.select(selectStudentDashboardLoaded),
-              this.store.select(selectStudentDashboardLoading),
-              this.store.select(selectCurrentEnrolmentLoaded),
-              this.store.select(selectCurrentEnrolmentLoading),
-            ]).pipe(
-              filter(
-                ([
-                  summaryLoaded,
-                  summaryLoading,
-                  enrolmentLoaded,
-                  enrolmentLoading,
-                ]) =>
-                  (!summaryLoaded && !summaryLoading) ||
-                  (!enrolmentLoaded && !enrolmentLoading)
-              ),
-              take(1),
-              tap(
-                ([
-                  summaryLoaded,
-                  summaryLoading,
-                  enrolmentLoaded,
-                  enrolmentLoading,
-                ]) => {
-                  if (!summaryLoaded && !summaryLoading) {
-                    this.store.dispatch(
-                      studentDashboardActions.fetchStudentDashboardSummary({
-                        studentNumber: studentId,
-                      })
-                    );
-                  }
-                  if (!enrolmentLoaded && !enrolmentLoading) {
-                    this.store.dispatch(
-                      currentEnrolementActions.fetchCurrentEnrolment({
-                        studentNumber: studentId,
-                      })
-                    );
-                  }
-                }
-              )
-            )
-          )
-        )
-        .subscribe()
-    );
   }
 
   private loadContinuousAssessmentAnalytics(studentNumber: string) {

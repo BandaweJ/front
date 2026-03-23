@@ -64,13 +64,6 @@ export class SignupComponent implements OnInit, OnDestroy {
     this.initializeForm();
     this.setupFormValidation();
     
-    // Debug: Log roles array
-    console.log('Available roles:', this.roles);
-    
-    // Debug: Watch role form control changes
-    this.role?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(value => {
-      console.log('Role form control value changed:', value);
-    });
   }
 
   ngOnDestroy(): void {
@@ -170,19 +163,12 @@ export class SignupComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('Signup form value:', formValue);
-    console.log('Role form control value:', this.role?.value);
-    console.log('Role value from formValue:', formValue.role);
-    console.log('Final role value:', roleValue);
-
     const signupData: SignupInterface = {
       id: (formValue.id || '').trim(),
       role: roleValue,
       username: (formValue.username || '').trim(),
       password: formValue.password || ''
     };
-
-    console.log('Signup data being sent:', signupData);
 
     this.store.dispatch(signupActions.signup({ signupData }));
   }

@@ -78,4 +78,10 @@ export class AuthService {
       `${this.baseUrl}${id}/${role}`
     );
   }
+
+  getUserPermissions(accountId: string): Observable<{ permissions: string[] }> {
+    return this.http.get<{ permissions: string[] }>(
+      `${environment.apiUrl}/system/roles-permissions/user/${accountId}/permissions`
+    );
+  }
 }

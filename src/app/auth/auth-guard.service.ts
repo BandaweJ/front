@@ -6,8 +6,10 @@ import {
   UrlTree,
 } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { selectIsLoggedIn } from './store/auth.selectors';
+import { Observable, combineLatest } from 'rxjs';
+import { map, take } from 'rxjs/operators';
+import { selectIsLoggedIn, selectUser } from './store/auth.selectors';
+import { ROLES } from '../registration/models/roles.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -43,8 +45,26 @@ export class AuthGuardService {
       }
     }
     
-    return (
-      this.store.select(selectIsLoggedIn) || this.router.parseUrl('/signin')
+    const allowedRoles = route.data?.['roles'] as ROLES[] | undefined;
+
+    return combineLatest([
+      this.store.select(selectIsLoggedIn),
+      this.store.select(selectUser),
+    ]).pipe(
+      take(1),
+      map(([isLoggedIn, user]) => {
+        if (!isLoggedIn || !user) {
+          return this.router.parseUrl('/signin');
+        }
+
+        if (!allowedRoles || allowedRoles.length === 0) {
+          return true;
+        }
+
+        return allowedRoles.includes(user.role as ROLES)
+          ? true
+          : this.router.parseUrl('/dashboard');
+      })
     );
   }
 }
