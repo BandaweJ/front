@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   filter,
-  map,
   Observable,
   Subscription,
   switchMap,
@@ -11,28 +10,13 @@ import {
 } from 'rxjs';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { StudentDashboardSummary } from '../models/student-dashboard-summary';
-import {
-  selectStudentDashboardLoaded,
-  selectStudentDashboardLoading,
-  selectStudentDashboardSummary,
-} from '../store/dashboard.selectors';
-import { studentDashboardActions } from '../store/dashboard.actions';
 import { User } from 'src/app/auth/models/user.model';
 
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
-import {
-  selectCurrentEnrolment,
-  selectCurrentEnrolmentLoaded,
-  selectCurrentEnrolmentLoading,
-} from 'src/app/enrolment/store/enrolment.selectors';
-import { currentEnrolementActions } from 'src/app/enrolment/store/enrolment.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
-import {
-  invoiceActions,
-  receiptActions,
-} from 'src/app/finance/store/finance.actions';
 import { ContinuousAssessmentService, ContinuousAssessmentAnalytics } from 'src/app/marks/continuous-assessment/continuous-assessment.service';
 import { InvoiceChargesApiService, InvoiceCharge } from 'src/app/payment/invoice-charges-api.service';
+import { StudentDashboardFacade } from './student-dashboard.facade';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -59,20 +43,19 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private store: Store,
+    private studentDashboardFacade: StudentDashboardFacade,
     private caService: ContinuousAssessmentService,
     private chargesApi: InvoiceChargesApiService,
   ) {
-    this.dashboardSummary$ = this.store.select(selectStudentDashboardSummary);
-    this.summaryLoading$ = this.store.select(selectStudentDashboardLoading);
-    this.summaryLoaded$ = this.store.select(selectStudentDashboardLoaded);
+    this.dashboardSummary$ = this.studentDashboardFacade.dashboardSummary$;
+    this.summaryLoading$ = this.studentDashboardFacade.summaryLoading$;
+    this.summaryLoaded$ = this.studentDashboardFacade.summaryLoaded$;
 
-    this.currentEnrolment$ = this.store.select(selectCurrentEnrolment);
-    this.enrolmentLoading$ = this.store.select(selectCurrentEnrolmentLoading);
-    this.enrolmentLoaded$ = this.store.select(selectCurrentEnrolmentLoaded);
+    this.currentEnrolment$ = this.studentDashboardFacade.currentEnrolment$;
+    this.enrolmentLoading$ = this.studentDashboardFacade.enrolmentLoading$;
+    this.enrolmentLoaded$ = this.studentDashboardFacade.enrolmentLoaded$;
 
-    this.studentDetails$ = this.currentEnrolment$.pipe(
-      map((enrolment) => (enrolment ? enrolment.student : null))
-    );
+    this.studentDetails$ = this.studentDashboardFacade.getStudentDetails$();
   }
 
   ngOnInit(): void {
@@ -88,27 +71,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           tap((user) => {
             const studentNumber = user.id;
 
-            // Fetch only this student's invoices and receipts (more efficient than fetching all)
-            this.store.dispatch(
-              invoiceActions.fetchStudentInvoices({
-                studentNumber,
-              })
-            );
-            this.store.dispatch(
-              receiptActions.fetchStudentReceipts({
-                studentNumber,
-              })
-            );
-            this.store.dispatch(
-              studentDashboardActions.fetchStudentDashboardSummary({
-                studentNumber,
-              })
-            );
-            this.store.dispatch(
-              currentEnrolementActions.fetchCurrentEnrolment({
-                studentNumber,
-              })
-            );
+            this.studentDashboardFacade.initializeStudent(studentNumber);
             this.loadContinuousAssessmentAnalytics(studentNumber);
             this.loadLiabilities(studentNumber);
           })

@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import { SignupInterface } from './models/signup.model';
 import { AccountStats } from './models/account-stats.model';
 import { environment } from 'src/environments/environment';
-import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
 import { User } from './models/user.model';
 import { StudentsModel } from '../registration/models/students.model';
@@ -16,6 +15,11 @@ import { ParentsModel } from '../registration/models/parents.model';
   providedIn: 'root',
 })
 export class AuthService {
+  private readonly tokenKey = 'token';
+  private readonly userKey = 'user';
+  private readonly legacySessionKey = 'jhs_session';
+  private readonly tenantKey = 'tenantSlug';
+
   constructor(
     private http: HttpClient // private router: Router, // private store: Store
   ) {}
@@ -23,32 +27,61 @@ export class AuthService {
   private baseUrl = `${environment.apiUrl}/auth/`;
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  clearAuthSession(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.legacySessionKey);
+    localStorage.removeItem(this.tenantKey);
+  }
+
+  setToken(accessToken: string): void {
+    localStorage.setItem(this.tokenKey, accessToken);
+  }
+
+  setTenantSlug(tenantSlug?: string): void {
+    localStorage.setItem(this.tenantKey, tenantSlug || 'default');
+  }
+
+  decodeToken(token: string): User | null {
+    try {
+      return jwt_decode<User>(token);
+    } catch {
+      return null;
+    }
+  }
+
+  isTokenExpired(token: string): boolean {
+    const decoded = this.decodeToken(token);
+    if (!decoded?.exp) return true;
+    return decoded.exp * 1000 < Date.now();
+  }
+
+  getValidToken(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+    if (this.isTokenExpired(token)) {
+      this.clearAuthSession();
+      return null;
+    }
+    return token;
   }
 
   getAuthStatus(): { isLoggedIn: boolean; user?: User; accessToken?: string } {
-    const token = this.getToken();
+    const token = this.getValidToken();
     if (!token) {
       return { isLoggedIn: false };
     }
 
-    try {
-      const user: User = jwt_decode(token); // Decode the token
-      const expiryTimeSeconds = user.exp; // 'exp' claim is in seconds
-
-      if (!expiryTimeSeconds) {
-        return { isLoggedIn: false };
-      }
-
-      const expiryDate = new Date(expiryTimeSeconds * 1000); // Convert seconds to milliseconds
-      if (expiryDate >= new Date()) {
-        return { isLoggedIn: true, user: user, accessToken: token };
-      } else {
-        return { isLoggedIn: false };
-      }
-    } catch (error) {
-      return { isLoggedIn: false }; // Error decoding, consider token invalid/expired
+    const user = this.decodeToken(token);
+    if (!user) {
+      this.clearAuthSession();
+      return { isLoggedIn: false };
     }
+
+    return { isLoggedIn: true, user, accessToken: token };
   }
 
   signin(signinData: SigninInterface): Observable<{ accessToken: string; permissions: string[] }> {

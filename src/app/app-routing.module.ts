@@ -42,6 +42,7 @@ import { ResultsAnalysisComponent } from './results-analysis/results-analysis.co
 import { ExemptionReportsComponent } from './finance/reports/exemption-reports/exemption-reports/exemption-reports.component';
 // Lazy loaded - removed direct import
 import { ROLES } from './registration/models/roles.enum';
+import { ROUTE_POLICIES } from './auth/route-policies';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -67,7 +68,7 @@ const routes: Routes = [
     path: 'teachers',
     component: TeachersListComponent,
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin, ROLES.reception, ROLES.director] },
+    data: ROUTE_POLICIES.teachers,
     title: 'Manage Teachers',
   },
   {
@@ -87,7 +88,7 @@ const routes: Routes = [
     path: 'students',
     component: StudentsListComponent,
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin, ROLES.reception, ROLES.director] },
+    data: ROUTE_POLICIES.students,
     title: 'Manage Students',
   },
   {
@@ -100,7 +101,7 @@ const routes: Routes = [
     path: 'parents',
     component: ParentsListComponent,
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin, ROLES.reception, ROLES.director] },
+    data: ROUTE_POLICIES.parents,
     title: 'Manage Parents',
   },
   {
@@ -195,21 +196,21 @@ const routes: Routes = [
     path: 'fees',
     loadComponent: () => import('./finance/fees/fees.component').then(m => m.FeesComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin, ROLES.reception, ROLES.auditor, ROLES.director] },
+    data: ROUTE_POLICIES.fees,
     title: 'Manage Fees',
   },
   {
     path: 'balances',
     loadComponent: () => import('./finance/student-balances/student-balances.component').then(m => m.StudentBalancesComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.reception] },
+    data: ROUTE_POLICIES.balances,
     title: 'Manage Balances',
   },
   {
     path: 'invoice',
     loadComponent: () => import('./finance/student-finance/invoice/invoice.component').then(m => m.InvoiceComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.reception, ROLES.auditor, ROLES.director] },
+    data: ROUTE_POLICIES.invoice,
     title: 'Invoice Management',
   },
   {
@@ -222,7 +223,7 @@ const routes: Routes = [
     path: 'payments',
     loadComponent: () => import('./finance/payments/payments.component').then(m => m.PaymentsComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.auditor, ROLES.director] },
+    data: ROUTE_POLICIES.payments,
     title: 'Receipting',
   },
   {
@@ -320,14 +321,14 @@ const routes: Routes = [
     path: 'user-management',
     loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin] },
+    data: ROUTE_POLICIES.userManagement,
     title: 'User Management',
   },
   {
     path: 'system/roles',
     loadComponent: () => import('./system/roles-permissions/roles-permissions.component').then(m => m.RolesPermissionsComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin] },
+    data: ROUTE_POLICIES.systemRoles,
     title: 'Roles & Permissions',
   },
   {
@@ -341,14 +342,14 @@ const routes: Routes = [
     path: 'system/settings',
     loadComponent: () => import('./system/system-settings/system-settings.component').then(m => m.SystemSettingsComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin] },
+    data: ROUTE_POLICIES.systemSettings,
     title: 'System Settings',
   },
   {
     path: 'system/audit',
     loadComponent: () => import('./system/audit-logs/audit-logs.component').then(m => m.AuditLogsComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin, ROLES.director, ROLES.auditor] },
+    data: ROUTE_POLICIES.systemAudit,
     title: 'Audit Logs',
   },
   {

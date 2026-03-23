@@ -13,6 +13,11 @@
 
   <div class="toolbar-actions">
     <ng-container *ngIf="isLoggedIn$ | async">
+      <button mat-icon-button (click)="openCommandPalette()"
+              matTooltip="Search screens (Ctrl+K)"
+              class="search-btn">
+        <mat-icon>search</mat-icon>
+      </button>
       <button mat-icon-button (click)="router.navigate(['/messaging'])" 
               matTooltip="Messages"
               class="messages-btn">
@@ -528,5 +533,73 @@
     <div class="content-wrapper">
       <router-outlet></router-outlet>
     </div>
+
+    <!-- Mobile bottom navigation for student/parent flows -->
+    <nav class="mobile-bottom-nav" *ngIf="isScreenSmall && isStudentOrParentNav">
+      <button type="button" (click)="navigateQuick(quickNavItems[0])">
+        <mat-icon>home</mat-icon>
+        <span>Home</span>
+      </button>
+      <button type="button" (click)="navigateQuick(quickNavItems[1])">
+        <mat-icon>account_balance_wallet</mat-icon>
+        <span>Finance</span>
+      </button>
+      <button type="button" (click)="navigateQuick(quickNavItems[2])">
+        <mat-icon>receipt_long</mat-icon>
+        <span>Reports</span>
+      </button>
+      <button type="button" (click)="navigateQuick(quickNavItems[3])">
+        <mat-icon>message</mat-icon>
+        <span>Messages</span>
+      </button>
+      <button type="button" (click)="sidenav.open()">
+        <mat-icon>menu</mat-icon>
+        <span>More</span>
+      </button>
+    </nav>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<!-- Search launcher -->
+<div class="command-palette-backdrop" *ngIf="isCommandPaletteOpen" (click)="closeCommandPalette()">
+  <div class="command-palette" (click)="$event.stopPropagation()">
+    <div class="palette-header">
+      <mat-icon>search</mat-icon>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Find screens (finance, reports, messages...)"
+      />
+      <button type="button" (click)="closeCommandPalette()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="palette-section" *ngIf="getFavoriteItems().length">
+      <h4>Favorites</h4>
+      <button class="palette-item" *ngFor="let item of getFavoriteItems()" (click)="navigateQuick(item)">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </button>
+    </div>
+
+    <div class="palette-section" *ngIf="getRecentItems().length">
+      <h4>Recent</h4>
+      <button class="palette-item" *ngFor="let item of getRecentItems()" (click)="navigateQuick(item)">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </button>
+    </div>
+
+    <div class="palette-section">
+      <h4>All destinations</h4>
+      <button class="palette-item" *ngFor="let item of getFilteredQuickNavItems()" (click)="navigateQuick(item)">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+        <span class="favorite-toggle" (click)="toggleFavorite(item.id, $event)">
+          <mat-icon>{{ isFavorite(item.id) ? 'star' : 'star_border' }}</mat-icon>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,30 @@
     <p class="subtitle">View details, marks, and performance for each child</p>
   </div>
 
+  <div class="quick-actions">
+    <a routerLink="/student-financials" class="quick-action-card">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <div>
+        <h4>Finance Overview</h4>
+        <p>Open invoices, receipts, and balances per child.</p>
+      </div>
+    </a>
+    <a routerLink="/reports" class="quick-action-card">
+      <mat-icon>receipt_long</mat-icon>
+      <div>
+        <h4>Progress Reports</h4>
+        <p>Review report cards and performance trends.</p>
+      </div>
+    </a>
+    <a routerLink="/messaging" class="quick-action-card">
+      <mat-icon>message</mat-icon>
+      <div>
+        <h4>Messages</h4>
+        <p>Check announcements and teacher updates.</p>
+      </div>
+    </a>
+  </div>
+
   <div class="section-loading" *ngIf="summaryLoading$ | async">
     <mat-spinner diameter="40"></mat-spinner>
     <span>Loading dashboard...</span>

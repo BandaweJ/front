@@ -4,6 +4,7 @@ import {
   OnInit,
   OnDestroy,
   ChangeDetectorRef,
+  HostListener,
 } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Observable, Subject, of, combineLatest } from 'rxjs';
@@ -57,6 +58,21 @@ export class AppComponent implements OnInit, OnDestroy {
   
   // Messaging unread count
   totalUnreadCount = 0;
+  searchQuery = '';
+  isCommandPaletteOpen = false;
+  isStudentOrParentNav = false;
+
+  quickNavItems = [
+    { id: 'dashboard', label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
+    { id: 'finance', label: 'Finance Overview', route: '/student-financials', icon: 'account_balance_wallet' },
+    { id: 'reports', label: 'Reports', route: '/reports', icon: 'receipt_long' },
+    { id: 'messages', label: 'Messages', route: '/messaging', icon: 'message' },
+    { id: 'calendar', label: 'Calendar', route: '/calendar', icon: 'calendar_today' },
+  ];
+  recentNavIds: string[] = [];
+  favoriteNavIds: string[] = [];
+  private readonly recentStorageKey = 'jhs_nav_recents';
+  private readonly favoriteStorageKey = 'jhs_nav_favorites';
 
   // Role-based access observables - these update when role changes
   canAccessRegistration$ = this.roleAccess.getCurrentRole$().pipe(
@@ -212,6 +228,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.restoreNavPreferences();
     // Subscribe to theme changes
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
       this.currentTheme = theme;
@@ -328,6 +345,18 @@ export class AppComponent implements OnInit, OnDestroy {
         this.role = user.role;
       }
     });
+
+    combineLatest([
+      this.isLoggedIn$,
+      this.isStudent$,
+      this.isParentRole$,
+      this.hasLinkedChildrenProfile$,
+    ])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([loggedIn, isStudent, isParent, hasLinkedChildren]) => {
+        this.isStudentOrParentNav =
+          !!loggedIn && (isStudent || isParent || hasLinkedChildren);
+      });
   }
 
   ngOnDestroy(): void {
@@ -365,5 +394,81 @@ export class AppComponent implements OnInit, OnDestroy {
   openCalendar(): void {
     // Navigate to calendar route or open calendar dialog
     this.router.navigate(['/calendar']);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardShortcut(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      this.isCommandPaletteOpen = true;
+    }
+    if (event.key === 'Escape' && this.isCommandPaletteOpen) {
+      this.closeCommandPalette();
+    }
+  }
+
+  openCommandPalette(): void {
+    this.isCommandPaletteOpen = true;
+  }
+
+  closeCommandPalette(): void {
+    this.isCommandPaletteOpen = false;
+    this.searchQuery = '';
+  }
+
+  getFilteredQuickNavItems() {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return this.quickNavItems;
+    return this.quickNavItems.filter((item) =>
+      item.label.toLowerCase().includes(q)
+    );
+  }
+
+  getRecentItems() {
+    return this.recentNavIds
+      .map((id) => this.quickNavItems.find((item) => item.id === id))
+      .filter((item): item is (typeof this.quickNavItems)[number] => !!item);
+  }
+
+  getFavoriteItems() {
+    return this.favoriteNavIds
+      .map((id) => this.quickNavItems.find((item) => item.id === id))
+      .filter((item): item is (typeof this.quickNavItems)[number] => !!item);
+  }
+
+  isFavorite(itemId: string): boolean {
+    return this.favoriteNavIds.includes(itemId);
+  }
+
+  toggleFavorite(itemId: string, event?: Event): void {
+    event?.stopPropagation();
+    if (this.favoriteNavIds.includes(itemId)) {
+      this.favoriteNavIds = this.favoriteNavIds.filter((id) => id !== itemId);
+    } else {
+      this.favoriteNavIds = [itemId, ...this.favoriteNavIds].slice(0, 8);
+    }
+    localStorage.setItem(this.favoriteStorageKey, JSON.stringify(this.favoriteNavIds));
+  }
+
+  navigateQuick(item: { id: string; route: string }): void {
+    this.router.navigate([item.route]);
+    this.recentNavIds = [item.id, ...this.recentNavIds.filter((id) => id !== item.id)].slice(0, 8);
+    localStorage.setItem(this.recentStorageKey, JSON.stringify(this.recentNavIds));
+    this.closeCommandPalette();
+    if (this.isScreenSmall) {
+      this.sidenav?.close();
+    }
+  }
+
+  private restoreNavPreferences(): void {
+    try {
+      const recents = JSON.parse(localStorage.getItem(this.recentStorageKey) || '[]');
+      const favorites = JSON.parse(localStorage.getItem(this.favoriteStorageKey) || '[]');
+      this.recentNavIds = Array.isArray(recents) ? recents : [];
+      this.favoriteNavIds = Array.isArray(favorites) ? favorites : [];
+    } catch {
+      this.recentNavIds = [];
+      this.favoriteNavIds = [];
+    }
   }
 }

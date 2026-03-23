@@ -40,12 +40,8 @@ export class AuthEffects {
               user.permissions = resp.permissions;
             }
 
-            localStorage.setItem('token', resp.accessToken);
-            if (user.tenantSlug) {
-              localStorage.setItem('tenantSlug', user.tenantSlug);
-            } else {
-              localStorage.setItem('tenantSlug', 'default');
-            }
+            this.authService.setToken(resp.accessToken);
+            this.authService.setTenantSlug(user.tenantSlug);
 
             const payload = {
               ...resp,
@@ -131,11 +127,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(logout), // Still an individual action
         tap(() => {
-          // Clear all authentication-related data from localStorage
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('jhs_session');
-          localStorage.removeItem('tenantSlug');
+          this.authService.clearAuthSession();
           // Note: We keep 'theme' and 'jhs-theme' as they are user preferences, not auth data
           // We keep 'rememberUsername' as it's a convenience feature
           this.router.navigateByUrl('/signin');
@@ -174,8 +166,7 @@ export class AuthEffects {
               )
             );
           } else {
-            localStorage.removeItem('token');
-            localStorage.removeItem('tenantSlug');
+            this.authService.clearAuthSession();
             this.router.navigateByUrl('/signin');
             return of(logout()); // Still an individual action
           }

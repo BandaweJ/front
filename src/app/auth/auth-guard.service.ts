@@ -10,12 +10,17 @@ import { Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { selectIsLoggedIn, selectUser } from './store/auth.selectors';
 import { ROLES } from '../registration/models/roles.enum';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuardService {
-  constructor(private store: Store, private router: Router) {}
+  constructor(
+    private store: Store,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   canActivate(
     route: ActivatedRouteSnapshot,
@@ -25,27 +30,12 @@ export class AuthGuardService {
     | UrlTree
     | Observable<boolean | UrlTree>
     | Promise<boolean | UrlTree> {
-    // Check if token exists and is not expired
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded: any = JSON.parse(atob(token.split('.')[1]));
-        const expiryTime = decoded.exp * 1000;
-        const now = Date.now();
-        
-        if (expiryTime < now) {
-          console.warn('Token expired in AuthGuard, redirecting to signin');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('jhs_session');
-          return this.router.parseUrl('/signin');
-        }
-      } catch (e) {
-        console.warn('Could not decode token in AuthGuard');
-      }
+    if (!this.authService.getValidToken()) {
+      return this.router.parseUrl('/signin');
     }
-    
-    const allowedRoles = route.data?.['roles'] as ROLES[] | undefined;
+
+    const allowedRoles = route.data?.['roles'] as readonly ROLES[] | undefined;
+    const requiredPermissions = route.data?.['permissions'] as readonly string[] | undefined;
 
     return combineLatest([
       this.store.select(selectIsLoggedIn),
@@ -58,12 +48,24 @@ export class AuthGuardService {
         }
 
         if (!allowedRoles || allowedRoles.length === 0) {
-          return true;
+          if (!requiredPermissions || requiredPermissions.length === 0) {
+            return true;
+          }
+        } else if (!allowedRoles.includes(user.role as ROLES)) {
+          return this.router.parseUrl('/dashboard');
         }
 
-        return allowedRoles.includes(user.role as ROLES)
-          ? true
-          : this.router.parseUrl('/dashboard');
+        if (requiredPermissions && requiredPermissions.length > 0) {
+          const userPermissions = user.permissions || [];
+          const hasAllPermissions = requiredPermissions.every((permission) =>
+            userPermissions.includes(permission)
+          );
+          if (!hasAllPermissions) {
+            return this.router.parseUrl('/dashboard');
+          }
+        }
+
+        return true;
       })
     );
   }

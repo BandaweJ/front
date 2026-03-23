@@ -1,4 +1,28 @@
 <div class="student-dashboard-main-container">
+  <div class="quick-actions">
+    <a routerLink="/student-financials" class="quick-action-card">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <div>
+        <h4>Finance Overview</h4>
+        <p>Check balances, invoices, and receipts.</p>
+      </div>
+    </a>
+    <a routerLink="/reports" class="quick-action-card">
+      <mat-icon>receipt_long</mat-icon>
+      <div>
+        <h4>Progress Reports</h4>
+        <p>Open your latest reports quickly.</p>
+      </div>
+    </a>
+    <a routerLink="/messaging" class="quick-action-card">
+      <mat-icon>message</mat-icon>
+      <div>
+        <h4>Messages</h4>
+        <p>View school communications.</p>
+      </div>
+    </a>
+  </div>
+
   <div class="summary-cards-container">
     <ng-container *ngIf="(summaryLoading$ | async) || (enrolmentLoading$ | async)">
       <div class="loading-spinner">Loading student data...</div>
