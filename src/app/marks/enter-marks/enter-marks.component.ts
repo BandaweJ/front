@@ -22,6 +22,7 @@ import {
 import { fromEvent } from 'rxjs';
 import { ClassesModel } from '../../enrolment/models/classes.model';
 import { TermsModel } from '../../enrolment/models/terms.model';
+import { formatTermLabel } from '../../enrolment/models/term-label.util';
 import {
   fetchClasses,
   fetchTerms,
@@ -681,6 +682,10 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
   trackByTerm(index: number, term: TermsModel): string {
     return `${term.num}-${term.year}`;
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 
   trackByClass(index: number, clas: ClassesModel): string {

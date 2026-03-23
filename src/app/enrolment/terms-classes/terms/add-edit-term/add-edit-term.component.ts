@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { TermType, TermsModel } from 'src/app/enrolment/models/terms.model';
 import {
   addTermAction,
   editTermAction,
@@ -23,6 +23,7 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
   errorMsg$!: Observable<string>;
   isLoading = false;
   isEditMode = false;
+  readonly termTypes: TermType[] = ['regular', 'vacation'];
   
   private destroy$ = new Subject<void>();
 
@@ -62,6 +63,8 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
       ]),
       startDate: new FormControl('', [Validators.required]),
       endDate: new FormControl('', [Validators.required]),
+      type: new FormControl<TermType>('regular', [Validators.required]),
+      label: new FormControl(''),
     }, { validators: this.dateRangeValidator });
 
     if (this.data) {
@@ -69,7 +72,9 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
         num: this.data.num,
         year: this.data.year,
         startDate: new Date(this.data.startDate),
-        endDate: new Date(this.data.endDate)
+        endDate: new Date(this.data.endDate),
+        type: this.data.type || 'regular',
+        label: this.data.label || '',
       });
     }
 
@@ -122,6 +127,14 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
     return this.addTermForm.get('endDate');
   }
 
+  get type() {
+    return this.addTermForm.get('type');
+  }
+
+  get label() {
+    return this.addTermForm.get('label');
+  }
+
   addTerm(): void {
     if (this.addTermForm.invalid) {
       this.markFormGroupTouched();
@@ -136,7 +149,9 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
       num: Number(formValue.num),
       year: Number(formValue.year),
       startDate: formValue.startDate,
-      endDate: formValue.endDate
+      endDate: formValue.endDate,
+      type: formValue.type || 'regular',
+      label: formValue.label?.trim() || null,
     };
 
     if (this.isEditMode) {

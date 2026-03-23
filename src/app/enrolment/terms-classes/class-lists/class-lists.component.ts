@@ -25,6 +25,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { EnrolsModel } from '../../models/enrols.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { formatTermLabel } from '../../models/term-label.util';
 
 // ADDED: Import jsPDF and html2canvas
 import jsPDF from 'jspdf';
@@ -181,7 +182,7 @@ export class ClassListsComponent implements OnInit, AfterViewInit, OnDestroy {
     const term: TermsModel = this.term?.value;
 
     this.selectedClassName = name;
-    this.selectedTermName = `Term ${term.num} ${term.year}`;
+    this.selectedTermName = formatTermLabel(term);
 
     const num = term.num;
     const year = term.year;
@@ -253,6 +254,10 @@ export class ClassListsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getResidenceColor(residence: string): string {
     return residence === 'Boarder' ? 'accent' : 'primary';
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 
   downloadPDF(): void {

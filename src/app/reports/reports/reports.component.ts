@@ -28,6 +28,7 @@ import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { take, map, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators'; // Import operators for filtering
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { MatTabChangeEvent } from '@angular/material/tabs';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 @Component({
   selector: 'app-reports',
@@ -346,6 +347,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   trackByReport(index: number, report: ReportsModel): string {
     return `${report.studentNumber}-${report.id ?? index}`;
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 
   ngOnDestroy(): void {

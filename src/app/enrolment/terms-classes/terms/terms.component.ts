@@ -27,6 +27,7 @@ import {
   selectTerms,
 } from '../../store/enrolment.selectors';
 import { AddEditTermComponent } from './add-edit-term/add-edit-term.component';
+import { formatTermLabel } from '../../models/term-label.util';
 
 @Component({
   selector: 'app-terms',
@@ -59,6 +60,8 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   displayedColumns: string[] = [
     'index',
+    'type',
+    'label',
     'num',
     'year',
     'startDate',
@@ -128,6 +131,8 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
           filtered = filtered.filter(term => 
             term.num.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
             term.year.toString().includes(searchTerm) ||
+            (term.type || 'regular').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (term.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             term.startDate.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
             term.endDate.toString().toLowerCase().includes(searchTerm.toLowerCase())
           );
@@ -250,5 +255,9 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
       years.push(i);
     }
     return years;
+  }
+
+  formatTermLabel(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 }

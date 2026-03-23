@@ -40,6 +40,7 @@ import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { User } from 'src/app/auth/models/user.model';
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
+import { formatTermLabel } from '../models/term-label.util';
 
 @Component({
   selector: 'app-terms-classes',
@@ -308,5 +309,9 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 }

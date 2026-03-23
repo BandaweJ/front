@@ -50,6 +50,19 @@
 
               <div class="field-group">
                 <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Period Type</mat-label>
+                  <mat-select formControlName="type">
+                    <mat-option *ngFor="let periodType of termTypes" [value]="periodType">
+                      {{ periodType | titlecase }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>category</mat-icon>
+                  <mat-hint>Regular term or vacation school period</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
                   <mat-label>Academic Year</mat-label>
                   <mat-select formControlName="year" placeholder="Select academic year">
                     <mat-option *ngFor="let year of getAvailableYears()" [value]="year">
@@ -59,6 +72,15 @@
                   <mat-icon matSuffix>calendar_today</mat-icon>
                   <mat-hint>Select the academic year</mat-hint>
                   <mat-error>{{ getFormErrorMessage('year') }}</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="field-group" *ngIf="type?.value === 'vacation'">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Vacation Label (optional)</mat-label>
+                  <input matInput formControlName="label" placeholder="e.g. April Holiday School" />
+                  <mat-icon matSuffix>label</mat-icon>
+                  <mat-hint>Name shown in selectors and reports</mat-hint>
                 </mat-form-field>
               </div>
             </div>
