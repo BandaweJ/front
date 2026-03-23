@@ -3,7 +3,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ReportsModel } from '../models/reports.model';
 import { ReportModel } from '../models/report.model';
-import { HeadCommentModel, TeacherCommentModel } from '../models/comment.model';
+import {
+  GenerateRoleCommentModel,
+  GenerateRoleCommentResponse,
+  HeadCommentModel,
+  TeacherCommentModel,
+} from '../models/comment.model';
 import { environment } from 'src/environments/environment';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 
@@ -50,6 +55,15 @@ export class ReportsService {
     return this.httpClient.post<ReportsModel>(
       `${this.baseUrl}save-teacher-comment`,
       comment
+    );
+  }
+
+  generateRoleComment(
+    payload: GenerateRoleCommentModel
+  ): Observable<GenerateRoleCommentResponse> {
+    return this.httpClient.post<GenerateRoleCommentResponse>(
+      `${this.baseUrl}generate-role-comment`,
+      payload
     );
   }
 

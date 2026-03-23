@@ -104,6 +104,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   // Per-row save failure state (index -> user-facing message)
   failedSaveIndices = new Set<number>();
   failedSaveErrors = new Map<number, string>();
+  private readonly commentTone: 'encouraging' | 'balanced' | 'firm' = 'balanced';
 
   // Default fallback comments
   defaultCommentOptions: string[] = [
@@ -743,7 +744,14 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       mark: mark,
       maxMark: 100, // Assuming marks are out of 100
       subject: subject,
-      studentLevel: studentLevel
+      studentLevel: studentLevel,
+      studentName: `${markModel.student?.name || ''} ${markModel.student?.surname || ''}`.trim(),
+      className: className,
+      examType: this.examTypeControl?.value,
+      tone: this.commentTone,
+      average: (markModel as any).average,
+      position: (markModel as any).position,
+      classSize: (markModel as any).classSize
     };
 
     this.aiService.generateComments(request).subscribe({
