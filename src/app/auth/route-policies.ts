@@ -44,8 +44,24 @@ export const ROUTE_POLICIES = {
     roles: [ROLES.admin],
     permissions: [PERMISSIONS.SYSTEM.EDIT_SETTINGS],
   },
+  systemDepartments: {
+    roles: [ROLES.admin],
+    permissions: [PERMISSIONS.SYSTEM.MANAGE_ROLES],
+  },
+  systemAcademic: {
+    roles: [ROLES.admin],
+    permissions: [PERMISSIONS.SYSTEM.EDIT_SETTINGS],
+  },
   systemAudit: {
     roles: [ROLES.admin, ROLES.director, ROLES.auditor],
     permissions: [PERMISSIONS.SYSTEM.VIEW_AUDIT],
+  },
+  systemAnalytics: {
+    roles: [ROLES.admin, ROLES.director],
+    permissions: [PERMISSIONS.SYSTEM.VIEW_AUDIT],
+  },
+  systemIntegrations: {
+    roles: [ROLES.admin],
+    permissions: [PERMISSIONS.SYSTEM.EDIT_SETTINGS],
   },
 } as const satisfies Record<string, RoutePolicy>;

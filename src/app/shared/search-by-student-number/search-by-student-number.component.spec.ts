@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SearchByStudentNumberComponent } from './search-by-student-number.component';
+import { StudentSearchComponent } from './search-by-student-number.component';
 
-describe('SearchByStudentNumberComponent', () => {
-  let component: SearchByStudentNumberComponent;
-  let fixture: ComponentFixture<SearchByStudentNumberComponent>;
+describe('StudentSearchComponent', () => {
+  let component: StudentSearchComponent;
+  let fixture: ComponentFixture<StudentSearchComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [SearchByStudentNumberComponent]
+      imports: [StudentSearchComponent],
     });
-    fixture = TestBed.createComponent(SearchByStudentNumberComponent);
+    fixture = TestBed.createComponent(StudentSearchComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -41,10 +41,9 @@ import { RevenueRecognitionReportComponent } from './finance/reports/revenue-rec
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 import { ExemptionReportsComponent } from './finance/reports/exemption-reports/exemption-reports/exemption-reports.component';
 // Lazy loaded - removed direct import
-import { ROLES } from './registration/models/roles.enum';
 import { ROUTE_POLICIES } from './auth/route-policies';
 
-const routes: Routes = [
+export const APP_ROUTES: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
   { path: 'signup', component: SignupComponent, title: 'Sign Up' },
   {
@@ -230,7 +229,7 @@ const routes: Routes = [
     path: 'system/departments',
     loadComponent: () => import('./system/departments/departments.component').then(m => m.DepartmentsComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin] },
+    data: ROUTE_POLICIES.systemDepartments,
     title: 'Departments',
   },
   {
@@ -335,7 +334,7 @@ const routes: Routes = [
     path: 'system/academic',
     loadComponent: () => import('./system/academic-settings/academic-settings.component').then(m => m.AcademicSettingsComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin] },
+    data: ROUTE_POLICIES.systemAcademic,
     title: 'Academic Settings',
   },
   {
@@ -356,14 +355,14 @@ const routes: Routes = [
     path: 'system/analytics',
     loadComponent: () => import('./system/analytics/analytics.component').then(m => m.AnalyticsComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin, ROLES.director] },
+    data: ROUTE_POLICIES.systemAnalytics,
     title: 'Analytics & Reports',
   },
   {
     path: 'system/integrations',
     loadComponent: () => import('./system/integrations/integrations.component').then(m => m.IntegrationsComponent),
     canActivate: [AuthGuardService],
-    data: { roles: [ROLES.admin] },
+    data: ROUTE_POLICIES.systemIntegrations,
     title: 'Integrations',
   },
   {
@@ -385,20 +384,18 @@ const routes: Routes = [
     title: 'Messages',
   },
   {
-    path: '', // Default route for the root path
+    path: '',
     redirectTo: 'signin',
     pathMatch: 'full',
   },
   {
-    path: '**', // Wildcard route for any unmatched paths
-    // Redirect to 'signin' if any unknown route is hit.
-    // This prevents hitting guarded routes when not logged in.
+    path: '**',
     redirectTo: 'signin',
   },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(APP_ROUTES)],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

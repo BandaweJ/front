@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ExemptionSummaryByTypeTableComponentComponent } from './exemption-summary-by-type-table.component.component';
+import { ExemptionSummaryByTypeTableComponent } from './exemption-summary-by-type-table.component.component';
 
-describe('ExemptionSummaryByTypeTableComponentComponent', () => {
-  let component: ExemptionSummaryByTypeTableComponentComponent;
-  let fixture: ComponentFixture<ExemptionSummaryByTypeTableComponentComponent>;
+describe('ExemptionSummaryByTypeTableComponent', () => {
+  let component: ExemptionSummaryByTypeTableComponent;
+  let fixture: ComponentFixture<ExemptionSummaryByTypeTableComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ExemptionSummaryByTypeTableComponentComponent]
+      declarations: [ExemptionSummaryByTypeTableComponent]
     });
-    fixture = TestBed.createComponent(ExemptionSummaryByTypeTableComponentComponent);
+    fixture = TestBed.createComponent(ExemptionSummaryByTypeTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

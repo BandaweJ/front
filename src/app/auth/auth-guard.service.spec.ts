@@ -43,12 +43,16 @@ describe('AuthGuardService', () => {
     const route: any = { data: {} };
 
     const result = guard.canActivate(route, {} as any);
-    if (result instanceof Promise || typeof result === 'boolean') {
+    if (
+      result instanceof Promise ||
+      typeof result === 'boolean' ||
+      (result as any).root !== undefined
+    ) {
       fail('Expected observable result');
       return;
     }
 
-    result.subscribe((value) => {
+    (result as any).subscribe((value: any) => {
       expect(value).toEqual(router.parseUrl('/signin'));
       done();
     });
