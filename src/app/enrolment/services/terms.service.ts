@@ -21,20 +21,28 @@ export class TermsService {
   }
 
   editTerm(term: TermsModel): Observable<TermsModel> {
-    if (term.id != null) {
-      return this.httpClient.patch<TermsModel>(`${this.baseURL}/id/${term.id}`, term);
+    const termId = this.toValidId(term.id);
+    if (termId !== null) {
+      return this.httpClient.patch<TermsModel>(`${this.baseURL}/id/${termId}`, term);
     }
     return this.httpClient.patch<TermsModel>(this.baseURL, term);
   }
 
   deleteTerm(term: TermsModel): Observable<number> {
-    if (term.id != null) {
-      return this.httpClient.delete<number>(`${this.baseURL}/id/${term.id}`);
+    const termId = this.toValidId(term.id);
+    if (termId !== null) {
+      return this.httpClient.delete<number>(`${this.baseURL}/id/${termId}`);
     }
     return this.httpClient.delete<number>(`${this.baseURL}/${term.num}/${term.year}`);
   }
 
   getCurrentTerm(): Observable<TermsModel> {
     return this.httpClient.get<TermsModel>(`${this.baseURL}/current`);
+  }
+
+  private toValidId(id: unknown): number | null {
+    if (id === null || id === undefined || id === '') return null;
+    const parsed = Number(id);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 }

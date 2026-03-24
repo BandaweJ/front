@@ -24,6 +24,7 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
   isLoading = false;
   isEditMode = false;
   readonly termTypes: TermType[] = ['regular', 'vacation'];
+  private editingTermId: number | null = null;
   
   private destroy$ = new Subject<void>();
 
@@ -37,6 +38,7 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
     public data: TermsModel
   ) {
     this.isEditMode = !!data;
+    this.editingTermId = this.toValidId(data?.id);
   }
 
   ngOnInit(): void {
@@ -146,7 +148,7 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
 
     const formValue = this.addTermForm.value;
     const term: TermsModel = {
-      id: this.data?.id,
+      id: this.editingTermId ?? undefined,
       num: Number(formValue.num),
       year: Number(formValue.year),
       startDate: formValue.startDate,
@@ -213,5 +215,11 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
       years.push(i);
     }
     return years;
+  }
+
+  private toValidId(id: unknown): number | null {
+    if (id === null || id === undefined || id === '') return null;
+    const parsed = Number(id);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 }
