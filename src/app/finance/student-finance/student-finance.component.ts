@@ -31,6 +31,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FinanceService } from '../services/finance.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 @Component({
   selector: 'app-student-finance',
@@ -146,6 +147,10 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
 
   isFormValid(): boolean {
     return !!(this.selectedStudentNumber && this.selectedTerm);
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 
   /**

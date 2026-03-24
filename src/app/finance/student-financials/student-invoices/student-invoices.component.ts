@@ -16,6 +16,7 @@ import { selectIsParent } from 'src/app/auth/store/auth.selectors';
 import { selectStudentInvoices, selectLoadingStudentInvoices, selectLoadStudentInvoicesErr, selectEffectiveStudentForFinance } from '../../store/finance.selector';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 @Component({
   selector: 'app-student-invoices',
@@ -147,6 +148,16 @@ export class StudentInvoicesComponent implements OnInit, OnDestroy {
       console.warn('Cannot download invoice: Invoice number is missing.');
       // Optionally, show a user-friendly message
     }
+  }
+
+  formatInvoiceTerm(invoice: InvoiceModel): string {
+    if (!invoice.enrol) return '';
+    return formatTermLabel({
+      num: invoice.enrol.num,
+      year: invoice.enrol.year,
+      type: (invoice as any).enrol?.term?.type || 'regular',
+      label: (invoice as any).enrol?.term?.label || null,
+    } as any);
   }
 
 }

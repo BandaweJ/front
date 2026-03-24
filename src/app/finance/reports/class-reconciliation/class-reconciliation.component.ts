@@ -18,6 +18,7 @@ import { ClassesService } from 'src/app/enrolment/services/classes.service';
 import { TermsService } from 'src/app/enrolment/services/terms.service';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 import {
   ClassReconciliationReport,
   ClassReconciliationResultItem,
@@ -154,6 +155,16 @@ export class ClassReconciliationComponent implements OnInit, OnDestroy {
   }
 
   termLabel(term: TermsModel): string {
-    return `Term ${term.num} ${term.year}`;
+    return formatTermLabel(term);
+  }
+
+  selectedTermLabel(): string {
+    if (this.selectedTerm) {
+      return formatTermLabel(this.selectedTerm);
+    }
+    if (this.report) {
+      return `Term ${this.report.termNum} - ${this.report.year}`;
+    }
+    return '';
   }
 }

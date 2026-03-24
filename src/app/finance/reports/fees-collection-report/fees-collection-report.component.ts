@@ -192,12 +192,12 @@ export class FeesCollectionReportComponent implements OnInit, OnDestroy {
           // If a term is selected, override start/end dates and set termId
           if (formValue.term) {
             const selectedTerm = terms.find(
-              (t) => t.num === formValue.term.num
+              (t) => t.id != null && formValue.term.id != null && t.id === formValue.term.id
             );
             if (selectedTerm) {
               startDate = new Date(selectedTerm.startDate);
               endDate = new Date(selectedTerm.endDate);
-              termId = selectedTerm.num;
+              termId = selectedTerm.id ?? null;
             }
           }
           // Return the structured filters object

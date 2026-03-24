@@ -59,6 +59,7 @@ import {
 
 import { ClassesModel } from '../../../enrolment/models/classes.model';
 import { TermsModel } from '../../../enrolment/models/terms.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 interface ReportSummary {
   totalOverallOutstanding: number;
@@ -137,7 +138,7 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
     const filters: string[] = [];
     if (this.filterForm.get('termFilter')?.value) {
       const term = this.filterForm.get('termFilter')?.value;
-      filters.push(`Term: ${term.num} ${term.year}`);
+      filters.push(`Term: ${formatTermLabel(term)}`);
     }
     if (this.filterForm.get('classFilter')?.value) {
       filters.push(`Class: ${this.filterForm.get('classFilter')?.value.name}`);
@@ -252,7 +253,7 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
           let termId: string | null = null;
 
           if (formValue.termFilter) {
-            termId = `${formValue.termFilter.num}-${formValue.termFilter.year}`;
+            termId = formValue.termFilter.id ?? null;
           }
 
           return {

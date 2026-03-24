@@ -55,7 +55,7 @@
           <mat-card-header>
             <mat-card-title>
               <mat-icon>check_circle</mat-icon>
-              Reconciliation Report — {{ report.className }}, Term {{ report.termNum }} {{ report.year }}
+              Reconciliation Report — {{ report.className }}, {{ selectedTermLabel() }}
             </mat-card-title>
             <mat-card-subtitle>
               {{ report.succeeded }} succeeded, {{ report.failed }} failed of {{ report.totalStudents }} students

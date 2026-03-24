@@ -2,7 +2,7 @@
 
 export interface AgedDebtorsReportFilters {
   asOfDate: Date; // The date to calculate ageing from (defaults to today)
-  termId: string | null; // Format: "num-year", e.g., "1-2024" (for TermsModel mapping)
+  termId: number | null; // TermsEntity.id
   enrolmentName?: string | null; // Optional: for drilling down into a specific class (maps to ClassesModel.name and EnrolsModel.name)
   studentNumber?: string | null; // Optional: for drilling down into a specific student (StudentsModel.studentNumber)
 }

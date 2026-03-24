@@ -62,6 +62,7 @@ import {
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 interface ReportSummary {
   totalOutstanding: number;
@@ -162,7 +163,7 @@ export class AgedDebtorsReportComponent implements OnInit, OnDestroy {
     const filters: string[] = [];
     if (this.filterForm.get('termFilter')?.value) {
       const term = this.filterForm.get('termFilter')?.value;
-      filters.push(`Term: ${term.num} ${term.year}`);
+      filters.push(`Term: ${formatTermLabel(term)}`);
     }
     if (this.filterForm.get('classFilter')?.value) {
       filters.push(`Class: ${this.filterForm.get('classFilter')?.value.name}`);
@@ -270,7 +271,7 @@ export class AgedDebtorsReportComponent implements OnInit, OnDestroy {
         map((formValue) => {
           let termId: string | null = null;
           if (formValue.termFilter) {
-            termId = `${formValue.termFilter.num}-${formValue.termFilter.year}`;
+            termId = formValue.termFilter.id ?? null;
           }
           return {
             asOfDate: formValue.asOfDate || new Date(),

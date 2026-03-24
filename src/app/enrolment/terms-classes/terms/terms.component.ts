@@ -192,7 +192,7 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
   deleteTerm(term: TermsModel): void {
     const idText = term.id != null ? ` [ID ${term.id}]` : '';
     const confirmDelete = confirm(
-      `Are you sure you want to delete Term ${term.num} ${term.year}${idText}?`
+      `Are you sure you want to delete ${this.formatTermLabel(term)}${idText}?`
     );
     if (confirmDelete) {
       this.store.dispatch(deleteTermAction({ term }));

@@ -37,6 +37,7 @@ import {
   EnrollmentBillingReportFilters,
   EnrollmentBillingReportSummary,
 } from '../models/enrollment-billing-reconciliation-report.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 export const financeState =
   createFeatureSelector<fromFinanceReducer.State>('finance');
@@ -407,7 +408,12 @@ function buildLedgerFromInvoicesAndReceipts(
       studentInvoices.forEach((invoice) => {
         let termInfo = '';
         if (invoice.enrol?.num && invoice.enrol?.year) {
-          termInfo = ` (Term ${invoice.enrol.num}, ${invoice.enrol.year})`;
+          termInfo = ` (${formatTermLabel({
+            num: invoice.enrol.num,
+            year: invoice.enrol.year,
+            type: 'regular',
+            label: null,
+          } as TermsModel)})`;
         } else if (invoice.enrol?.year) {
           termInfo = ` (${invoice.enrol.year})`;
         }
@@ -681,9 +687,7 @@ export const getFeesCollectionReport = (filters: FeesCollectionReportFilters) =>
         allTerms &&
         allTerms.length > 0
       ) {
-        const selectedTerm = allTerms.find(
-          (t) => Number(t.num) === Number(filters.termId)
-        );
+        const selectedTerm = allTerms.find((t) => Number(t.id) === Number(filters.termId));
         if (selectedTerm) {
           reportStartDate = selectedTerm.startDate
             ? new Date(selectedTerm.startDate)
@@ -828,7 +832,12 @@ export const selectAllCombinedFinanceData = createSelector(
             transactionDate: invoice.invoiceDate,
             amount: invoice.totalBill,
             type: 'Invoice',
-            description: `Term ${invoice.enrol.num} ${invoice.enrol.year} Invoice For ${invoice.student.surname} ${invoice.student.name} Enrolled in ${invoice.enrol.name} as a ${invoice.enrol.residence}`,
+            description: `${formatTermLabel({
+              num: invoice.enrol.num,
+              year: invoice.enrol.year,
+              type: 'regular',
+              label: null,
+            } as TermsModel)} Invoice For ${invoice.student.surname} ${invoice.student.name} Enrolled in ${invoice.enrol.name} as a ${invoice.enrol.residence}`,
             date: invoice.invoiceDate,
             studentId: invoice.student.studentNumber,
             studentName: invoice.student.surname + invoice.student.name,
@@ -1057,12 +1066,8 @@ export const getOutstandingFeesReport = (
         allTerms &&
         allTerms.length > 0
       ) {
-        const [filterNumStr, filterYearStr] = filters.termId.split('-');
-        const filterNum = parseInt(filterNumStr, 10);
-        const filterYear = parseInt(filterYearStr, 10);
-
         const selectedTerm = allTerms.find(
-          (t) => t.num === filterNum && t.year === filterYear
+          (t) => Number(t.id) === Number(filters.termId)
         );
 
         if (selectedTerm) {
@@ -1128,10 +1133,7 @@ const getSelectedTermForAgedReport = (filters: AgedDebtorsReportFilters) =>
     if (!filters.termId || !allTerms || allTerms.length === 0) {
       return null;
     }
-    const [numStr, yearStr] = filters.termId.split('-');
-    const num = parseInt(numStr, 10);
-    const year = parseInt(yearStr, 10);
-    return allTerms.find((t) => t.num === num && t.year === year) || null;
+    return allTerms.find((t) => Number(t.id) === Number(filters.termId)) || null;
   });
 
 export const getAgedDebtorsReport = (filters: AgedDebtorsReportFilters) =>
@@ -1236,7 +1238,12 @@ export const getAgedDebtorsReport = (filters: AgedDebtorsReportFilters) =>
             invoice.student.surname || ''
           }`.trim() || 'Unknown Student';
         const className = invoice.enrol.name || 'N/A';
-        const termName = `Term ${invoice.enrol.num} (${invoice.enrol.year})`;
+        const termName = formatTermLabel({
+          num: invoice.enrol.num,
+          year: invoice.enrol.year,
+          type: selectedTerm?.type || 'regular',
+          label: selectedTerm?.label || null,
+        } as TermsModel);
 
         detailedInvoices.push({
           invoiceId: invoice.id,
@@ -1292,10 +1299,7 @@ const getSelectedTermForRevenueRecognition = (
     if (!filters.termId || !allTerms || allTerms.length === 0) {
       return null;
     }
-    const [numStr, yearStr] = filters.termId.split('-');
-    const num = parseInt(numStr, 10);
-    const year = parseInt(yearStr, 10);
-    return allTerms.find((t) => t.num === num && t.year === year) || null;
+    return allTerms.find((t) => Number(t.id) === Number(filters.termId)) || null;
   });
 
 export const getRevenueRecognitionReport = (
@@ -1377,7 +1381,7 @@ export const getRevenueRecognitionReport = (
 
           if (classInvoices.length > 0) {
             reportData.push({
-              termName: `Term ${selectedTerm.num} (${selectedTerm.year})`,
+              termName: formatTermLabel(selectedTerm),
               className: currentClass?.name,
               totalInvoiced: totalInvoiced,
               totalOutstanding: totalOutstanding,
@@ -1401,7 +1405,7 @@ export const getRevenueRecognitionReport = (
         ).size;
 
         reportData.push({
-          termName: `Term ${selectedTerm.num} (${selectedTerm.year})`,
+          termName: formatTermLabel(selectedTerm),
           className: undefined,
           totalInvoiced: totalInvoiced,
           totalOutstanding: totalOutstanding,
@@ -1428,10 +1432,7 @@ const getSelectedTermForEnrollmentBilling = (
     if (!filters.termId || !allTerms || allTerms.length === 0) {
       return null;
     }
-    const [numStr, yearStr] = filters.termId.split('-');
-    const num = parseInt(numStr, 10);
-    const year = parseInt(yearStr, 10);
-    return allTerms.find((t) => t.num === num && t.year === year) || null;
+    return allTerms.find((t) => Number(t.id) === Number(filters.termId)) || null;
   });
 
 export const getEnrollmentBillingReconciliationReport = (
@@ -1489,7 +1490,7 @@ export const getEnrollmentBillingReconciliationReport = (
           return {
             asOfDate: new Date(),
             summary: {
-              termName: `Term ${selectedTerm.num} (${selectedTerm.year})`,
+              termName: formatTermLabel(selectedTerm),
               className: filters.classId,
               totalStudentsEnrolled: 0,
               totalStudentsInvoiced: 0,
@@ -1555,7 +1556,7 @@ export const getEnrollmentBillingReconciliationReport = (
       });
 
       const summary: EnrollmentBillingReportSummary = {
-        termName: `Term ${selectedTerm.num} (${selectedTerm.year})`,
+        termName: formatTermLabel(selectedTerm),
         className: filters.classId
           ? allClasses.find((c) => c.id === filters.classId)?.name ||
             'Unknown Class'

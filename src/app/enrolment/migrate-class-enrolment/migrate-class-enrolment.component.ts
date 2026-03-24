@@ -13,6 +13,7 @@ import { takeUntil, tap, map, startWith } from 'rxjs/operators';
 import { TermsModel } from '../models/terms.model';
 import { ClassesModel } from '../models/classes.model';
 import { selectClasses, selectTerms, selectEnrolErrorMsg, selectMigrateClassResult } from '../store/enrolment.selectors';
+import { formatTermLabel } from '../models/term-label.util';
 
 @Component({
   selector: 'app-migrate-class-enrolment',
@@ -176,5 +177,9 @@ export class MigrateClassEnrolmentComponent implements OnInit, OnDestroy {
     // Check if all fields are filled and source != destination
     return !!(fromName && fromTerm && toName && toTerm) && 
            !(fromName === toName && fromTerm?.num === toTerm?.num && fromTerm?.year === toTerm?.year);
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 }
