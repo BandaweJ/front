@@ -57,6 +57,7 @@ export const fetchSubjectMarksInClass = createAction(
     name: string;
     num: number;
     year: number;
+    termId?: number;
     subjectCode: string;
     examType: ExamType;
   }>()
@@ -111,6 +112,7 @@ export const perfomanceActions = createActionGroup({
     fetchPerfomanceData: props<{
       num: number;
       year: number;
+      termId?: number;
       name: string;
       examType: ExamType;
     }>(),
@@ -150,6 +152,7 @@ export const fetchMarksProgressActions = createActionGroup({
     fetchMarksProgress: props<{
       num: number;
       year: number;
+      termId?: number;
       clas: string;
       // fom: number;
       examType: ExamType;

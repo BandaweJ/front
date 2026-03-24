@@ -190,8 +190,9 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const num = term.num;
     const year = term.year;
+    const termId = term.id;
 
-    this.store.dispatch(getEnrolmentByClass({ name, num, year }));
+    this.store.dispatch(getEnrolmentByClass({ name, num, year, termId }));
   }
 
   openEnrolStudentsDialog(): void {
@@ -304,7 +305,12 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
         const term: TermsModel = this.term?.value;
         if (name && term) {
           this.store.dispatch(
-            getEnrolmentByClass({ name, num: term.num, year: term.year })
+            getEnrolmentByClass({
+              name,
+              num: term.num,
+              year: term.year,
+              termId: term.id,
+            })
           );
         }
       }

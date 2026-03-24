@@ -4,6 +4,7 @@ import { ExamType } from './examtype.enum';
 
 export interface MarksModel {
   id?: number;
+  termId?: number;
   num: number;
   name: string;
   year: number;

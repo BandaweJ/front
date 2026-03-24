@@ -146,6 +146,7 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
 
     const formValue = this.addTermForm.value;
     const term: TermsModel = {
+      id: this.data?.id,
       num: Number(formValue.num),
       year: Number(formValue.year),
       startDate: formValue.startDate,

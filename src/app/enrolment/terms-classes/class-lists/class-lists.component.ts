@@ -186,8 +186,9 @@ export class ClassListsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const num = term.num;
     const year = term.year;
+    const termId = term.id;
 
-    this.store.dispatch(getEnrolmentByClass({ name, num, year }));
+    this.store.dispatch(getEnrolmentByClass({ name, num, year, termId }));
     
     // Reset loading state after a short delay
     setTimeout(() => {

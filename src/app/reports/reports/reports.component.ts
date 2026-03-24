@@ -209,6 +209,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
           name: clas,
           num: term.num,
           year: term.year,
+          termId: term.id,
           examType: examType,
         })
       );
@@ -228,6 +229,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
           name: clas,
           num: term.num,
           year: term.year,
+          termId: term.id,
           examType: examType,
         })
       );
@@ -247,6 +249,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
             name: clas,
             num: term.num,
             year: term.year,
+            termId: term.id,
             reports: reportsToSave,
             examType: examType,
           })

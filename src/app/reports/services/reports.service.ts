@@ -24,11 +24,12 @@ export class ReportsService {
     name: string,
     num: number,
     year: number,
-    examType: ExamType
+    examType: ExamType,
+    termId?: number
   ): Observable<ReportsModel[]> {
     // console.log(`${this.baseUrl}generate/${name}/${num}/${year}/`);
     return this.httpClient.get<ReportsModel[]>(
-      `${this.baseUrl}generate/${name}/${num}/${year}/${examType}`
+      `${this.baseUrl}generate/${name}/${num}/${year}/${examType}${termId ? `?termId=${termId}` : ''}`
     );
   }
 
@@ -37,12 +38,16 @@ export class ReportsService {
     num: number,
     year: number,
     examType: ExamType,
-    reports: ReportsModel[]
+    reports: ReportsModel[],
+    termId?: number
   ): Observable<ReportsModel[]> {
     // console.log(name, num, year, examType, reports.length);
     return this.httpClient.post<ReportsModel[]>(
       `${this.baseUrl}save/${name}/${num}/${year}/${examType}`,
       reports
+    , {
+      params: termId ? { termId: String(termId) } : undefined,
+    }
     );
   }
 
@@ -71,10 +76,11 @@ export class ReportsService {
     name: string,
     num: number,
     year: number,
-    examType: ExamType
+    examType: ExamType,
+    termId?: number
   ): Observable<ReportsModel[]> {
     return this.httpClient.get<ReportsModel[]>(
-      `${this.baseUrl}view/${name}/${num}/${year}/${examType}`
+      `${this.baseUrl}view/${name}/${num}/${year}/${examType}${termId ? `?termId=${termId}` : ''}`
     );
   }
 
@@ -136,10 +142,11 @@ export class ReportsService {
     num: number,
     year: number,
     examType: string,
-    studentNumber: string
+    studentNumber: string,
+    termId?: number
   ) {
     const result = this.httpClient.get(
-      `${this.baseUrl}pdf/${name}/${num}/${year}/${examType}/${studentNumber}`,
+      `${this.baseUrl}pdf/${name}/${num}/${year}/${examType}/${studentNumber}${termId ? `?termId=${termId}` : ''}`,
       {
         observe: 'response',
         responseType: 'blob',

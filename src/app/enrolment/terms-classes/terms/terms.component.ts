@@ -60,6 +60,7 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   displayedColumns: string[] = [
     'index',
+    'id',
     'type',
     'label',
     'num',
@@ -189,8 +190,9 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   deleteTerm(term: TermsModel): void {
+    const idText = term.id != null ? ` [ID ${term.id}]` : '';
     const confirmDelete = confirm(
-      `Are you sure you want to delete Term ${term.num} ${term.year}?`
+      `Are you sure you want to delete Term ${term.num} ${term.year}${idText}?`
     );
     if (confirmDelete) {
       this.store.dispatch(deleteTermAction({ term }));
@@ -224,7 +226,7 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   trackByTermId(index: number, term: TermsModel): string {
-    return `${term.num}-${term.year}`;
+    return `${term.id ?? `${term.num}-${term.year}`}`;
   }
 
   getTermStatus(term: TermsModel): string {

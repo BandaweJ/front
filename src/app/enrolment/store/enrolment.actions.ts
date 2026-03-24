@@ -127,7 +127,7 @@ export const editTermFail = createAction(
 
 export const getEnrolmentByClass = createAction(
   '[Terms-Classes Component] fetch enrolment for class',
-  props<{ name: string; num: number; year: number }>()
+  props<{ name: string; num: number; year: number; termId?: number }>()
 );
 
 export const getEnrolmentByClassSuccess = createAction(
@@ -157,7 +157,7 @@ export const enrolStudentsFail = createAction(
 
 export const fetchTotalEnrols = createAction(
   '[Terms Classes Component] fetch enrolments',
-  props<{ num: number; year: number }>()
+  props<{ num: number; year: number; termId?: number }>()
 );
 
 export const fetchTotalEnrolsSuccess = createAction(
@@ -233,7 +233,7 @@ export const currentTermActions = createActionGroup({
 export const termEnrolsActions = createActionGroup({
   source: 'Term Enrols',
   events: {
-    fetchTermEnrols: props<{ num: number; year: number }>(),
+    fetchTermEnrols: props<{ num: number; year: number; termId?: number }>(),
     fetchTermEnrolsSuccess: props<{ termEnrols: EnrolsModel[] }>(),
     fetchTermEnrolsFail: props<{ error: HttpErrorResponse }>(),
   },

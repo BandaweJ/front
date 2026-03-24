@@ -45,10 +45,11 @@ export class MarksService {
     num: number,
     year: number,
     subjectCode: string,
-    examType: ExamType
+    examType: ExamType,
+    termId?: number
   ): Observable<MarksModel[]> {
     return this.httpClient.get<MarksModel[]>(
-      `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}/${examType}`
+      `${this.baseUrl}marks/${num}/${year}/${name}/${subjectCode}/${examType}${termId ? `?termId=${termId}` : ''}`
     );
   }
 
@@ -57,10 +58,11 @@ export class MarksService {
     year: number,
     clas: string,
     // fom: number,
-    examType: ExamType
+    examType: ExamType,
+    termId?: number
   ): Observable<MarksProgressModel[]> {
     return this.httpClient.get<MarksProgressModel[]>(
-      `${this.baseUrl}progress/${num}/${year}/${clas}/${examType}`
+      `${this.baseUrl}progress/${num}/${year}/${clas}/${examType}${termId ? `?termId=${termId}` : ''}`
     );
   }
 
@@ -98,7 +100,8 @@ export class MarksService {
     num: number,
     year: number,
     name: string,
-    examType: ExamType
+    examType: ExamType,
+    termId?: number
   ): Observable<{
     subjects: SubjectsModel[];
     subjectsMarks: Array<MarksModel[]>;
@@ -110,7 +113,7 @@ export class MarksService {
       subjectsMarks: Array<MarksModel[]>;
       marks: Array<number[]>;
       xAxes: number[];
-    }>(`${this.baseUrl}perf/${num}/${year}/${name}/${examType}`);
+    }>(`${this.baseUrl}perf/${num}/${year}/${name}/${examType}${termId ? `?termId=${termId}` : ''}`);
   }
 
   getStudentMarks(studentNumber: string): Observable<MarksModel[]> {

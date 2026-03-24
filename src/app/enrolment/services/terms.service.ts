@@ -21,7 +21,17 @@ export class TermsService {
   }
 
   editTerm(term: TermsModel): Observable<TermsModel> {
+    if (term.id != null) {
+      return this.httpClient.patch<TermsModel>(`${this.baseURL}/id/${term.id}`, term);
+    }
     return this.httpClient.patch<TermsModel>(this.baseURL, term);
+  }
+
+  deleteTerm(term: TermsModel): Observable<number> {
+    if (term.id != null) {
+      return this.httpClient.delete<number>(`${this.baseURL}/id/${term.id}`);
+    }
+    return this.httpClient.delete<number>(`${this.baseURL}/${term.num}/${term.year}`);
   }
 
   getCurrentTerm(): Observable<TermsModel> {

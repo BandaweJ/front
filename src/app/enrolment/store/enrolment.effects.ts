@@ -234,11 +234,32 @@ export class EnrolmentEffects {
     )
   );
 
+  deleteTerm$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromEnrolmentActions.deleteTermAction),
+      switchMap(({ term }) =>
+        this.termsService.deleteTerm(term).pipe(
+          tap(() =>
+            this.snackBar.open('Term Deleted Successfully', 'OK', {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            })
+          ),
+          map(() => fromEnrolmentActions.deleteTermSuccess({ term })),
+          catchError((error: HttpErrorResponse) =>
+            of(fromEnrolmentActions.deleteTermFail({ ...error }))
+          )
+        )
+      )
+    )
+  );
+
   fetchEnrolmentByClass$ = createEffect(() =>
     this.actions$.pipe(
       ofType(fromEnrolmentActions.getEnrolmentByClass),
-      switchMap(({ name, num, year }) =>
-        this.enrolService.getEnrolmentByClass(name, num, year).pipe(
+      switchMap(({ name, num, year, termId }) =>
+        this.enrolService.getEnrolmentByClass(name, num, year, termId).pipe(
           map((enrols) =>
             fromEnrolmentActions.getEnrolmentByClassSuccess({ enrols })
           ),
@@ -277,8 +298,8 @@ export class EnrolmentEffects {
   fetchTotalEnrols$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromEnrolmentActions.fetchTotalEnrols),
-      concatMap(({ num, year }) => {
-        return this.enrolService.getTotalEnrolment(num, year).pipe(
+      concatMap(({ num, year, termId }) => {
+        return this.enrolService.getTotalEnrolment(num, year, termId).pipe(
           // And this method call
           map((summary) =>
             fromEnrolmentActions.fetchTotalEnrolsSuccess({ summary })
@@ -476,7 +497,7 @@ export class EnrolmentEffects {
     this.actions$.pipe(
       ofType(fromEnrolmentActions.termEnrolsActions.fetchTermEnrols),
       switchMap((data) =>
-        this.enrolService.getTermEnrolments(data.num, data.year).pipe(
+        this.enrolService.getTermEnrolments(data.num, data.year, data.termId).pipe(
           map((termEnrols) => {
             return fromEnrolmentActions.termEnrolsActions.fetchTermEnrolsSuccess(
               {

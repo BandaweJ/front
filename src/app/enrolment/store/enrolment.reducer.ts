@@ -165,9 +165,34 @@ export const enrolmentReducer = createReducer(
     errorMessage: '',
     terms: [
       ...state.terms.map((trm) =>
-        trm.num === term.num && trm.year === term.year ? term : trm
+        trm.id != null && term.id != null
+          ? trm.id === term.id
+            ? term
+            : trm
+          : trm.num === term.num && trm.year === term.year
+            ? term
+            : trm
       ),
     ],
+  })),
+  on(enrolmentActions.deleteTermAction, (state) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(enrolmentActions.deleteTermSuccess, (state, { term }) => ({
+    ...state,
+    isLoading: false,
+    terms: state.terms.filter((t) =>
+      t.id != null && term.id != null
+        ? t.id !== term.id
+        : !(t.num === term.num && t.year === term.year)
+    ),
+  })),
+  on(enrolmentActions.deleteTermFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error.message,
   })),
   on(enrolmentActions.fetchTotalEnrols, (state) => ({
     ...state,

@@ -528,11 +528,12 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const num = term.num;
     const year = term.year;
+    const termId = term.id;
     const subjectCode = subject.code;
     const examType = this.examTypeControl?.value;
 
     this.store.dispatch(
-      fetchSubjectMarksInClass({ name, num, year, subjectCode, examType })
+      fetchSubjectMarksInClass({ name, num, year, termId, subjectCode, examType })
     );
   }
 
@@ -626,6 +627,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       examType: this.examTypeControl?.value,
       year: this.termControl?.value.year,
       num: this.termControl?.value.num,
+      termId: this.termControl?.value.id,
     };
 
     console.log(`💾 Saving mark for index ${index}:`, { mark, comment });

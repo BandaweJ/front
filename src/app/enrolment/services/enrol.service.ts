@@ -14,17 +14,24 @@ export class EnrolService {
 
   constructor(private httpClient: HttpClient) {}
 
-  getTermEnrolments(num: number, year: number): Observable<EnrolsModel[]> {
-    return this.httpClient.get<EnrolsModel[]>(`${this.baseURL}${num}/${year}`);
+  getTermEnrolments(
+    num: number,
+    year: number,
+    termId?: number
+  ): Observable<EnrolsModel[]> {
+    const suffix = termId ? `?termId=${termId}` : '';
+    return this.httpClient.get<EnrolsModel[]>(`${this.baseURL}${num}/${year}${suffix}`);
   }
 
   getEnrolmentByClass(
     name: string,
     num: number,
-    year: number
+    year: number,
+    termId?: number
   ): Observable<EnrolsModel[]> {
+    const suffix = termId ? `?termId=${termId}` : '';
     return this.httpClient.get<EnrolsModel[]>(
-      `${this.baseURL}${name}/${num}/${year}`
+      `${this.baseURL}${name}/${num}/${year}${suffix}`
     );
   }
 
@@ -51,8 +58,12 @@ export class EnrolService {
     return this.httpClient.get<EnrolStats>(this.baseURL);
   }
 
-  getTotalEnrolment(num: number, year: number): Observable<StudentsSummary> {
-    const requestUrl = `${this.baseURL}summary/${num}/${year}`;
+  getTotalEnrolment(
+    num: number,
+    year: number,
+    termId?: number
+  ): Observable<StudentsSummary> {
+    const requestUrl = `${this.baseURL}summary/${num}/${year}${termId ? `?termId=${termId}` : ''}`;
     // <-- ADD THIS LINE
 
     return this.httpClient.get<StudentsSummary>(requestUrl);
