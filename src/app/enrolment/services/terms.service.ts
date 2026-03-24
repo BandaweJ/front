@@ -33,7 +33,12 @@ export class TermsService {
     if (termId !== null) {
       return this.httpClient.delete<number>(`${this.baseURL}/id/${termId}`);
     }
-    return this.httpClient.delete<number>(`${this.baseURL}/${term.num}/${term.year}`);
+    const num = Number(term.num);
+    const year = Number(term.year);
+    if (!Number.isFinite(num) || !Number.isFinite(year)) {
+      throw new Error('Invalid term payload: num/year must be numeric.');
+    }
+    return this.httpClient.delete<number>(`${this.baseURL}/${num}/${year}`);
   }
 
   getCurrentTerm(): Observable<TermsModel> {
