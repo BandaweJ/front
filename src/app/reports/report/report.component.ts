@@ -430,7 +430,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     const saved = this.normalizeRoleComment(this.report?.report?.classTrComment || '');
     return (
       this.isReportSaved &&
-      this.teacherComment?.valid &&
+      !!this.teacherComment?.valid &&
       !this.savingTeacherComment &&
       current !== saved
     );
@@ -441,7 +441,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     const saved = this.normalizeRoleComment(this.report?.report?.headComment || '');
     return (
       this.isReportSaved &&
-      this.comment?.valid &&
+      !!this.comment?.valid &&
       !this.savingHeadComment &&
       current !== saved
     );
