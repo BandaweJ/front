@@ -64,4 +64,8 @@ export const ROUTE_POLICIES = {
     roles: [ROLES.admin, ROLES.dev],
     permissions: [PERMISSIONS.SYSTEM.EDIT_SETTINGS],
   },
+  marksDiagnostics: {
+    roles: [ROLES.admin, ROLES.dev],
+    permissions: [PERMISSIONS.MARKS.VIEW],
+  },
 } as const satisfies Record<string, RoutePolicy>;

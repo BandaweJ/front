@@ -15,6 +15,7 @@ import { markSheetsReducer } from './marks-sheets/store/reducer';
 import { MarkSheetEffects } from './marks-sheets/store/effects';
 import { MarksProgressComponent } from './marks-progress/marks-progress.component';
 import { SharedModule } from '../shared/shared.module';
+import { SubjectEntryDiagnosticsComponent } from './subject-entry-diagnostics/subject-entry-diagnostics.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { SharedModule } from '../shared/shared.module';
     AddEditSubjectComponent,
     MarksSheetsComponent,
     MarksProgressComponent,
+    SubjectEntryDiagnosticsComponent,
   ],
   imports: [
     CommonModule,

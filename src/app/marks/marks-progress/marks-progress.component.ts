@@ -116,6 +116,7 @@ export class MarksProgressComponent implements OnInit, OnDestroy {
     const term: TermsModel = this.termControl?.value;
     const num = term.num;
     const year = term.year;
+    const termId = term.id;
 
     const clas = this.clasControl?.value;
     const examType = this.examTypeControl?.value;
@@ -124,6 +125,7 @@ export class MarksProgressComponent implements OnInit, OnDestroy {
       fetchMarksProgressActions.fetchMarksProgress({
         num,
         year,
+        termId,
         clas,
         examType,
       })

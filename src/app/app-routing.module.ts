@@ -22,6 +22,7 @@ import { StudentViewComponent } from './registration/students-list/student-view/
 import { ParentsListComponent } from './registration/parents-list/parents-list.component';
 import { ClassListsComponent } from './enrolment/terms-classes/class-lists/class-lists.component';
 import { MarksProgressComponent } from './marks/marks-progress/marks-progress.component';
+import { SubjectEntryDiagnosticsComponent } from './marks/subject-entry-diagnostics/subject-entry-diagnostics.component';
 // FeesComponent is lazy loaded
 // StudentFinanceComponent is lazy loaded
 // StudentBalancesComponent is now standalone and lazy loaded
@@ -150,6 +151,13 @@ export const APP_ROUTES: Routes = [
     component: MarksProgressComponent,
     canActivate: [AuthGuardService],
     title: 'Marks Capture Progress',
+  },
+  {
+    path: 'marks/diagnostics',
+    component: SubjectEntryDiagnosticsComponent,
+    canActivate: [AuthGuardService],
+    data: ROUTE_POLICIES.marksDiagnostics,
+    title: 'Marks Subject Diagnostics',
   },
   {
     path: 'mark-sheets',

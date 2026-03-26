@@ -197,6 +197,11 @@
               <mat-icon>trending_up</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Marks Progress</span>
             </button>
+            <!-- Marks Subject Diagnostics -->
+            <button mat-button *ngIf="canAccessMarksDiagnostics$ | async" routerLink="/marks/diagnostics" routerLinkActive="active">
+              <mat-icon>manage_search</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Marks Diagnostics</span>
+            </button>
             <!-- Continuous Assessment -->
             <button mat-button routerLink="/marks/continuous" routerLinkActive="active">
               <mat-icon>fact_check</mat-icon>

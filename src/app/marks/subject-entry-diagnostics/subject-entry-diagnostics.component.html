@@ -1,0 +1,120 @@
+<div class="main-container">
+  <mat-toolbar class="title">Subject Marks Diagnostics</mat-toolbar>
+
+  <mat-card class="container">
+    <form [formGroup]="filtersForm" (ngSubmit)="runDiagnostics()">
+      <div class="top-btns">
+        <mat-form-field appearance="outline">
+          <mat-label>Choose Term</mat-label>
+          <mat-select formControlName="term">
+            <mat-option *ngFor="let term of terms$ | async; trackBy: trackByTerm" [value]="term">
+              {{ formatTerm(term) }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="termControl?.invalid && termControl?.touched">Term is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Exam Type</mat-label>
+          <mat-select formControlName="examType">
+            <mat-option *ngFor="let ty of examtype" [value]="ty">{{ ty }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="examTypeControl?.invalid && examTypeControl?.touched">Exam type is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Choose Class</mat-label>
+          <mat-select formControlName="className">
+            <mat-option *ngFor="let clas of classes$ | async; trackBy: trackByClass" [value]="clas.name">
+              {{ clas.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="classControl?.invalid && classControl?.touched">Class is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Choose Subject</mat-label>
+          <mat-select formControlName="subject">
+            <mat-option *ngFor="let subject of subjects$ | async; trackBy: trackBySubject" [value]="subject">
+              {{ subject.code }} {{ subject.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="subjectControl?.invalid && subjectControl?.touched">Subject is required</mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+          <mat-icon>search</mat-icon>
+          Run Diagnostics
+        </button>
+      </div>
+    </form>
+
+    <div class="loading-row" *ngIf="loading">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Checking saved marks against enrolment...</span>
+    </div>
+
+    <div *ngIf="diagnostics" class="summary-grid">
+      <div class="summary-card">
+        <div class="label">Subject</div>
+        <div class="value">{{ diagnostics.subject.code }} {{ diagnostics.subject.name }}</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Enrolled</div>
+        <div class="value">{{ diagnostics.totals.enrolled }}</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Marks Entered</div>
+        <div class="value">{{ diagnostics.totals.entered }}</div>
+      </div>
+      <div class="summary-card warn">
+        <div class="label">Missing</div>
+        <div class="value">{{ diagnostics.totals.missing }}</div>
+      </div>
+    </div>
+
+    <div class="table-wrapper" *ngIf="diagnostics">
+      <h3>Entered Students</h3>
+      <table mat-table [dataSource]="enteredData">
+        <ng-container matColumnDef="studentNumber">
+          <th mat-header-cell *matHeaderCellDef>Student Number</th>
+          <td mat-cell *matCellDef="let row">{{ row.studentNumber }}</td>
+        </ng-container>
+        <ng-container matColumnDef="studentName">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.studentName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="mark">
+          <th mat-header-cell *matHeaderCellDef>Mark</th>
+          <td mat-cell *matCellDef="let row">{{ row.mark }}</td>
+        </ng-container>
+        <ng-container matColumnDef="comment">
+          <th mat-header-cell *matHeaderCellDef>Comment</th>
+          <td mat-cell *matCellDef="let row">{{ row.comment }}</td>
+        </ng-container>
+        <ng-container matColumnDef="savedAt">
+          <th mat-header-cell *matHeaderCellDef>Saved At</th>
+          <td mat-cell *matCellDef="let row">{{ row.savedAt | date : 'short' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="enteredColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: enteredColumns"></tr>
+      </table>
+    </div>
+
+    <div class="table-wrapper" *ngIf="diagnostics">
+      <h3>Missing Students</h3>
+      <table mat-table [dataSource]="missingData">
+        <ng-container matColumnDef="studentNumber">
+          <th mat-header-cell *matHeaderCellDef>Student Number</th>
+          <td mat-cell *matCellDef="let row">{{ row.studentNumber }}</td>
+        </ng-container>
+        <ng-container matColumnDef="studentName">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.studentName }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="missingColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: missingColumns"></tr>
+      </table>
+    </div>
+  </mat-card>
+</div>
