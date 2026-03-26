@@ -220,6 +220,27 @@ th {
   width: 100%; /* Ensure textarea takes full available width */
 }
 
+.comment-editor-shell {
+  position: relative;
+}
+
+.comment-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #7a5a00;
+  background: rgba(255, 248, 225, 0.88);
+  border: 1px dashed #ffd54f;
+  border-radius: 4px;
+  z-index: 2;
+}
+
 /* Style for the displayed head comment */
 .displayed-head-comment {
   display: flex;
