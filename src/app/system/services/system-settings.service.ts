@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { timeout } from 'rxjs/operators';
 
 export interface SystemSettings {
   id?: string;
@@ -61,11 +62,14 @@ export interface SystemSettings {
 })
 export class SystemSettingsService {
   private apiUrl = `${environment.apiUrl}/system/settings`;
+  private static readonly REQUEST_TIMEOUT_MS = 15000;
 
   constructor(private http: HttpClient) {}
 
   getSettings(): Observable<SystemSettings> {
-    return this.http.get<SystemSettings>(this.apiUrl);
+    return this.http
+      .get<SystemSettings>(this.apiUrl)
+      .pipe(timeout(SystemSettingsService.REQUEST_TIMEOUT_MS));
   }
 
   updateSettings(settings: Partial<SystemSettings>): Observable<SystemSettings> {
