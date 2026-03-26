@@ -358,4 +358,19 @@ export class ParentDashboardComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  buildParentAdvisory(child: ChildSummaryDto | null): string {
+    if (!child) {
+      return 'No advisory available yet.';
+    }
+    const owed = Number(child.finance?.amountOwed ?? 0);
+    const reports = Number(child.academics?.numberOfReportCards ?? 0);
+    if (owed > 0 && reports > 0) {
+      return 'This learner has outstanding balances and active academic records; monitor both payment and performance weekly.';
+    }
+    if (owed > 0) {
+      return 'Outstanding balances detected. Consider a payment plan to reduce arrears risk.';
+    }
+    return 'Financial position is stable. Focus on term-by-term academic improvement.';
+  }
 }

@@ -29,6 +29,20 @@
               class="calendar-btn">
         <mat-icon>calendar_today</mat-icon>
       </button>
+      <div class="dev-view-switcher" *ngIf="isAuthenticatedDev$ | async">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>View as role</mat-label>
+          <mat-select
+            [value]="selectedDevViewRole"
+            (selectionChange)="onDevViewRoleChange($event.value)"
+          >
+            <mat-option [value]="null">Default (dev)</mat-option>
+            <mat-option *ngFor="let role of devViewRoleOptions" [value]="role">
+              {{ role }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </ng-container>
     <button mat-icon-button (click)="themeService.toggleTheme()" 
             [matTooltip]="(currentTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode')"
@@ -38,6 +52,11 @@
     <app-profile-buttons [isLoggedIn]="isLoggedIn$ | async"></app-profile-buttons>
   </div>
 </mat-toolbar>
+
+<div class="dev-view-banner" *ngIf="(isAuthenticatedDev$ | async) && selectedDevViewRole">
+  DEV VIEW MODE: {{ selectedDevViewRole }}
+  <button mat-button (click)="clearDevViewRoleSelection()">Reset</button>
+</div>
 
 <mat-sidenav-container>
   <mat-sidenav role="navigation" #sidenav [mode]="isScreenSmall ? 'over' : 'side'"
@@ -455,6 +474,13 @@
               <mat-icon>sync</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
                 class="menu-text">Student
                 Reconciliation</span>
+            </button>
+
+            <!-- Analytics & Forecasts -->
+            <button mat-button routerLink="/system/analytics" routerLinkActive="active"
+              *ngIf="canAccessExecutiveAnalytics$ | async">
+              <mat-icon>insights</mat-icon> <span *ngIf="!isSidenavCollapsed || isScreenSmall"
+                class="menu-text">Analytics & Forecasts</span>
             </button>
 
             <!-- Class Reconciliation -->

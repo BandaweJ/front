@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable, map, combineLatest, of, switchMap, catchError } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { selectUser } from '../auth/store/auth.selectors';
+import { selectEffectiveRole, selectUser } from '../auth/store/auth.selectors';
 import { ROLES } from '../registration/models/roles.enum';
 import { RolesPermissionsService } from '../system/services/roles-permissions.service';
 import { PERMISSIONS } from './permissions.constants';
+import { clearDevViewRole, setDevViewRole } from '../auth/store/auth.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -24,9 +25,19 @@ export class RoleAccessService {
    * Get current user's role as Observable
    */
   getCurrentRole$(): Observable<string | null> {
-    return this.store.select(selectUser).pipe(
-      map(user => user?.role || null)
-    );
+    return this.store.select(selectEffectiveRole).pipe(map((role) => role ?? null));
+  }
+
+  getAuthenticatedRole$(): Observable<string | null> {
+    return this.store.select(selectUser).pipe(map((user) => user?.role || null));
+  }
+
+  setDevViewRole(role: ROLES | null): void {
+    this.store.dispatch(setDevViewRole({ role }));
+  }
+
+  clearDevViewRole(): void {
+    this.store.dispatch(clearDevViewRole());
   }
 
   /**
@@ -216,7 +227,7 @@ export class RoleAccessService {
     fallbackRoles: string[]
   ): Observable<boolean> {
     return combineLatest([
-      this.getCurrentRole$(),
+      this.getAuthenticatedRole$(),
       this.store.select(selectUser)
     ]).pipe(
       map(([role, user]) => {
@@ -241,7 +252,7 @@ export class RoleAccessService {
     fallbackRoles?: string[]
   ): Observable<boolean> {
     return combineLatest([
-      this.getCurrentRole$(),
+      this.getAuthenticatedRole$(),
       this.store.select(selectUser)
     ]).pipe(
       map(([role, user]) => {

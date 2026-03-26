@@ -74,3 +74,10 @@ export const resetErrorMessage = createAction(
 );
 export const logout = createAction('[Auth] logout'); // Changed source for consistency
 export const checkAuthStatus = createAction('[Auth] Check Auth Status');
+
+export const setDevViewRole = createAction(
+  '[Auth] Set Dev View Role',
+  props<{ role: ROLES | null }>()
+);
+
+export const clearDevViewRole = createAction('[Auth] Clear Dev View Role');

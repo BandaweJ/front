@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatTableModule } from '@angular/material/table';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
 import { Subject } from 'rxjs';
@@ -29,10 +30,18 @@ import {
   AcademicAnalytics,
   UserActivityAnalytics,
   SystemAnalytics,
+  DataQualityAnalytics,
+  PredictionsAnalytics,
+  MetricCatalogResponse,
+  MetricDefinition,
 } from '../services/analytics.service';
 import { of } from 'rxjs';
 import { TermsService } from 'src/app/enrolment/services/terms.service';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { Store } from '@ngrx/store';
+import { selectEffectiveRole } from 'src/app/auth/store/auth.selectors';
+import { ROLES } from 'src/app/registration/models/roles.enum';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-analytics',
@@ -54,6 +63,7 @@ import { TermsModel } from 'src/app/enrolment/models/terms.model';
     MatChipsModule,
     MatExpansionModule,
     MatGridListModule,
+    MatTableModule,
     NgChartsModule,
   ],
   templateUrl: './analytics.component.html',
@@ -68,6 +78,16 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   analyticsSummary: AnalyticsSummary | null = null;
   currentTerm: TermsModel | null = null;
   availableTerms: TermsModel[] = [];
+  dataQuality: DataQualityAnalytics | null = null;
+  predictions: PredictionsAnalytics | null = null;
+  metricCatalog: MetricCatalogResponse | null = null;
+  currentRole: ROLES | null = null;
+  roleRecommendations: string[] = [];
+
+  metricColumns = ['name', 'category', 'ownerRole', 'formula'];
+  duplicateColumns = ['className', 'subjectCode', 'studentNumber', 'duplicateCount'];
+  riskColumns = ['studentNumber', 'average', 'riskLevel', 'explanation'];
+  feeRiskColumns = ['studentNumber', 'invoiceNumber', 'balance', 'overdueDays', 'riskLevel'];
 
   // Chart configurations
   enrollmentByTermChart: ChartConfiguration<'bar'> | null = null;
@@ -87,6 +107,8 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
     private title: Title,
     private cdr: ChangeDetectorRef,
     private termsService: TermsService,
+    private store: Store,
+    private router: Router,
   ) {
     this.initializeForm();
   }
@@ -102,6 +124,14 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.title.setTitle('Analytics & Reports');
+    this.store
+      .select(selectEffectiveRole)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((role) => {
+        this.currentRole = (role as ROLES) ?? null;
+        this.roleRecommendations = this.buildRoleRecommendations(this.currentRole);
+        this.cdr.markForCheck();
+      });
     this.loadTerms();
   }
 
@@ -189,6 +219,9 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
       .subscribe((data) => {
         if (data) {
           this.analyticsSummary = data;
+          this.dataQuality = data.dataQuality ?? null;
+          this.predictions = data.predictions ?? null;
+          this.metricCatalog = data.metricsCatalog ?? null;
           this.initializeCharts(data);
         }
         this.isLoading = false;
@@ -431,6 +464,53 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
+  }
+
+  getRiskClass(level: 'high' | 'medium' | 'low'): string {
+    if (level === 'high') return 'risk-high';
+    if (level === 'medium') return 'risk-medium';
+    return 'risk-low';
+  }
+
+  viewMarksDiagnostics(): void {
+    this.router.navigate(['/marks/diagnostics']);
+  }
+
+  private buildRoleRecommendations(role: ROLES | null): string[] {
+    if (!role) {
+      return [];
+    }
+    if (role === ROLES.teacher) {
+      return [
+        'Prioritize intervention for students marked high-risk in Predictions.',
+        'Use Academic tab trends to plan remediation by class and subject.',
+      ];
+    }
+    if (role === ROLES.parent || role === ROLES.student) {
+      return [
+        'Use Academic pass-rate trends to track consistency term by term.',
+        'Use Finance collection and outstanding metrics to plan payments early.',
+      ];
+    }
+    if (role === ROLES.admin || role === ROLES.dev) {
+      return [
+        'Monitor Data Quality tab daily before report release windows.',
+        'Track duplicate marks and missing term links, then resolve from diagnostics.',
+      ];
+    }
+    if (role === ROLES.auditor) {
+      return [
+        'Review fee default risk cohorts and overdue days each week.',
+        'Use payment-method mix and collection rate to flag reconciliation exceptions.',
+      ];
+    }
+    if (role === ROLES.director) {
+      return [
+        'Use Executive Forecast for board-facing outlook on pass rate and collections.',
+        'Track risk deltas month over month to direct interventions.',
+      ];
+    }
+    return ['Use this dashboard with metric definitions to support data-driven decisions.'];
   }
 
   onFilterChange(): void {

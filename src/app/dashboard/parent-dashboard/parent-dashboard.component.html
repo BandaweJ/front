@@ -132,6 +132,10 @@
                         <span *ngIf="!childSummary.academics.worstPosition">N/A</span>
                       </div>
                     </mat-card>
+                    <mat-card class="summary-card">
+                      <h4>Advisory Insight</h4>
+                      <p>{{ buildParentAdvisory(childSummary) }}</p>
+                    </mat-card>
                   </div>
                   <div class="continuous-assessment" *ngIf="caLoading">
                     <mat-spinner diameter="32"></mat-spinner>

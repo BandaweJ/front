@@ -57,7 +57,7 @@ export const ROUTE_POLICIES = {
     permissions: [PERMISSIONS.SYSTEM.VIEW_AUDIT],
   },
   systemAnalytics: {
-    roles: [ROLES.admin, ROLES.director],
+    roles: [ROLES.admin, ROLES.director, ROLES.auditor, ROLES.dev],
     permissions: [PERMISSIONS.SYSTEM.VIEW_AUDIT],
   },
   systemIntegrations: {

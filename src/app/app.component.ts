@@ -13,6 +13,7 @@ import { MediaMatcher } from '@angular/cdk/layout';
 import { Store } from '@ngrx/store';
 import {
   selectHasLinkedChildrenProfile,
+  selectEffectiveRole,
   selectIsLoggedIn,
   selectIsParent,
   selectUser,
@@ -53,8 +54,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   user$ = this.store.select(selectUser);
   role!: string;
+  effectiveRole: string | null = null;
   isLoggedIn$: Observable<boolean>; // Simulate logged-in state, typically from an auth service
   isLoggedInStatus!: boolean; // Store the actual boolean status for TS logic
+  isAuthenticatedDev$: Observable<boolean>;
   
   // Messaging unread count
   totalUnreadCount = 0;
@@ -73,6 +76,20 @@ export class AppComponent implements OnInit, OnDestroy {
   favoriteNavIds: string[] = [];
   private readonly recentStorageKey = 'jhs_nav_recents';
   private readonly favoriteStorageKey = 'jhs_nav_favorites';
+  readonly devViewRoleOptions: ROLES[] = [
+    ROLES.teacher,
+    ROLES.student,
+    ROLES.parent,
+    ROLES.admin,
+    ROLES.reception,
+    ROLES.hod,
+    ROLES.seniorTeacher,
+    ROLES.deputy,
+    ROLES.head,
+    ROLES.auditor,
+    ROLES.director,
+  ];
+  selectedDevViewRole: ROLES | null = null;
 
   // Role-based access observables - these update when role changes
   canAccessRegistration$ = this.roleAccess.getCurrentRole$().pipe(
@@ -109,6 +126,9 @@ export class AppComponent implements OnInit, OnDestroy {
         ROLES.director,
       ),
     )
+  );
+  canAccessExecutiveAnalytics$ = this.roleAccess.getCurrentRole$().pipe(
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.dev, ROLES.auditor, ROLES.director))
   );
   canAccessRequisitions$ = this.roleAccess.getCurrentRole$().pipe(
     map(role =>
@@ -236,6 +256,9 @@ export class AppComponent implements OnInit, OnDestroy {
     };
     this.mobileQuery.addListener(this._mobileQueryListener);
     this.isLoggedIn$ = this.store.select(selectIsLoggedIn);
+    this.isAuthenticatedDev$ = this.store.select(selectUser).pipe(
+      map((user) => (user?.role || '').toLowerCase() === ROLES.dev),
+    );
   }
 
   ngOnInit(): void {
@@ -357,6 +380,13 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.store
+      .select(selectEffectiveRole)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((role) => {
+        this.effectiveRole = role || null;
+      });
+
     combineLatest([
       this.isLoggedIn$,
       this.isStudent$,
@@ -469,6 +499,21 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.isScreenSmall) {
       this.sidenav?.close();
     }
+  }
+
+  onDevViewRoleChange(role: ROLES | null): void {
+    if (!role) {
+      this.selectedDevViewRole = null;
+      this.roleAccess.clearDevViewRole();
+      return;
+    }
+    this.selectedDevViewRole = role;
+    this.roleAccess.setDevViewRole(role);
+  }
+
+  clearDevViewRoleSelection(): void {
+    this.selectedDevViewRole = null;
+    this.roleAccess.clearDevViewRole();
   }
 
   private restoreNavPreferences(): void {

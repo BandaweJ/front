@@ -122,4 +122,24 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
+
+  buildStudyPriorityTip(summary: StudentDashboardSummary | null): string {
+    if (!summary?.academicSummary) {
+      return 'Keep submitting assessments consistently to improve predictive confidence.';
+    }
+    const best = Number(summary.academicSummary.bestPosition?.position ?? NaN);
+    const worst = Number(summary.academicSummary.worstPosition?.position ?? NaN);
+    if (!isNaN(best) && !isNaN(worst) && worst - best > 8) {
+      return 'Your class position swings a lot between terms. Focus on consistency in weaker subjects.';
+    }
+    return 'Maintain steady revision and practice in all subjects to protect your term average.';
+  }
+
+  buildFinanceRiskTip(summary: StudentDashboardSummary | null): string {
+    const owed = Number(summary?.financialSummary?.amountOwed ?? 0);
+    if (owed > 0) {
+      return 'Outstanding balances can affect access to some school services; plan payments early.';
+    }
+    return 'Great job keeping fees current. Continue tracking charges each term.';
+  }
 }

@@ -6,6 +6,8 @@ import {
   userDetailsActions,
   resetErrorMessage,
   logout,
+  setDevViewRole,
+  clearDevViewRole,
 } from './auth.actions'; // Import grouped actions
 import { User } from '../models/user.model';
 import { AccountStats } from '../models/account-stats.model';
@@ -21,6 +23,7 @@ export interface State {
   accStats: AccountStats | null;
   isLoading: boolean;
   userDetails: StudentsModel | TeachersModel | ParentsModel | null; // Added ParentsModel
+  devViewRole: string | null;
 }
 
 export const initialState: State = {
@@ -31,6 +34,7 @@ export const initialState: State = {
   accStats: null,
   isLoading: false,
   userDetails: null,
+  devViewRole: null,
 };
 
 export const authReducer = createReducer(
@@ -53,6 +57,7 @@ export const authReducer = createReducer(
     user: user,
     accStats: null, // Clear stats on new signin
     isLoading: false,
+    devViewRole: null,
   })),
   on(signinActions.signinFailure, (state, { error }) => {
     // Extract error message from HttpErrorResponse
@@ -134,6 +139,15 @@ export const authReducer = createReducer(
     user: null, // Clear user on logout
     accStats: null, // Clear account stats on logout
     userDetails: null, // Clear user details on logout
+    devViewRole: null,
+  })),
+  on(setDevViewRole, (state, { role }) => ({
+    ...state,
+    devViewRole: role,
+  })),
+  on(clearDevViewRole, (state) => ({
+    ...state,
+    devViewRole: null,
   })),
   on(accountStatsActions.fetchAccountStats, (state) => ({
     // Use grouped action

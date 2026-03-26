@@ -95,6 +95,18 @@
 
 
     <ng-container *ngIf="dashboardSummary$ | async as summary; else noSummaryData">
+      <div class="summary-card academic-card">
+        <h4>AI Advisory Insights</h4>
+        <div class="data-item">
+          <label>Study Priority:</label>
+          <span>{{ buildStudyPriorityTip(summary) }}</span>
+        </div>
+        <div class="data-item">
+          <label>Finance Risk:</label>
+          <span>{{ buildFinanceRiskTip(summary) }}</span>
+        </div>
+      </div>
+
       <div class="summary-card financial-card">
         <h4>Financial Overview</h4>
 

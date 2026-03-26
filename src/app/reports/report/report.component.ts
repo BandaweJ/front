@@ -13,7 +13,7 @@ import {
   HeadCommentModel,
   TeacherCommentModel,
 } from '../models/comment.model';
-import { selectUser } from 'src/app/auth/store/auth.selectors';
+import { selectEffectiveRole } from 'src/app/auth/store/auth.selectors';
 
 import { selectIsLoading, selectReports } from '../store/reports.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
@@ -123,9 +123,9 @@ export class ReportComponent implements OnInit, OnDestroy {
     );
     this.studentNumber = this.report.report.studentNumber;
 
-    this.userSubscription = this.store.select(selectUser).subscribe((user) => {
-      if (user) {
-        this.role = user.role;
+    this.userSubscription = this.store.select(selectEffectiveRole).subscribe((role) => {
+      if (role) {
+        this.role = role;
       }
     });
 
