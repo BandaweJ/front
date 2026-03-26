@@ -30,6 +30,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import jsPDF from 'jspdf';
+import { applyPlugin } from 'jspdf-autotable';
 
 // Ngrx actions and selectors
 import * as enrolmentActions from 'src/app/enrolment/store/enrolment.actions';
@@ -55,6 +57,8 @@ import {
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
+
+applyPlugin(jsPDF);
 
 interface ReportSummary {
   totalStudentsEnrolled: number;
@@ -155,6 +159,10 @@ export class EnrollmentBillingReconciliationReportComponent
       filters.push(`Class: ${this.filterForm.get('classFilter')?.value.name}`);
     }
     return filters.length > 0 ? filters.join(' | ') : 'All Records';
+  }
+
+  get discrepancyDetails(): EnrollmentBillingReportDetail[] {
+    return this.allDetails.filter((detail) => detail.discrepancy);
   }
 
   constructor(
@@ -456,6 +464,23 @@ export class EnrollmentBillingReconciliationReportComponent
       }, 1000);
     }, 500);
   }
+
+  onPrintDiscrepancies(): void {
+    if (this.discrepancyDetails.length === 0) {
+      this.snackBar.open('No discrepancies to print', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    this.openDiscrepancyPrintWindow();
+  }
+
+  onDownloadDiscrepanciesPdf(): void {
+    if (this.discrepancyDetails.length === 0) {
+      this.snackBar.open('No discrepancies to download', 'Dismiss', { duration: 3000 });
+      return;
+    }
+    this.downloadDiscrepanciesPdf();
+  }
   
   handlePageEvent(event: PageEvent): void {
     this.pageSize = event.pageSize;
@@ -483,6 +508,169 @@ export class EnrollmentBillingReconciliationReportComponent
     this.snackBar.open(message, 'Dismiss', {
       duration: 5000,
       panelClass: ['error-snackbar'],
+    });
+  }
+
+  private openDiscrepancyPrintWindow(): void {
+    const selectedTerm = this.filterForm.get('termFilter')?.value;
+    const selectedClass = this.filterForm.get('classFilter')?.value;
+    const termLabel = selectedTerm ? formatTermLabel(selectedTerm) : 'All Terms';
+    const classLabel = selectedClass?.name || 'All Classes';
+
+    const rows = this.discrepancyDetails
+      .map(
+        (detail, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${detail.studentNumber}</td>
+            <td>${detail.studentName}</td>
+            <td>${detail.className}</td>
+            <td>${detail.invoiceNumber || '-'}</td>
+            <td>${detail.balance !== null && detail.balance !== undefined ? detail.balance.toFixed(2) : '-'}</td>
+            <td>${detail.discrepancyMessage || 'Enrolled but not invoiced'}</td>
+          </tr>
+        `
+      )
+      .join('');
+
+    const html = `
+      <html>
+      <head>
+        <title>Discrepancy List</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; color: #111; }
+          h1 { margin: 0 0 8px; font-size: 20px; }
+          .meta { margin-bottom: 16px; font-size: 12px; color: #444; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; text-align: left; }
+          th { background: #f5f5f5; }
+        </style>
+      </head>
+      <body>
+        <h1>Enrollment vs Billing Discrepancy List</h1>
+        <div class="meta">
+          <div><strong>Generated:</strong> ${this.printDate}</div>
+          <div><strong>Term:</strong> ${termLabel}</div>
+          <div><strong>Class:</strong> ${classLabel}</div>
+          <div><strong>Total Discrepancies:</strong> ${this.discrepancyDetails.length}</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student No.</th>
+              <th>Student Name</th>
+              <th>Class</th>
+              <th>Invoice No.</th>
+              <th>Balance</th>
+              <th>Discrepancy</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const popup = window.open('', '_blank', 'width=1200,height=800');
+    if (!popup) {
+      this.snackBar.open('Popup blocked. Please allow popups and try again.', 'Dismiss', {
+        duration: 4000,
+      });
+      return;
+    }
+
+    popup.document.open();
+    popup.document.write(html);
+    popup.document.close();
+    popup.focus();
+    setTimeout(() => popup.print(), 300);
+  }
+
+  private downloadDiscrepanciesPdf(): void {
+    const selectedTerm = this.filterForm.get('termFilter')?.value;
+    const selectedClass = this.filterForm.get('classFilter')?.value;
+    const termLabel = selectedTerm ? formatTermLabel(selectedTerm) : 'All Terms';
+    const classLabel = selectedClass?.name || 'All Classes';
+
+    const doc = new jsPDF() as any;
+    const head = [[
+      '#',
+      'Student Number',
+      'Student Name',
+      'Class',
+      'Invoice Number',
+      'Balance',
+      'Discrepancy',
+    ]];
+    const body = this.discrepancyDetails.map((detail, index) => [
+      index + 1,
+      detail.studentNumber,
+      detail.studentName,
+      detail.className,
+      detail.invoiceNumber || '-',
+      detail.balance !== null && detail.balance !== undefined
+        ? detail.balance.toFixed(2)
+        : '-',
+      detail.discrepancyMessage || 'Enrolled but not invoiced',
+    ]);
+
+    doc.setFontSize(20);
+    doc.setFont(undefined, 'bold');
+    doc.text('Enrollment vs Billing Discrepancies', 14, 20);
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Term: ${termLabel}`, 14, 30);
+    doc.text(`Class: ${classLabel}`, 14, 37);
+    doc.text(`Total Discrepancies: ${this.discrepancyDetails.length}`, 14, 44);
+
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 52);
+
+    doc.autoTable({
+      head,
+      body,
+      startY: 60,
+      theme: 'striped',
+      headStyles: {
+        fillColor: [63, 81, 181],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 12,
+      },
+      bodyStyles: {
+        fontSize: 10,
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      styles: {
+        cellPadding: 4,
+        fontSize: 10,
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1,
+      },
+      columnStyles: {
+        0: { cellWidth: 12 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 26 },
+        4: { cellWidth: 30 },
+        5: { cellWidth: 20 },
+        6: { cellWidth: 30 },
+      },
+    });
+
+    const termNamePart = selectedTerm
+      ? `Term_${selectedTerm.num}_${selectedTerm.year}`
+      : 'All_Terms';
+    const classNamePart = classLabel.replace(/\s+/g, '_');
+    const fileName = `Enrollment_Billing_Discrepancies_${classNamePart}_${termNamePart}.pdf`;
+    doc.save(fileName);
+
+    this.snackBar.open('Discrepancy PDF downloaded successfully!', 'Dismiss', {
+      duration: 3000,
     });
   }
 }
