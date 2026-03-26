@@ -245,7 +245,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Load system settings and initialize school information observables
     const settings$ = this.systemSettingsService.getSettings().pipe(
       catchError(error => {
-        console.error('Error loading system settings:', error);
+        console.warn('System settings unavailable, using defaults.');
         // Return default settings on error
         return of({
           schoolName: 'Junior High School',
