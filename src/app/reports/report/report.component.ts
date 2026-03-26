@@ -23,6 +23,7 @@ import { Actions, ofType } from '@ngrx/effects';
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { ReportsService } from '../services/reports.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 // pdfMake.vfs = pdfFonts.pdfMake.vfs; // Commented out as per original
 
@@ -101,6 +102,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     private roleAccess: RoleAccessService,
     private actions$: Actions,
     private reportsService: ReportsService,
+    private snackBar: MatSnackBar,
   ) {}
 
   commentForm!: FormGroup;
@@ -211,9 +213,11 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   saveComment() {
-    // Note: Backend can now create new reports if they don't exist
-    // So we allow saving comments even on unsaved reports
     if (this.comment?.valid && !this.savingHeadComment) {
+      if (!this.isReportSaved) {
+        this.showReportMustBeSavedMessage();
+        return;
+      }
       // Ensure we have a valid report with all required properties
       if (!this.report || !this.report.report) {
         console.error('Cannot save head comment: Report data is incomplete', {
@@ -256,9 +260,11 @@ export class ReportComponent implements OnInit, OnDestroy {
 
   // Save teacher / class comment directly on the report
   saveTeacherComment(event?: Event) {
-    // Note: Backend can now create new reports if they don't exist
-    // So we allow saving comments even on unsaved reports
     if (this.teacherComment?.valid && !this.savingTeacherComment) {
+      if (!this.isReportSaved) {
+        this.showReportMustBeSavedMessage();
+        return;
+      }
       const comm: string = this.normalizeRoleComment(this.teacherComment.value);
 
       // Ensure we have a valid report with all required properties
@@ -419,7 +425,37 @@ export class ReportComponent implements OnInit, OnDestroy {
     return (this.teacherComment?.value || '').length;
   }
 
+  canSaveTeacherComment(): boolean {
+    const current = this.normalizeRoleComment(this.teacherComment?.value || '');
+    const saved = this.normalizeRoleComment(this.report?.report?.classTrComment || '');
+    return (
+      this.isReportSaved &&
+      this.teacherComment?.valid &&
+      !this.savingTeacherComment &&
+      current !== saved
+    );
+  }
+
+  canSaveHeadComment(): boolean {
+    const current = this.normalizeRoleComment(this.comment?.value || '');
+    const saved = this.normalizeRoleComment(this.report?.report?.headComment || '');
+    return (
+      this.isReportSaved &&
+      this.comment?.valid &&
+      !this.savingHeadComment &&
+      current !== saved
+    );
+  }
+
   private normalizeRoleComment(value: string): string {
     return (value || '').trim().slice(0, ReportComponent.MAX_ROLE_COMMENT_LENGTH);
+  }
+
+  private showReportMustBeSavedMessage(): void {
+    this.snackBar.open(
+      'Comments cannot be saved until reports for this class are saved by admin.',
+      'Dismiss',
+      { duration: 4500 }
+    );
   }
 }

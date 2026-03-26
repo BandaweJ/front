@@ -89,6 +89,17 @@
           <mat-icon>auto_awesome</mat-icon>
           {{ generatingTeacherComment ? 'Generating...' : 'Generate with AI' }}
         </button>
+        <button
+          *ngIf="canEditCommentAndNotStudent$ | async"
+          mat-icon-button
+          type="button"
+          color="accent"
+          (click)="saveTeacherComment($event)"
+          [disabled]="!canSaveTeacherComment()"
+          matTooltip="Save form teacher comment"
+        >
+          <mat-icon>save</mat-icon>
+        </button>
         <mat-spinner *ngIf="savingTeacherComment" diameter="18"></mat-spinner>
         <span *ngIf="savingTeacherComment" class="saving-text">Saving...</span>
         <span
@@ -122,6 +133,12 @@
           Keep comment concise for report card space.
         </mat-error>
       </mat-form-field>
+      <p
+        *ngIf="(canEditCommentAndNotStudent$ | async) && !isReportSaved"
+        class="missing-comment-cue"
+      >
+        Comments cannot be saved until reports for this class are saved by admin.
+      </p>
 
       <!-- Display mode for authorised staff -->
       <p
@@ -158,6 +175,17 @@
           <mat-icon>auto_awesome</mat-icon>
           {{ generatingHeadComment ? 'Generating...' : 'Generate with AI' }}
         </button>
+        <button
+          *ngIf="canEditCommentAndNotStudent$ | async"
+          mat-icon-button
+          type="button"
+          color="accent"
+          (click)="saveComment()"
+          [disabled]="!canSaveHeadComment()"
+          matTooltip="Save head comment"
+        >
+          <mat-icon>save</mat-icon>
+        </button>
         <mat-spinner *ngIf="savingHeadComment" diameter="18"></mat-spinner>
         <span *ngIf="savingHeadComment" class="saving-text">Saving...</span>
         <span
@@ -180,6 +208,12 @@
           <mat-error *ngIf="commentForm.get('comment')?.hasError('required')">Comment is required</mat-error>
           <mat-error *ngIf="commentForm.get('comment')?.hasError('maxlength')">Keep comment concise for report card space.</mat-error>
         </mat-form-field>
+        <p
+          *ngIf="(canEditCommentAndNotStudent$ | async) && !isReportSaved"
+          class="missing-comment-cue"
+        >
+          Comments cannot be saved until reports for this class are saved by admin.
+        </p>
 
         <p *ngIf="(canEditCommentAndNotStudent$ | async) && report.report.headComment && !editState" class="displayed-head-comment">
           {{ report.report.headComment }}
