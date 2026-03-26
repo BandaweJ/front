@@ -89,6 +89,8 @@
           <mat-icon>auto_awesome</mat-icon>
           {{ generatingTeacherComment ? 'Generating...' : 'Generate with AI' }}
         </button>
+        <mat-spinner *ngIf="savingTeacherComment" diameter="18"></mat-spinner>
+        <span *ngIf="savingTeacherComment" class="saving-text">Saving...</span>
         <span
           *ngIf="showAiSourceBadge && teacherCommentSource"
           class="ai-source-badge"
@@ -111,8 +113,14 @@
           cdkAutosizeMinRows="2"
           cdkAutosizeMaxRows="6"
           [formControl]="teacherCommentControl"
+          [maxlength]="maxRoleCommentLength"
+          [disabled]="savingTeacherComment"
           (blur)="saveTeacherComment()"
         ></textarea>
+        <mat-hint align="end">{{ teacherCommentLength }}/{{ maxRoleCommentLength }}</mat-hint>
+        <mat-error *ngIf="teacherCommentControl.hasError('maxlength')">
+          Keep comment concise for report card space.
+        </mat-error>
       </mat-form-field>
 
       <!-- Display mode for authorised staff -->
@@ -150,6 +158,8 @@
           <mat-icon>auto_awesome</mat-icon>
           {{ generatingHeadComment ? 'Generating...' : 'Generate with AI' }}
         </button>
+        <mat-spinner *ngIf="savingHeadComment" diameter="18"></mat-spinner>
+        <span *ngIf="savingHeadComment" class="saving-text">Saving...</span>
         <span
           *ngIf="showAiSourceBadge && headCommentSource"
           class="ai-source-badge"
@@ -163,8 +173,12 @@
           class="full-width-textarea">
           <mat-label>Type Headmaster's Comment here</mat-label>
           <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="3" cdkAutosizeMaxRows="7" formControlName="comment"
+            [maxlength]="maxRoleCommentLength"
+            [disabled]="savingHeadComment"
             (blur)="saveComment()"></textarea>
+          <mat-hint align="end">{{ headCommentLength }}/{{ maxRoleCommentLength }}</mat-hint>
           <mat-error *ngIf="commentForm.get('comment')?.hasError('required')">Comment is required</mat-error>
+          <mat-error *ngIf="commentForm.get('comment')?.hasError('maxlength')">Keep comment concise for report card space.</mat-error>
         </mat-form-field>
 
         <p *ngIf="(canEditCommentAndNotStudent$ | async) && report.report.headComment && !editState" class="displayed-head-comment">

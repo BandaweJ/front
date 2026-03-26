@@ -106,6 +106,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   failedSaveIndices = new Set<number>();
   failedSaveErrors = new Map<number, string>();
   private readonly commentTone: 'encouraging' | 'balanced' | 'firm' = 'balanced';
+  isOffline = typeof navigator !== 'undefined' ? !navigator.onLine : false;
 
   // Default fallback comments
   defaultCommentOptions: string[] = [
@@ -307,6 +308,20 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         filter(() => this.pendingMarks.getPendingCount() > 0)
       )
       .subscribe(() => this.retryPendingMarks());
+
+    fromEvent(window, 'online')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.isOffline = false;
+        this.cdr.detectChanges();
+      });
+
+    fromEvent(window, 'offline')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.isOffline = true;
+        this.cdr.detectChanges();
+      });
   }
 
   ngAfterViewInit(): void {
