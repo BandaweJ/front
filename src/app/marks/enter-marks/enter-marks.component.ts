@@ -357,37 +357,18 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.marksFormArray.push(markFormGroup);
 
-      combineLatest([
-        markControl.valueChanges.pipe(
-          debounceTime(300),
-          distinctUntilChanged()
-        ),
-        commentControl.valueChanges.pipe(
-          debounceTime(300),
-          distinctUntilChanged()
-        ),
-      ])
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => {
-          this.updateProgressBar();
-        });
     });
   }
 
   private updateProgressBar(): void {
-    let completedCount = 0;
-    this.dataSource.data.forEach((markModel, index) => {
-      const formGroup = this.marksFormArray.at(
-        index
-      ) as FormGroup<MarkFormGroup>;
-      if (
-        formGroup &&
-        formGroup.controls.mark.valid &&
-        formGroup.controls.comment.valid
-      ) {
-        completedCount++;
-      }
-    });
+    // Progress reflects persisted server state only (non-optimistic).
+    const completedCount = this.dataSource.data.filter((markModel) => {
+      const hasMark =
+        typeof markModel.mark === 'number' && markModel.mark >= 0 && markModel.mark <= 100;
+      const hasComment =
+        typeof markModel.comment === 'string' && markModel.comment.trim().length > 0;
+      return hasMark && hasComment;
+    }).length;
     this.value = completedCount;
   }
 
@@ -684,11 +665,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       this.savingMarks.delete(index);
       this.failedSaveIndices.delete(index);
       this.failedSaveErrors.delete(index);
-      this.savedMarks.add(index);
-      setTimeout(() => {
-        this.savedMarks.delete(index);
-        this.cdr.detectChanges();
-      }, 2000);
       this.snackBar.open(
         'Offline: mark saved locally and queued for sync.',
         'Dismiss',
