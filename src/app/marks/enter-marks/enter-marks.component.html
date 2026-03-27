@@ -86,6 +86,11 @@
       <span>Offline mode: marks are stored locally and will sync when connection returns.</span>
     </div>
 
+    <div class="sync-status-banner">
+      <mat-icon>sync</mat-icon>
+      <span>Last sync: {{ lastSyncLabel }}</span>
+    </div>
+
     <div *ngIf="dataSource.data.length > 0; else noDataMessage">
       <table mat-table [dataSource]="dataSource" matSort>
         <ng-container matColumnDef="studentNumber">
