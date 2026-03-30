@@ -27,6 +27,8 @@
       <span><b>Position in Class: </b> <span class="blue-text"> {{ report.report.classPosition }} / {{
           report.report.classSize }} </span> </span>
 
+      <span><b>Position in Form: </b> <span class="blue-text"> {{ report.report.formPosition }} </span> </span>
+
       <span *ngIf="report.name.charAt(0) === '5' || report.name.charAt(0) === '6'"><b>Points: </b> <span
           class="blue-text"> {{ report.report.points }} </span> </span>
 
