@@ -227,7 +227,8 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges
 
   /**
    * Checks if a report can be displayed based on the student's invoice balance for that term.
-   * A report is displayed only if the balance on the corresponding invoice is zero.
+   * A report is displayed when there is no outstanding debt for the term.
+   * Zero balance and credit balances (negative) are both allowed.
    *
    * @param report The ReportsModel object for the report being viewed.
    * @param allInvoices An array of all invoices available for the student.
@@ -253,9 +254,9 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges
     }
 
     if (matchingInvoice) {
-      // Check if the balance on the found invoice is zero
-
-      return +matchingInvoice.balance === 0;
+      // Allow report when debt is cleared or overpaid (credit).
+      const balance = Number(matchingInvoice.balance);
+      return Number.isFinite(balance) ? balance <= 0 : true;
     } else {
       // No matching invoice found for this report's term and year.
       // As per the requirement "display the report only if the balance on an invoice... is zero",
