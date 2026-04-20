@@ -6,6 +6,12 @@ import { EnrolStats } from '../models/enrol-stats.model';
 import { environment } from 'src/environments/environment';
 import { StudentsSummary } from '../models/students-summary.model';
 
+export interface MigrateClassResponse {
+  result: boolean;
+  message?: string;
+  migratedCount?: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -82,12 +88,12 @@ export class EnrolService {
     toNum: number,
     toYear: number,
     toTermId: number | undefined
-  ): Observable<boolean> {
+  ): Observable<MigrateClassResponse> {
     const query = new URLSearchParams();
     if (fromTermId != null) query.set('fromTermId', String(fromTermId));
     if (toTermId != null) query.set('toTermId', String(toTermId));
     const suffix = query.toString() ? `?${query.toString()}` : '';
-    return this.httpClient.get<boolean>(
+    return this.httpClient.get<MigrateClassResponse>(
       `${this.baseURL}migrate/${fromName}/${fromNum}/${fromYear}/${toName}/${toNum}/${toYear}${suffix}`
     );
   }

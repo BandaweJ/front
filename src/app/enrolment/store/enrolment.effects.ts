@@ -380,17 +380,11 @@ export class EnrolmentEffects {
             data.toTermId,
           )
           .pipe(
-            tap((data) =>
-              this.snackBar.open('Students moved to New Class', 'OK', {
-                duration: 3000,
-                verticalPosition: 'top',
-                horizontalPosition: 'center',
-              })
-            ),
-            map((result) => {
+            map((response) => {
               return fromEnrolmentActions.migrateClassActions.migrateClassEnrolmentSuccess(
                 {
-                  result,
+                  result: !!response?.result,
+                  message: response?.message,
                 }
               );
             }),

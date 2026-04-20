@@ -196,6 +196,7 @@ export const UnenrolStudentActions = createActionGroup({
 export const migrateClassActions = createActionGroup({
   source: 'Migrate Class Enrolment Component',
   events: {
+    resetMigrateClassResult: emptyProps(),
     migrateClassEnrolment: props<{
       fromName: string;
       fromNum: number;
@@ -206,7 +207,7 @@ export const migrateClassActions = createActionGroup({
       toYear: number;
       toTermId?: number;
     }>(),
-    migrateClassEnrolmentSuccess: props<{ result: boolean }>(),
+    migrateClassEnrolmentSuccess: props<{ result: boolean; message?: string }>(),
     migrateClassEnrolmentFail: props<{ error: HttpErrorResponse }>(),
   },
 });

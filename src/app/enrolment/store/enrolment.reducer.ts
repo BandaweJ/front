@@ -19,7 +19,8 @@ export interface State {
   deleteSuccess: boolean | null;
   // addSuccess: boolean | null;
   enrolStats: EnrolStats | null;
-  migrateClassResult: boolean;
+  migrateClassResult: boolean | null;
+  migrateClassMessage: string;
   totalEnrolment: StudentsSummary | null;
 
   currentEnrolment: EnrolsModel | null;
@@ -42,7 +43,8 @@ export const initialState: State = {
   deleteSuccess: null,
 
   enrolStats: null,
-  migrateClassResult: false,
+  migrateClassResult: null,
+  migrateClassMessage: '',
   totalEnrolment: null,
 
   currentEnrolment: null,
@@ -165,34 +167,9 @@ export const enrolmentReducer = createReducer(
     errorMessage: '',
     terms: [
       ...state.terms.map((trm) =>
-        trm.id != null && term.id != null
-          ? trm.id === term.id
-            ? term
-            : trm
-          : trm.num === term.num && trm.year === term.year
-            ? term
-            : trm
+        trm.num === term.num && trm.year === term.year ? term : trm
       ),
     ],
-  })),
-  on(enrolmentActions.deleteTermAction, (state) => ({
-    ...state,
-    isLoading: true,
-    errorMessage: '',
-  })),
-  on(enrolmentActions.deleteTermSuccess, (state, { term }) => ({
-    ...state,
-    isLoading: false,
-    terms: state.terms.filter((t) =>
-      t.id != null && term.id != null
-        ? t.id !== term.id
-        : !(t.num === term.num && t.year === term.year)
-    ),
-  })),
-  on(enrolmentActions.deleteTermFail, (state, { error }) => ({
-    ...state,
-    isLoading: false,
-    errorMessage: error.message,
   })),
   on(enrolmentActions.fetchTotalEnrols, (state) => ({
     ...state,
@@ -284,15 +261,18 @@ export const enrolmentReducer = createReducer(
       ...state,
       isLoading: true,
       errorMessage: '',
+      migrateClassResult: null,
+      migrateClassMessage: '',
     })
   ),
   on(
     enrolmentActions.migrateClassActions.migrateClassEnrolmentSuccess,
-    (state, { result }) => ({
+    (state, { result, message }) => ({
       ...state,
       isLoading: false,
       errorMessage: '',
       migrateClassResult: result,
+      migrateClassMessage: message || '',
     })
   ),
   on(
@@ -301,8 +281,15 @@ export const enrolmentReducer = createReducer(
       ...state,
       isLoading: false,
       errorMessage: error.message,
+      migrateClassResult: false,
+      migrateClassMessage: error.message || 'Class migration failed.',
     })
   ),
+  on(enrolmentActions.migrateClassActions.resetMigrateClassResult, (state) => ({
+    ...state,
+    migrateClassResult: null,
+    migrateClassMessage: '',
+  })),
   on(
     enrolmentActions.currentEnrolementActions.fetchCurrentEnrolment,
     (state) => ({

@@ -9,10 +9,16 @@ import {
   migrateClassActions,
 } from '../store/enrolment.actions';
 import { Observable, Subject, combineLatest } from 'rxjs';
-import { takeUntil, tap, map, startWith } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
 import { TermsModel } from '../models/terms.model';
 import { ClassesModel } from '../models/classes.model';
-import { selectClasses, selectTerms, selectEnrolErrorMsg, selectMigrateClassResult } from '../store/enrolment.selectors';
+import {
+  selectClasses,
+  selectTerms,
+  selectEnrolErrorMsg,
+  selectMigrateClassMessage,
+  selectMigrateClassResult,
+} from '../store/enrolment.selectors';
 import { formatTermLabel } from '../models/term-label.util';
 
 @Component({
@@ -26,7 +32,8 @@ export class MigrateClassEnrolmentComponent implements OnInit, OnDestroy {
   terms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
   errorMsg$!: Observable<string>;
-  migrateResult$!: Observable<boolean>;
+  migrateResult$!: Observable<boolean | null>;
+  migrateMessage$!: Observable<string>;
   
   isLoading = false;
   destroy$ = new Subject<void>();
@@ -43,6 +50,7 @@ export class MigrateClassEnrolmentComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeForm();
+    this.store.dispatch(migrateClassActions.resetMigrateClassResult());
     this.setupObservables();
   }
 
@@ -65,6 +73,7 @@ export class MigrateClassEnrolmentComponent implements OnInit, OnDestroy {
     this.classes$ = this.store.select(selectClasses);
     this.errorMsg$ = this.store.select(selectEnrolErrorMsg);
     this.migrateResult$ = this.store.select(selectMigrateClassResult);
+    this.migrateMessage$ = this.store.select(selectMigrateClassMessage);
 
     // Handle error messages
     this.errorMsg$.pipe(
@@ -79,19 +88,29 @@ export class MigrateClassEnrolmentComponent implements OnInit, OnDestroy {
       })
     ).subscribe();
 
-    // Handle migration result
-    this.migrateResult$.pipe(
+    // Handle migration outcome from backend response (non-optimistic feedback).
+    combineLatest([this.migrateResult$, this.migrateMessage$]).pipe(
       takeUntil(this.destroy$),
-      tap(result => {
-        if (result) {
-          this.snackBar.open('Class migration completed successfully!', 'Close', {
+      tap(([result, message]) => {
+        if (result === null) return;
+
+        const feedback = message?.trim()
+          ? message
+          : result
+            ? 'Class migration completed successfully.'
+            : 'No students were migrated.';
+
+        this.snackBar.open(feedback, 'Close', {
             duration: 5000,
-            panelClass: ['success-snackbar']
-          });
+            panelClass: [result ? 'success-snackbar' : 'warning-snackbar']
+        });
+
+        if (result) {
           this.migrateForm.reset();
-          this.isLoading = false;
-          this.cdr.markForCheck();
         }
+        this.isLoading = false;
+        this.store.dispatch(migrateClassActions.resetMigrateClassResult());
+        this.cdr.markForCheck();
       })
     ).subscribe();
   }
