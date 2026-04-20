@@ -13,7 +13,6 @@ import { takeUntil, tap, map, startWith } from 'rxjs/operators';
 import { TermsModel } from '../models/terms.model';
 import { ClassesModel } from '../models/classes.model';
 import { selectClasses, selectTerms, selectEnrolErrorMsg, selectMigrateClassResult } from '../store/enrolment.selectors';
-import { formatTermLabel } from '../models/term-label.util';
 
 @Component({
   selector: 'app-migrate-class-enrolment',
@@ -170,16 +169,27 @@ export class MigrateClassEnrolmentComponent implements OnInit, OnDestroy {
 
   canMigrate(): boolean {
     const fromName = this.fromName?.value;
-    const fromTerm = this.fromTerm?.value;
+    const fromTerm: TermsModel | null = this.fromTerm?.value;
     const toName = this.toName?.value;
-    const toTerm = this.toTerm?.value;
+    const toTerm: TermsModel | null = this.toTerm?.value;
 
-    // Check if all fields are filled and source != destination
-    return !!(fromName && fromTerm && toName && toTerm) && 
-           !(fromName === toName && fromTerm?.num === toTerm?.num && fromTerm?.year === toTerm?.year);
-  }
+    // Check if all fields are filled and source != destination.
+    // Prefer comparing by term id (regular and vacation can share num/year).
+    if (!(fromName && fromTerm && toName && toTerm)) {
+      return false;
+    }
 
-  formatTerm(term: TermsModel): string {
-    return formatTermLabel(term);
+    const sameClass = fromName === toName;
+    const sameTermById =
+      fromTerm.id != null &&
+      toTerm.id != null &&
+      Number(fromTerm.id) === Number(toTerm.id);
+    const sameTermByLegacyFields =
+      fromTerm.num === toTerm.num &&
+      fromTerm.year === toTerm.year &&
+      (fromTerm.type ?? 'regular') === (toTerm.type ?? 'regular');
+    const sameTerm = sameTermById || sameTermByLegacyFields;
+
+    return !(sameClass && sameTerm);
   }
 }
