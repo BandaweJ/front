@@ -17,6 +17,10 @@ import {
   FinanceDashboardSummary,
   FinanceDashboardSummaryFilters,
 } from '../models/finance-dashboard-summary.model';
+import {
+  BulkClassInvoiceRequest,
+  BulkClassInvoiceResponse,
+} from '../models/bulk-class-invoice.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsService {
@@ -98,6 +102,19 @@ export class PaymentsService {
     } catch (error) {
       return throwError(() => error);
     }
+  }
+
+  bulkInvoiceClass(
+    className: string,
+    num: number,
+    year: number,
+    request: BulkClassInvoiceRequest = {}
+  ): Observable<BulkClassInvoiceResponse> {
+    const encodedClassName = encodeURIComponent(className);
+    return this.httpClient.post<BulkClassInvoiceResponse>(
+      `${this.baseURL}invoice/bulk/class/${encodedClassName}/${num}/${year}`,
+      request
+    );
   }
   downloadInvoice(invoiceNumber: string): Observable<HttpResponse<Blob>> {
     return this.httpClient.get(

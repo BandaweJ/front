@@ -16,6 +16,7 @@ import {
   FinanceDashboardSummary,
   FinanceDashboardSummaryFilters,
 } from '../models/finance-dashboard-summary.model';
+import { BulkClassInvoiceResponse } from '../models/bulk-class-invoice.model';
 
 export const feesActions = createActionGroup({
   source: 'Fees Component',
@@ -56,6 +57,10 @@ export const invoiceActions = createActionGroup({
     saveInvoice: props<{ invoice: InvoiceModel }>(),
     saveInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     saveInvoiceFail: props<{ error: HttpErrorResponse }>(),
+
+    bulkInvoiceClass: props<{ className: string; num: number; year: number; termId?: number; dryRun?: boolean }>(),
+    bulkInvoiceClassSuccess: props<{ result: BulkClassInvoiceResponse }>(),
+    bulkInvoiceClassFail: props<{ error: HttpErrorResponse }>(),
 
     fetchInvoiceStats: props<{ num: number; year: number }>(),
     fetchInvoiceStatsSuccess: props<{ invoiceStats: InvoiceStatsModel[] }>(),

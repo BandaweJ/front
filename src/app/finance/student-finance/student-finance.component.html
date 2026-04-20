@@ -72,6 +72,26 @@
                    {{ (loadingInvoice$ | async) ? 'Generating...' : 'Generate Invoice' }}
                  </button>
 
+                 <mat-form-field appearance="outline" class="term-field">
+                   <mat-label>Class For Bulk Invoicing</mat-label>
+                   <input
+                     matInput
+                     [(ngModel)]="selectedClassName"
+                     placeholder="e.g. Form 1A"
+                     [disabled]="(bulkInvoiceLoading$ | async) || false" />
+                 </mat-form-field>
+
+                 <button
+                   mat-raised-button
+                   color="warn"
+                   (click)="runBulkInvoicing()"
+                   [disabled]="!canRunBulkInvoicing() || (bulkInvoiceLoading$ | async) || (loadingInvoice$ | async)"
+                   class="save-button">
+                   <mat-icon *ngIf="!(bulkInvoiceLoading$ | async)">groups</mat-icon>
+                   <mat-spinner *ngIf="bulkInvoiceLoading$ | async" diameter="20"></mat-spinner>
+                   {{ (bulkInvoiceLoading$ | async) ? 'Running Bulk Invoicing...' : 'Bulk Invoice Class' }}
+                 </button>
+
                  <button
                    mat-raised-button
                    color="accent"
@@ -126,6 +146,28 @@
     </div>
   </div>
 
+  <div
+    *ngIf="(bulkInvoiceResult$ | async) as bulkResult"
+    class="warning-container"
+    style="margin: 16px; padding: 16px; background-color: #e8f5e9; border: 1px solid #66bb6a; border-radius: 4px; display: flex; flex-direction: column; gap: 8px;">
+    <strong>
+      Bulk Invoicing Summary:
+      {{ bulkResult.successCount }}/{{ bulkResult.totalStudents }} successful
+      ({{ bulkResult.failureCount }} failed)
+    </strong>
+    <span>
+      Class {{ bulkResult.className }} - Term {{ bulkResult.termNum }} {{ bulkResult.year }} ({{ bulkResult.termType }})
+    </span>
+    <div *ngIf="bulkResult.failureCount > 0">
+      <strong>Failed Students</strong>
+      <div *ngFor="let row of bulkResult.results">
+        <span *ngIf="!row.success">
+          {{ row.studentNumber }} {{ row.studentName ? '(' + row.studentName + ')' : '' }}: {{ row.error }}
+        </span>
+      </div>
+    </div>
+  </div>
+
          <!-- Main Content -->
          <div *ngIf="!(loadingInvoice$ | async) && !(error$ | async)" class="main-content">
            <!-- Show side-by-side layout only when there's an invoice -->
@@ -141,7 +183,10 @@
                </mat-card-header>
 
                <mat-card-content>
-                 <app-billing [enrolment]="invoice.enrol"></app-billing>
+                <app-billing
+                  [enrolment]="invoice.enrol"
+                  [selectedTermType]="selectedTerm?.type">
+                </app-billing>
                </mat-card-content>
              </mat-card>
 

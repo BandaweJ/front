@@ -509,6 +509,38 @@ export class FinanceEffects {
     )
   );
 
+  bulkInvoiceClass$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.bulkInvoiceClass),
+      switchMap(({ className, num, year, termId, dryRun }) =>
+        this.paymentsService
+          .bulkInvoiceClass(className, num, year, { termId, dryRun })
+          .pipe(
+            tap((result) => {
+              const message = `Bulk invoicing complete: ${result.successCount}/${result.totalStudents} succeeded`;
+              this.snackBar.open(message, 'OK', {
+                duration: 5000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              });
+            }),
+            map((result) => invoiceActions.bulkInvoiceClassSuccess({ result })),
+            catchError((error: HttpErrorResponse) => {
+              const errorMessage =
+                error?.error?.message || error?.message || 'Bulk invoicing failed.';
+              this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+                duration: 5000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+                panelClass: ['error-snackbar'],
+              });
+              return of(invoiceActions.bulkInvoiceClassFail({ ...error }));
+            })
+          )
+      )
+    )
+  );
+
   fetchStudentOutstandingBalance$ = createEffect(() =>
     this.actions$.pipe(
       ofType(receiptActions.fetchStudentOutstandingBalance),

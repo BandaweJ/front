@@ -51,6 +51,7 @@ export class FeesComponent implements OnInit, OnDestroy {
   aLevelScienceFees: FeesModel[] = [];
   newStudentFees: FeesModel[] = [];
   optionalServiceFees: FeesModel[] = [];
+  vacationFees: FeesModel[] = [];
 
   private destroy$ = new Subject<void>();
   currentTheme: Theme = 'light';
@@ -96,6 +97,7 @@ export class FeesComponent implements OnInit, OnDestroy {
     this.aLevelScienceFees = [];
     this.newStudentFees = [];
     this.optionalServiceFees = [];
+    this.vacationFees = [];
 
     fees.forEach(fee => {
       switch (fee.name) {
@@ -134,6 +136,10 @@ export class FeesComponent implements OnInit, OnDestroy {
         case FeesNames.transportFee:
           this.optionalServiceFees.push(fee);
           break;
+        case FeesNames.vacationTuitionDay:
+        case FeesNames.vacationTuitionBoarder:
+          this.vacationFees.push(fee);
+          break;
       }
     });
   }
@@ -152,6 +158,8 @@ export class FeesComponent implements OnInit, OnDestroy {
       [FeesNames.developmentFee]: 'Development Fee',
       [FeesNames.foodFee]: 'Food Fee',
       [FeesNames.transportFee]: 'Transport Fee',
+      [FeesNames.vacationTuitionDay]: 'Vacation Day Tuition',
+      [FeesNames.vacationTuitionBoarder]: 'Vacation Boarder Tuition',
       [FeesNames.groomingFee]: 'Grooming Fee',
       [FeesNames.brokenFurnitureFee]: 'Broken Furniture Fee',
       [FeesNames.lostBooksFee]: 'Lost Books Fee',

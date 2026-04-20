@@ -8,6 +8,9 @@
           <h1>Enrollment Preferences</h1>
         </div>
         <p class="subtitle">Configure specific enrollment options for O Level and A Level students.</p>
+        <p class="subtitle" *ngIf="isVacationTerm">
+          Vacation term mode: only flat vacation tuition is charged (Day or Boarder). No food, transport, or other extra fees.
+        </p>
 
         <form [formGroup]="academicSettingsForm">
           <div class="academic-level-selection">
@@ -32,7 +35,7 @@
               <div class="header-cell">A Level</div>
             </div>
 
-            <div class="grid-row">
+            <div class="grid-row" *ngIf="!isVacationTerm">
               <div class="label-cell">New Comer?</div>
               <div class="control-cell">
                 <mat-checkbox formControlName="oLevelNewComer" color="primary">O Level New Comer</mat-checkbox>
@@ -42,7 +45,7 @@
               </div>
             </div>
 
-            <div class="grid-row">
+            <div class="grid-row" *ngIf="!isVacationTerm">
               <div class="label-cell">Additional Fees</div>
               <div class="control-cell">
               </div>

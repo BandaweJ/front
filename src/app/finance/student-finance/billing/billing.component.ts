@@ -23,6 +23,7 @@ import {
   selectIsNewComer,
 } from '../../store/finance.selector';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
+import { TermType } from 'src/app/enrolment/models/terms.model';
 import { BillModel } from '../../models/bill.model';
 import { SharedService } from 'src/app/shared.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -65,6 +66,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   isNewComer$ = this.store.select(selectIsNewComer);
   isScienceStudent: boolean = false;
   @Input() enrolment: EnrolsModel | undefined = undefined;
+  @Input() selectedTermType: TermType | undefined;
   selectedBills: BillModel[] = []; // Bills already associated with the invoice from backend
   toBill: BillModel[] = []; // Temporary staging area for bills to be processed on save
   currentInvoice: any = null; // Store current invoice for accessing student information
@@ -72,6 +74,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   academicLevel!: 'O Level' | 'A Level'; // Tracks currently selected academic level for UI logic
   showTransportFoodOptions: boolean = false; // Controls visibility of transport/food section
   showMiscellaneousCharges: boolean = true; // Controls visibility of miscellaneous charges section
+  isVacationTerm: boolean = false; // Vacation terms only allow flat tuition by residence
 
   academicSettingsForm!: FormGroup;
   accommodationOptions = Object.values(Residence); // Use Object.values for enum strings
@@ -245,6 +248,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         if (this.fees.length > 0) {
           this.populateFormAndToBillFromSelectedBills(this.selectedBills);
         }
+        this.applyVacationBillingRules();
         this.cdr.markForCheck();
       })
     );
@@ -422,6 +426,17 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       this.oLevelAccommodationType.valueChanges
         .pipe(distinctUntilChanged())
         .subscribe((value: Residence | null) => {
+          if (this.isVacationTerm) {
+            this.removeFeeFromToBill(this.findFee('vacationTuitionDay'));
+            this.removeFeeFromToBill(this.findFee('vacationTuitionBoarder'));
+            if (value === Residence.Day) {
+              this.addFeeToToBill(this.findFee('vacationTuitionDay'));
+            } else if (value === Residence.Boarder) {
+              this.addFeeToToBill(this.findFee('vacationTuitionBoarder'));
+            }
+            return;
+          }
+
           this.removeFeeFromToBill(this.currentOLevelAccommodationFee);
           this.currentOLevelAccommodationFee = undefined;
 
@@ -452,6 +467,17 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       this.aLevelAccommodationType.valueChanges
         .pipe(distinctUntilChanged())
         .subscribe((value: Residence | null) => {
+          if (this.isVacationTerm) {
+            this.removeFeeFromToBill(this.findFee('vacationTuitionDay'));
+            this.removeFeeFromToBill(this.findFee('vacationTuitionBoarder'));
+            if (value === Residence.Day) {
+              this.addFeeToToBill(this.findFee('vacationTuitionDay'));
+            } else if (value === Residence.Boarder) {
+              this.addFeeToToBill(this.findFee('vacationTuitionBoarder'));
+            }
+            return;
+          }
+
           this.removeFeeFromToBill(this.currentALevelAccommodationFee);
           this.currentALevelAccommodationFee = undefined;
 
@@ -506,6 +532,86 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       this.transportOption.disable({ emitEvent: false });
       this.transportOption.setValue(false, { emitEvent: false });
       this.removeFeeFromToBill(this.findFee('transportFee'));
+    }
+  }
+
+  private getVacationTermState(): boolean {
+    if (this.selectedTermType) {
+      return this.selectedTermType === 'vacation';
+    }
+    const invoiceTermType = this.currentInvoice?.enrol?.term?.type;
+    const inputTermType = (this.enrolment as any)?.term?.type;
+    return invoiceTermType === 'vacation' || inputTermType === 'vacation';
+  }
+
+  private applyVacationBillingRules(): void {
+    const isVacation = this.getVacationTermState();
+    this.isVacationTerm = isVacation;
+
+    if (!isVacation) {
+      this.showMiscellaneousCharges = true;
+      this.academicSettingsForm.get('oLevelNewComer')?.enable({ emitEvent: false });
+      this.academicSettingsForm.get('aLevelNewComer')?.enable({ emitEvent: false });
+      this.academicSettingsForm.get('aLevelScienceLevy')?.enable({ emitEvent: false });
+      this.academicSettingsForm.get('groomingFee')?.enable({ emitEvent: false });
+      this.academicSettingsForm.get('brokenFurnitureFee')?.enable({ emitEvent: false });
+      this.academicSettingsForm.get('lostBooksFee')?.enable({ emitEvent: false });
+      this.academicSettingsForm.get('miscellaneousCharge')?.enable({ emitEvent: false });
+      this.accommodationTypeTrigger$.next();
+      return;
+    }
+
+    this.showTransportFoodOptions = false;
+    this.showMiscellaneousCharges = false;
+
+    const controlsToReset = [
+      'oLevelNewComer',
+      'aLevelNewComer',
+      'aLevelScienceLevy',
+      'foodOption',
+      'transportOption',
+      'groomingFee',
+      'brokenFurnitureFee',
+      'lostBooksFee',
+      'miscellaneousCharge',
+    ];
+    controlsToReset.forEach((name) => {
+      const control = this.academicSettingsForm.get(name);
+      control?.setValue(false, { emitEvent: false });
+      control?.disable({ emitEvent: false });
+    });
+
+    [
+      'deskFee',
+      'oLevelApplicationFee',
+      'aLevelApplicationFee',
+      'aLevelScienceFee',
+      'alevelScienceFee',
+      'oLevelScienceFee',
+      'foodFee',
+      'transportFee',
+      'groomingFee',
+      'brokenFurnitureFee',
+      'lostBooksFee',
+      'miscellaneousCharge',
+      'oLevelTuitionDay',
+      'oLevelTuitionBoarder',
+      'aLevelTuitionDay',
+      'aLevelTuitionBoarder',
+    ].forEach((feeName) => this.removeFeeFromToBill(this.findFee(feeName)));
+
+    const activeAccommodation =
+      this.academicLevel === 'A Level'
+        ? this.aLevelAccommodationType.value
+        : this.oLevelAccommodationType.value;
+
+    this.removeFeeFromToBill(this.findFee('vacationTuitionDay'));
+    this.removeFeeFromToBill(this.findFee('vacationTuitionBoarder'));
+
+    if (activeAccommodation === Residence.Day) {
+      this.addFeeToToBill(this.findFee('vacationTuitionDay'));
+    } else if (activeAccommodation === Residence.Boarder) {
+      this.addFeeToToBill(this.findFee('vacationTuitionBoarder'));
     }
   }
 
@@ -657,10 +763,25 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       bills,
       'oLevelTuitionBoarder'
     );
+    const vacationDayBill = findBillByFeeName(bills, 'vacationTuitionDay');
+    const vacationBoarderBill = findBillByFeeName(
+      bills,
+      'vacationTuitionBoarder'
+    );
     const oLevelDayFee = findFee('oLevelTuitionDay');
     const oLevelBoarderFee = findFee('oLevelTuitionBoarder');
+    const vacationDayFee = findFee('vacationTuitionDay');
+    const vacationBoarderFee = findFee('vacationTuitionBoarder');
 
-    if (oLevelTuitionDayBill) {
+    if (vacationDayBill) {
+      formUpdates['oLevelAccommodationType'] = Residence.Day;
+      addBillToInitial(vacationDayBill, vacationDayFee);
+      this.currentOLevelAccommodationFee = vacationDayFee;
+    } else if (vacationBoarderBill) {
+      formUpdates['oLevelAccommodationType'] = Residence.Boarder;
+      addBillToInitial(vacationBoarderBill, vacationBoarderFee);
+      this.currentOLevelAccommodationFee = vacationBoarderFee;
+    } else if (oLevelTuitionDayBill) {
       formUpdates['oLevelAccommodationType'] = Residence.Day;
       addBillToInitial(oLevelTuitionDayBill, oLevelDayFee);
       this.currentOLevelAccommodationFee = oLevelDayFee;
@@ -681,7 +802,15 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     const aLevelDayFee = findFee('aLevelTuitionDay');
     const aLevelBoarderFee = findFee('aLevelTuitionBoarder');
 
-    if (aLevelTuitionDayBill) {
+    if (vacationDayBill) {
+      formUpdates['aLevelAccommodationType'] = Residence.Day;
+      addBillToInitial(vacationDayBill, vacationDayFee);
+      this.currentALevelAccommodationFee = vacationDayFee;
+    } else if (vacationBoarderBill) {
+      formUpdates['aLevelAccommodationType'] = Residence.Boarder;
+      addBillToInitial(vacationBoarderBill, vacationBoarderFee);
+      this.currentALevelAccommodationFee = vacationBoarderFee;
+    } else if (aLevelTuitionDayBill) {
       formUpdates['aLevelAccommodationType'] = Residence.Day;
       addBillToInitial(aLevelTuitionDayBill, aLevelDayFee);
       this.currentALevelAccommodationFee = aLevelDayFee;
@@ -748,9 +877,15 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     // Ensure academic level controls are properly toggled based on determined level
     this.toggleAcademicLevelControls(determinedLevel);
     this.accommodationTypeTrigger$.next();
+    this.applyVacationBillingRules();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['selectedTermType']) {
+      this.applyVacationBillingRules();
+      this.cdr.markForCheck();
+    }
+
     if (changes['enrolment']) {
       this.cdr.markForCheck();
       
@@ -799,6 +934,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       // Trigger academic level controls to enable/disable based on determined level
       this.toggleAcademicLevelControls(determinedLevel);
       this.accommodationTypeTrigger$.next();
+      this.applyVacationBillingRules();
       
       this.cdr.markForCheck();
     }
@@ -825,6 +961,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     this.academicLevel = level;
     this.toggleAcademicLevelControls(level);
     this.accommodationTypeTrigger$.next(); // Trigger to update UI based on reset
+    this.applyVacationBillingRules();
   }
 
   /**

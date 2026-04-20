@@ -20,6 +20,7 @@ import { ExemptionModel } from '../models/exemption.model';
 import { FinanceDashboardSummary } from '../models/finance-dashboard-summary.model';
 import { ExemptionType } from '../enums/exemption-type.enum';
 import { FeesNames } from '../enums/fees-names.enum';
+import { BulkClassInvoiceResponse } from '../models/bulk-class-invoice.model';
 
 export interface State {
   fees: FeesModel[];
@@ -68,6 +69,8 @@ export interface State {
   financeDashboardSummary: FinanceDashboardSummary | null;
   loadingFinanceDashboardSummary: boolean;
   financeDashboardSummaryError: string | null;
+  bulkInvoiceResult: BulkClassInvoiceResponse | null;
+  bulkInvoiceLoading: boolean;
 }
 
 export const initialState: State = {
@@ -112,6 +115,8 @@ export const initialState: State = {
   financeDashboardSummary: null,
   loadingFinanceDashboardSummary: false,
   financeDashboardSummaryError: null,
+  bulkInvoiceResult: null,
+  bulkInvoiceLoading: false,
 };
 
 export const financeReducer = createReducer(
@@ -329,6 +334,24 @@ export const financeReducer = createReducer(
     ...state,
     isLoading: false,
     errorMessage: error?.error?.message ?? error?.message ?? 'Failed to save invoice.',
+  })),
+  on(invoiceActions.bulkInvoiceClass, (state) => ({
+    ...state,
+    bulkInvoiceLoading: true,
+    bulkInvoiceResult: null,
+    errorMessage: '',
+  })),
+  on(invoiceActions.bulkInvoiceClassSuccess, (state, { result }) => ({
+    ...state,
+    bulkInvoiceLoading: false,
+    bulkInvoiceResult: result,
+    errorMessage: '',
+  })),
+  on(invoiceActions.bulkInvoiceClassFail, (state, { error }) => ({
+    ...state,
+    bulkInvoiceLoading: false,
+    errorMessage:
+      error?.error?.message ?? error?.message ?? 'Failed to run bulk invoicing.',
   })),
   on(invoiceActions.fetchInvoiceStats, (state) => ({
     ...state,
