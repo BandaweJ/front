@@ -1304,7 +1304,8 @@ const getSelectedTermForRevenueRecognition = (
     if (!filters.termId || !allTerms || allTerms.length === 0) {
       return null;
     }
-    const [numStr, yearStr] = filters.termId.split('-');
+    const termIdValue = String(filters.termId);
+    const [numStr, yearStr] = termIdValue.split('-');
     const num = parseInt(numStr, 10);
     const year = parseInt(yearStr, 10);
     return allTerms.find((t) => t.num === num && t.year === year) || null;
