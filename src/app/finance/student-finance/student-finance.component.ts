@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { take, takeUntil, filter } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
 import { StudentsModel } from 'src/app/registration/models/students.model';
@@ -11,13 +11,10 @@ import { invoiceActions } from '../store/finance.actions';
 import { InvoiceModel } from '../models/invoice.model';
 import {
   selectedStudentInvoice,
-  selectBulkInvoiceLoading,
-  selectBulkInvoiceResult,
   selectFechInvoiceError,
   selectLoadingInvoice,
   selectInvoiceWarning,
 } from '../store/finance.selector';
-import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { ThemeService, Theme } from '../../services/theme.service';
 import { SharedModule } from '../../shared/shared.module';
 import { BillingComponent } from './billing/billing.component';
@@ -31,7 +28,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
-import { BulkClassInvoiceResponse } from '../models/bulk-class-invoice.model';
+import { BulkClassInvoicingComponent } from './bulk-class-invoicing/bulk-class-invoicing.component';
 
 @Component({
   selector: 'app-student-finance',
@@ -51,6 +48,7 @@ import { BulkClassInvoiceResponse } from '../models/bulk-class-invoice.model';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatInputModule,
+    BulkClassInvoicingComponent,
   ],
   templateUrl: './student-finance.component.html',
   styleUrls: ['./student-finance.component.scss'],
@@ -63,29 +61,23 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
   loadingInvoice$: Observable<boolean>;
   error$: Observable<string | null>;
   invoiceWarning$: Observable<{ message: string; voidedInvoiceNumber?: string; voidedAt?: Date; voidedBy?: string } | null>;
-  bulkInvoiceResult$: Observable<BulkClassInvoiceResponse | null>;
-  bulkInvoiceLoading$: Observable<boolean>;
   
   selectedTerm: TermsModel | null = null;
   selectedStudentNumber: string | null = null;
   selectedStudent: StudentsModel | null = null;
-  selectedClassName = '';
 
   private destroy$ = new Subject<void>();
   currentTheme: Theme = 'light';
 
   constructor(
     private store: Store,
-    public themeService: ThemeService,
-    private cdr: ChangeDetectorRef
+    public themeService: ThemeService
   ) {
     this.terms$ = this.store.select(selectTerms);
     this.invoice$ = this.store.select(selectedStudentInvoice);
     this.loadingInvoice$ = this.store.select(selectLoadingInvoice);
     this.error$ = this.store.select(selectFechInvoiceError);
     this.invoiceWarning$ = this.store.select(selectInvoiceWarning);
-    this.bulkInvoiceResult$ = this.store.select(selectBulkInvoiceResult);
-    this.bulkInvoiceLoading$ = this.store.select(selectBulkInvoiceLoading);
   }
 
   ngOnInit(): void {
@@ -144,31 +136,10 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
            });
          }
 
-  runBulkInvoicing(): void {
-    const className = this.selectedClassName.trim();
-    if (!this.selectedTerm || !className) {
-      return;
-    }
-
-    this.store.dispatch(
-      invoiceActions.bulkInvoiceClass({
-        className,
-        num: this.selectedTerm.num,
-        year: this.selectedTerm.year,
-        termId: this.selectedTerm.id,
-      })
-    );
-  }
-
-  canRunBulkInvoicing(): boolean {
-    return !!this.selectedTerm && this.selectedClassName.trim().length > 0;
-  }
-
   clearSelection(): void {
     this.selectedStudent = null;
     this.selectedStudentNumber = null;
     this.selectedTerm = null;
-    this.selectedClassName = '';
   }
 
   isFormValid(): boolean {

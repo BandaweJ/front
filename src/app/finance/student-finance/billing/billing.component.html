@@ -21,7 +21,7 @@
               <mat-radio-button value="A Level" color="primary">A Level</mat-radio-button>
             </mat-radio-group>
             <mat-error
-              *ngIf="academicSettingsForm.get('selectedAcademicLevel')?.invalid && academicSettingsForm.get('selectedAcademicLevel')?.touched">
+              *ngIf="selectedAcademicLevel?.invalid && selectedAcademicLevel?.touched">
               Academic Level is required.
             </mat-error>
           </div>
