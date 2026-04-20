@@ -234,27 +234,6 @@ export class EnrolmentEffects {
     )
   );
 
-  deleteTerm$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(fromEnrolmentActions.deleteTermAction),
-      switchMap(({ term }) =>
-        this.termsService.deleteTerm(term).pipe(
-          tap(() =>
-            this.snackBar.open('Term Deleted Successfully', 'OK', {
-              duration: 3000,
-              verticalPosition: 'top',
-              horizontalPosition: 'center',
-            })
-          ),
-          map(() => fromEnrolmentActions.deleteTermSuccess({ term })),
-          catchError((error: HttpErrorResponse) =>
-            of(fromEnrolmentActions.deleteTermFail({ ...error }))
-          )
-        )
-      )
-    )
-  );
-
   fetchEnrolmentByClass$ = createEffect(() =>
     this.actions$.pipe(
       ofType(fromEnrolmentActions.getEnrolmentByClass),
@@ -394,9 +373,11 @@ export class EnrolmentEffects {
             data.fromName,
             data.fromNum,
             data.fromYear,
+            data.fromTermId,
             data.toName,
             data.toNum,
-            data.toYear
+            data.toYear,
+            data.toTermId,
           )
           .pipe(
             tap((data) =>

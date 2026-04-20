@@ -125,20 +125,24 @@ export class MigrateClassEnrolmentComponent implements OnInit, OnDestroy {
     const fromTerm: TermsModel = this.fromTerm?.value;
     const fromNum = fromTerm.num;
     const fromYear = fromTerm.year;
+    const fromTermId = fromTerm.id;
 
     const toName = this.toName?.value;
     const toTerm: TermsModel = this.toTerm?.value;
     const toNum = toTerm.num;
     const toYear = toTerm.year;
+    const toTermId = toTerm.id;
 
     this.store.dispatch(
       migrateClassActions.migrateClassEnrolment({
         fromName,
         fromNum,
         fromYear,
+        fromTermId,
         toName,
         toNum,
         toYear,
+        toTermId,
       })
     );
   }

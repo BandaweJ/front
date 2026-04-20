@@ -77,12 +77,18 @@ export class EnrolService {
     fromName: string,
     fromNum: number,
     fromYear: number,
+    fromTermId: number | undefined,
     toName: string,
     toNum: number,
-    toYear: number
+    toYear: number,
+    toTermId: number | undefined
   ): Observable<boolean> {
+    const query = new URLSearchParams();
+    if (fromTermId != null) query.set('fromTermId', String(fromTermId));
+    if (toTermId != null) query.set('toTermId', String(toTermId));
+    const suffix = query.toString() ? `?${query.toString()}` : '';
     return this.httpClient.get<boolean>(
-      `${this.baseURL}migrate/${fromName}/${fromNum}/${fromYear}/${toName}/${toNum}/${toYear}`
+      `${this.baseURL}migrate/${fromName}/${fromNum}/${fromYear}/${toName}/${toNum}/${toYear}${suffix}`
     );
   }
 

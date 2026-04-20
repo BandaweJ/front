@@ -200,9 +200,11 @@ export const migrateClassActions = createActionGroup({
       fromName: string;
       fromNum: number;
       fromYear: number;
+      fromTermId?: number;
       toName: string;
       toNum: number;
       toYear: number;
+      toTermId?: number;
     }>(),
     migrateClassEnrolmentSuccess: props<{ result: boolean }>(),
     migrateClassEnrolmentFail: props<{ error: HttpErrorResponse }>(),
