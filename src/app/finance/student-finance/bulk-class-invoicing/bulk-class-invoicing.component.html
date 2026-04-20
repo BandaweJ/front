@@ -22,7 +22,11 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Class Name</mat-label>
-        <input matInput [(ngModel)]="selectedClassName" placeholder="e.g. 4 Blue" />
+        <mat-select [(ngModel)]="selectedClassName">
+          <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+            {{ clas.name }}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
 
       <button

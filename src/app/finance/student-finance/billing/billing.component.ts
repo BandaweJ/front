@@ -549,19 +549,22 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.academicSettingsForm) {
       this.initializeForm();
     }
+    if (!this.academicSettingsForm) {
+      return;
+    }
 
     const isVacation = this.getVacationTermState();
     this.isVacationTerm = isVacation;
 
     if (!isVacation) {
       this.showMiscellaneousCharges = true;
-      this.academicSettingsForm.get('oLevelNewComer')?.enable({ emitEvent: false });
-      this.academicSettingsForm.get('aLevelNewComer')?.enable({ emitEvent: false });
-      this.academicSettingsForm.get('aLevelScienceLevy')?.enable({ emitEvent: false });
-      this.academicSettingsForm.get('groomingFee')?.enable({ emitEvent: false });
-      this.academicSettingsForm.get('brokenFurnitureFee')?.enable({ emitEvent: false });
-      this.academicSettingsForm.get('lostBooksFee')?.enable({ emitEvent: false });
-      this.academicSettingsForm.get('miscellaneousCharge')?.enable({ emitEvent: false });
+      this.academicSettingsForm?.get('oLevelNewComer')?.enable({ emitEvent: false });
+      this.academicSettingsForm?.get('aLevelNewComer')?.enable({ emitEvent: false });
+      this.academicSettingsForm?.get('aLevelScienceLevy')?.enable({ emitEvent: false });
+      this.academicSettingsForm?.get('groomingFee')?.enable({ emitEvent: false });
+      this.academicSettingsForm?.get('brokenFurnitureFee')?.enable({ emitEvent: false });
+      this.academicSettingsForm?.get('lostBooksFee')?.enable({ emitEvent: false });
+      this.academicSettingsForm?.get('miscellaneousCharge')?.enable({ emitEvent: false });
       this.accommodationTypeTrigger$.next();
       return;
     }
@@ -581,7 +584,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       'miscellaneousCharge',
     ];
     controlsToReset.forEach((name) => {
-      const control = this.academicSettingsForm.get(name);
+      const control = this.academicSettingsForm?.get(name);
       control?.setValue(false, { emitEvent: false });
       control?.disable({ emitEvent: false });
     });
@@ -886,6 +889,10 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+
     if (changes['selectedTermType']) {
       this.applyVacationBillingRules();
       this.cdr.markForCheck();

@@ -19,7 +19,9 @@ import { Store } from '@ngrx/store';
 import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
-import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
+import { ClassesModel } from 'src/app/enrolment/models/classes.model';
+import { fetchClasses } from 'src/app/enrolment/store/enrolment.actions';
+import { selectClasses, selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
 import { BulkClassInvoiceResponse } from '../../models/bulk-class-invoice.model';
 import { invoiceActions } from '../../store/finance.actions';
 import {
@@ -48,6 +50,7 @@ import {
 })
 export class BulkClassInvoicingComponent implements OnInit, OnDestroy {
   terms$: Observable<TermsModel[]>;
+  classes$: Observable<ClassesModel[]>;
   bulkInvoiceResult$: Observable<BulkClassInvoiceResponse | null>;
   bulkInvoiceLoading$: Observable<boolean>;
   selectedTerm: TermsModel | null = null;
@@ -56,11 +59,13 @@ export class BulkClassInvoicingComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store, private cdr: ChangeDetectorRef) {
     this.terms$ = this.store.select(selectTerms);
+    this.classes$ = this.store.select(selectClasses);
     this.bulkInvoiceResult$ = this.store.select(selectBulkInvoiceResult);
     this.bulkInvoiceLoading$ = this.store.select(selectBulkInvoiceLoading);
   }
 
   ngOnInit(): void {
+    this.store.dispatch(fetchClasses());
     this.bulkInvoiceResult$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.cdr.markForCheck();
     });
