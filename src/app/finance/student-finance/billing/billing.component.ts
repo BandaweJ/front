@@ -545,6 +545,11 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private applyVacationBillingRules(): void {
+    // ngOnChanges can trigger before ngOnInit; ensure form exists before control access.
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+
     const isVacation = this.getVacationTermState();
     this.isVacationTerm = isVacation;
 
