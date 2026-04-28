@@ -52,6 +52,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   public caAnalytics: ContinuousAssessmentAnalytics | null = null;
   public caLoading = false;
+  public liabilities: Array<{ description: string; amount: number; status: string }> = [];
+  public liabilitiesLoading = false;
 
   private subscriptions: Subscription = new Subscription();
 
@@ -179,5 +181,24 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  buildStudyPriorityTip(summary: StudentDashboardSummary): string {
+    const academic = summary?.academicSummary;
+    if (!academic) return 'Keep revising consistently across all subjects.';
+    const worstPosition = Number(academic.worstPosition?.position ?? 0);
+    if (worstPosition > 10) {
+      return 'Focus on weaker subjects first and aim for steady weekly improvement.';
+    }
+    return 'Maintain your current momentum and keep practicing past assessments.';
+  }
+
+  buildFinanceRiskTip(summary: StudentDashboardSummary): string {
+    const financial = summary?.financialSummary;
+    const owed = financial?.amountOwed ?? 0;
+    if (owed > 0) {
+      return 'Outstanding balance detected. Clear it early to avoid interruptions.';
+    }
+    return 'No immediate finance risk. Keep receipts and payments up to date.';
   }
 }

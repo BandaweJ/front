@@ -30,10 +30,10 @@ export class StudentsToBillComponent implements OnInit {
   }
 
   onTermChange(term: TermsModel) {
-    if (this.currentTerm) {
-      const num = this.currentTerm.num;
-      const year = this.currentTerm.year;
-      this.store.dispatch(billingActions.fetchStudentsToBill({ num, year }));
+    if (term?.id) {
+      this.store.dispatch(
+        billingActions.fetchStudentsToBill({ termId: term.id })
+      );
     }
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, map, combineLatest, of, switchMap, catchError } from 'rxjs';
+import { Observable, map, combineLatest, of, switchMap, catchError, BehaviorSubject } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectUser } from '../auth/store/auth.selectors';
 import { ROLES } from '../registration/models/roles.enum';
@@ -10,6 +10,8 @@ import { PERMISSIONS } from './permissions.constants';
   providedIn: 'root'
 })
 export class RoleAccessService {
+  private devViewRoleOverride$ = new BehaviorSubject<string | null>(null);
+
   constructor(
     private store: Store,
     private rolesPermissionsService: RolesPermissionsService
@@ -19,9 +21,20 @@ export class RoleAccessService {
    * Get current user's role as Observable
    */
   getCurrentRole$(): Observable<string | null> {
-    return this.store.select(selectUser).pipe(
-      map(user => user?.role || null)
+    return combineLatest([
+      this.store.select(selectUser).pipe(map(user => user?.role || null)),
+      this.devViewRoleOverride$,
+    ]).pipe(
+      map(([baseRole, overrideRole]) => overrideRole ?? baseRole)
     );
+  }
+
+  setDevViewRole(role: ROLES): void {
+    this.devViewRoleOverride$.next(role);
+  }
+
+  clearDevViewRole(): void {
+    this.devViewRoleOverride$.next(null);
   }
 
   /**

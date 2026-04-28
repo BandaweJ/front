@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { EnrolmentChartComponent } from './enrolment-chart/enrolment-chart.component';
 import { NgChartsModule } from 'ng2-charts';
@@ -20,6 +21,15 @@ import { TeachersDashboardComponent } from './teachers-dashboard/teachers-dashbo
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
 import { DashboardCardComponent } from './dashboard-card/dashboard-card.component';
 import { ParentDashboardComponent } from './parent-dashboard/parent-dashboard.component';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
   declarations: [
@@ -36,10 +46,20 @@ import { ParentDashboardComponent } from './parent-dashboard/parent-dashboard.co
   ],
   imports: [
     CommonModule,
+    RouterModule,
     FormsModule,
     ReactiveFormsModule,
     NgChartsModule,
     MaterialModule,
+    MatCardModule,
+    MatIconModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatChipsModule,
     FinanceModule,
     ReportsModule,
     StoreModule.forFeature('dashboard', dashboardReducer),

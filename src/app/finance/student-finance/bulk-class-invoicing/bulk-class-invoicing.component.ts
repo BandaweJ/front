@@ -90,16 +90,15 @@ export class BulkClassInvoicingComponent implements OnInit, OnDestroy {
 
   runBulkInvoicing(): void {
     const className = this.selectedClassName.trim();
-    if (!this.selectedTerm || !className) {
+    const termId = this.selectedTerm?.id;
+    if (typeof termId !== 'number' || !className) {
       return;
     }
 
     this.store.dispatch(
       invoiceActions.bulkInvoiceClass({
         className,
-        num: this.selectedTerm.num,
-        year: this.selectedTerm.year,
-        termId: this.selectedTerm.id,
+        termId,
       })
     );
   }
