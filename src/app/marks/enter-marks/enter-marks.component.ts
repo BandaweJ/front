@@ -59,8 +59,6 @@ interface MarkFormGroup {
   comment: FormControl<string | null>;
 }
 
-const LAST_SYNC_AT_KEY = 'marks_last_sync_at';
-
 @Component({
   selector: 'app-enter-marks',
   templateUrl: './enter-marks.component.html',
@@ -108,8 +106,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   failedSaveIndices = new Set<number>();
   failedSaveErrors = new Map<number, string>();
   private readonly commentTone: 'encouraging' | 'balanced' | 'firm' = 'balanced';
-  isOffline = typeof navigator !== 'undefined' ? !navigator.onLine : false;
-  lastSyncAt: Date | null = null;
 
   // Default fallback comments
   defaultCommentOptions: string[] = [
@@ -200,7 +196,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    this.restoreLastSyncAt();
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
     this.subjects$ = this.store.select(selectSubjects).pipe(
@@ -240,8 +235,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe(({ mark }) => {
         this.pendingMarks.remove(mark);
-        this.setOfflineState(false);
-        this.updateLastSyncAt();
         const studentNumber = mark.student?.studentNumber;
         if (studentNumber && this.studentNumberToIndex.has(studentNumber)) {
           const index = this.studentNumberToIndex.get(studentNumber)!;
@@ -267,9 +260,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(({ error, mark }) => {
-        if (this.isNetworkError(error)) {
-          this.setOfflineState(true);
-        }
         const userMessage = this.getUserFriendlySaveError(error);
         const index =
           mark?.student?.studentNumber != null
@@ -317,18 +307,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         filter(() => this.pendingMarks.getPendingCount() > 0)
       )
       .subscribe(() => this.retryPendingMarks());
-
-    fromEvent(window, 'online')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.setOfflineState(false);
-      });
-
-    fromEvent(window, 'offline')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.setOfflineState(true);
-      });
   }
 
   ngAfterViewInit(): void {
@@ -357,18 +335,37 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.marksFormArray.push(markFormGroup);
 
+      combineLatest([
+        markControl.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged()
+        ),
+        commentControl.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged()
+        ),
+      ])
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          this.updateProgressBar();
+        });
     });
   }
 
   private updateProgressBar(): void {
-    // Progress reflects persisted server state only (non-optimistic).
-    const completedCount = this.dataSource.data.filter((markModel) => {
-      const hasMark =
-        typeof markModel.mark === 'number' && markModel.mark >= 0 && markModel.mark <= 100;
-      const hasComment =
-        typeof markModel.comment === 'string' && markModel.comment.trim().length > 0;
-      return hasMark && hasComment;
-    }).length;
+    let completedCount = 0;
+    this.dataSource.data.forEach((markModel, index) => {
+      const formGroup = this.marksFormArray.at(
+        index
+      ) as FormGroup<MarkFormGroup>;
+      if (
+        formGroup &&
+        formGroup.controls.mark.valid &&
+        formGroup.controls.comment.valid
+      ) {
+        completedCount++;
+      }
+    });
     this.value = completedCount;
   }
 
@@ -468,27 +465,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   retryPendingMarks(): void {
-    if (this.isOffline || (typeof navigator !== 'undefined' && !navigator.onLine)) {
-      this.setOfflineState(true);
-      this.snackBar.open('Still offline. Pending marks will sync when connection returns.', 'Dismiss', {
-        duration: 3500,
-      });
-      return;
-    }
     const pending = this.pendingMarks.getAll();
     pending.forEach((mark) => this.store.dispatch(saveMarkAction({ mark })));
     this.cdr.detectChanges();
-  }
-
-  get lastSyncLabel(): string {
-    if (!this.lastSyncAt) {
-      return 'Not synced yet';
-    }
-    try {
-      return this.lastSyncAt.toLocaleString();
-    } catch {
-      return 'Not synced yet';
-    }
   }
 
   retrySaveForRow(markModel: MarksModel, index: number): void {
@@ -657,21 +636,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     const studentNumber = markModel.student?.studentNumber;
     if (studentNumber) {
       this.studentNumberToIndex.set(studentNumber, index);
-    }
-
-    if (this.isOffline || (typeof navigator !== 'undefined' && !navigator.onLine)) {
-      this.setOfflineState(true);
-      this.pendingMarks.add(updatedMark);
-      this.savingMarks.delete(index);
-      this.failedSaveIndices.delete(index);
-      this.failedSaveErrors.delete(index);
-      this.snackBar.open(
-        'Offline: mark saved locally and queued for sync.',
-        'Dismiss',
-        { duration: 2500 }
-      );
-      this.cdr.detectChanges();
-      return;
     }
 
     this.store.dispatch(saveMarkAction({ mark: updatedMark }));
@@ -932,43 +896,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     this.studentNumberToIndex.clear();
     this.failedSaveIndices.clear();
     this.failedSaveErrors.clear();
-  }
-
-  private isNetworkError(error: HttpErrorResponse): boolean {
-    return (
-      error.status === 0 ||
-      error.message === 'Http failure response' ||
-      (typeof error.message === 'string' &&
-        (error.message.toLowerCase().includes('network') ||
-          error.message.toLowerCase().includes('failed to fetch')))
-    );
-  }
-
-  private setOfflineState(isOffline: boolean): void {
-    this.isOffline = isOffline;
-    this.cdr.detectChanges();
-  }
-
-  private updateLastSyncAt(date: Date = new Date()): void {
-    this.lastSyncAt = date;
-    try {
-      localStorage.setItem(LAST_SYNC_AT_KEY, date.toISOString());
-    } catch {
-      // ignore storage errors
-    }
-  }
-
-  private restoreLastSyncAt(): void {
-    try {
-      const raw = localStorage.getItem(LAST_SYNC_AT_KEY);
-      if (!raw) return;
-      const parsed = new Date(raw);
-      if (!isNaN(parsed.getTime())) {
-        this.lastSyncAt = parsed;
-      }
-    } catch {
-      this.lastSyncAt = null;
-    }
   }
 
   /**

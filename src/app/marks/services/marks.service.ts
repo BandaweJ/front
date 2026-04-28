@@ -7,7 +7,6 @@ import { StudentComment } from '../models/student-comment';
 import { environment } from 'src/environments/environment';
 import { ExamType } from '../models/examtype.enum';
 import { MarksProgressModel } from '../models/marks-progress.model';
-import { SubjectEntryDiagnosticsResponse } from '../models/subject-entry-diagnostics.model';
 
 @Injectable({
   providedIn: 'root',
@@ -120,23 +119,6 @@ export class MarksService {
   getStudentMarks(studentNumber: string): Observable<MarksModel[]> {
     return this.httpClient.get<MarksModel[]>(
       `${this.baseUrl}studentMarks/${studentNumber}`
-    );
-  }
-
-  getSubjectEntryDiagnostics(
-    num: number,
-    year: number,
-    className: string,
-    subjectCode: string,
-    examType: ExamType,
-    termId?: number
-  ): Observable<SubjectEntryDiagnosticsResponse> {
-    const encodedClass = encodeURIComponent(className);
-    const encodedSubject = encodeURIComponent(subjectCode);
-    const encodedExamType = encodeURIComponent(examType);
-    const termQuery = termId ? `?termId=${termId}` : '';
-    return this.httpClient.get<SubjectEntryDiagnosticsResponse>(
-      `${this.baseUrl}diagnostics/subject/${num}/${year}/${encodedClass}/${encodedSubject}/${encodedExamType}${termQuery}`
     );
   }
 }

@@ -20,7 +20,7 @@ export interface OutstandingResidenceSummary {
 export interface OutstandingFeesReportFilters {
   enrolmentName?: string | null; // Filter for student list drill-down
   residence?: string | null; // Filter for student list drill-down
-  termId?: number | null; // TermsEntity.id
+  termId?: string | null; // Filter all data by specific term
   searchQuery?: string | null;
 }
 

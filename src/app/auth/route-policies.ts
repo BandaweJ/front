@@ -33,23 +33,23 @@ export const ROUTE_POLICIES = {
     permissions: [PERMISSIONS.FINANCE.VIEW],
   },
   userManagement: {
-    roles: [ROLES.admin, ROLES.dev],
+    roles: [ROLES.admin],
     permissions: [PERMISSIONS.USERS.MANAGE_ROLES],
   },
   systemRoles: {
-    roles: [ROLES.admin, ROLES.dev],
+    roles: [ROLES.admin],
     permissions: [PERMISSIONS.SYSTEM.MANAGE_ROLES],
   },
   systemSettings: {
-    roles: [ROLES.admin, ROLES.dev],
+    roles: [ROLES.admin],
     permissions: [PERMISSIONS.SYSTEM.EDIT_SETTINGS],
   },
   systemDepartments: {
-    roles: [ROLES.admin, ROLES.dev],
+    roles: [ROLES.admin],
     permissions: [PERMISSIONS.SYSTEM.MANAGE_ROLES],
   },
   systemAcademic: {
-    roles: [ROLES.admin, ROLES.dev],
+    roles: [ROLES.admin],
     permissions: [PERMISSIONS.SYSTEM.EDIT_SETTINGS],
   },
   systemAudit: {
@@ -57,15 +57,11 @@ export const ROUTE_POLICIES = {
     permissions: [PERMISSIONS.SYSTEM.VIEW_AUDIT],
   },
   systemAnalytics: {
-    roles: [ROLES.admin, ROLES.director, ROLES.auditor, ROLES.dev],
+    roles: [ROLES.admin, ROLES.director],
     permissions: [PERMISSIONS.SYSTEM.VIEW_AUDIT],
   },
   systemIntegrations: {
-    roles: [ROLES.admin, ROLES.dev],
+    roles: [ROLES.admin],
     permissions: [PERMISSIONS.SYSTEM.EDIT_SETTINGS],
-  },
-  marksDiagnostics: {
-    roles: [ROLES.admin, ROLES.dev],
-    permissions: [PERMISSIONS.MARKS.VIEW],
   },
 } as const satisfies Record<string, RoutePolicy>;

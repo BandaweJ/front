@@ -29,12 +29,11 @@ export class PaymentsService {
   constructor(private httpClient: HttpClient) {}
   getInvoice(
     studentNumber: string,
-    num: number,
-    year: number
+    termId: number
   ): Observable<InvoiceResponseModel> {
     return this.httpClient
       .get<InvoiceResponseModel>(
-        `${this.baseURL}invoice/${studentNumber}/${num}/${year}`
+        `${this.baseURL}invoice/${studentNumber}/term/${termId}`
       )
       .pipe(
         timeout(30000), // 30 second timeout
@@ -58,15 +57,15 @@ export class PaymentsService {
       );
   }
 
-  getInvoiceStats(num: number, year: number): Observable<InvoiceStatsModel[]> {
+  getInvoiceStats(termId: number): Observable<InvoiceStatsModel[]> {
     return this.httpClient.get<InvoiceStatsModel[]>(
-      `${this.baseURL}invoice/stats/${num}/${year}`
+      `${this.baseURL}invoice/stats/${termId}`
     );
   }
 
-  getTermInvoices(num: number, year: number): Observable<InvoiceModel[]> {
+  getTermInvoices(termId: number): Observable<InvoiceModel[]> {
     return this.httpClient.get<InvoiceModel[]>(
-      `${this.baseURL}invoice/${num}/${year}`
+      `${this.baseURL}invoice/term/${termId}`
     );
   }
 
@@ -106,13 +105,12 @@ export class PaymentsService {
 
   bulkInvoiceClass(
     className: string,
-    num: number,
-    year: number,
+    termId: number,
     request: BulkClassInvoiceRequest = {}
   ): Observable<BulkClassInvoiceResponse> {
     const encodedClassName = encodeURIComponent(className);
     return this.httpClient.post<BulkClassInvoiceResponse>(
-      `${this.baseURL}invoice/bulk/class/${encodedClassName}/${num}/${year}`,
+      `${this.baseURL}invoice/bulk/class/${encodedClassName}/${termId}`,
       request
     );
   }

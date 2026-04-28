@@ -36,7 +36,7 @@ export const feesActions = createActionGroup({
 export const billingActions = createActionGroup({
   source: 'Student Finance Component',
   events: {
-    fetchStudentsToBill: props<{ num: number; year: number }>(),
+    fetchStudentsToBill: props<{ termId: number }>(),
     fetchStudentsToBillSuccess: props<{ studentsToBill: EnrolsModel[] }>(),
     fetchStudentsToBillFail: props<{ error: HttpErrorResponse }>(),
   },
@@ -45,7 +45,7 @@ export const billingActions = createActionGroup({
 export const invoiceActions = createActionGroup({
   source: 'Student Finance Component',
   events: {
-    fetchInvoice: props<{ studentNumber: string; num: number; year: number }>(),
+    fetchInvoice: props<{ studentNumber: string; termId: number }>(),
     fetchInvoiceSuccess: props<{ invoice: InvoiceModel; warning?: { message: string; voidedInvoiceNumber?: string; voidedAt?: Date; voidedBy?: string } }>(),
     fetchInvoiceFail: props<{ error: HttpErrorResponse }>(),
 
@@ -58,15 +58,15 @@ export const invoiceActions = createActionGroup({
     saveInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     saveInvoiceFail: props<{ error: HttpErrorResponse }>(),
 
-    bulkInvoiceClass: props<{ className: string; num: number; year: number; termId?: number; dryRun?: boolean }>(),
+    bulkInvoiceClass: props<{ className: string; termId: number; dryRun?: boolean }>(),
     bulkInvoiceClassSuccess: props<{ result: BulkClassInvoiceResponse }>(),
     bulkInvoiceClassFail: props<{ error: HttpErrorResponse }>(),
 
-    fetchInvoiceStats: props<{ num: number; year: number }>(),
+    fetchInvoiceStats: props<{ termId: number }>(),
     fetchInvoiceStatsSuccess: props<{ invoiceStats: InvoiceStatsModel[] }>(),
     fetchInvoiceStatsFail: props<{ error: HttpErrorResponse }>(),
 
-    fetchTermInvoices: props<{ num: number; year: number }>(), //invoices for a term
+    fetchTermInvoices: props<{ termId: number }>(), // invoices for a term
     fetchTermInvoicesSuccess: props<{ invoices: InvoiceModel[] }>(),
     fetchTermInvoicesFail: props<{ error: HttpErrorResponse }>(),
 

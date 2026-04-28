@@ -33,22 +33,6 @@ export const selectAuthUserRole = createSelector(
   (state: fromAuthReducer.State) => state.user?.role
 );
 
-export const selectDevViewRole = createSelector(
-  authState,
-  (state: fromAuthReducer.State) => state.devViewRole
-);
-
-export const selectEffectiveRole = createSelector(
-  selectAuthUserRole,
-  selectDevViewRole,
-  (authRole, devViewRole) => {
-    if (authRole?.toLowerCase() === 'dev' && devViewRole) {
-      return devViewRole;
-    }
-    return authRole;
-  }
-);
-
 export const selectAuthUserId = createSelector(
   authState,
   (state: fromAuthReducer.State) => state.user?.id
@@ -115,7 +99,7 @@ export const selectLinkedChildrenForParent = createSelector(
 );
 
 export const selectIsParent = createSelector(
-  selectEffectiveRole,
+  selectAuthUserRole,
   (role) => (role && role.toLowerCase()) === 'parent'
 );
 

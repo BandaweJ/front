@@ -1,7 +1,6 @@
 .report {
   width: 21cm;
-  min-height: 29.7cm;
-  height: auto;
+  height: 29.7cm; /* Fixed height for A4 size */
   background-color: white;
   margin: 2rem auto;
   box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
@@ -146,9 +145,9 @@ th {
 }
 
 .footer {
-  min-height: 6cm;
-  height: auto;
+  height: 6cm; /* Increased height to accommodate larger text areas and gaps */
   display: grid;
+  grid-template-rows: auto 1fr;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   padding: 1rem;
@@ -167,24 +166,13 @@ th {
 }
 
 .comment-section h3 {
-  margin: 0;
+  margin-bottom: 0.5rem;
   font-size: 16px;
   color: #555;
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 0.5rem;
-}
-
-.comment-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .comment-section p {
@@ -215,12 +203,6 @@ th {
   border-color: #ffd08a;
 }
 
-.saving-text {
-  font-size: 12px;
-  color: #1976d2;
-  font-weight: 500;
-}
-
 .head-comment-form {
   display: flex;
   flex-direction: column;
@@ -230,27 +212,6 @@ th {
 
 .full-width-textarea {
   width: 100%; /* Ensure textarea takes full available width */
-}
-
-.comment-editor-shell {
-  position: relative;
-}
-
-.comment-lock-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #7a5a00;
-  background: rgba(255, 248, 225, 0.88);
-  border: 1px dashed #ffd54f;
-  border-radius: 4px;
-  z-index: 2;
 }
 
 /* Style for the displayed head comment */
@@ -281,7 +242,7 @@ th {
   padding: 10px;
   border: 1px dashed #ccc;
   background-color: #f9f9f9;
-  min-height: 40px;
+  min-height: 50px; /* Match min-height of displayed comment */
   display: flex;
   align-items: center;
   justify-content: center;

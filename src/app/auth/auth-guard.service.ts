@@ -47,11 +47,6 @@ export class AuthGuardService {
           return this.router.parseUrl('/signin');
         }
 
-        // Dev is treated as a superuser in this system.
-        if (user.role === ROLES.dev) {
-          return true;
-        }
-
         if (!allowedRoles || allowedRoles.length === 0) {
           if (!requiredPermissions || requiredPermissions.length === 0) {
             return true;

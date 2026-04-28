@@ -54,78 +54,7 @@ export interface AnalyticsSummary {
   academic: AcademicAnalytics;
   userActivity: UserActivityAnalytics;
   system: SystemAnalytics;
-  dataQuality: DataQualityAnalytics;
-  predictions: PredictionsAnalytics;
-  metricsCatalog: MetricCatalogResponse;
   generatedAt: Date;
-}
-
-export interface MetricDefinition {
-  id: string;
-  name: string;
-  category: 'academic' | 'finance' | 'operations' | 'system';
-  ownerRole: string;
-  description: string;
-  formula: string;
-  interpretation: string;
-}
-
-export interface MetricCatalogResponse {
-  version: string;
-  generatedAt: Date;
-  metrics: MetricDefinition[];
-}
-
-export interface DataQualityAnalytics {
-  totals: {
-    marksWithoutTermId: number;
-    enrolmentWithoutTermId: number;
-    duplicateMarkGroups: number;
-    duplicateMarkRows: number;
-    reportWithoutTermId: number;
-  };
-  duplicateMarkSamples: Array<{
-    num: number;
-    year: number;
-    termId: number | null;
-    className: string;
-    examType: string;
-    subjectCode: string;
-    studentNumber: string;
-    duplicateCount: number;
-  }>;
-  marksCoverageBySubject: Array<{
-    subjectCode: string;
-    subjectName: string;
-    enteredCount: number;
-  }>;
-}
-
-export interface PredictionsAnalytics {
-  atRiskStudents: Array<{
-    studentNumber: string;
-    average: number;
-    riskLevel: 'high' | 'medium' | 'low';
-    explanation: string;
-  }>;
-  feeDefaultRisks: Array<{
-    studentNumber: string;
-    invoiceNumber: string;
-    balance: number;
-    overdueDays: number;
-    riskLevel: 'high' | 'medium' | 'low';
-  }>;
-  executiveForecast: {
-    expectedPassRate: number;
-    passRateConfidenceLow: number;
-    passRateConfidenceHigh: number;
-    expectedCollectionRate: number;
-    collectionConfidenceLow: number;
-    collectionConfidenceHigh: number;
-    expectedEnrollment: number;
-    enrollmentConfidenceLow: number;
-    enrollmentConfidenceHigh: number;
-  };
 }
 
 @Injectable({
@@ -216,38 +145,6 @@ export class AnalyticsService {
 
   getSystemAnalytics(): Observable<SystemAnalytics> {
     return this.http.get<SystemAnalytics>(`${this.apiUrl}/system`);
-  }
-
-  getMetricCatalog(): Observable<MetricCatalogResponse> {
-    return this.http.get<MetricCatalogResponse>(`${this.apiUrl}/metrics`);
-  }
-
-  getDataQualityAnalytics(
-    termNum?: number,
-    termYear?: number,
-  ): Observable<DataQualityAnalytics> {
-    let params = new HttpParams();
-    if (termNum) {
-      params = params.set('termNum', termNum.toString());
-    }
-    if (termYear) {
-      params = params.set('termYear', termYear.toString());
-    }
-    return this.http.get<DataQualityAnalytics>(`${this.apiUrl}/data-quality`, { params });
-  }
-
-  getPredictionsAnalytics(
-    termNum?: number,
-    termYear?: number,
-  ): Observable<PredictionsAnalytics> {
-    let params = new HttpParams();
-    if (termNum) {
-      params = params.set('termNum', termNum.toString());
-    }
-    if (termYear) {
-      params = params.set('termYear', termYear.toString());
-    }
-    return this.http.get<PredictionsAnalytics>(`${this.apiUrl}/predictions`, { params });
   }
 }
 

@@ -13,17 +13,16 @@ import {
   HeadCommentModel,
   TeacherCommentModel,
 } from '../models/comment.model';
-import { selectEffectiveRole } from 'src/app/auth/store/auth.selectors';
+import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 import { selectIsLoading, selectReports } from '../store/reports.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 import { Subscription, combineLatest } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { map, filter, take } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { ReportsService } from '../services/reports.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 // pdfMake.vfs = pdfFonts.pdfMake.vfs; // Commented out as per original
 
@@ -33,7 +32,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./report.component.css'],
 })
 export class ReportComponent implements OnInit, OnDestroy {
-  private static readonly MAX_ROLE_COMMENT_LENGTH = 220;
   private _report!: ReportsModel;
   
   @Input()
@@ -59,8 +57,6 @@ export class ReportComponent implements OnInit, OnDestroy {
   studentNumber = '';
   generatingTeacherComment = false;
   generatingHeadComment = false;
-  savingTeacherComment = false;
-  savingHeadComment = false;
   teacherCommentSource: 'openai' | 'fallback' | null = null;
   headCommentSource: 'openai' | 'fallback' | null = null;
   
@@ -102,7 +98,6 @@ export class ReportComponent implements OnInit, OnDestroy {
     private roleAccess: RoleAccessService,
     private actions$: Actions,
     private reportsService: ReportsService,
-    private snackBar: MatSnackBar,
   ) {}
 
   commentForm!: FormGroup;
@@ -112,20 +107,19 @@ export class ReportComponent implements OnInit, OnDestroy {
     this.commentForm = new FormGroup({
       comment: new FormControl(this.report.report.headComment, [
         Validators.required,
-        Validators.maxLength(ReportComponent.MAX_ROLE_COMMENT_LENGTH),
       ]),
     });
 
     // initialise teacher comment control from report
     this.teacherCommentControl = new FormControl(
       this.report.report.classTrComment || '',
-      [Validators.maxLength(ReportComponent.MAX_ROLE_COMMENT_LENGTH)]
+      []
     );
     this.studentNumber = this.report.report.studentNumber;
 
-    this.userSubscription = this.store.select(selectEffectiveRole).subscribe((role) => {
-      if (role) {
-        this.role = role;
+    this.userSubscription = this.store.select(selectUser).subscribe((user) => {
+      if (user) {
+        this.role = user.role;
       }
     });
 
@@ -154,7 +148,6 @@ export class ReportComponent implements OnInit, OnDestroy {
       ).subscribe((action: { report: ReportsModel }) => {
         // Update the local report with the saved report (which includes the ID)
         this._report = { ...action.report };
-        this.savingHeadComment = false;
       })
     );
 
@@ -165,33 +158,6 @@ export class ReportComponent implements OnInit, OnDestroy {
       ).subscribe((action: { report: ReportsModel }) => {
         // Update the local report with the saved report (which includes the ID)
         this._report = { ...action.report };
-        this.savingTeacherComment = false;
-      })
-    );
-
-    this.saveSubscriptions.push(
-      this.actions$.pipe(
-        ofType(saveHeadCommentActions.saveHeadCommentFail),
-        filter(
-          (action: { error: { error?: { studentNumber?: string } } }) =>
-            action?.error?.error?.studentNumber == null ||
-            action.error.error.studentNumber === this.report?.studentNumber
-        )
-      ).subscribe(() => {
-        this.savingHeadComment = false;
-      })
-    );
-
-    this.saveSubscriptions.push(
-      this.actions$.pipe(
-        ofType(saveTeacherCommentActions.saveTeacherCommentFail),
-        filter(
-          (action: { error: { error?: { studentNumber?: string } } }) =>
-            action?.error?.error?.studentNumber == null ||
-            action.error.error.studentNumber === this.report?.studentNumber
-        )
-      ).subscribe(() => {
-        this.savingTeacherComment = false;
       })
     );
   }
@@ -201,7 +167,6 @@ export class ReportComponent implements OnInit, OnDestroy {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
-    this.saveSubscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   get comment() {
@@ -213,11 +178,9 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   saveComment() {
-    if (this.comment?.valid && !this.savingHeadComment) {
-      if (!this.isReportSaved) {
-        this.showReportMustBeSavedMessage();
-        return;
-      }
+    // Note: Backend can now create new reports if they don't exist
+    // So we allow saving comments even on unsaved reports
+    if (this.comment?.valid) {
       // Ensure we have a valid report with all required properties
       if (!this.report || !this.report.report) {
         console.error('Cannot save head comment: Report data is incomplete', {
@@ -228,7 +191,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const comm: string = this.normalizeRoleComment(this.comment.value);
+      const comm: string = this.comment.value;
 
       // Explicitly construct the report object with all necessary properties
       // id is optional - if missing, backend will create a new report
@@ -252,7 +215,6 @@ export class ReportComponent implements OnInit, OnDestroy {
 
       console.log('Saving head comment with report:', comment);
 
-      this.savingHeadComment = true;
       this.store.dispatch(saveHeadCommentActions.saveHeadComment({ comment }));
       this.toggleEditState(); // Toggle state after dispatching
     }
@@ -260,12 +222,10 @@ export class ReportComponent implements OnInit, OnDestroy {
 
   // Save teacher / class comment directly on the report
   saveTeacherComment(event?: Event) {
-    if (this.teacherComment?.valid && !this.savingTeacherComment) {
-      if (!this.isReportSaved) {
-        this.showReportMustBeSavedMessage();
-        return;
-      }
-      const comm: string = this.normalizeRoleComment(this.teacherComment.value);
+    // Note: Backend can now create new reports if they don't exist
+    // So we allow saving comments even on unsaved reports
+    if (this.teacherComment?.valid) {
+      const comm: string = this.teacherComment.value;
 
       // Ensure we have a valid report with all required properties
       if (!this.report || !this.report.report) {
@@ -296,7 +256,6 @@ export class ReportComponent implements OnInit, OnDestroy {
       event?.preventDefault?.();
       event?.stopPropagation?.();
 
-      this.savingTeacherComment = true;
       this.store.dispatch(
         saveTeacherCommentActions.saveTeacherComment({ comment })
       );
@@ -318,9 +277,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     this.reportsService.generateRoleComment(payload).subscribe({
       next: (response) => {
         if (response?.success && response.comment) {
-          this.teacherCommentControl.setValue(
-            this.normalizeRoleComment(response.comment)
-          );
+          this.teacherCommentControl.setValue(response.comment);
           this.teacherEditState = true;
           this.teacherCommentSource = response.source;
         }
@@ -346,9 +303,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     this.reportsService.generateRoleComment(payload).subscribe({
       next: (response) => {
         if (response?.success && response.comment) {
-          this.commentForm
-            .get('comment')
-            ?.setValue(this.normalizeRoleComment(response.comment));
+          this.commentForm.get('comment')?.setValue(response.comment);
           this.editState = true;
           this.headCommentSource = response.source;
         }
@@ -411,51 +366,5 @@ export class ReportComponent implements OnInit, OnDestroy {
         this.report.report.classTrComment || ''
       );
     }
-  }
-
-  get maxRoleCommentLength(): number {
-    return ReportComponent.MAX_ROLE_COMMENT_LENGTH;
-  }
-
-  get headCommentLength(): number {
-    return (this.comment?.value || '').length;
-  }
-
-  get teacherCommentLength(): number {
-    return (this.teacherComment?.value || '').length;
-  }
-
-  canSaveTeacherComment(): boolean {
-    const current = this.normalizeRoleComment(this.teacherComment?.value || '');
-    const saved = this.normalizeRoleComment(this.report?.report?.classTrComment || '');
-    return (
-      this.isReportSaved &&
-      !!this.teacherComment?.valid &&
-      !this.savingTeacherComment &&
-      current !== saved
-    );
-  }
-
-  canSaveHeadComment(): boolean {
-    const current = this.normalizeRoleComment(this.comment?.value || '');
-    const saved = this.normalizeRoleComment(this.report?.report?.headComment || '');
-    return (
-      this.isReportSaved &&
-      !!this.comment?.valid &&
-      !this.savingHeadComment &&
-      current !== saved
-    );
-  }
-
-  private normalizeRoleComment(value: string): string {
-    return (value || '').trim().slice(0, ReportComponent.MAX_ROLE_COMMENT_LENGTH);
-  }
-
-  private showReportMustBeSavedMessage(): void {
-    this.snackBar.open(
-      'Comments cannot be saved until reports for this class are saved by admin.',
-      'Dismiss',
-      { duration: 4500 }
-    );
   }
 }

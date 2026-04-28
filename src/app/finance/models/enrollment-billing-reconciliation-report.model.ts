@@ -1,7 +1,7 @@
 // src/app/finance/models/enrollment-billing-reconciliation-report.model.ts
 
 export interface EnrollmentBillingReportFilters {
-  termId: number | null; // TermsEntity.id
+  termId: string; // Format: "num-year", e.g., "1-2024"
   classId?: string | null; // Optional: Filter by class ID (ClassesModel.id)
 }
 

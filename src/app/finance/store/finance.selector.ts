@@ -692,7 +692,7 @@ export const getFeesCollectionReport = (filters: FeesCollectionReportFilters) =>
         allTerms.length > 0
       ) {
         const selectedTerm = allTerms.find(
-          (t) => Number(t.num) === Number(filters.termId)
+          (t) => Number(t.id) === Number(filters.termId)
         );
         if (selectedTerm) {
           reportStartDate = selectedTerm.startDate
@@ -1067,13 +1067,8 @@ export const getOutstandingFeesReport = (
         allTerms &&
         allTerms.length > 0
       ) {
-        const termIdValue = String(filters.termId);
-        const [filterNumStr, filterYearStr] = termIdValue.split('-');
-        const filterNum = parseInt(filterNumStr, 10);
-        const filterYear = parseInt(filterYearStr, 10);
-
         const selectedTerm = allTerms.find(
-          (t) => t.num === filterNum && t.year === filterYear
+          (t) => Number(t.id) === Number(filters.termId)
         );
 
         if (selectedTerm) {
@@ -1139,11 +1134,7 @@ const getSelectedTermForAgedReport = (filters: AgedDebtorsReportFilters) =>
     if (!filters.termId || !allTerms || allTerms.length === 0) {
       return null;
     }
-    const termIdValue = String(filters.termId);
-    const [numStr, yearStr] = termIdValue.split('-');
-    const num = parseInt(numStr, 10);
-    const year = parseInt(yearStr, 10);
-    return allTerms.find((t) => t.num === num && t.year === year) || null;
+    return allTerms.find((t) => Number(t.id) === Number(filters.termId)) || null;
   });
 
 export const getAgedDebtorsReport = (filters: AgedDebtorsReportFilters) =>
@@ -1304,11 +1295,7 @@ const getSelectedTermForRevenueRecognition = (
     if (!filters.termId || !allTerms || allTerms.length === 0) {
       return null;
     }
-    const termIdValue = String(filters.termId);
-    const [numStr, yearStr] = termIdValue.split('-');
-    const num = parseInt(numStr, 10);
-    const year = parseInt(yearStr, 10);
-    return allTerms.find((t) => t.num === num && t.year === year) || null;
+    return allTerms.find((t) => Number(t.id) === Number(filters.termId)) || null;
   });
 
 export const getRevenueRecognitionReport = (
@@ -1441,11 +1428,7 @@ const getSelectedTermForEnrollmentBilling = (
     if (!filters.termId || !allTerms || allTerms.length === 0) {
       return null;
     }
-    const termIdValue = String(filters.termId);
-    const [numStr, yearStr] = termIdValue.split('-');
-    const num = parseInt(numStr, 10);
-    const year = parseInt(yearStr, 10);
-    return allTerms.find((t) => t.num === num && t.year === year) || null;
+    return allTerms.find((t) => Number(t.id) === Number(filters.termId)) || null;
   });
 
 export const getEnrollmentBillingReconciliationReport = (

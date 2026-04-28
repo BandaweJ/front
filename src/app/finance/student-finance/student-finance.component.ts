@@ -108,16 +108,11 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
   }
 
          generateInvoice(): void {
-           if (
-             this.selectedStudentNumber &&
-             this.selectedTerm?.num !== undefined &&
-             this.selectedTerm?.year !== undefined
-           ) {
+           if (this.selectedStudentNumber && this.selectedTerm?.id) {
              this.store.dispatch(
                invoiceActions.fetchInvoice({
                  studentNumber: this.selectedStudentNumber,
-                 num: this.selectedTerm.num,
-                 year: this.selectedTerm.year,
+                 termId: this.selectedTerm.id,
                })
              );
            }

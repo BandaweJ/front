@@ -1,21 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Observable, map, combineLatest, of, switchMap, catchError } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { selectEffectiveRole, selectUser } from '../auth/store/auth.selectors';
+import { selectUser } from '../auth/store/auth.selectors';
 import { ROLES } from '../registration/models/roles.enum';
 import { RolesPermissionsService } from '../system/services/roles-permissions.service';
 import { PERMISSIONS } from './permissions.constants';
-import { clearDevViewRole, setDevViewRole } from '../auth/store/auth.actions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoleAccessService {
-  private normalizeRole(role: string | null | undefined): string | null {
-    if (!role) return null;
-    return role.toString().trim().toLowerCase();
-  }
-
   constructor(
     private store: Store,
     private rolesPermissionsService: RolesPermissionsService
@@ -25,19 +19,9 @@ export class RoleAccessService {
    * Get current user's role as Observable
    */
   getCurrentRole$(): Observable<string | null> {
-    return this.store.select(selectEffectiveRole).pipe(map((role) => role ?? null));
-  }
-
-  getAuthenticatedRole$(): Observable<string | null> {
-    return this.store.select(selectUser).pipe(map((user) => user?.role || null));
-  }
-
-  setDevViewRole(role: ROLES | null): void {
-    this.store.dispatch(setDevViewRole({ role }));
-  }
-
-  clearDevViewRole(): void {
-    this.store.dispatch(clearDevViewRole());
+    return this.store.select(selectUser).pipe(
+      map(user => user?.role || null)
+    );
   }
 
   /**
@@ -73,11 +57,9 @@ export class RoleAccessService {
    * Dev is treated as having every role for access control, except student (dev does not access student dashboard).
    */
   hasRole(role: string, currentRole: string | null): boolean {
-    const normalizedCurrent = this.normalizeRole(currentRole);
-    const normalizedTarget = this.normalizeRole(role);
-    if (!normalizedCurrent || !normalizedTarget) return false;
-    if (normalizedCurrent === normalizedTarget) return true;
-    if (normalizedCurrent === ROLES.dev && normalizedTarget !== ROLES.student) return true;
+    if (currentRole === null) return false;
+    if (currentRole === role) return true;
+    if (currentRole === ROLES.dev && role !== ROLES.student) return true;
     return false;
   }
 
@@ -86,25 +68,14 @@ export class RoleAccessService {
    * Dev role has access to everything
    */
   hasAnyRole(currentRole: string | null, ...roles: string[]): boolean {
-    const normalizedCurrent = this.normalizeRole(currentRole);
-    if (!normalizedCurrent) return false;
-    if (normalizedCurrent === ROLES.dev) return true;
-    const normalizedRoles = roles
-      .map((r) => this.normalizeRole(r))
-      .filter((r): r is string => Boolean(r));
-    return normalizedRoles.includes(normalizedCurrent);
+    return currentRole !== null && (currentRole === ROLES.dev || roles.includes(currentRole));
   }
 
   /**
    * Check if user does NOT have any of the specified roles (synchronous version)
    */
   doesNotHaveRole(currentRole: string | null, ...roles: string[]): boolean {
-    const normalizedCurrent = this.normalizeRole(currentRole);
-    if (!normalizedCurrent) return false;
-    const normalizedRoles = roles
-      .map((r) => this.normalizeRole(r))
-      .filter((r): r is string => Boolean(r));
-    return !normalizedRoles.includes(normalizedCurrent);
+    return currentRole !== null && !roles.includes(currentRole);
   }
 
   /**
@@ -227,7 +198,7 @@ export class RoleAccessService {
     fallbackRoles: string[]
   ): Observable<boolean> {
     return combineLatest([
-      this.getAuthenticatedRole$(),
+      this.getCurrentRole$(),
       this.store.select(selectUser)
     ]).pipe(
       map(([role, user]) => {
@@ -252,7 +223,7 @@ export class RoleAccessService {
     fallbackRoles?: string[]
   ): Observable<boolean> {
     return combineLatest([
-      this.getAuthenticatedRole$(),
+      this.getCurrentRole$(),
       this.store.select(selectUser)
     ]).pipe(
       map(([role, user]) => {

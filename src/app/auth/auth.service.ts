@@ -10,7 +10,6 @@ import { User } from './models/user.model';
 import { StudentsModel } from '../registration/models/students.model';
 import { TeachersModel } from '../registration/models/teachers.model';
 import { ParentsModel } from '../registration/models/parents.model';
-import { timeout } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +19,6 @@ export class AuthService {
   private readonly userKey = 'user';
   private readonly legacySessionKey = 'jhs_session';
   private readonly tenantKey = 'tenantSlug';
-  private static readonly SIGNIN_TIMEOUT_MS = 15000;
-  private static readonly PERMISSIONS_TIMEOUT_MS = 5000;
 
   constructor(
     private http: HttpClient // private router: Router, // private store: Store
@@ -92,7 +89,7 @@ export class AuthService {
       this.baseUrl + 'signin',
 
       signinData
-    ).pipe(timeout(AuthService.SIGNIN_TIMEOUT_MS));
+    );
   }
 
   signup(signupData: SignupInterface): Observable<{ response: boolean }> {
@@ -118,6 +115,6 @@ export class AuthService {
   getUserPermissions(accountId: string): Observable<{ permissions: string[] }> {
     return this.http.get<{ permissions: string[] }>(
       `${environment.apiUrl}/system/roles-permissions/user/${accountId}/permissions`
-    ).pipe(timeout(AuthService.PERMISSIONS_TIMEOUT_MS));
+    );
   }
 }

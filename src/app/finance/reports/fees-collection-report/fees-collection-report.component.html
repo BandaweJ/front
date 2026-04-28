@@ -24,9 +24,7 @@
         <mat-select formControlName="term" (selectionChange)="onTermSelected()">
           <mat-option [value]="null">-- Select --</mat-option>
           <mat-option *ngFor="let term of (terms$ | async)" [value]="term">
-            {{ term.type === 'vacation'
-              ? (term.label ? 'Vacation: ' + term.label + ' (' + term.year + ')' : 'Vacation ' + term.num + ' - ' + term.year)
-              : 'Term ' + term.num + ' - ' + term.year }}
+            {{ term.num }} ({{ term.year }})
           </mat-option>
         </mat-select>
       </mat-form-field>

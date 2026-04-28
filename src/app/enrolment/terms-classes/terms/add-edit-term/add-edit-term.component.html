@@ -75,7 +75,7 @@
                 </mat-form-field>
               </div>
 
-              <div class="field-group" *ngIf="isEditMode || type?.value === 'vacation'">
+              <div class="field-group" *ngIf="type?.value === 'vacation'">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>Vacation Label (optional)</mat-label>
                   <input matInput formControlName="label" placeholder="e.g. April Holiday School" />

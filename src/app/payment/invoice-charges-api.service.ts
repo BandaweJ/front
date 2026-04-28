@@ -24,9 +24,9 @@ export class InvoiceChargesApiService {
   constructor(private readonly http: HttpClient) {}
 
   // Re-uses existing invoice endpoint response which now includes pendingCharges.
-  getPendingChargesForInvoice(studentNumber: string, termNum: number, year: number): Observable<{ pendingCharges?: InvoiceCharge[]; warning?: { message: string } }> {
+  getPendingChargesForInvoice(studentNumber: string, termId: number): Observable<{ pendingCharges?: InvoiceCharge[]; warning?: { message: string } }> {
     return this.http.get<{ pendingCharges?: InvoiceCharge[]; warning?: { message: string } }>(
-      `${this.baseUrl}/invoice/${studentNumber}/${termNum}/${year}`,
+      `${this.baseUrl}/invoice/${studentNumber}/term/${termId}`,
     );
   }
 }

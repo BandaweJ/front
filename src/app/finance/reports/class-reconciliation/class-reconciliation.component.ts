@@ -18,7 +18,6 @@ import { ClassesService } from 'src/app/enrolment/services/classes.service';
 import { TermsService } from 'src/app/enrolment/services/terms.service';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
-import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 import {
   ClassReconciliationReport,
   ClassReconciliationResultItem,
@@ -96,13 +95,20 @@ export class ClassReconciliationComponent implements OnInit, OnDestroy {
     }
 
     const name = encodeURIComponent(this.selectedClass.name);
-    const num = this.selectedTerm.num;
-    const year = this.selectedTerm.year;
+    const termId = this.selectedTerm.id;
+    if (!termId) {
+      this.snackBar.open('Selected term is missing a termId', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+      });
+      return;
+    }
     this.isReconciling = true;
     this.report = null;
 
     this.http
-      .post<ClassReconciliationReport>(`${this.baseURL}reconcile/class/${name}/${num}/${year}`, {})
+      .post<ClassReconciliationReport>(`${this.baseURL}reconcile/class/${name}/${termId}`, {})
       .subscribe({
         next: (response) => {
           this.isReconciling = false;
@@ -155,16 +161,6 @@ export class ClassReconciliationComponent implements OnInit, OnDestroy {
   }
 
   termLabel(term: TermsModel): string {
-    return formatTermLabel(term);
-  }
-
-  selectedTermLabel(): string {
-    if (this.selectedTerm) {
-      return formatTermLabel(this.selectedTerm);
-    }
-    if (this.report) {
-      return `Term ${this.report.termNum} - ${this.report.year}`;
-    }
-    return '';
+    return `Term ${term.num} ${term.year}`;
   }
 }

@@ -1,7 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
+  combineLatest,
+  distinctUntilChanged,
   filter,
+  map,
   Observable,
   Subscription,
   switchMap,
@@ -10,13 +13,27 @@ import {
 } from 'rxjs';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { StudentDashboardSummary } from '../models/student-dashboard-summary';
+import {
+  selectStudentDashboardLoaded,
+  selectStudentDashboardLoading,
+  selectStudentDashboardSummary,
+} from '../store/dashboard.selectors';
+import { studentDashboardActions } from '../store/dashboard.actions';
 import { User } from 'src/app/auth/models/user.model';
 
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
+import {
+  selectCurrentEnrolment,
+  selectCurrentEnrolmentLoaded,
+  selectCurrentEnrolmentLoading,
+} from 'src/app/enrolment/store/enrolment.selectors';
+import { currentEnrolementActions } from 'src/app/enrolment/store/enrolment.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import {
+  invoiceActions,
+  receiptActions,
+} from 'src/app/finance/store/finance.actions';
 import { ContinuousAssessmentService, ContinuousAssessmentAnalytics } from 'src/app/marks/continuous-assessment/continuous-assessment.service';
-import { InvoiceChargesApiService, InvoiceCharge } from 'src/app/payment/invoice-charges-api.service';
-import { StudentDashboardFacade } from './student-dashboard.facade';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -36,26 +53,20 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   public caAnalytics: ContinuousAssessmentAnalytics | null = null;
   public caLoading = false;
 
-  public liabilities: InvoiceCharge[] = [];
-  public liabilitiesLoading = false;
-
   private subscriptions: Subscription = new Subscription();
 
-  constructor(
-    private store: Store,
-    private studentDashboardFacade: StudentDashboardFacade,
-    private caService: ContinuousAssessmentService,
-    private chargesApi: InvoiceChargesApiService,
-  ) {
-    this.dashboardSummary$ = this.studentDashboardFacade.dashboardSummary$;
-    this.summaryLoading$ = this.studentDashboardFacade.summaryLoading$;
-    this.summaryLoaded$ = this.studentDashboardFacade.summaryLoaded$;
+  constructor(private store: Store, private caService: ContinuousAssessmentService) {
+    this.dashboardSummary$ = this.store.select(selectStudentDashboardSummary);
+    this.summaryLoading$ = this.store.select(selectStudentDashboardLoading);
+    this.summaryLoaded$ = this.store.select(selectStudentDashboardLoaded);
 
-    this.currentEnrolment$ = this.studentDashboardFacade.currentEnrolment$;
-    this.enrolmentLoading$ = this.studentDashboardFacade.enrolmentLoading$;
-    this.enrolmentLoaded$ = this.studentDashboardFacade.enrolmentLoaded$;
+    this.currentEnrolment$ = this.store.select(selectCurrentEnrolment);
+    this.enrolmentLoading$ = this.store.select(selectCurrentEnrolmentLoading);
+    this.enrolmentLoaded$ = this.store.select(selectCurrentEnrolmentLoaded);
 
-    this.studentDetails$ = this.studentDashboardFacade.getStudentDetails$();
+    this.studentDetails$ = this.currentEnrolment$.pipe(
+      map((enrolment) => (enrolment ? enrolment.student : null))
+    );
   }
 
   ngOnInit(): void {
@@ -71,14 +82,86 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           tap((user) => {
             const studentNumber = user.id;
 
-            this.studentDashboardFacade.initializeStudent(studentNumber);
+            // Fetch only this student's invoices and receipts (more efficient than fetching all)
+            this.store.dispatch(
+              invoiceActions.fetchStudentInvoices({
+                studentNumber,
+              })
+            );
+            this.store.dispatch(
+              receiptActions.fetchStudentReceipts({
+                studentNumber,
+              })
+            );
+            this.store.dispatch(
+              studentDashboardActions.fetchStudentDashboardSummary({
+                studentNumber,
+              })
+            );
+            this.store.dispatch(
+              currentEnrolementActions.fetchCurrentEnrolment({
+                studentNumber,
+              })
+            );
             this.loadContinuousAssessmentAnalytics(studentNumber);
-            this.loadLiabilities(studentNumber);
           })
         )
         .subscribe()
     );
 
+    // REVISED Dashboard Summary & Enrolment Data Fetching (already good, just including for completeness)
+    this.subscriptions.add(
+      (this.store.select(selectUser) as Observable<User | null>)
+        .pipe(
+          filter((user): user is User => !!user && !!user.id),
+          map((user: User) => user.id),
+          distinctUntilChanged(),
+          switchMap((studentId) =>
+            combineLatest([
+              this.store.select(selectStudentDashboardLoaded),
+              this.store.select(selectStudentDashboardLoading),
+              this.store.select(selectCurrentEnrolmentLoaded),
+              this.store.select(selectCurrentEnrolmentLoading),
+            ]).pipe(
+              filter(
+                ([
+                  summaryLoaded,
+                  summaryLoading,
+                  enrolmentLoaded,
+                  enrolmentLoading,
+                ]) =>
+                  (!summaryLoaded && !summaryLoading) ||
+                  (!enrolmentLoaded && !enrolmentLoading)
+              ),
+              take(1),
+              tap(
+                ([
+                  summaryLoaded,
+                  summaryLoading,
+                  enrolmentLoaded,
+                  enrolmentLoading,
+                ]) => {
+                  if (!summaryLoaded && !summaryLoading) {
+                    this.store.dispatch(
+                      studentDashboardActions.fetchStudentDashboardSummary({
+                        studentNumber: studentId,
+                      })
+                    );
+                  }
+                  if (!enrolmentLoaded && !enrolmentLoading) {
+                    this.store.dispatch(
+                      currentEnrolementActions.fetchCurrentEnrolment({
+                        studentNumber: studentId,
+                      })
+                    );
+                  }
+                }
+              )
+            )
+          )
+        )
+        .subscribe()
+    );
   }
 
   private loadContinuousAssessmentAnalytics(studentNumber: string) {
@@ -94,52 +177,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadLiabilities(studentNumber: string) {
-    this.liabilitiesLoading = true;
-    // We need current enrolment term/year; use the store's current enrolment once loaded.
-    this.subscriptions.add(
-      this.currentEnrolment$
-        .pipe(
-          filter((e): e is EnrolsModel => !!e && typeof e.num === 'number' && typeof e.year === 'number'),
-          take(1),
-          switchMap((enrol) =>
-            this.chargesApi.getPendingChargesForInvoice(studentNumber, enrol.num, enrol.year),
-          ),
-        )
-        .subscribe({
-          next: (res) => {
-            this.liabilities = (res.pendingCharges ?? []).filter((c) => !c.isVoided);
-            this.liabilitiesLoading = false;
-          },
-          error: () => {
-            this.liabilities = [];
-            this.liabilitiesLoading = false;
-          },
-        }),
-    );
-  }
-
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
-  }
-
-  buildStudyPriorityTip(summary: StudentDashboardSummary | null): string {
-    if (!summary?.academicSummary) {
-      return 'Keep submitting assessments consistently to improve predictive confidence.';
-    }
-    const best = Number(summary.academicSummary.bestPosition?.position ?? NaN);
-    const worst = Number(summary.academicSummary.worstPosition?.position ?? NaN);
-    if (!isNaN(best) && !isNaN(worst) && worst - best > 8) {
-      return 'Your class position swings a lot between terms. Focus on consistency in weaker subjects.';
-    }
-    return 'Maintain steady revision and practice in all subjects to protect your term average.';
-  }
-
-  buildFinanceRiskTip(summary: StudentDashboardSummary | null): string {
-    const owed = Number(summary?.financialSummary?.amountOwed ?? 0);
-    if (owed > 0) {
-      return 'Outstanding balances can affect access to some school services; plan payments early.';
-    }
-    return 'Great job keeping fees current. Continue tracking charges each term.';
   }
 }

@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, Subject, takeUntil, tap } from 'rxjs';
-import { selectEffectiveRole, selectUser } from 'src/app/auth/store/auth.selectors';
+import { selectUser } from 'src/app/auth/store/auth.selectors';
 import {
   currentTermActions,
   fetchClasses,
@@ -74,22 +74,12 @@ export class TeachersDashboardComponent {
     public title: Title,
     private router: Router
   ) {
-    this.store
-      .select(selectEffectiveRole)
-      .pipe(
-        filter((role): role is ROLES => !!role),
-        tap((role) => {
-          this.role = role;
-        }),
-        takeUntil(this.destroy$),
-      )
-      .subscribe();
-
     // Initial dispatches based on user role when user data is available
     this.user$
       .pipe(
         filter((user) => !!user), // Ensure user is not null/undefined
         tap((user) => {
+          this.role = user!.role; // Assign role here
           this.id = user!.id; // Assign ID here
 
           // Dispatch actions for admin/hod/reception/teacher roles
@@ -205,20 +195,6 @@ export class TeachersDashboardComponent {
 
   navigateToSubjects() {
     this._navigateToRoleBased('/subjects');
-  }
-
-  navigateToResultsAnalysis(): void {
-    this._navigateToRoleBased('/results-analysis');
-  }
-
-  navigateToMarksProgress(): void {
-    this._navigateToRoleBased('/marks-progress');
-  }
-
-  navigateToAnalyticsForecasts(): void {
-    if (this.role === ROLES.admin || this.role === ROLES.dev || this.role === ROLES.auditor || this.role === ROLES.director) {
-      this._navigateToRoleBased('/system/analytics');
-    }
   }
 
   // changeSelectedReport(report: ReportsModel): void {
