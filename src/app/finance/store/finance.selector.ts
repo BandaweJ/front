@@ -409,6 +409,7 @@ export interface LedgerEntry extends PaymentHistoryItem {
 function buildLedgerFromInvoicesAndReceipts(
   invoices: InvoiceModel[],
   receipts: ReceiptModel[],
+  termsById: Map<number, TermsModel>,
 ): LedgerEntry[] {
   const ledgerEntries: PaymentHistoryItem[] = [];
   const studentInvoices = invoices.filter((inv) => !inv.isVoided);
@@ -416,12 +417,17 @@ function buildLedgerFromInvoicesAndReceipts(
 
       // 1. Process Invoices (Debit entries)
       studentInvoices.forEach((invoice) => {
-        let termInfo = '';
-        if (invoice.enrol?.num && invoice.enrol?.year) {
-          termInfo = ` (Term ${invoice.enrol.num}, ${invoice.enrol.year})`;
-        } else if (invoice.enrol?.year) {
-          termInfo = ` (${invoice.enrol.year})`;
-        }
+        const matchedTerm =
+          invoice.enrol?.termId != null
+            ? termsById.get(Number(invoice.enrol.termId))
+            : undefined;
+        const termInfo = matchedTerm
+          ? ` (${formatTermLabel(matchedTerm)})`
+          : invoice.enrol?.num && invoice.enrol?.year
+            ? ` (Term ${invoice.enrol.num}, ${invoice.enrol.year})`
+            : invoice.enrol?.year
+              ? ` (${invoice.enrol.year})`
+              : '';
 
         ledgerEntries.push({
           id: `INV-${invoice.id}`,
@@ -601,9 +607,11 @@ export const getStudentLedger = (studentNumber: string) =>
   createSelector(
     selectAllInvoices,
     selectAllNonVoidedReceipts,
+    selectTerms,
     (
       allInvoices: InvoiceModel[] | null,
       allReceipts: ReceiptModel[] | null,
+      allTerms: TermsModel[] | null,
     ): LedgerEntry[] => {
       if (!studentNumber || (!allInvoices && !allReceipts)) {
         return [];
@@ -614,9 +622,15 @@ export const getStudentLedger = (studentNumber: string) =>
       const studentReceipts = (allReceipts || []).filter(
         (rec) => rec.student?.studentNumber === studentNumber,
       );
+      const termsById = new Map<number, TermsModel>(
+        (allTerms || [])
+          .filter((term) => term?.id != null)
+          .map((term) => [Number(term.id), term]),
+      );
       return buildLedgerFromInvoicesAndReceipts(
         studentInvoices,
         studentReceipts,
+        termsById,
       );
     },
   );
@@ -625,14 +639,23 @@ export const getStudentLedger = (studentNumber: string) =>
 export const selectStudentLedgerFromStudentData = createSelector(
   selectStudentInvoices,
   selectStudentReceipts,
+  selectTerms,
   (
     studentInvoices: InvoiceModel[] | null,
     studentReceipts: ReceiptModel[] | null,
-  ): LedgerEntry[] =>
-    buildLedgerFromInvoicesAndReceipts(
+    allTerms: TermsModel[] | null,
+  ): LedgerEntry[] => {
+    const termsById = new Map<number, TermsModel>(
+      (allTerms || [])
+        .filter((term) => term?.id != null)
+        .map((term) => [Number(term.id), term]),
+    );
+    return buildLedgerFromInvoicesAndReceipts(
       studentInvoices || [],
       studentReceipts || [],
-    ),
+      termsById,
+    );
+  },
 );
 
 // --- Fees Collection Report Specific Models (no changes here) ---
