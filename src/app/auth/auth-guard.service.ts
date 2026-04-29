@@ -47,6 +47,11 @@ export class AuthGuardService {
           return this.router.parseUrl('/signin');
         }
 
+        // Developer role bypasses route role/permission gates for testing.
+        if (user.role === ROLES.dev) {
+          return true;
+        }
+
         if (!allowedRoles || allowedRoles.length === 0) {
           if (!requiredPermissions || requiredPermissions.length === 0) {
             return true;

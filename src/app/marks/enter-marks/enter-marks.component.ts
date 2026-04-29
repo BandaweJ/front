@@ -98,6 +98,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   
   // Debounce timers for saving
   private saveTimers: Map<number, any> = new Map();
+  private uiTimers: number[] = [];
   
   // Track which student number corresponds to which index for save status updates
   private studentNumberToIndex: Map<string, number> = new Map();
@@ -781,10 +782,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         // Trigger change detection
         this.cdr.detectChanges();
         
-        // Try to focus and open the autocomplete after a short delay
-        setTimeout(() => {
-          this.openAutocompleteForIndex(index);
-        }, 100);
+        // Focus the comment input safely after async updates settle.
+        this.scheduleOpenAutocomplete(index);
         
         // Show success feedback
         console.log(`✅ Generated ${comments.length} AI comments for mark ${mark}:`, comments);
@@ -813,10 +812,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         // Trigger change detection
         this.cdr.detectChanges();
         
-        // Try to focus and open the autocomplete after a short delay
-        setTimeout(() => {
-          this.openAutocompleteForIndex(index);
-        }, 100);
+        // Focus the comment input safely after async updates settle.
+        this.scheduleOpenAutocomplete(index);
         
         // Show user-friendly error message
         this.snackBar.open('AI comments unavailable, using default suggestions', 'Dismiss', {
@@ -898,6 +895,14 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     this.failedSaveErrors.clear();
   }
 
+  private scheduleOpenAutocomplete(index: number): void {
+    const timerId = window.setTimeout(() => {
+      this.openAutocompleteForIndex(index);
+      this.uiTimers = this.uiTimers.filter((id) => id !== timerId);
+    }, 100);
+    this.uiTimers.push(timerId);
+  }
+
   /**
    * Programmatically open autocomplete for a specific index
    */
@@ -907,23 +912,12 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       const commentInputs = document.querySelectorAll('input[formControlName="comment"]');
       const commentInput = commentInputs[index] as HTMLInputElement;
       
-      if (commentInput) {
-        // Focus the input first
-        commentInput.focus();
-        
-        // Dispatch input event to trigger autocomplete
-        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
-        commentInput.dispatchEvent(inputEvent);
-        
-        // Also dispatch focus event
-        const focusEvent = new Event('focus', { bubbles: true, cancelable: true });
-        commentInput.dispatchEvent(focusEvent);
-        
-        // Trigger a click to ensure autocomplete opens
-        setTimeout(() => {
-          commentInput.click();
-        }, 50);
-        
+      if (commentInput && commentInput.isConnected && document.body.contains(commentInput)) {
+        // Avoid synthetic click/focus storms on detached nodes.
+        // A normal focus + input event is enough to prompt autocomplete.
+        commentInput.focus({ preventScroll: true });
+        commentInput.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+
         console.log(`🎯 Attempted to open autocomplete for row ${index}`);
       } else {
         console.warn(`Could not find comment input for row ${index}`);
@@ -948,6 +942,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       clearTimeout(timer);
     });
     this.saveTimers.clear();
+    this.uiTimers.forEach((timerId) => window.clearTimeout(timerId));
+    this.uiTimers = [];
     
     // Clean up tracking maps
     this.lastSavedValues.clear();
