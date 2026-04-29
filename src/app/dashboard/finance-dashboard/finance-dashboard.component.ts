@@ -355,14 +355,35 @@ export class FinanceDashboardComponent
     summary$
       .pipe(
         tap((summary) => {
-          if (summary?.monthlyBreakdown?.length) {
-            this.barChartData.labels = summary.monthlyBreakdown.map(
-              (m) => m.monthLabel
+          const breakdownRaw = (summary as any)?.monthlyBreakdown;
+          const breakdown = Array.isArray(breakdownRaw) ? breakdownRaw : [];
+
+          if (breakdown.length) {
+            this.barChartData.labels = breakdown.map((m: any) => {
+              const label = m?.monthLabel ?? m?.label;
+              if (label) return String(label);
+              const month = Number(m?.month ?? 0);
+              const year = Number(m?.year ?? 0);
+              return month > 0 && year > 0 ? `${month}/${year}` : 'N/A';
+            });
+            this.barChartData.datasets[0].data = breakdown.map((m: any) =>
+              Number(
+                m?.invoicesTotal ??
+                  m?.invoiceTotal ??
+                  m?.invoicedTotal ??
+                  m?.invoices ??
+                  0
+              )
             );
-            this.barChartData.datasets[0].data =
-              summary.monthlyBreakdown.map((m) => m.invoicesTotal);
-            this.barChartData.datasets[1].data =
-              summary.monthlyBreakdown.map((m) => m.paymentsTotal);
+            this.barChartData.datasets[1].data = breakdown.map((m: any) =>
+              Number(
+                m?.paymentsTotal ??
+                  m?.paymentTotal ??
+                  m?.receiptsTotal ??
+                  m?.payments ??
+                  0
+              )
+            );
           } else {
             this.barChartData.labels = [];
             this.barChartData.datasets[0].data = [];
@@ -513,9 +534,9 @@ export class FinanceDashboardComponent
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe((currentTerm) => {
-        if (currentTerm) {
-          // Format term as "num year" to match enrolTerm format in FinanceDataModel
-          const enrolTerm = `${currentTerm.num} ${currentTerm.year}`;
+        if (currentTerm?.id != null) {
+          // Strict term identity: backend dashboard filters now treat enrolTerm as termId.
+          const enrolTerm = String(currentTerm.id);
           this.filterSubject.next({ enrolTerm });
         } else {
           // If no current term, use empty filter
@@ -549,8 +570,18 @@ export class FinanceDashboardComponent
         return false;
       if (filters.minAmount && item.amount < filters.minAmount) return false;
       if (filters.maxAmount && item.amount > filters.maxAmount) return false;
-      if (filters.enrolTerm && item.enrolTerm !== filters.enrolTerm)
-        return false;
+      if (filters.enrolTerm) {
+        const filterTermId = Number(filters.enrolTerm);
+        const itemTermId = Number((item as any).enrolId ?? (item as any).termId);
+        const isTermIdFilter = !Number.isNaN(filterTermId);
+
+        if (isTermIdFilter && !Number.isNaN(itemTermId)) {
+          if (itemTermId !== filterTermId) return false;
+        } else if (item.enrolTerm !== filters.enrolTerm) {
+          // Backward compatible fallback for any legacy data payloads.
+          return false;
+        }
+      }
       return true;
     });
   }
