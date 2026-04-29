@@ -36,6 +36,7 @@ import { getRevenueRecognitionReport } from '../../store/finance.selector';
 
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 @Component({
   selector: 'app-revenue-recognition-report',
@@ -71,7 +72,7 @@ export class RevenueRecognitionReportComponent implements OnInit, OnDestroy {
 
     // Initialize reportData$ here as well to ensure it's always an Observable
     this.reportData$ = this.store.select(
-      getRevenueRecognitionReport({ termId: '', classId: null })
+      getRevenueRecognitionReport({ termId: -1, classId: null })
     ); // Provide a default empty filter
   }
 
@@ -110,8 +111,7 @@ export class RevenueRecognitionReportComponent implements OnInit, OnDestroy {
           // Ensure a term is selected before trying to create termId
           if (
             !formValue.termFilter ||
-            !formValue.termFilter.num ||
-            !formValue.termFilter.year
+            typeof formValue.termFilter.id !== 'number'
           ) {
             // If no term is selected, return a filter that will result in empty report data
             this.snackBar.open(
@@ -121,7 +121,7 @@ export class RevenueRecognitionReportComponent implements OnInit, OnDestroy {
             );
             return null; // Return null to prevent selector from running with invalid filters
           }
-          const termId = `${formValue.termFilter.num}-${formValue.termFilter.year}`;
+          const termId = formValue.termFilter.id;
 
           return {
             termId: termId,
@@ -165,5 +165,9 @@ export class RevenueRecognitionReportComponent implements OnInit, OnDestroy {
       termFilter: null,
       classFilter: null,
     });
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 }

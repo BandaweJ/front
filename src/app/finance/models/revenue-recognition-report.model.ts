@@ -1,7 +1,7 @@
 // src/app/finance/models/revenue-recognition-report.model.ts
 
 export interface RevenueRecognitionReportFilters {
-  termId: string; // Format: "num-year", e.g., "1-2024"
+  termId: number; // TermsModel.id
   classId?: string | null; // Optional: Filter by class ID
 }
 

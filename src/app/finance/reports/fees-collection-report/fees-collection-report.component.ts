@@ -24,6 +24,7 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { PaymentMethods } from '../../enums/payment-methods.enum';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 @Component({
   selector: 'app-fees-collection-report',
@@ -192,12 +193,12 @@ export class FeesCollectionReportComponent implements OnInit, OnDestroy {
           // If a term is selected, override start/end dates and set termId
           if (formValue.term) {
             const selectedTerm = terms.find(
-              (t) => t.num === formValue.term.num
+              (t) => Number(t.id) === Number(formValue.term.id)
             );
             if (selectedTerm) {
               startDate = new Date(selectedTerm.startDate);
               endDate = new Date(selectedTerm.endDate);
-              termId = selectedTerm.num;
+              termId = selectedTerm.id ?? null;
             }
           }
           // Return the structured filters object
@@ -352,5 +353,9 @@ export class FeesCollectionReportComponent implements OnInit, OnDestroy {
       obj['total'] = value;
       return obj;
     });
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 }

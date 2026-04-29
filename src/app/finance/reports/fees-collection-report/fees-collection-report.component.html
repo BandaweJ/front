@@ -24,7 +24,7 @@
         <mat-select formControlName="term" (selectionChange)="onTermSelected()">
           <mat-option [value]="null">-- Select --</mat-option>
           <mat-option *ngFor="let term of (terms$ | async)" [value]="term">
-            {{ term.num }} ({{ term.year }})
+            {{ formatTerm(term) }}
           </mat-option>
         </mat-select>
       </mat-form-field>
