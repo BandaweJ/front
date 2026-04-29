@@ -41,8 +41,8 @@
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>Term</mat-label>
             <mat-select formControlName="term">
-              <mat-option *ngFor="let term of terms$ | async" [value]="term">
-                {{ term.num + " " + term.year }}
+              <mat-option *ngFor="let term of sortedTerms$ | async" [value]="term">
+                {{ formatTerm(term) }}
               </mat-option>
             </mat-select>
             <mat-icon matPrefix>calendar_today</mat-icon>

@@ -2,9 +2,10 @@ import { Component, OnInit, ElementRef, ViewChild, OnDestroy, ChangeDetectionStr
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { ClassesModel } from 'src/app/enrolment/models/classes.model';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 import {
   fetchClasses,
   fetchTerms,
@@ -52,6 +53,7 @@ export class MarksSheetsComponent implements OnInit, OnDestroy {
 
   markSheetForm!: FormGroup;
   terms$!: Observable<TermsModel[]>;
+  sortedTerms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
   isLoading$!: Observable<boolean>;
   markSheet$!: Observable<ReportsModel[]>;
@@ -73,6 +75,19 @@ export class MarksSheetsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
+    this.sortedTerms$ = this.terms$.pipe(
+      map((terms) =>
+        [...(terms || [])].sort((a, b) => {
+          if (a.year !== b.year) return b.year - a.year;
+          if (a.num !== b.num) return b.num - a.num;
+          // Vacation first when num/year are equal, so labels stay clear and deterministic
+          if ((a.type || 'regular') !== (b.type || 'regular')) {
+            return (a.type || 'regular') === 'vacation' ? -1 : 1;
+          }
+          return 0;
+        })
+      )
+    );
     this.isLoading$ = this.store.select(selectIsLoading);
 
     // Process reports with proper subscription management
@@ -317,5 +332,9 @@ export class MarksSheetsComponent implements OnInit, OnDestroy {
         panelClass: ['error-snackbar']
       });
     }
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 }
