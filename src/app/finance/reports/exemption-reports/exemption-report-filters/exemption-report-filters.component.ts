@@ -5,6 +5,7 @@ import { TermsModel } from 'src/app/enrolment/models/terms.model'; // Adjust pat
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors'; // Adjust path
 import { Observable } from 'rxjs';
 import { ExemptionType } from 'src/app/finance/enums/exemption-type.enum';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 @Component({
   selector: 'app-exemption-report-filters',
@@ -28,8 +29,7 @@ export class ExemptionReportFiltersComponent implements OnInit {
     // Make a copy to avoid mutating the input directly
     // Initialize filters with only the ones we are keeping
     this.filters = {
-      termNum: this.currentFilters.termNum || null,
-      termYear: this.currentFilters.termYear || null,
+      termId: this.currentFilters.termId || null,
       exemptionType: this.currentFilters.exemptionType || null,
       // startDate, endDate, studentNumber, enrolId are removed
     };
@@ -66,8 +66,7 @@ export class ExemptionReportFiltersComponent implements OnInit {
   onClear(): void {
     const clearedFilters: ExemptionReportFilters = {
       // Set only the remaining filters to null
-      termNum: null,
-      termYear: null,
+      termId: null,
       exemptionType: null,
       // Removed startDate, endDate, studentNumber, enrolId from here
     };
@@ -75,13 +74,7 @@ export class ExemptionReportFiltersComponent implements OnInit {
     this.applyFilters.emit(clearedFilters); // Emit cleared filters
   }
 
-  getUniqueTermNumbers(terms: TermsModel[] | null): number[] {
-    if (!terms) return [];
-    return [...new Set(terms.map((t) => t.num))].sort((a, b) => a - b);
-  }
-
-  getUniqueTermYears(terms: TermsModel[] | null): number[] {
-    if (!terms) return [];
-    return [...new Set(terms.map((t) => t.year))].sort((a, b) => a - b);
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 }

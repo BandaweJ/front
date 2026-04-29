@@ -16,8 +16,7 @@ import { TermsModel } from 'src/app/enrolment/models/terms.model';
 // Filters interface for the Exemption Reports - Adjusted studentId to string
 
 export interface ExemptionReportFilters {
-  termNum: number | null;
-  termYear: number | null;
+  termId: number | null;
   exemptionType: ExemptionType | null;
   startDate?: Date | null; // REMOVED
   endDate?: Date | null; // REMOVED
@@ -153,20 +152,8 @@ export const getExemptionReport = (filters: ExemptionReportFilters) =>
       // --- FIX END ---
 
       // If a term is selected, apply term-based date filtering
-      if (
-        filters.termNum !== undefined &&
-        filters.termNum !== null &&
-        allTerms &&
-        allTerms.length > 0
-      ) {
-        const selectedTerm = allTerms.find(
-          (t) =>
-            t.num === filters.termNum &&
-            // Only filter by year if a specific year is provided in filters
-            (filters.termYear === undefined ||
-              filters.termYear === null ||
-              t.year === filters.termYear)
-        );
+      if (filters.termId != null && allTerms && allTerms.length > 0) {
+        const selectedTerm = allTerms.find((t) => t.id === filters.termId);
 
         if (selectedTerm) {
           // --- FIX START: Explicitly convert to Date objects ---

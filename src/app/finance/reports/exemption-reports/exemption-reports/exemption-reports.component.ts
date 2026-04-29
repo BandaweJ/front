@@ -20,8 +20,7 @@ export class ExemptionReportsComponent implements OnInit {
   filters: ExemptionReportFilters = {
     startDate: null,
     endDate: null,
-    termNum: null,
-    termYear: null,
+    termId: null,
     exemptionType: null,
     studentNumber: null,
     enrolId: null,
