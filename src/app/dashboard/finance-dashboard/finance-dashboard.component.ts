@@ -350,12 +350,16 @@ export class FinanceDashboardComponent
       map((s) => s?.totalTransactions ?? 0)
     );
 
-    // Chart: from summary monthly breakdown
-    summary$
+    // Chart: prefer API monthly breakdown, fallback to filtered table data aggregation.
+    combineLatest([summary$, filteredData$])
       .pipe(
-        tap((summary) => {
+        tap(([summary, filteredRows]) => {
           const breakdownRaw = (summary as any)?.monthlyBreakdown;
-          const breakdown = Array.isArray(breakdownRaw) ? breakdownRaw : [];
+          const breakdownFromApi = Array.isArray(breakdownRaw) ? breakdownRaw : [];
+          const breakdown =
+            breakdownFromApi.length > 0
+              ? breakdownFromApi
+              : this.buildMonthlyBreakdownFromRows(filteredRows ?? []);
 
           if (breakdown.length) {
             this.barChartData.labels = breakdown.map((m: any) => {
@@ -611,5 +615,57 @@ export class FinanceDashboardComponent
       default:
         return sortedData;
     }
+  }
+
+  private buildMonthlyBreakdownFromRows(data: FinanceDataModel[]): Array<{
+    monthLabel: string;
+    year: number;
+    month: number;
+    invoicesTotal: number;
+    paymentsTotal: number;
+  }> {
+    const buckets = new Map<
+      string,
+      {
+        year: number;
+        month: number;
+        invoicesTotal: number;
+        paymentsTotal: number;
+      }
+    >();
+
+    for (const row of data) {
+      const date = new Date(row.date);
+      if (Number.isNaN(date.getTime())) continue;
+
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const key = `${year}-${month}`;
+      const existing = buckets.get(key) ?? {
+        year,
+        month,
+        invoicesTotal: 0,
+        paymentsTotal: 0,
+      };
+
+      if (row.type === 'Invoice') {
+        existing.invoicesTotal += Number(row.amount ?? 0);
+      } else if (row.type === 'Payment') {
+        existing.paymentsTotal += Number(row.amount ?? 0);
+      }
+
+      buckets.set(key, existing);
+    }
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return Array.from(buckets.values())
+      .sort((a, b) => a.year - b.year || a.month - b.month)
+      .map((item) => ({
+        monthLabel: `${months[item.month - 1] || ''} ${item.year}`.trim(),
+        year: item.year,
+        month: item.month,
+        invoicesTotal: item.invoicesTotal,
+        paymentsTotal: item.paymentsTotal,
+      }));
   }
 }
