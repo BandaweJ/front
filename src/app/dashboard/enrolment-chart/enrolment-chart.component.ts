@@ -16,7 +16,7 @@ export class EnrolmentChartComponent implements OnInit {
   public barChartData!: ChartConfiguration<'bar'>['data'];
 
   constructor(private store: Store) {
-    this.store.dispatch(fetchEnrolsStats());
+    this.store.dispatch(fetchEnrolsStats({}));
   }
 
   ngOnInit(): void {

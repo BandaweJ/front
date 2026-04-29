@@ -21,7 +21,13 @@ export class MarkSheetEffects {
       ofType(markSheetActions.fetchMarkSheet),
       switchMap((data) =>
         this.reportsService
-          .generateReports(data.name, data.num, data.year, data.examType)
+          .generateReports(
+            data.name,
+            data.num,
+            data.year,
+            data.examType,
+            data.termId
+          )
           .pipe(
             tap((reports) =>
               this.snackBar.open(`Mark sheet generated successfully`, 'OK', {

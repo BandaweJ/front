@@ -298,11 +298,19 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     this.selectedStudent$.next(null);
 
     const { term, clas, examType } = this.analysisForm.value;
+    const termId = term?.id;
+    if (typeof termId !== 'number') {
+      this.snackBar.open('Please select a valid term.', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
     this.store.dispatch(
       viewReportsActions.viewReports({
         name: clas,
         num: term.num,
         year: term.year,
+        termId,
         examType: examType,
       })
     );

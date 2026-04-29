@@ -10,6 +10,7 @@ export const markSheetActions = createActionGroup({
       name: string;
       num: number;
       year: number;
+      termId: number;
       examType: ExamType;
     }>(),
     fechMarkSheetSuccess: props<{ reports: ReportsModel[] }>(),

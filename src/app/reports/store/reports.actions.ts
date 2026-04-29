@@ -12,7 +12,7 @@ import { ExamType } from 'src/app/marks/models/examtype.enum';
 
 export const generateReports = createAction(
   '[Reports Component] generate reports',
-  props<{ name: string; num: number; year: number; termId?: number; examType: ExamType }>()
+  props<{ name: string; num: number; year: number; termId: number; examType: ExamType }>()
 );
 
 export const generateReportsSuccess = createAction(
@@ -32,7 +32,7 @@ export const saveReportActions = createActionGroup({
       name: string;
       num: number;
       year: number;
-      termId?: number;
+      termId: number;
       reports: ReportsModel[];
       examType: ExamType;
     }>(),
@@ -48,7 +48,7 @@ export const viewReportsActions = createActionGroup({
       name: string;
       num: number;
       year: number;
-      termId?: number;
+      termId: number;
       examType: ExamType;
     }>(),
     viewReportsSuccess: props<{ reports: ReportsModel[] }>(),
@@ -92,7 +92,7 @@ export const downloadReportActions = createActionGroup({
       name: string;
       num: number;
       year: number;
-      termId?: number;
+      termId: number;
       examType: ExamType;
       studentNumber: string;
     }>(),

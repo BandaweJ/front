@@ -339,15 +339,16 @@ export class ReportComponent implements OnInit, OnDestroy {
       examType: examType,
       studentNumber,
     } = report;
+    const termId = this.report.termId;
 
-    if (examType) {
+    if (examType && typeof termId === 'number') {
       // Check if examType exists before dispatching
       this.store.dispatch(
         downloadReportActions.downloadReport({
           name,
           num,
           year,
-          termId: this.report.termId,
+          termId,
           // Re-evaluate if you need `examType` if you already have it from `report.report.examType`
           // If the action expects `ExamType`, ensure 'examType' from 'report.report' is that type.
           examType: examType, // Explicit cast if necessary
@@ -355,7 +356,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         })
       );
     } else {
-      console.warn('Cannot download report: ExamType is missing.');
+      console.warn('Cannot download report: ExamType or termId is missing.');
     }
   }
 

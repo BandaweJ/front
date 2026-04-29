@@ -161,12 +161,26 @@ export class MarksSheetsComponent implements OnInit, OnDestroy {
 
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
+    const termId = term?.id;
+    if (typeof termId !== 'number') {
+      this.snackBar.open('Selected term is invalid. Please reselect term.', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
+      return;
+    }
     const num = term.num;
     const year = term.year;
     const examType = this.examType?.value;
 
     this.store.dispatch(
-      markSheetActions.fetchMarkSheet({ name, num, year, examType })
+      markSheetActions.fetchMarkSheet({
+        name,
+        num,
+        year,
+        termId,
+        examType,
+      })
     );
 
     this.snackBar.open(
