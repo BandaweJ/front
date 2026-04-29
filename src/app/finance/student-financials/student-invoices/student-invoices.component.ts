@@ -16,6 +16,9 @@ import { selectIsParent } from 'src/app/auth/store/auth.selectors';
 import { selectStudentInvoices, selectLoadingStudentInvoices, selectLoadStudentInvoicesErr, selectEffectiveStudentForFinance } from '../../store/finance.selector';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
+import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
+import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 @Component({
   selector: 'app-student-invoices',
@@ -42,6 +45,7 @@ export class StudentInvoicesComponent implements OnInit, OnDestroy {
   currentTheme: Theme = 'light';
   private userSubscription: Subscription | undefined;
   private destroy$ = new Subject<void>();
+  private terms: TermsModel[] = [];
 
   constructor(
     private store: Store<any>,
@@ -57,6 +61,10 @@ export class StudentInvoicesComponent implements OnInit, OnDestroy {
         this.currentTheme = theme;
         this.cdr.markForCheck();
       });
+    this.store.select(selectTerms).pipe(takeUntil(this.destroy$)).subscribe((terms) => {
+      this.terms = terms ?? [];
+      this.cdr.markForCheck();
+    });
     
     this.loadInvoices();
   }
@@ -147,6 +155,15 @@ export class StudentInvoicesComponent implements OnInit, OnDestroy {
       console.warn('Cannot download invoice: Invoice number is missing.');
       // Optionally, show a user-friendly message
     }
+  }
+
+  getInvoiceTermLabel(invoice: InvoiceModel): string {
+    const termId = invoice?.enrol?.termId;
+    if (typeof termId === 'number') {
+      const matched = this.terms.find((t) => t.id === termId);
+      if (matched) return formatTermLabel(matched);
+    }
+    return `Term ${invoice.enrol.num} - ${invoice.enrol.year}`;
   }
 
 }

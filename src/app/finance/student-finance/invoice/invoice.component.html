@@ -29,7 +29,7 @@
           <mat-label>Academic Term</mat-label>
           <mat-select [(ngModel)]="term" (selectionChange)="onTermChange($event.value)">
             <mat-option *ngFor="let t of terms$ | async" [value]="t">
-              Term {{ t.num }} - {{ t.year }}
+              {{ t.type === 'vacation' ? 'Vacation' : 'Regular' }} Term {{ t.num }} - {{ t.year }}
             </mat-option>
           </mat-select>
           <mat-hint>Select the term to view invoices</mat-hint>

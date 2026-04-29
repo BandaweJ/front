@@ -17,6 +17,9 @@ import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialo/c
 import { MatDialogRef } from '@angular/material/dialog';
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
+import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
+import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 @Component({
   selector: 'app-invoice-item',
   standalone: true,
@@ -39,6 +42,7 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
   private destroy$ = new Subject<void>();
   userRole$: Observable<string | null>;
   canVoidInvoice$!: Observable<boolean>; // Observable for void invoice permission
+  terms: TermsModel[] = [];
 
   @Input() invoice!: InvoiceModel | null;
   @Input() downloadable!: boolean;
@@ -62,6 +66,10 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
       this.currentTheme = theme;
+      this.cdr.markForCheck();
+    });
+    this.store.select(selectTerms).pipe(takeUntil(this.destroy$)).subscribe((terms) => {
+      this.terms = terms ?? [];
       this.cdr.markForCheck();
     });
   }
@@ -131,6 +139,17 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
     if (img) {
       img.src = '../../../assets/placeholder-logo.png';
     }
+  }
+
+  getInvoiceTermLabel(): string {
+    const enrol = this.invoice?.enrol;
+    if (!enrol) return 'Term N/A';
+    const termId = enrol.termId;
+    if (typeof termId === 'number') {
+      const matched = this.terms.find((t) => t.id === termId);
+      if (matched) return formatTermLabel(matched);
+    }
+    return `Term ${enrol.num} - ${enrol.year}`;
   }
 
   voidInvoice(): void {
