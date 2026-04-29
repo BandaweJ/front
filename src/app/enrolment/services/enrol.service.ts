@@ -60,8 +60,9 @@ export class EnrolService {
     return this.httpClient.post<EnrolsModel[]>(this.baseURL, enrols);
   }
 
-  getEnrolsStats(): Observable<EnrolStats> {
-    return this.httpClient.get<EnrolStats>(this.baseURL);
+  getEnrolsStats(termId?: number): Observable<EnrolStats> {
+    const suffix = termId ? `?termId=${termId}` : '';
+    return this.httpClient.get<EnrolStats>(`${this.baseURL}${suffix}`);
   }
 
   getTotalEnrolment(

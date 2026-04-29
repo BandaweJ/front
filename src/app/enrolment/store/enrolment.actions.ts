@@ -171,7 +171,8 @@ export const fetchTotalEnrolsFailure = createAction(
 );
 
 export const fetchEnrolsStats = createAction(
-  '[Dashboard Compmonent] fetch enrolment stats'
+  '[Dashboard Compmonent] fetch enrolment stats',
+  props<{ termId?: number }>()
 );
 
 export const fetchEnrolsStatsSuccess = createAction(

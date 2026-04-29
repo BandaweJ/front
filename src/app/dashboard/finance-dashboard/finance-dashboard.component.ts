@@ -249,7 +249,6 @@ export class FinanceDashboardComponent
       this.store.dispatch(fetchTerms());
       this.store.dispatch(fetchClasses());
       this.store.dispatch(currentTermActions.fetchCurrentTerm());
-      this.store.dispatch(fetchEnrolsStats());
     } catch (error) {
       this.handleError('Failed to load financial data');
     }
@@ -538,9 +537,11 @@ export class FinanceDashboardComponent
           // Strict term identity: backend dashboard filters now treat enrolTerm as termId.
           const enrolTerm = String(currentTerm.id);
           this.filterSubject.next({ enrolTerm });
+          this.store.dispatch(fetchEnrolsStats({ termId: currentTerm.id }));
         } else {
           // If no current term, use empty filter
           this.filterSubject.next({});
+          this.store.dispatch(fetchEnrolsStats({}));
         }
         this.cdr.markForCheck();
       });

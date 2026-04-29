@@ -310,8 +310,8 @@ export class EnrolmentEffects {
   fetchEnrolsStats$ = createEffect(() =>
     this.actions$.pipe(
       ofType(fromEnrolmentActions.fetchEnrolsStats),
-      switchMap(() =>
-        this.enrolService.getEnrolsStats().pipe(
+      switchMap(({ termId }) =>
+        this.enrolService.getEnrolsStats(termId).pipe(
           map((stats) =>
             fromEnrolmentActions.fetchEnrolsStatsSuccess({ stats })
           ),
