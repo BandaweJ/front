@@ -59,6 +59,7 @@ import {
 
 import { ClassesModel } from '../../../enrolment/models/classes.model';
 import { TermsModel } from '../../../enrolment/models/terms.model';
+import { formatTermLabel } from 'src/app/enrolment/models/term-label.util';
 
 interface ReportSummary {
   totalOverallOutstanding: number;
@@ -137,7 +138,7 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
     const filters: string[] = [];
     if (this.filterForm.get('termFilter')?.value) {
       const term = this.filterForm.get('termFilter')?.value;
-      filters.push(`Term: ${term.num} ${term.year}`);
+      filters.push(`Term: ${this.formatTerm(term)}`);
     }
     if (this.filterForm.get('classFilter')?.value) {
       filters.push(`Class: ${this.filterForm.get('classFilter')?.value.name}`);
@@ -248,17 +249,20 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
       ),
     ])
       .pipe(
-        map(([formValue, terms]) => {
-          let termId: string | null = null;
+        map(([formValue]) => {
+          let termId: number | null = null;
 
-          if (formValue.termFilter) {
-            termId = `${formValue.termFilter.num}-${formValue.termFilter.year}`;
+          if (
+            formValue.termFilter &&
+            typeof formValue.termFilter.id === 'number'
+          ) {
+            termId = formValue.termFilter.id;
           }
 
           return {
             enrolmentName: formValue.classFilter?.name || null,
             residence: formValue.residenceFilter || null,
-            termId: termId,
+            termId,
             searchQuery: formValue.searchQuery || null,
           } as OutstandingFeesReportFilters;
         }),
@@ -505,5 +509,9 @@ export class OutstandingFeesReportComponent implements OnInit, OnDestroy {
   // UI Helper methods
   getTotalOutstandingClass(amount: number): string {
     return amount > 10000 ? 'high-outstanding' : amount > 5000 ? 'medium-outstanding' : 'low-outstanding';
+  }
+
+  formatTerm(term: TermsModel): string {
+    return formatTermLabel(term);
   }
 }

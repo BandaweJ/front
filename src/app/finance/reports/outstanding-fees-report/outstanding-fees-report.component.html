@@ -59,7 +59,7 @@
             <mat-select formControlName="termFilter">
               <mat-option [value]="null">All Terms</mat-option>
               <mat-option *ngFor="let term of (terms$ | async)" [value]="term">
-                Term {{ term.num }} ({{ term.year }})
+                {{ formatTerm(term) }}
               </mat-option>
             </mat-select>
             <mat-icon matPrefix>calendar_today</mat-icon>
