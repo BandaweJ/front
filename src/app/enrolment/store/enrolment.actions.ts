@@ -127,7 +127,7 @@ export const editTermFail = createAction(
 
 export const getEnrolmentByClass = createAction(
   '[Terms-Classes Component] fetch enrolment for class',
-  props<{ name: string; num: number; year: number; termId?: number }>()
+  props<{ name: string; num: number; year: number; termId: number }>()
 );
 
 export const getEnrolmentByClassSuccess = createAction(

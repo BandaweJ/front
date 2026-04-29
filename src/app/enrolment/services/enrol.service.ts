@@ -33,11 +33,10 @@ export class EnrolService {
     name: string,
     num: number,
     year: number,
-    termId?: number
+    termId: number
   ): Observable<EnrolsModel[]> {
-    const suffix = termId ? `?termId=${termId}` : '';
     return this.httpClient.get<EnrolsModel[]>(
-      `${this.baseURL}${name}/${num}/${year}${suffix}`
+      `${this.baseURL}${name}/${num}/${year}?termId=${termId}`
     );
   }
 

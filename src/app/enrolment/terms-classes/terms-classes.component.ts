@@ -187,10 +187,20 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
+    const termId = term?.id;
+    if (typeof termId !== 'number') {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+      this.snackBar.open(
+        'Invalid term selection. Please reselect the term.',
+        'Close',
+        { duration: 3000 }
+      );
+      return;
+    }
 
     const num = term.num;
     const year = term.year;
-    const termId = term.id;
 
     this.store.dispatch(getEnrolmentByClass({ name, num, year, termId }));
   }
@@ -220,10 +230,16 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
     const num = term.num;
     const year = term.year;
 
+    if (typeof term.id !== 'number') {
+      this.snackBar.open('Invalid term selection. Please reselect the term.', 'Close', { duration: 3000 });
+      return;
+    }
+
     const data = {
       name,
       num,
       year,
+      termId: term.id,
     };
 
     console.log('Dialog data:', data);
@@ -304,6 +320,10 @@ export class TermsClassesComponent implements OnInit, AfterViewInit, OnDestroy {
         const name = this.clas?.value;
         const term: TermsModel = this.term?.value;
         if (name && term) {
+          if (typeof term.id !== 'number') {
+            this.snackBar.open('Invalid term selection. Please reselect the term.', 'Close', { duration: 3000 });
+            return;
+          }
           this.store.dispatch(
             getEnrolmentByClass({
               name,

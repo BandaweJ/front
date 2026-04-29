@@ -7,6 +7,7 @@ export interface EnrolsModel {
   name: string;
   num: number;
   year: number;
+  termId?: number;
   residence: Residence;
   student: StudentsModel;
 }

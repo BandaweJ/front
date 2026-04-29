@@ -186,7 +186,16 @@ export class ClassListsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const num = term.num;
     const year = term.year;
-    const termId = term.id;
+    const termId = term?.id;
+    if (typeof termId !== 'number') {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+      this.snackBar.open('Invalid term selection. Please reselect the term.', 'Close', {
+        duration: 3000,
+        panelClass: ['warning-snackbar']
+      });
+      return;
+    }
 
     this.store.dispatch(getEnrolmentByClass({ name, num, year, termId }));
     
