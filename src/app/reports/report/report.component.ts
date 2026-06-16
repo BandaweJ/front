@@ -200,6 +200,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         num: this.report.num,
         year: this.report.year,
         name: this.report.name,
+        termId: this.report.termId, // Required by backend to locate/create the report
         studentNumber: this.report.studentNumber,
         report: {
           ...this.report.report, // Spread existing report.report properties
@@ -244,6 +245,7 @@ export class ReportComponent implements OnInit, OnDestroy {
           num: this.report.num,
           year: this.report.year,
           name: this.report.name,
+          termId: this.report.termId, // Required by backend to locate/create the report
           studentNumber: this.report.studentNumber,
           examType: this.report.examType,
           report: this.report.report, // Ensure the nested report is included
