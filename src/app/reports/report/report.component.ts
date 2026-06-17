@@ -9,11 +9,9 @@ import {
 } from '../store/reports.actions';
 
 import {
-  GenerateRoleCommentModel,
   HeadCommentModel,
   TeacherCommentModel,
 } from '../models/comment.model';
-import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 import { selectIsLoading, selectReports } from '../store/reports.selectors';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
@@ -22,8 +20,6 @@ import { map, filter, take } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
-import { ReportsService } from '../services/reports.service';
-
 // pdfMake.vfs = pdfFonts.pdfMake.vfs; // Commented out as per original
 
 @Component({
@@ -52,13 +48,8 @@ export class ReportComponent implements OnInit, OnDestroy {
   
   editState = false;
   teacherEditState = false;
-  role = ''; // Initialize role
   isLoading$ = this.store.select(selectIsLoading);
   studentNumber = '';
-  generatingTeacherComment = false;
-  generatingHeadComment = false;
-  teacherCommentSource: 'openai' | 'fallback' | null = null;
-  headCommentSource: 'openai' | 'fallback' | null = null;
   
   // Permission-based access observables
   canDownloadReport$ = this.roleAccess.canDownloadReport$();
@@ -87,17 +78,10 @@ export class ReportComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  get showAiSourceBadge(): boolean {
-    return this.role !== ROLES.student && this.role !== ROLES.parent;
-  }
-
-  private userSubscription: Subscription | undefined; // Declare subscription
-
   constructor(
     private store: Store,
     private roleAccess: RoleAccessService,
     private actions$: Actions,
-    private reportsService: ReportsService,
   ) {}
 
   commentForm!: FormGroup;
@@ -116,12 +100,6 @@ export class ReportComponent implements OnInit, OnDestroy {
       []
     );
     this.studentNumber = this.report.report.studentNumber;
-
-    this.userSubscription = this.store.select(selectUser).subscribe((user) => {
-      if (user) {
-        this.role = user.role;
-      }
-    });
 
     // Subscribe to store reports to keep local report in sync
     // This ensures the report ID is available after saving comments
@@ -162,11 +140,8 @@ export class ReportComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Add ngOnDestroy to unsubscribe if the component might not be destroyed and recreated quickly
   ngOnDestroy(): void {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
-    }
+    this.saveSubscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   get comment() {
@@ -263,58 +238,6 @@ export class ReportComponent implements OnInit, OnDestroy {
       );
       this.toggleTeacherEditState();
     }
-  }
-
-  generateTeacherComment(): void {
-    if (!this.report || !this.report.report || this.generatingTeacherComment) {
-      return;
-    }
-
-    this.generatingTeacherComment = true;
-    const payload: GenerateRoleCommentModel = {
-      role: 'formTeacher',
-      report: this.report,
-    };
-
-    this.reportsService.generateRoleComment(payload).subscribe({
-      next: (response) => {
-        if (response?.success && response.comment) {
-          this.teacherCommentControl.setValue(response.comment);
-          this.teacherEditState = true;
-          this.teacherCommentSource = response.source;
-        }
-        this.generatingTeacherComment = false;
-      },
-      error: () => {
-        this.generatingTeacherComment = false;
-      },
-    });
-  }
-
-  generateHeadComment(): void {
-    if (!this.report || !this.report.report || this.generatingHeadComment) {
-      return;
-    }
-
-    this.generatingHeadComment = true;
-    const payload: GenerateRoleCommentModel = {
-      role: 'headTeacher',
-      report: this.report,
-    };
-
-    this.reportsService.generateRoleComment(payload).subscribe({
-      next: (response) => {
-        if (response?.success && response.comment) {
-          this.commentForm.get('comment')?.setValue(response.comment);
-          this.editState = true;
-          this.headCommentSource = response.source;
-        }
-        this.generatingHeadComment = false;
-      },
-      error: () => {
-        this.generatingHeadComment = false;
-      },
-    });
   }
 
   toggleEditState() {

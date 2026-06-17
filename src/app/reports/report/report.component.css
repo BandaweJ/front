@@ -186,23 +186,6 @@ th {
   text-decoration: underline;
 }
 
-.ai-source-badge {
-  font-size: 11px;
-  line-height: 1;
-  padding: 4px 8px;
-  border-radius: 12px;
-  background: #e6f7ff;
-  color: #046d9a;
-  border: 1px solid #9bdcff;
-  text-decoration: none;
-}
-
-.ai-source-badge.fallback {
-  background: #fff7e6;
-  color: #9a6800;
-  border-color: #ffd08a;
-}
-
 .head-comment-form {
   display: flex;
   flex-direction: column;
