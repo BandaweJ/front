@@ -16,9 +16,11 @@ import { Router } from '@angular/router';
 
 // --- NEW IMPORTS FOR INVOICE MODELS AND SELECTORS/ACTIONS ---
 import { InvoiceModel } from 'src/app/finance/models/invoice.model'; // Adjust path
+import { ReceiptModel } from 'src/app/finance/models/payment.model';
 import {
   selectLoadingStudentInvoices,
   selectStudentInvoices,
+  selectStudentReceipts,
 } from 'src/app/finance/store/finance.selector';
 import {
   selectIsLoading,
@@ -27,7 +29,7 @@ import {
   selectSelectedReport,
   selectStudentReports,
 } from '../store/reports.selectors';
-import { invoiceActions } from 'src/app/finance/store/finance.actions';
+import { invoiceActions, receiptActions } from 'src/app/finance/store/finance.actions';
 // Import the *actual* selectors provided by the user
 
 @Component({
@@ -46,6 +48,7 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges
   emptyStateMessage$: Observable<string>;
 
   allInvoices$: Observable<InvoiceModel[]>;
+  allReceipts$: Observable<ReceiptModel[]>;
   invoicesLoading$: Observable<boolean>;
 
   studentNumber: string | null = null;
@@ -83,8 +86,9 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges
     );
 
     // --- Initialize NEW Invoices Observables (using provided selector names) ---
-    this.allInvoices$ = this.store.select(selectStudentInvoices); // Use the provided selector
-    this.invoicesLoading$ = this.store.select(selectLoadingStudentInvoices); // Use the provided selector
+    this.allInvoices$ = this.store.select(selectStudentInvoices);
+    this.allReceipts$ = this.store.select(selectStudentReceipts);
+    this.invoicesLoading$ = this.store.select(selectLoadingStudentInvoices);
     // --- END Initialize NEW Observables ---
 
     // Treat any account with linked children as "parent-like" for this view
@@ -117,6 +121,9 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges
           );
           this.store.dispatch(
             invoiceActions.fetchStudentInvoices({ studentNumber })
+          );
+          this.store.dispatch(
+            receiptActions.fetchStudentReceipts({ studentNumber })
           );
         }),
         takeUntil(this.destroy$)
@@ -156,12 +163,12 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges
     );
 
     // Combine selected filters with student reports and invoices to determine selection and display eligibility
-    combineLatest([this.studentReports$, this.allInvoices$])
+    combineLatest([this.studentReports$, this.allInvoices$, this.allReceipts$])
       .pipe(
         filter(([reports, invoices]) => !!reports && !!invoices),
         takeUntil(this.destroy$)
       )
-      .subscribe(([reports, invoices]) => {
+      .subscribe(([reports, invoices, receipts]) => {
         const foundReport = reports.find(
           (report) =>
             report.report.termNumber === this.selectedTerm &&
@@ -171,7 +178,7 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges
 
         if (foundReport) {
           // Check if the report can be displayed based on invoice balance
-          if (this.canDisplayReport(foundReport, invoices)) {
+          if (this.canDisplayReport(foundReport, invoices, receipts)) {
             this.store.dispatch(
               ReportsActions.viewReportsActions.selectStudentReport({
                 report: foundReport,
@@ -227,42 +234,72 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy, OnChanges
 
   /**
    * Checks if a report can be displayed based on the student's invoice balance for that term.
-   * A report is displayed when there is no outstanding debt for the term.
-   * Zero balance and credit balances (negative) are both allowed.
-   *
-   * @param report The ReportsModel object for the report being viewed.
-   * @param allInvoices An array of all invoices available for the student.
-   * @returns True if the report can be displayed, false otherwise.
+   * A report is displayed when there is no outstanding debt for the term, or when the
+   * student's overall account is fully paid or in credit (matching the finance dashboard).
    */
   public canDisplayReport(
     report: ReportsModel,
-    allInvoices: InvoiceModel[] | null
+    allInvoices: InvoiceModel[] | null,
+    allReceipts: ReceiptModel[] | null = null,
   ): boolean {
     if (!allInvoices || allInvoices.length === 0) {
-      // If there are no invoices, assume the report can't be displayed for financial reasons
       return true;
     }
 
-    // Find the invoice that matches the report's term (num) and year
-    const matchingInvoice = allInvoices.find(
-      (invoice) =>
-        invoice.enrol.num === report.num && invoice.enrol.year === report.year
-    );
-
+    const matchingInvoice = this.findInvoiceForReport(report, allInvoices);
     if (!matchingInvoice) {
       return true;
     }
 
-    if (matchingInvoice) {
-      // Allow report when debt is cleared or overpaid (credit).
-      const balance = Number(matchingInvoice.balance);
-      return Number.isFinite(balance) ? balance <= 0 : true;
-    } else {
-      // No matching invoice found for this report's term and year.
-      // As per the requirement "display the report only if the balance on an invoice... is zero",
-      // an invoice must exist and be paid. So, if no matching invoice, then false.
-      return false;
+    const termBalance = Number(matchingInvoice.balance);
+    if (Number.isFinite(termBalance) && termBalance <= 0) {
+      return true;
     }
+
+    // Invoice may still show a balance when payments created account credit instead.
+    return this.calculateStudentNetBalance(allInvoices, allReceipts) <= 0;
+  }
+
+  private findInvoiceForReport(
+    report: ReportsModel,
+    allInvoices: InvoiceModel[],
+  ): InvoiceModel | undefined {
+    if (report.termId != null) {
+      const byTermId = allInvoices.find(
+        (invoice) => invoice.enrol?.termId === report.termId,
+      );
+      if (byTermId) {
+        return byTermId;
+      }
+    }
+
+    const termNumber = report.report?.termNumber ?? report.num;
+    const termYear = report.report?.termYear ?? report.year;
+    return allInvoices.find(
+      (invoice) =>
+        invoice.enrol?.num === termNumber && invoice.enrol?.year === termYear,
+    );
+  }
+
+  private calculateStudentNetBalance(
+    allInvoices: InvoiceModel[],
+    allReceipts: ReceiptModel[] | null,
+  ): number {
+    let balance = 0;
+
+    allInvoices
+      .filter((invoice) => !invoice.isVoided)
+      .forEach((invoice) => {
+        balance += Number(invoice.totalBill || 0);
+      });
+
+    (allReceipts || [])
+      .filter((receipt) => !receipt.isVoided)
+      .forEach((receipt) => {
+        balance -= Number(receipt.amountPaid || 0);
+      });
+
+    return balance;
   }
 
   ngOnDestroy(): void {
