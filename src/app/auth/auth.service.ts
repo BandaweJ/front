@@ -21,7 +21,7 @@ export class AuthService {
   private readonly tenantKey = 'tenantSlug';
 
   constructor(
-    private http: HttpClient // private router: Router, // private store: Store
+    private http: HttpClient, // private router: Router, // private store: Store
   ) {}
 
   private baseUrl = `${environment.apiUrl}/auth/`;
@@ -84,18 +84,20 @@ export class AuthService {
     return { isLoggedIn: true, user, accessToken: token };
   }
 
-  signin(signinData: SigninInterface): Observable<{ accessToken: string; permissions: string[] }> {
+  signin(
+    signinData: SigninInterface,
+  ): Observable<{ accessToken: string; permissions: string[] }> {
     return this.http.post<{ accessToken: string; permissions: string[] }>(
       this.baseUrl + 'signin',
 
-      signinData
+      signinData,
     );
   }
 
   signup(signupData: SignupInterface): Observable<{ response: boolean }> {
     return this.http.post<{ response: boolean }>(
       this.baseUrl + 'signup',
-      signupData
+      signupData,
     );
   }
 
@@ -105,16 +107,16 @@ export class AuthService {
 
   fetchUserDetails(
     id: string,
-    role: string
+    role: string,
   ): Observable<StudentsModel | TeachersModel | ParentsModel> {
     return this.http.get<StudentsModel | TeachersModel | ParentsModel>(
-      `${this.baseUrl}${id}/${role}`
+      `${this.baseUrl}${id}/${role}`,
     );
   }
 
   getUserPermissions(accountId: string): Observable<{ permissions: string[] }> {
     return this.http.get<{ permissions: string[] }>(
-      `${environment.apiUrl}/system/roles-permissions/user/${accountId}/permissions`
+      `${environment.apiUrl}/system/roles-permissions/user/${accountId}/permissions`,
     );
   }
 }

@@ -8,7 +8,14 @@ import {
 } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Observable, Subject, of, combineLatest } from 'rxjs';
-import { takeUntil, map, shareReplay, catchError, filter, take } from 'rxjs/operators';
+import {
+  takeUntil,
+  map,
+  shareReplay,
+  catchError,
+  filter,
+  take,
+} from 'rxjs/operators';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Store } from '@ngrx/store';
 import {
@@ -23,7 +30,10 @@ import { checkAuthStatus, userDetailsActions } from './auth/store/auth.actions';
 import { ThemeService, Theme } from './services/theme.service';
 import { RoleAccessService } from './services/role-access.service';
 import { ROLES } from './registration/models/roles.enum';
-import { SystemSettingsService, SystemSettings } from './system/services/system-settings.service';
+import {
+  SystemSettingsService,
+  SystemSettings,
+} from './system/services/system-settings.service';
 import { Title } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, NavigationEnd } from '@angular/router';
@@ -36,9 +46,9 @@ import { MessagingService } from './messaging/services/messaging.service';
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'School';
-  
+
   currentTheme: Theme = 'light';
-  
+
   // School information from system settings
   schoolName$!: Observable<string>;
   schoolLogo$!: Observable<string>;
@@ -58,7 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
   isLoggedIn$: Observable<boolean>; // Simulate logged-in state, typically from an auth service
   isLoggedInStatus!: boolean; // Store the actual boolean status for TS logic
   isAuthenticatedDev$: Observable<boolean>;
-  
+
   // Messaging unread count
   totalUnreadCount = 0;
   searchQuery = '';
@@ -66,11 +76,31 @@ export class AppComponent implements OnInit, OnDestroy {
   isStudentOrParentNav = false;
 
   quickNavItems = [
-    { id: 'dashboard', label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
-    { id: 'finance', label: 'Finance Overview', route: '/student-financials', icon: 'account_balance_wallet' },
-    { id: 'reports', label: 'Reports', route: '/reports', icon: 'receipt_long' },
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      route: '/dashboard',
+      icon: 'dashboard',
+    },
+    {
+      id: 'finance',
+      label: 'Finance Overview',
+      route: '/student-financials',
+      icon: 'account_balance_wallet',
+    },
+    {
+      id: 'reports',
+      label: 'Reports',
+      route: '/reports',
+      icon: 'receipt_long',
+    },
     { id: 'messages', label: 'Messages', route: '/messaging', icon: 'message' },
-    { id: 'calendar', label: 'Calendar', route: '/calendar', icon: 'calendar_today' },
+    {
+      id: 'calendar',
+      label: 'Calendar',
+      route: '/calendar',
+      icon: 'calendar_today',
+    },
   ];
   recentNavIds: string[] = [];
   favoriteNavIds: string[] = [];
@@ -92,139 +122,237 @@ export class AppComponent implements OnInit, OnDestroy {
   selectedDevViewRole: ROLES | null = null;
 
   // Role-based access observables - these update when role changes
-  canAccessRegistration$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception, ROLES.director))
-  );
-  canAccessEnrolment$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.doesNotHaveRole(role, ROLES.student, ROLES.parent))
-  );
-  canAccessAttendance$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.teacher, ROLES.hod))
-  );
-  canAccessMarks$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.teacher, ROLES.hod, ROLES.dev))
-  );
-  canAccessMarksDiagnostics$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.dev))
-  );
-  canAccessResultsAnalysis$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.teacher, ROLES.hod, ROLES.director))
-  );
-  canAccessBilling$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.director, ROLES.auditor))
-  );
-  canAccessReceipting$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
-  );
-  canAccessFinancialReports$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role =>
-      this.roleAccess.hasAnyRole(
-        role,
-        ROLES.dev,
-        ROLES.reception,
-        ROLES.auditor,
-        ROLES.director,
+  canAccessRegistration$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.admin,
+          ROLES.reception,
+          ROLES.director,
+        ),
       ),
-    )
-  );
-  canAccessExecutiveAnalytics$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.dev, ROLES.auditor, ROLES.director))
-  );
-  canAccessRequisitions$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role =>
-      this.roleAccess.hasAnyRole(
-        role,
-        ROLES.dev,
-        ROLES.admin,
-        ROLES.director,
-        ROLES.auditor,
-        ROLES.deputy,
-        ROLES.head,
-        ROLES.hod,
-        ROLES.seniorTeacher,
+    );
+  canAccessEnrolment$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.doesNotHaveRole(role, ROLES.student, ROLES.parent),
       ),
-    ),
-  );
-  canAccessInventory$ = this.roleAccess.getCurrentRole$().pipe(
-    map((role) =>
-      this.roleAccess.hasAnyRole(
-        role,
-        ROLES.dev,
-        ROLES.admin,
-        ROLES.director,
-        ROLES.auditor,
-        ROLES.head,
-        ROLES.deputy,
-        ROLES.hod,
-        ROLES.seniorTeacher,
-        ROLES.teacher,
+    );
+  canAccessAttendance$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.teacher, ROLES.hod),
       ),
-    ),
-  );
-  canAccessLibrary$ = this.roleAccess.getCurrentRole$().pipe(
-    map((role) =>
-      this.roleAccess.hasAnyRole(
-        role,
-        ROLES.dev,
-        ROLES.admin,
-        ROLES.director,
-        ROLES.auditor,
-        ROLES.head,
-        ROLES.deputy,
-        ROLES.hod,
-        ROLES.seniorTeacher,
-        ROLES.teacher,
+    );
+  canAccessMarks$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.admin,
+          ROLES.teacher,
+          ROLES.hod,
+          ROLES.dev,
+        ),
       ),
-    ),
-  );
-  canAccessIncidents$ = this.roleAccess.getCurrentRole$().pipe(
-    map((role) =>
-      this.roleAccess.hasAnyRole(
-        role,
-        ROLES.dev,
-        ROLES.admin,
-        ROLES.director,
-        ROLES.auditor,
-        ROLES.head,
-        ROLES.deputy,
-        ROLES.hod,
-        ROLES.seniorTeacher,
-        ROLES.teacher,
+    );
+  canAccessMarksDiagnostics$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.dev)),
+    );
+  canAccessResultsAnalysis$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.admin,
+          ROLES.teacher,
+          ROLES.hod,
+          ROLES.director,
+        ),
       ),
-    ),
-  );
-  canAccessSystemAdmin$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.dev))
-  );
-  canAccessClassLists$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception, ROLES.teacher, ROLES.hod, ROLES.auditor, ROLES.director))
-  );
-  canAccessStudentBalances$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasRole(ROLES.reception, role))
-  );
-  canAccessExemptions$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
-  );
-  canAccessRevenueRecognition$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
-  );
-  canAccessFeesCollection$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
-  );
-  
+    );
+  canAccessBilling$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.reception,
+          ROLES.director,
+          ROLES.auditor,
+        ),
+      ),
+    );
+  canAccessReceipting$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director),
+      ),
+    );
+  canAccessFinancialReports$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.dev,
+          ROLES.reception,
+          ROLES.auditor,
+          ROLES.director,
+        ),
+      ),
+    );
+  canAccessExecutiveAnalytics$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.admin,
+          ROLES.dev,
+          ROLES.auditor,
+          ROLES.director,
+        ),
+      ),
+    );
+  canAccessRequisitions$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.dev,
+          ROLES.admin,
+          ROLES.director,
+          ROLES.auditor,
+          ROLES.deputy,
+          ROLES.head,
+          ROLES.hod,
+          ROLES.seniorTeacher,
+        ),
+      ),
+    );
+  canAccessInventory$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.dev,
+          ROLES.admin,
+          ROLES.director,
+          ROLES.auditor,
+          ROLES.head,
+          ROLES.deputy,
+          ROLES.hod,
+          ROLES.seniorTeacher,
+          ROLES.teacher,
+        ),
+      ),
+    );
+  canAccessLibrary$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.dev,
+          ROLES.admin,
+          ROLES.director,
+          ROLES.auditor,
+          ROLES.head,
+          ROLES.deputy,
+          ROLES.hod,
+          ROLES.seniorTeacher,
+          ROLES.teacher,
+        ),
+      ),
+    );
+  canAccessIncidents$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.dev,
+          ROLES.admin,
+          ROLES.director,
+          ROLES.auditor,
+          ROLES.head,
+          ROLES.deputy,
+          ROLES.hod,
+          ROLES.seniorTeacher,
+          ROLES.teacher,
+        ),
+      ),
+    );
+  canAccessSystemAdmin$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.dev)),
+    );
+  canAccessClassLists$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(
+          role,
+          ROLES.admin,
+          ROLES.reception,
+          ROLES.teacher,
+          ROLES.hod,
+          ROLES.auditor,
+          ROLES.director,
+        ),
+      ),
+    );
+  canAccessStudentBalances$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(map((role) => this.roleAccess.hasRole(ROLES.reception, role)));
+  canAccessExemptions$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director),
+      ),
+    );
+  canAccessRevenueRecognition$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director),
+      ),
+    );
+  canAccessFeesCollection$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(
+      map((role) =>
+        this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director),
+      ),
+    );
+
   // Helper methods for specific role checks
-  isAdmin$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasRole(ROLES.admin, role))
-  );
-  isReception$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasRole(ROLES.reception, role))
-  );
-  isStudent$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasRole(ROLES.student, role))
-  );
-  isParent$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasRole(ROLES.parent, role))
-  );
+  isAdmin$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(map((role) => this.roleAccess.hasRole(ROLES.admin, role)));
+  isReception$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(map((role) => this.roleAccess.hasRole(ROLES.reception, role)));
+  isStudent$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(map((role) => this.roleAccess.hasRole(ROLES.student, role)));
+  isParent$ = this.roleAccess
+    .getCurrentRole$()
+    .pipe(map((role) => this.roleAccess.hasRole(ROLES.parent, role)));
   /** True when user role is parent (case-insensitive). Used for Finance overview and parent views. */
   isParentRole$ = this.store.select(selectIsParent);
   /**
@@ -241,13 +369,13 @@ export class AppComponent implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     private media: MediaMatcher,
     private store: Store,
-    public themeService: ThemeService,  // Made public for template access
-    public roleAccess: RoleAccessService,  // Made public for template access
-    public router: Router,  // Made public for template access
+    public themeService: ThemeService, // Made public for template access
+    public roleAccess: RoleAccessService, // Made public for template access
+    public router: Router, // Made public for template access
     private systemSettingsService: SystemSettingsService,
     private titleService: Title,
     private dialog: MatDialog,
-    private messagingService: MessagingService
+    private messagingService: MessagingService,
   ) {
     this.mobileQuery = media.matchMedia('(max-width: 767px)');
     this._mobileQueryListener = () => {
@@ -256,21 +384,23 @@ export class AppComponent implements OnInit, OnDestroy {
     };
     this.mobileQuery.addListener(this._mobileQueryListener);
     this.isLoggedIn$ = this.store.select(selectIsLoggedIn);
-    this.isAuthenticatedDev$ = this.store.select(selectUser).pipe(
-      map((user) => (user?.role || '').toLowerCase() === ROLES.dev),
-    );
+    this.isAuthenticatedDev$ = this.store
+      .select(selectUser)
+      .pipe(map((user) => (user?.role || '').toLowerCase() === ROLES.dev));
   }
 
   ngOnInit(): void {
     this.restoreNavPreferences();
     // Subscribe to theme changes
-    this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
-      this.currentTheme = theme;
-    });
-    
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+      });
+
     // Load system settings and initialize school information observables
     const settings$ = this.systemSettingsService.getSettings().pipe(
-      catchError(error => {
+      catchError((error) => {
         console.warn('System settings unavailable, using defaults.');
         // Return default settings on error
         return of({
@@ -278,50 +408,60 @@ export class AppComponent implements OnInit, OnDestroy {
           schoolLogo: 'assets/jhs_logo.jpg',
         } as SystemSettings);
       }),
-      shareReplay(1) // Cache the result to avoid multiple HTTP calls
+      shareReplay(1), // Cache the result to avoid multiple HTTP calls
     );
-    
+
     // Initialize school information observables
     this.schoolName$ = settings$.pipe(
-      map(settings => {
+      map((settings) => {
         const name = (settings.schoolName || '').toString().trim();
         // Treat literal 'null'/'undefined' from DB as empty and fall back
-        if (!name || name.toLowerCase() === 'null' || name.toLowerCase() === 'undefined') {
+        if (
+          !name ||
+          name.toLowerCase() === 'null' ||
+          name.toLowerCase() === 'undefined'
+        ) {
           return 'Junior High School';
         }
         return name;
-      })
+      }),
     );
-    
+
     this.schoolLogo$ = settings$.pipe(
-      map(settings => {
+      map((settings) => {
         const logo = (settings.schoolLogo || '').toString().trim();
         // Treat literal 'null'/'undefined' from DB as empty and fall back to bundled asset
-        if (!logo || logo.toLowerCase() === 'null' || logo.toLowerCase() === 'undefined') {
+        if (
+          !logo ||
+          logo.toLowerCase() === 'null' ||
+          logo.toLowerCase() === 'undefined'
+        ) {
           return 'assets/jhs_logo.jpg';
         }
         return logo;
-      })
+      }),
     );
-    
+
     this.schoolNameAbbr$ = settings$.pipe(
-      map(settings => {
+      map((settings) => {
         const name = settings.schoolName || 'Junior High School';
         // Generate abbreviation from school name (first letters of each word)
-        return name
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase())
-          .join('')
-          .substring(0, 3) || 'JHS';
-      })
+        return (
+          name
+            .split(' ')
+            .map((word) => word.charAt(0).toUpperCase())
+            .join('')
+            .substring(0, 3) || 'JHS'
+        );
+      }),
     );
-    
+
     // Update page title and apply school colors
-    settings$.pipe(takeUntil(this.destroy$)).subscribe(settings => {
+    settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
       const schoolName = settings.schoolName || 'Junior High School';
       this.title = schoolName;
       this.titleService.setTitle(schoolName);
-      
+
       // Apply school colors to theme
       if (settings.primaryColor || settings.accentColor || settings.warnColor) {
         this.themeService.applySchoolColors({
@@ -331,27 +471,31 @@ export class AppComponent implements OnInit, OnDestroy {
         });
       }
     });
-    
+
     this.store.dispatch(checkAuthStatus());
 
     // When user logs in, load their profile (display name in header; for parents, linked students for finance/reports)
     combineLatest([
       this.store.select(selectUser),
       this.store.select(selectUserDetails),
-    ]).pipe(
-      filter(([user, details]) => {
-        if (!user?.id || !user.role) return false;
-        if (!details) return true; // load for all roles so we have display name
-        if (user.role === ROLES.parent) return !('students' in details);
-        return false;
-      }),
-      take(1),
-      takeUntil(this.destroy$)
-    ).subscribe(([user]) => {
-      if (user?.id && user.role) {
-        this.store.dispatch(userDetailsActions.fetchUser({ id: user.id, role: user.role }));
-      }
-    });
+    ])
+      .pipe(
+        filter(([user, details]) => {
+          if (!user?.id || !user.role) return false;
+          if (!details) return true; // load for all roles so we have display name
+          if (user.role === ROLES.parent) return !('students' in details);
+          return false;
+        }),
+        take(1),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(([user]) => {
+        if (user?.id && user.role) {
+          this.store.dispatch(
+            userDetailsActions.fetchUser({ id: user.id, role: user.role }),
+          );
+        }
+      });
 
     this.checkScreenSize(); // Initial screen size check
 
@@ -364,15 +508,17 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     // After login, route everyone to /dashboard (role-specific view is shown inside dashboard component)
-    this.isLoggedIn$.pipe(
-      takeUntil(this.destroy$),
-      filter((loggedIn) => !!loggedIn)
-    ).subscribe(() => {
-      const url = this.router.url;
-      if (url === '/signin' || url === '/' || url === '') {
-        this.router.navigate(['/dashboard']);
-      }
-    });
+    this.isLoggedIn$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((loggedIn) => !!loggedIn),
+      )
+      .subscribe(() => {
+        const url = this.router.url;
+        if (url === '/signin' || url === '/' || url === '') {
+          this.router.navigate(['/dashboard']);
+        }
+      });
 
     this.user$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
       if (user) {
@@ -461,7 +607,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const q = this.searchQuery.trim().toLowerCase();
     if (!q) return this.quickNavItems;
     return this.quickNavItems.filter((item) =>
-      item.label.toLowerCase().includes(q)
+      item.label.toLowerCase().includes(q),
     );
   }
 
@@ -488,13 +634,22 @@ export class AppComponent implements OnInit, OnDestroy {
     } else {
       this.favoriteNavIds = [itemId, ...this.favoriteNavIds].slice(0, 8);
     }
-    localStorage.setItem(this.favoriteStorageKey, JSON.stringify(this.favoriteNavIds));
+    localStorage.setItem(
+      this.favoriteStorageKey,
+      JSON.stringify(this.favoriteNavIds),
+    );
   }
 
   navigateQuick(item: { id: string; route: string }): void {
     this.router.navigate([item.route]);
-    this.recentNavIds = [item.id, ...this.recentNavIds.filter((id) => id !== item.id)].slice(0, 8);
-    localStorage.setItem(this.recentStorageKey, JSON.stringify(this.recentNavIds));
+    this.recentNavIds = [
+      item.id,
+      ...this.recentNavIds.filter((id) => id !== item.id),
+    ].slice(0, 8);
+    localStorage.setItem(
+      this.recentStorageKey,
+      JSON.stringify(this.recentNavIds),
+    );
     this.closeCommandPalette();
     if (this.isScreenSmall) {
       this.sidenav?.close();
@@ -518,8 +673,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private restoreNavPreferences(): void {
     try {
-      const recents = JSON.parse(localStorage.getItem(this.recentStorageKey) || '[]');
-      const favorites = JSON.parse(localStorage.getItem(this.favoriteStorageKey) || '[]');
+      const recents = JSON.parse(
+        localStorage.getItem(this.recentStorageKey) || '[]',
+      );
+      const favorites = JSON.parse(
+        localStorage.getItem(this.favoriteStorageKey) || '[]',
+      );
       this.recentNavIds = Array.isArray(recents) ? recents : [];
       this.favoriteNavIds = Array.isArray(favorites) ? favorites : [];
     } catch {
