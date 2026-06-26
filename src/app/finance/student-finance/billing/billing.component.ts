@@ -544,6 +544,28 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     return invoiceTermType === 'vacation' || inputTermType === 'vacation';
   }
 
+  private getActiveAccommodationType(): Residence | null {
+    return this.academicLevel === 'A Level'
+      ? this.aLevelAccommodationType.value
+      : this.oLevelAccommodationType.value;
+  }
+
+  private getFeeForCurrentContext(fee: FeesModel | undefined): FeesModel | undefined {
+    if (!fee) {
+      return undefined;
+    }
+
+    const isVacationInvoice = this.getVacationTermState();
+    const isVacationDayResidence =
+      isVacationInvoice && this.getActiveAccommodationType() === Residence.Day;
+
+    if (isVacationDayResidence && fee.name?.includes('foodFee')) {
+      return { ...fee, amount: 60 };
+    }
+
+    return fee;
+  }
+
   private applyVacationBillingRules(): void {
     // ngOnChanges can trigger before ngOnInit; ensure form exists before control access.
     if (!this.academicSettingsForm) {
@@ -569,14 +591,16 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    this.showTransportFoodOptions = false;
+    const activeAccommodation = this.getActiveAccommodationType();
+    const isDayResidence = activeAccommodation === Residence.Day;
+
+    this.showTransportFoodOptions = isDayResidence;
     this.showMiscellaneousCharges = false;
 
     const controlsToReset = [
       'oLevelNewComer',
       'aLevelNewComer',
       'aLevelScienceLevy',
-      'foodOption',
       'transportOption',
       'groomingFee',
       'brokenFurnitureFee',
@@ -588,6 +612,21 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       control?.setValue(false, { emitEvent: false });
       control?.disable({ emitEvent: false });
     });
+
+    const foodControl = this.academicSettingsForm?.get('foodOption');
+    if (isDayResidence) {
+      foodControl?.enable({ emitEvent: false });
+      if (foodControl?.value) {
+        this.addFeeToToBill(this.findFee('foodFee'));
+      } else {
+        foodControl?.setValue(false, { emitEvent: false });
+        this.removeFeeFromToBill(this.findFee('foodFee'));
+      }
+    } else {
+      foodControl?.setValue(false, { emitEvent: false });
+      foodControl?.disable({ emitEvent: false });
+      this.removeFeeFromToBill(this.findFee('foodFee'));
+    }
 
     [
       'deskFee',
@@ -607,11 +646,6 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       'aLevelTuitionDay',
       'aLevelTuitionBoarder',
     ].forEach((feeName) => this.removeFeeFromToBill(this.findFee(feeName)));
-
-    const activeAccommodation =
-      this.academicLevel === 'A Level'
-        ? this.aLevelAccommodationType.value
-        : this.oLevelAccommodationType.value;
 
     this.removeFeeFromToBill(this.findFee('vacationTuitionDay'));
     this.removeFeeFromToBill(this.findFee('vacationTuitionBoarder'));
@@ -704,9 +738,14 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         return;
       }
 
+      const effectiveFee = this.getFeeForCurrentContext(resolvedFee);
+      if (!effectiveFee) {
+        return;
+      }
+
       initialToBill.push({
         ...bill,
-        fees: resolvedFee,
+        fees: effectiveFee,
         student,
         enrol,
       });
@@ -1066,36 +1105,38 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
    * @param fee The FeesModel to add.
    */
   addFeeToToBill(fee: FeesModel | undefined): void {
-    if (!fee?.id) {
+    const effectiveFee = this.getFeeForCurrentContext(fee);
+
+    if (!effectiveFee?.id) {
       return;
     }
-    
+
     // Validate that fee has amount property
-    if (fee.amount === undefined || fee.amount === null) {
+    if (effectiveFee.amount === undefined || effectiveFee.amount === null) {
       console.warn('Cannot add fee without amount to bill', {
-        feeId: fee.id,
-        feeName: fee.name,
+        feeId: effectiveFee.id,
+        feeName: effectiveFee.name,
       });
       return;
     }
-    
+
     // Use currentInvoice.student for editing existing invoices, or enrolment.student for new invoices
     const student = this.currentInvoice?.student || this.enrolment?.student;
     const enrol = this.currentInvoice?.enrol || this.enrolment;
-    
-    if (!fee || !student || !enrol) {
+
+    if (!effectiveFee || !student || !enrol) {
       return;
     }
 
     // Check if a bill with this fee ID is already in `toBill`
     const existingBillIndex = this.toBill.findIndex(
-      (b) => b.fees?.id === fee.id
+      (b) => b.fees?.id === effectiveFee.id
     );
 
     if (existingBillIndex === -1) {
       const newBill: BillModel = {
         student: student,
-        fees: fee,
+        fees: effectiveFee,
         enrol: enrol,
       };
       this.toBill.push(newBill);
